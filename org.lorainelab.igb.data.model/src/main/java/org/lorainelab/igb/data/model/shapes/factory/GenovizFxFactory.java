@@ -8,11 +8,11 @@ package org.lorainelab.igb.data.model.shapes.factory;
 import java.util.List;
 import java.util.Map;
 import javafx.scene.paint.Color;
-import static org.lorainelab.genoviz.fx.Palette.PRIMARY_TEXT_COLOR;
-import org.lorainelab.genoviz.fx.model.CompositionGlyph;
-import org.lorainelab.genoviz.fx.model.Glyph;
-import org.lorainelab.genoviz.fx.model.LineGlyph;
-import org.lorainelab.genoviz.fx.model.RectangleGlyph;
+import static org.lorainelab.igb.visualization.Palette.PRIMARY_TEXT_COLOR;
+import org.lorainelab.igb.visualization.model.CompositionGlyph;
+import org.lorainelab.igb.visualization.model.Glyph;
+import org.lorainelab.igb.visualization.model.LineGlyph;
+import org.lorainelab.igb.visualization.model.RectangleGlyph;
 
 /**
  *
