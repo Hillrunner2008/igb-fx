@@ -13,7 +13,6 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import org.lorainelab.igb.visualization.MainApp;
 import static org.lorainelab.igb.visualization.util.ColorUtils.colorToWebStyle;
 
 /**
@@ -44,7 +43,7 @@ public class TrackLabel {
         this.trackRenderer = trackRenderer;
         this.trackLabelText = trackRenderer.getTrackLabel();
         this.parent = parent;
-        final URL resource = MainApp.class.getClassLoader().getResource("trackLabel.fxml");
+        final URL resource = TrackLabel.class.getClassLoader().getResource("trackLabel.fxml");
         FXMLLoader fxmlLoader = new FXMLLoader(resource);
         fxmlLoader.setController(this);
         try {

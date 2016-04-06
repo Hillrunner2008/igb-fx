@@ -21,7 +21,6 @@ import org.lorainelab.igb.data.model.shapes.factory.GenovizFxFactory;
 import org.lorainelab.igb.data.view.Layer;
 import org.lorainelab.igb.data.view.Renderer;
 import org.lorainelab.igb.visualization.GenoVixFxController;
-import org.lorainelab.igb.visualization.MainApp;
 import org.lorainelab.igb.visualization.model.CompositionGlyph;
 import org.lorainelab.igb.visualization.model.Glyph;
 import org.lorainelab.igb.visualization.model.Track;
@@ -43,7 +42,7 @@ public class BedViewer extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        final URL resource = MainApp.class.getClassLoader().getResource("genoVizFx.fxml");
+        final URL resource = GenoVixFxController.class.getClassLoader().getResource("genoVizFx.fxml");
         FXMLLoader loader = new FXMLLoader(resource);
         Parent root = loader.load();
         controller = loader.getController();

@@ -8,30 +8,22 @@
     <parent>
         <groupId>org.lorainelab</groupId>
         <artifactId>org.lorainelab.igb</artifactId>
-        <version>0.0.1</version>
+        <version>0.0.1</version>  
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
             <scope>test</scope>
-            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>19.0</version>
         </dependency>
-        <!--        <dependency>
-            <groupId>net.sf</groupId>
-            <artifactId>sam-ext</artifactId>
-            <version>1.111</version>
-        </dependency>-->
         <dependency>
             <groupId>com.github.samtools</groupId>
             <artifactId>htsjdk</artifactId>
-            <version>2.1.0</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -43,22 +35,8 @@
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-math3</artifactId>
-            <version>3.6</version>
-            <scope>test</scope>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <version>3.3.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>de.jensd</groupId>
             <artifactId>fontawesomefx</artifactId>
-            <version>8.9</version>
         </dependency>
     </dependencies>
     <properties>
@@ -66,16 +44,4 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.19.1</version>
-                <configuration>
-                    <argLine>-Dsun.awt.disablegrab=true</argLine>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>

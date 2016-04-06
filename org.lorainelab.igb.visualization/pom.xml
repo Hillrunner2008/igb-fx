@@ -11,6 +11,7 @@
         <groupId>org.lorainelab</groupId>
         <artifactId>org.lorainelab.igb</artifactId>
         <version>0.0.1</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     
     <properties>
@@ -22,50 +23,36 @@
     <dependencies>
         <dependency>
             <groupId>biz.aQute.bnd</groupId>
-                <artifactId>bndlib</artifactId>
+            <artifactId>bndlib</artifactId>
         </dependency>  
         <dependency>
             <groupId>org.reactfx</groupId>
             <artifactId>reactfx</artifactId>
-            <version>2.0-M4u1</version>
         </dependency>
         <dependency>
             <groupId>com.miglayout</groupId>
             <artifactId>miglayout-javafx</artifactId>
-            <version>5.0</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>19.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.javaslang</groupId>
-            <artifactId>javaslang</artifactId>
-            <version>2.0.0-RC4</version>
         </dependency>
         <dependency>
             <groupId>de.jensd</groupId>
             <artifactId>fontawesomefx</artifactId>
-            <version>8.9</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.7</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
             <scope>test</scope>
-            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
-            <version>2.6</version>
-            <type>jar</type>
         </dependency>
     </dependencies>
     <build>
@@ -78,7 +65,7 @@
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Import-Package>*</Import-Package>
-                        <Export-Package></Export-Package>
+                        <Export-Package>org.lorainelab.igb.visualization.*</Export-Package>
                         <Bundle-ActivationPolicy>lazy</Bundle-ActivationPolicy>
                         <Service-Component>*</Service-Component>
                     </instructions>
