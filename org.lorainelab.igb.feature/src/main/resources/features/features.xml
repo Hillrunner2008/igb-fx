@@ -4,7 +4,7 @@
     <feature name="${project.artifactId}" version="${project.version}">	
        
 
-        <bundle>mvn:${project.groupId}/org.lorainelab.igb.visualization/${project.version}</bundle>
+        <bundle>mvn:${project.groupId}/${project.artifactId}/${project.version}</bundle>
     </feature>
 
 </features>
