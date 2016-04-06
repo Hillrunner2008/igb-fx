@@ -1,5 +1,7 @@
 package org.lorainelab.igb.visualization;
 
+import aQute.bnd.annotation.component.Component;
+import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
@@ -44,14 +46,12 @@ import org.lorainelab.igb.visualization.event.ScrollXUpdate;
 import org.lorainelab.igb.visualization.event.ZoomStripeEvent;
 import org.lorainelab.igb.visualization.model.CoordinateTrackRenderer;
 import org.lorainelab.igb.visualization.model.JumpZoomEvent;
-import org.lorainelab.igb.visualization.model.RefrenceSequenceProvider;
-import org.lorainelab.igb.visualization.model.Track;
 import org.lorainelab.igb.visualization.model.TrackLabel;
 import org.lorainelab.igb.visualization.model.TrackRenderer;
 import static org.lorainelab.igb.visualization.model.TrackRenderer.MAX_ZOOM_MODEL_COORDINATES_X;
+import org.lorainelab.igb.visualization.model.TrackRendererProvider;
 import org.lorainelab.igb.visualization.model.View;
 import org.lorainelab.igb.visualization.model.ViewPortManager;
-import org.lorainelab.igb.visualization.model.ZoomableTrackRenderer;
 import static org.lorainelab.igb.visualization.util.CanvasUtils.exponentialScaleTransform;
 import static org.lorainelab.igb.visualization.util.CanvasUtils.invertExpScaleTransform;
 import static org.lorainelab.igb.visualization.util.CanvasUtils.linearScaleTransform;
@@ -59,6 +59,7 @@ import org.reactfx.EventStream;
 import static org.reactfx.EventStreams.eventsOf;
 import org.reactfx.util.Either;
 
+@Component
 public class GenoVixFxController {
 
     @FXML
@@ -90,9 +91,6 @@ public class GenoVixFxController {
     private static final int H_SLIDER_MAX = 100;
     private Map<StackPane, TrackRenderer> labelPaneMap;
     private BiMap<Integer, TrackRenderer> trackRenderers;
-    private Track positiveStrandTrack;
-    private Track negativeStrandTrack;
-    private RefrenceSequenceProvider refrenceSequenceProvider;
     private DoubleProperty scrollX;
     private DoubleProperty hSliderWidget;
     private double lastDragX = 0;
@@ -104,7 +102,7 @@ public class GenoVixFxController {
     private CanvasPane canvasPane;
     private Canvas canvas;
     private double totalTrackHeight;
-    final int modelWidth;
+    private TrackRendererProvider trackRendererProvider;
 
     public GenoVixFxController() {
         trackRenderers = HashBiMap.create();
@@ -113,28 +111,11 @@ public class GenoVixFxController {
         eventBus.register(this);
         scrollX = new SimpleDoubleProperty(0);
         hSliderWidget = new SimpleDoubleProperty(0);
-        refrenceSequenceProvider = new RefrenceSequenceProvider();
-        modelWidth = refrenceSequenceProvider.getReferenceDna().length();
+
     }
 
     private void addMockData() {
-        positiveStrandTrack = new Track(false, "RefGene (+)", 5);
-        negativeStrandTrack = new Track(true, "RefGene (-)", 5);
 
-        ZoomableTrackRenderer bedFileTrack = new ZoomableTrackRenderer(canvasPane, positiveStrandTrack, modelWidth);
-        ZoomableTrackRenderer negativeStrandBedFile = new ZoomableTrackRenderer(canvasPane, negativeStrandTrack, modelWidth);
-        CoordinateTrackRenderer coordinateTrack = new CoordinateTrackRenderer(canvasPane, refrenceSequenceProvider);
-//        ZoomableTrackRenderer negativeStrandBedFile2 = new ZoomableTrackRenderer(negativeStrandTrack, refrenceSequenceProvider.getReferenceDna().length(), eventBus);
-//        ZoomableTrackRenderer negativeStrandBedFile3 = new ZoomableTrackRenderer(negativeStrandTrack, refrenceSequenceProvider.getReferenceDna().length(), eventBus);
-//        ZoomableTrackRenderer negativeStrandBedFile4 = new ZoomableTrackRenderer(negativeStrandTrack, refrenceSequenceProvider.getReferenceDna().length(), eventBus);
-//        ZoomableTrackRenderer negativeStrandBedFile5 = new ZoomableTrackRenderer(negativeStrandTrack, refrenceSequenceProvider.getReferenceDna().length(), eventBus);
-        trackRenderers.put(0, bedFileTrack);
-        trackRenderers.put(1, coordinateTrack);
-        trackRenderers.put(2, negativeStrandBedFile);
-//        trackRenderers.add(negativeStrandBedFile2);
-//        trackRenderers.add(negativeStrandBedFile3);
-//        trackRenderers.add(negativeStrandBedFile4);
-//        trackRenderers.add(negativeStrandBedFile5);
     }
 
     private void initCanvasMouseListeners() {
@@ -542,7 +523,6 @@ public class GenoVixFxController {
     }
 
     private void initializeGuiComponents() {
-        canvasPane = new CanvasPane(modelWidth, hSlider.valueProperty(), scrollX);
         labelPane = new Pane();
         HBox.setHgrow(labelPane, Priority.ALWAYS);
         labelHbox.getChildren().add(labelPane);
@@ -672,14 +652,6 @@ public class GenoVixFxController {
         }
     }
 
-    public Track getPositiveStrandTrack() {
-        return positiveStrandTrack;
-    }
-
-    public Track getNegativeStrandTrack() {
-        return negativeStrandTrack;
-    }
-
     @Subscribe
     private void jumpZoom(JumpZoomEvent jumpZoomEvent) {
         Rectangle2D focusRect = jumpZoomEvent.getRect();
@@ -745,6 +717,23 @@ public class GenoVixFxController {
     private void syncHSlider(double xFactor) {
         ignoreHSliderEvent = true;
         hSlider.setValue(invertExpScaleTransform(canvasPane, xFactor));
+    }
+
+    @Reference
+    public void setTrackRendererProvider(TrackRendererProvider trackRendererProvider) {
+        this.trackRendererProvider = trackRendererProvider;
+    }
+
+    public DoubleProperty getHSliderValue() {
+        return hSlider.valueProperty();
+    }
+    public DoubleProperty getXScrollPosition() {
+        return scrollX;
+    }
+
+    @Reference
+    public void setCanvasPane(CanvasPane canvasPane) {
+        this.canvasPane = canvasPane;
     }
 
 }

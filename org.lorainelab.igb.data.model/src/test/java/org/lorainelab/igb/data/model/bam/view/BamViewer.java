@@ -17,10 +17,9 @@ import org.lorainelab.igb.data.model.shapes.Composition;
 import org.lorainelab.igb.data.model.shapes.Line;
 import org.lorainelab.igb.data.model.shapes.Rectangle;
 import org.lorainelab.igb.data.model.shapes.Shape;
-import org.lorainelab.igb.data.view.Layer;
-import org.lorainelab.igb.data.view.Renderer;
+import org.lorainelab.igb.data.model.view.Layer;
+import org.lorainelab.igb.data.model.view.Renderer;
 import org.lorainelab.igb.visualization.GenoVixFxController;
-import org.lorainelab.igb.visualization.model.Track;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +51,7 @@ public class BamViewer extends Application {
         FXMLLoader loader = new FXMLLoader(resource);
         Parent root = loader.load();
         controller = loader.getController();
-        final Track track = controller.getPositiveStrandTrack();
+//        final Track track = controller.getPositiveStrandTrack();
         Scene scene = new Scene(root);
         scene.getStylesheets().add("/styles/Styles.css");
         stage.setTitle("GenoViz Fx");

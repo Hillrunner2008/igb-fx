@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import org.lorainelab.igb.data.view.Layer;
+import org.lorainelab.igb.data.model.view.Layer;
 
 /**
  *

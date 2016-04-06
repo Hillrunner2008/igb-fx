@@ -1,7 +1,9 @@
 package org.lorainelab.igb.visualization;
 
+import aQute.bnd.annotation.component.Activate;
+import aQute.bnd.annotation.component.Component;
+import aQute.bnd.annotation.component.Reference;
 import com.google.common.eventbus.EventBus;
-import javafx.beans.property.DoubleProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.scene.canvas.Canvas;
@@ -9,27 +11,29 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
+import org.lorainelab.igb.visualization.model.RefrenceSequenceProvider;
 import org.lorainelab.igb.visualization.util.CanvasUtils;
 
-/**
- *
- * @author dcnorris
- */
+@Component(immediate = true, provide = CanvasPane.class)
 public class CanvasPane extends Region {
 
-    private final Canvas canvas;
+    private Canvas canvas;
     private double modelWidth;
     private double xFactor;
     private double zoomStripeCoordinate;
-    private DoubleProperty scrollX;
     private double xOffset;
     private double visibleVirtualCoordinatesX;
     private EventBus eventBus;
+    private GenoVixFxController controller;
+    private RefrenceSequenceProvider refrenceSequenceProvider;
 
-    public CanvasPane(double modelWidth, DoubleProperty hSliderValue, DoubleProperty scrollX) {
+    public CanvasPane() {
         eventBus = new EventBus();
-        this.modelWidth = modelWidth;
-        this.scrollX = scrollX;
+    }
+
+    @Activate
+    public void activate() {
+        this.modelWidth = refrenceSequenceProvider.getReferenceDna().length();
         canvas = new Canvas();
         getChildren().add(canvas);
         canvas.widthProperty().addListener(observable -> {
@@ -37,11 +41,6 @@ public class CanvasPane extends Region {
             xFactor = canvas.getWidth() / modelWidth;
         });
         canvas.heightProperty().addListener(observable -> draw());
-        hSliderValue.addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-            xFactor = CanvasUtils.exponentialScaleTransform(this, newValue.doubleValue());
-            visibleVirtualCoordinatesX = Math.floor(canvas.getWidth() / xFactor);
-            xOffset = Math.round((scrollX.doubleValue() / 100) * (modelWidth - visibleVirtualCoordinatesX));
-        });
         zoomStripeCoordinate = -1;
         initializeMouseEventHandlers();
     }
@@ -109,5 +108,20 @@ public class CanvasPane extends Region {
 
     public EventBus getEventBus() {
         return eventBus;
+    }
+
+    @Reference(optional = true)
+    public void setMainViewController(GenoVixFxController controller) {
+        this.controller = controller;
+        controller.getHSliderValue().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+            xFactor = CanvasUtils.exponentialScaleTransform(this, newValue.doubleValue());
+            visibleVirtualCoordinatesX = Math.floor(canvas.getWidth() / xFactor);
+            xOffset = Math.round((controller.getXScrollPosition().doubleValue() / 100) * (modelWidth - visibleVirtualCoordinatesX));
+        });
+    }
+
+    @Reference
+    public void setRefrenceSequenceProvider(RefrenceSequenceProvider refrenceSequenceProvider) {
+        this.refrenceSequenceProvider = refrenceSequenceProvider;
     }
 }

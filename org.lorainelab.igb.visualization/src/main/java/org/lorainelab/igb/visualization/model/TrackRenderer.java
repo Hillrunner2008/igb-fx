@@ -6,8 +6,8 @@
 package org.lorainelab.igb.visualization.model;
 
 /**
+ * = TrackRenderer
  *
- * @author dcnorris
  */
 public interface TrackRenderer {
 
@@ -29,5 +29,10 @@ public interface TrackRenderer {
     int getModelWidth();
 
     double getModelHeight();
+
+    /**
+     *@return the weight that will be used for sorting tracks. Lower weights will be
+     */
+    int getWeight();
 
 }

@@ -403,4 +403,9 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         return modelHeight;
     }
 
+    @Override
+    public int getWeight() {
+        return 1;
+    }
+
 }

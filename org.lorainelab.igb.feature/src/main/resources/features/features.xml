@@ -10,6 +10,8 @@
         <bundle>mvn:org.apache.commons/commons-lang3/3.4</bundle>
         <bundle>wrap:mvn:com.github.samtools/htsjdk/2.1.0</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.visualization/${project.version}</bundle>
+        <bundle>mvn:${project.groupId}/org.lorainelab.igb.data.model/${project.version}</bundle>
+        <bundle>mvn:${project.groupId}/org.lorainelab.igb.demo/${project.version}</bundle>
     </feature>
 
 </features>

@@ -54,3 +54,4 @@ local.properties
 # Code Recommenders
 .recommenders/
 
+/org.lorainelab.igb.demo/target/

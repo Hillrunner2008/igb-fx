@@ -1,15 +1,13 @@
 package org.lorainelab.igb.visualization.model;
 
+import aQute.bnd.annotation.component.Component;
 import java.io.File;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.lorainelab.igb.visualization.util.TwoBitParser;
 
-/**
- *
- * @author dcnorris
- */
+@Component(immediate = true, provide = RefrenceSequenceProvider.class)
 public class RefrenceSequenceProvider {
 
     private String referenceDna;
