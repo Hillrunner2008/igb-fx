@@ -37,13 +37,14 @@ public class CanvasPane extends Region {
     private EventBus eventBus;
     private GenoVixFxController controller;
     private RefrenceSequenceProvider refrenceSequenceProvider;
+    private EventBusService eventBusService;
 
     public CanvasPane() {
-        eventBus = new EventBus();
     }
 
     @Activate
     public void activate() {
+        eventBus = eventBusService.getEventBus();
         this.modelWidth = refrenceSequenceProvider.getReferenceDna().length();
         canvas = new Canvas();
         getChildren().add(canvas);
@@ -164,5 +165,9 @@ public class CanvasPane extends Region {
     @Reference
     public void setRefrenceSequenceProvider(RefrenceSequenceProvider refrenceSequenceProvider) {
         this.refrenceSequenceProvider = refrenceSequenceProvider;
+    }
+    @Reference
+    public void setEventBusService(EventBusService eventBusService) {
+        this.eventBusService = eventBusService;
     }
 }
