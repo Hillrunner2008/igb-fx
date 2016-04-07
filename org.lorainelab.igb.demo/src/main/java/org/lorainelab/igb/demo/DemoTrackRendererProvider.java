@@ -31,9 +31,12 @@ public class DemoTrackRendererProvider implements TrackRendererProvider {
         modelWidth = refrenceSequenceProvider.getReferenceDna().length();
             positiveStrandTrack = new Track(false, "RefGene (+)", 5);
             negativeStrandTrack = new Track(true, "RefGene (-)", 5);
-            ZoomableTrackRenderer bedFileTrack = new ZoomableTrackRenderer(canvasPane, positiveStrandTrack, modelWidth);
-            CoordinateTrackRenderer coordinateTrack = new CoordinateTrackRenderer(canvasPane, refrenceSequenceProvider);
-            ZoomableTrackRenderer negativeStrandBedFile = new ZoomableTrackRenderer(canvasPane, negativeStrandTrack, modelWidth);
+        ZoomableTrackRenderer bedFileTrack = new ZoomableTrackRenderer(canvasPane, positiveStrandTrack, modelWidth);
+        bedFileTrack.setWeight(0);
+        CoordinateTrackRenderer coordinateTrack = new CoordinateTrackRenderer(canvasPane, refrenceSequenceProvider);
+        coordinateTrack.setWeight(1);
+        ZoomableTrackRenderer negativeStrandBedFile = new ZoomableTrackRenderer(canvasPane, negativeStrandTrack, modelWidth);
+        negativeStrandBedFile.setWeight(2);
             trackRenderers.add(bedFileTrack);
             trackRenderers.add(coordinateTrack);
             trackRenderers.add(negativeStrandBedFile);

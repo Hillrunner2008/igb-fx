@@ -2,14 +2,14 @@ package org.lorainelab.igb.visualization;
 
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -21,11 +21,8 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.Slider;
-import javafx.scene.control.SplitPane;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
@@ -62,10 +59,8 @@ import org.reactfx.util.Either;
 @Component(immediate = true, provide = GenoVixFxController.class)
 public class GenoVixFxController {
 
-    @FXML
-    private MenuBar menuBar;
-    @FXML
-    private Menu fileMenu;
+    private static final int H_SLIDER_MAX = 100;
+
     @FXML
     private Slider hSlider;
     @FXML
@@ -74,11 +69,8 @@ public class GenoVixFxController {
     private StackPane stackPane;
     @FXML
     private HBox labelHbox;
-    private Pane labelPane;
     @FXML
     private ScrollBar scrollY;
-    @FXML
-    private SplitPane trackLabelSplitPane;
     @FXML
     private Pane xSliderPane;
     @FXML
@@ -88,38 +80,38 @@ public class GenoVixFxController {
     @FXML
     private Rectangle rightSliderThumb;
 
-    private static final int H_SLIDER_MAX = 100;
+    private Pane labelPane;
     private Map<StackPane, TrackRenderer> labelPaneMap;
-    private BiMap<Integer, TrackRenderer> trackRenderers;
+    private Set<TrackRenderer> trackRenderers;
     private DoubleProperty scrollX;
     private DoubleProperty hSliderWidget;
-    private double lastDragX = 0;
+    private double lastDragX;
     private EventBus eventBus;
-    private boolean ignoreScrollXEvent = false;
-    private boolean ignoreHSliderEvent = false;
+    private boolean ignoreScrollXEvent;
+    private boolean ignoreHSliderEvent;
     private ViewPortManager viewPortManager;
-    private double zoomStripeCoordinate = -1;
+    private double zoomStripeCoordinate;
     private CanvasPane canvasPane;
     private Canvas canvas;
     private double totalTrackHeight;
     private TrackRendererProvider trackRendererProvider;
 
     public GenoVixFxController() {
-        trackRenderers = HashBiMap.create();
+        trackRenderers = Sets.newHashSet();
         labelPaneMap = Maps.newHashMap();
         eventBus = new EventBus();
         eventBus.register(this);
         scrollX = new SimpleDoubleProperty(0);
         hSliderWidget = new SimpleDoubleProperty(0);
+        ignoreScrollXEvent = false;
+        ignoreHSliderEvent = false;
+        zoomStripeCoordinate = -1;
+        lastDragX = 0;
 
     }
 
     private void addMockData() {
-        int[] i = {0};
-        trackRendererProvider.getTrackRenderers().stream().forEach(trackRenderer -> {
-            trackRenderers.put(i[0], trackRenderer);
-            i[0]++;
-        });
+        trackRenderers = trackRendererProvider.getTrackRenderers();
     }
 
     private void initCanvasMouseListeners() {
@@ -307,7 +299,7 @@ public class GenoVixFxController {
             resetZoomStripe();
             if (lastHSliderFire < 0 || Math.abs(lastHSliderFire - newValue.doubleValue()) > 1) {
                 final double xFactor = linearScaleTransform(canvasPane, newValue.doubleValue());
-                trackRenderers.keySet().stream().sorted().map(key -> trackRenderers.get(key)).forEach(trackRenderer -> {
+                trackRenderers.forEach(trackRenderer -> {
                     trackRenderer.scaleCanvas(xFactor, scrollX.get(), scrollY.getValue());
                 });
                 syncHSlider(xFactor);
@@ -481,7 +473,7 @@ public class GenoVixFxController {
 
     public void drawZoomCoordinateLine() {
         if (zoomStripeCoordinate >= 0) {
-            Optional<TrackRenderer> trackRenderer = trackRenderers.keySet().stream().sorted().map(key -> trackRenderers.get(key)).filter(tr -> !(tr instanceof CoordinateTrackRenderer)).findFirst();
+            Optional<TrackRenderer> trackRenderer = trackRenderers.stream().filter(tr -> !(tr instanceof CoordinateTrackRenderer)).findFirst();
             if (trackRenderer.isPresent()) {
                 GraphicsContext gc = canvas.getGraphicsContext2D();
                 gc.save();
@@ -509,7 +501,7 @@ public class GenoVixFxController {
 
     private void scaleTrackRenderers() {
         updateCanvasContexts();
-        trackRenderers.keySet().stream().sorted().map(key -> trackRenderers.get(key)).forEach(trackRenderer -> trackRenderer.scaleCanvas(exponentialScaleTransform(canvasPane, hSlider.getValue()), scrollX.get(), scrollY.getValue()));
+        trackRenderers.forEach(trackRenderer -> trackRenderer.scaleCanvas(exponentialScaleTransform(canvasPane, hSlider.getValue()), scrollX.get(), scrollY.getValue()));
         drawZoomCoordinateLine();
     }
 
@@ -518,7 +510,7 @@ public class GenoVixFxController {
 //        drawZoomCoordinateLine();
 //    }
     private void updateScrollY() {
-        double sum = trackRenderers.keySet().stream().sorted().map(key -> trackRenderers.get(key))
+        double sum = trackRenderers.stream()
                 .map(trackRenderer -> trackRenderer.getCanvasContext())
                 .filter(canvasContext -> canvasContext.isVisible())
                 .mapToDouble(canvasContext -> canvasContext.getBoundingRect().getHeight())
@@ -560,7 +552,7 @@ public class GenoVixFxController {
         Platform.runLater(() -> {
             labelPaneMap.clear();
             labelPane.getChildren().clear();
-            trackRenderers.keySet().stream().sorted().map(key -> trackRenderers.get(key))
+            trackRenderers.stream()
                     .filter(trackRenderer -> trackRenderer.getCanvasContext().isVisible())
                     .forEach(trackRenderer -> {
                 double y = trackRenderer.getCanvasContext().getBoundingRect().getMinY();
@@ -607,12 +599,10 @@ public class GenoVixFxController {
                                 labelPaneMap.keySet().stream().filter(labelNode -> labelNode.getBoundsInParent().getMinY() == eventTriggerMinY).findFirst().ifPresent(eventTrigger -> {
                                     TrackRenderer draggedTrackRenderer = labelPaneMap.get(eventTrigger);
                                     TrackRenderer droppedTrackRenderer = labelPaneMap.get(dropLocationLabelNode);
-                                    Integer draggedIndex = trackRenderers.inverse().get(draggedTrackRenderer);
-                                    Integer droppedIndex = trackRenderers.inverse().get(droppedTrackRenderer);
-                                    trackRenderers.remove(draggedIndex);
-                                    trackRenderers.remove(droppedIndex);
-                                    trackRenderers.put(droppedIndex, draggedTrackRenderer);
-                                    trackRenderers.put(draggedIndex, droppedTrackRenderer);
+                                    Integer draggedIndex = draggedTrackRenderer.getWeight();
+                                    Integer droppedIndex = droppedTrackRenderer.getWeight();
+                                    draggedTrackRenderer.setWeight(droppedIndex);
+                                    droppedTrackRenderer.setWeight(draggedIndex);
                                     scaleTrackRenderers();
                                 });
                             }
@@ -689,7 +679,7 @@ public class GenoVixFxController {
     @Subscribe
     private void clickDragZoomListener(ClickDragZoomEvent event) {
         final Rectangle2D zoomFocus = new Rectangle2D(event.getStartX(), 0, event.getEndX() - event.getStartX(), Double.MAX_VALUE);
-        trackRenderers.keySet().stream().sorted().map(key -> trackRenderers.get(key))
+        trackRenderers.stream()
                 .filter(track -> track instanceof CoordinateTrackRenderer)
                 .findFirst().ifPresent(coordinateRenderer -> {
                     jumpZoom(new JumpZoomEvent(zoomFocus, coordinateRenderer));
@@ -698,7 +688,7 @@ public class GenoVixFxController {
 
     private void syncWidgetSlider() {
         double[] scaledPercentage = {0};
-        trackRenderers.keySet().stream().sorted().map(key -> trackRenderers.get(key))
+        trackRenderers.stream()
                 .filter(tr -> !(tr instanceof CoordinateTrackRenderer))
                 .filter(tr -> tr.getCanvasContext().isVisible()).findFirst()
                 .ifPresent(trackRenderer -> {

@@ -6,7 +6,6 @@ import com.google.common.eventbus.Subscribe;
 import com.sun.javafx.tk.FontMetrics;
 import com.sun.javafx.tk.Toolkit;
 import java.text.DecimalFormat;
-import java.util.function.Function;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseEvent;
@@ -16,7 +15,6 @@ import javafx.scene.text.FontWeight;
 import org.lorainelab.igb.visualization.CanvasPane;
 import org.lorainelab.igb.visualization.event.ClickDragZoomEvent;
 import org.lorainelab.igb.visualization.event.ZoomStripeEvent;
-import static org.lorainelab.igb.visualization.util.StopWatchHelper.RECORD_METRICS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,8 +42,10 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     protected final EventBus eventBus;
     private CanvasContext canvasContext;
     private GraphicsContext gc;
+    private int weight;
 
     public CoordinateTrackRenderer(CanvasPane canvasPane, RefrenceSequenceProvider refrenceSequenceProvider) {
+        weight = 0;
         this.eventBus = canvasPane.getEventBus();
         eventBus.register(this);
         this.refrenceSequenceProvider = refrenceSequenceProvider;
@@ -60,18 +60,9 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         if (canvasContext.isVisible()) {
             gc.save();
             gc.scale(xfactor, 1);
-            RECORD_METRICS.apply((Function<Void, String>) (Void t) -> {
-                drawCoordinateBasePairs();
-                return "drawCoordinateBasePairs";
-            });
-            RECORD_METRICS.apply((Function<Void, String>) (Void t) -> {
-                drawCoordinateLine();
-                return "drawCoordinateLine";
-            });
-            RECORD_METRICS.apply((Function<Void, String>) (Void t) -> {
-                drawClickDrag();
-                return "drawClickDrag";
-            });
+            drawCoordinateBasePairs();
+            drawCoordinateLine();
+            drawClickDrag();
             gc.restore();
         }
     }
@@ -405,7 +396,12 @@ public class CoordinateTrackRenderer implements TrackRenderer {
 
     @Override
     public int getWeight() {
-        return 1;
+        return weight;
+    }
+
+    @Override
+    public void setWeight(int weight) {
+        this.weight = weight;
     }
 
 }
