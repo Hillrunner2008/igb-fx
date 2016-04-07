@@ -11,9 +11,10 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import javafx.application.Platform;
+import javafx.embed.swing.JFXPanel;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.lorainelab.igb.data.model.bed.BedFeature;
 import org.lorainelab.igb.data.model.bed.BedParser;
@@ -24,8 +25,8 @@ import org.lorainelab.igb.data.model.shapes.Rectangle;
 import org.lorainelab.igb.data.model.shapes.Shape;
 import org.lorainelab.igb.data.model.shapes.factory.GenovizFxFactory;
 import org.lorainelab.igb.data.model.view.Layer;
+import org.lorainelab.igb.stage.provider.api.StageProvider;
 import org.lorainelab.igb.visualization.GenoVixFxController;
-import org.lorainelab.igb.visualization.StageProvider;
 import org.lorainelab.igb.visualization.model.CompositionGlyph;
 import org.lorainelab.igb.visualization.model.Glyph;
 import org.lorainelab.igb.visualization.model.Track;
@@ -43,6 +44,7 @@ public class BedViewer {
     private List<Shape> shapes = Lists.newArrayList();
     private TrackRendererProvider trackRendererProvider;
     private Stage stage;
+    private VBox root;
 
     @Activate
     public void activate() throws IOException {
@@ -87,11 +89,12 @@ public class BedViewer {
     }
 
     private void initiailize() throws IOException {
+        new JFXPanel(); // runtime initializer, do not remove
         final URL resource = BedViewer.class.getClassLoader().getResource("genoVizFx.fxml");
         FXMLLoader loader = new FXMLLoader(resource);
         loader.setClassLoader(this.getClass().getClassLoader());
         loader.setController(controller);
-        Parent root = loader.load();
+        root = loader.load();
         positiveStrandTrack = trackRendererProvider.getPositiveStrandTrack();
         negativeStrandTrack = trackRendererProvider.getNegativeStrandTrack();
         BedParser bedParser = new BedParser();
@@ -140,6 +143,14 @@ public class BedViewer {
         Platform.runLater(() -> {
             stage.setScene(scene);
             stage.show();
+        });
+    }
+
+    @Deactivate
+    public void deactivate() {
+        Platform.runLater(() -> {
+            stage.hide();
+            root.getChildren().clear();
         });
     }
 

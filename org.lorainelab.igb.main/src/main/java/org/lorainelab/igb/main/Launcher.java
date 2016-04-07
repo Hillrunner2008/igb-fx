@@ -36,11 +36,7 @@ public class Launcher extends Application {
 
     private void handleRestartEvent() {
         Platform.runLater(() -> {
-            try {
-                start(new Stage());
-            } catch (Exception ex) {
-                LOG.error(ex.getMessage(), ex);
-            }
+            stageRegistrationManager.registerStageProvider(new Stage());
         });
     }
 
@@ -54,7 +50,6 @@ public class Launcher extends Application {
 
     @Deactivate
     public void deactivate() {
-
     }
 
     @Reference

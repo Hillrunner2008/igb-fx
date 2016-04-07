@@ -1,7 +1,7 @@
 package org.lorainelab.igb.main;
 
 import javafx.stage.Stage;
-import org.lorainelab.igb.visualization.StageProvider;
+import org.lorainelab.igb.stage.provider.api.StageProvider;
 
 public class MainStageProvider implements StageProvider {
 

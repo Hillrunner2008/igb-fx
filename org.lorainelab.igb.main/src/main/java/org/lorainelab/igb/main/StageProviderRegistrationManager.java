@@ -5,7 +5,7 @@ import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Deactivate;
 import javafx.application.Platform;
 import javafx.stage.Stage;
-import org.lorainelab.igb.visualization.StageProvider;
+import org.lorainelab.igb.stage.provider.api.StageProvider;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
@@ -33,7 +33,6 @@ public class StageProviderRegistrationManager {
             stage.hide();
         });
         registerService.unregister();
-        stage = null;
     }
 
 }

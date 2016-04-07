@@ -5,7 +5,6 @@ import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Sets;
 import java.util.Set;
-import javafx.embed.swing.JFXPanel;
 import org.lorainelab.igb.visualization.CanvasPane;
 import org.lorainelab.igb.visualization.model.CoordinateTrackRenderer;
 import org.lorainelab.igb.visualization.model.RefrenceSequenceProvider;
@@ -29,7 +28,6 @@ public class DemoTrackRendererProvider implements TrackRendererProvider {
 
     @Activate
     public void activate() {
-        new JFXPanel(); // runtime initializer, do not remove
         modelWidth = refrenceSequenceProvider.getReferenceDna().length();
             positiveStrandTrack = new Track(false, "RefGene (+)", 5);
             negativeStrandTrack = new Track(true, "RefGene (-)", 5);

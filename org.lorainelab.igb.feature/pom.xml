@@ -59,6 +59,10 @@
                                     <directory>src/main/resources/features-hotdeploy</directory>
                                     <filtering>true</filtering>
                                 </resource>
+                                <resource>
+                                    <directory>src/main/resources/features-stage-provider-hotdeploy</directory>
+                                    <filtering>true</filtering>
+                                </resource>
                             </resources>
                         </configuration>
                     </execution>
