@@ -11,6 +11,17 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
+import org.lorainelab.igb.visualization.event.MouseClickedEvent;
+import org.lorainelab.igb.visualization.event.MouseDragEnteredEvent;
+import org.lorainelab.igb.visualization.event.MouseDragExitedEvent;
+import org.lorainelab.igb.visualization.event.MouseDragOverEvent;
+import org.lorainelab.igb.visualization.event.MouseDragReleasedEvent;
+import org.lorainelab.igb.visualization.event.MouseDraggedEvent;
+import org.lorainelab.igb.visualization.event.MouseEnteredEvent;
+import org.lorainelab.igb.visualization.event.MouseExitedEvent;
+import org.lorainelab.igb.visualization.event.MouseMovedEvent;
+import org.lorainelab.igb.visualization.event.MousePressedEvent;
+import org.lorainelab.igb.visualization.event.MouseReleasedEvent;
 import org.lorainelab.igb.visualization.model.RefrenceSequenceProvider;
 import org.lorainelab.igb.visualization.util.CanvasUtils;
 
@@ -47,9 +58,39 @@ public class CanvasPane extends Region {
 
     private void initializeMouseEventHandlers() {
         canvas.setOnMouseClicked((MouseEvent event) -> {
+            eventBus.post(new MouseClickedEvent());
             drawZoomCoordinateLine(event);
         });
-
+        canvas.setOnMouseDragEntered((MouseEvent event) -> {
+            eventBus.post(new MouseDragEnteredEvent());
+        });
+        canvas.setOnMouseDragExited((MouseEvent event) -> {
+            eventBus.post(new MouseDragExitedEvent());
+        });
+        canvas.setOnMouseDragOver((MouseEvent event) -> {
+            eventBus.post(new MouseDragOverEvent());
+        });
+        canvas.setOnMouseDragReleased((MouseEvent event) -> {
+            eventBus.post(new MouseDragReleasedEvent());
+        });
+        canvas.setOnMouseDragged((MouseEvent event) -> {
+            eventBus.post(new MouseDraggedEvent());
+        });
+        canvas.setOnMouseEntered((MouseEvent event) -> {
+            eventBus.post(new MouseEnteredEvent());
+        });
+        canvas.setOnMouseExited((MouseEvent event) -> {
+            eventBus.post(new MouseExitedEvent());
+        });
+        canvas.setOnMouseMoved((MouseEvent event) -> {
+            eventBus.post(new MouseMovedEvent());
+        });
+        canvas.setOnMousePressed((MouseEvent event) -> {
+            eventBus.post(new MousePressedEvent());
+        });
+        canvas.setOnMouseReleased((MouseEvent event) -> {
+            eventBus.post(new MouseReleasedEvent());
+        });
     }
 
     @Override

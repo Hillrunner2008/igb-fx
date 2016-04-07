@@ -229,12 +229,12 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     }
 
     private void initializeMouseEventStreamSubscriptions() {
-         canvasContext.getMouseClickEventStream().subscribe(event -> handleMouseClickEvent(event));
-        canvasContext.getDoubleClickEventStream().subscribe(event -> handleMouseDoubleClickEvent(event));
-        canvasContext.getTooltipEventStream().subscribe(either -> either.exec(
-                pos -> showToolTip(pos),
-                stop -> hideTooltip()
-        ));
+//         canvasContext.getMouseClickEventStream().subscribe(event -> handleMouseClickEvent(event));
+//        canvasContext.getDoubleClickEventStream().subscribe(event -> handleMouseDoubleClickEvent(event));
+//        canvasContext.getTooltipEventStream().subscribe(either -> either.exec(
+//                pos -> showToolTip(pos),
+//                stop -> hideTooltip()
+//        ));
     }
 
     @Override
