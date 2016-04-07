@@ -41,7 +41,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Transform;
 import org.lorainelab.igb.visualization.event.ClickDragZoomEvent;
-import org.lorainelab.igb.visualization.event.MouseStationaryEvent;
+import org.lorainelab.igb.visualization.event.MouseStationaryEventOld;
 import org.lorainelab.igb.visualization.event.ScrollXUpdate;
 import org.lorainelab.igb.visualization.event.ZoomStripeEvent;
 import org.lorainelab.igb.visualization.model.CoordinateTrackRenderer;
@@ -360,9 +360,8 @@ public class GenoVixFxController {
                 = stationaryPositions.or(stoppers)
                 .distinct();
 
-        stationaryEvents.<Event>map(either -> either.unify(
-                pos -> MouseStationaryEvent.beginAt(pos),
-                stop -> MouseStationaryEvent.end()))
+        stationaryEvents.<Event>map(either -> either.unify(pos -> MouseStationaryEventOld.beginAt(pos),
+                stop -> MouseStationaryEventOld.end()))
                 .subscribe(evt -> Event.fireEvent(canvasPane, evt));
     }
 
