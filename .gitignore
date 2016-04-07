@@ -7,3 +7,4 @@ nb-configuration.xml
 karaf/data/**/*
 karaf/instances
 karaf/lock
+karaf/deploy
