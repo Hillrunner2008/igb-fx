@@ -29,7 +29,7 @@ public class DemoTrackRendererProvider implements TrackRendererProvider {
 
     @Activate
     public void activate() {
-        new JFXPanel();
+        new JFXPanel(); // runtime initializer, do not remove
         modelWidth = refrenceSequenceProvider.getReferenceDna().length();
             positiveStrandTrack = new Track(false, "RefGene (+)", 5);
             negativeStrandTrack = new Track(true, "RefGene (-)", 5);

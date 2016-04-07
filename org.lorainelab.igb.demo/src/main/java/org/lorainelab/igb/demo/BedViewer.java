@@ -84,7 +84,6 @@ public class BedViewer {
 
     @Deactivate
     public void stopBundle() {
-        Platform.exit();
     }
 
     private void initiailize() throws IOException {
