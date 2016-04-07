@@ -6,12 +6,10 @@ import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executors;
-import javafx.application.Application;
-import static javafx.application.Application.launch;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -27,6 +25,7 @@ import org.lorainelab.igb.data.model.shapes.Shape;
 import org.lorainelab.igb.data.model.shapes.factory.GenovizFxFactory;
 import org.lorainelab.igb.data.model.view.Layer;
 import org.lorainelab.igb.visualization.GenoVixFxController;
+import org.lorainelab.igb.visualization.StageProvider;
 import org.lorainelab.igb.visualization.model.CompositionGlyph;
 import org.lorainelab.igb.visualization.model.Glyph;
 import org.lorainelab.igb.visualization.model.Track;
@@ -35,7 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component(immediate = true)
-public class BedViewer extends Application {
+public class BedViewer {
 
     private static final Logger LOG = LoggerFactory.getLogger(BedViewer.class);
     private GenoVixFxController controller;
@@ -43,23 +42,57 @@ public class BedViewer extends Application {
     private Track negativeStrandTrack;
     private List<Shape> shapes = Lists.newArrayList();
     private TrackRendererProvider trackRendererProvider;
+    private Stage stage;
 
     @Activate
-    public void activate() {
-        Executors.defaultThreadFactory().newThread(() -> {
-            Thread.currentThread().setContextClassLoader(
-                    this.getClass().getClassLoader());
-            LOG.info("Launching IGB FX Application");
-            launch();
-        }).start();
+    public void activate() throws IOException {
+        initiailize();
     }
 
-    @Override
-    public void start(Stage stage) throws Exception {
-        final URL resource = GenoVixFxController.class.getClassLoader().getResource("genoVizFx.fxml");
+    public void viewBedFile() {
+        BedParser bedParser = new BedParser();
+        List<BedFeature> annotations = bedParser.getAnnotations();
+
+        annotations.stream().map((BedFeature annotation) -> {
+            BedRenderer view = new BedRenderer();
+            return view.render(annotation);
+        });
+
+    }
+
+    private List<Shape> getShapes(Layer layer) {
+        List<Shape> toReturn = Lists.newArrayList();
+        layer.getItems().forEach(s -> {
+            if (s instanceof Layer) {
+                toReturn.addAll(getShapes((Layer) s));
+            } else {
+                toReturn.add(s);
+            }
+        });
+        return toReturn;
+    }
+
+    @Reference
+    public void setTrackRendererProvider(TrackRendererProvider trackRendererProvider) {
+        this.trackRendererProvider = trackRendererProvider;
+    }
+
+    @Reference
+    public void setController(GenoVixFxController controller) {
+        this.controller = controller;
+    }
+
+    @Deactivate
+    public void stopBundle() {
+        Platform.exit();
+    }
+
+    private void initiailize() throws IOException {
+        final URL resource = BedViewer.class.getClassLoader().getResource("genoVizFx.fxml");
         FXMLLoader loader = new FXMLLoader(resource);
+        loader.setClassLoader(this.getClass().getClassLoader());
+        loader.setController(controller);
         Parent root = loader.load();
-        controller = loader.getController();
         positiveStrandTrack = trackRendererProvider.getPositiveStrandTrack();
         negativeStrandTrack = trackRendererProvider.getNegativeStrandTrack();
         BedParser bedParser = new BedParser();
@@ -78,10 +111,10 @@ public class BedViewer extends Application {
             List<Glyph> children = Lists.newArrayList();
             layersList
                     .stream().forEach((Layer layer) -> {
-                getShapes(layer).forEach(shape -> {
-                    if (Rectangle.class
-                            .isAssignableFrom(shape.getClass())) {
-                        children.add(GenovizFxFactory.generateRectangleGlyph((Rectangle) shape));
+                        getShapes(layer).forEach(shape -> {
+                            if (Rectangle.class
+                                    .isAssignableFrom(shape.getClass())) {
+                                children.add(GenovizFxFactory.generateRectangleGlyph((Rectangle) shape));
 
                             }
                             if (Line.class
@@ -105,40 +138,14 @@ public class BedViewer extends Application {
         Scene scene = new Scene(root);
         scene.getStylesheets().add("/styles/Styles.css");
         stage.setTitle("JavaFx IGB");
-        stage.setScene(scene);
-        stage.show();
-    }
-
-    //@Test
-    public void viewBedFile() {
-        BedParser bedParser = new BedParser();
-        List<BedFeature> annotations = bedParser.getAnnotations();
-
-        annotations.stream().map((BedFeature annotation) -> {
-            BedRenderer view = new BedRenderer();
-            return view.render(annotation);
+        Platform.runLater(() -> {
+            stage.setScene(scene);
+            stage.show();
         });
-
     }
 
-    private List<Shape> getShapes(Layer layer) {
-        List<Shape> toReturn = Lists.newArrayList();
-        layer.getItems().forEach(s -> {
-            if (s instanceof Layer) {
-                toReturn.addAll(getShapes((Layer) s));
-            } else {
-                toReturn.add(s);
-            }
-        });
-        return toReturn;
-    }
     @Reference
-    public void setTrackRendererProvider(TrackRendererProvider trackRendererProvider) {
-        this.trackRendererProvider = trackRendererProvider;
-    }
-
-    @Deactivate
-    public void stopBundle() {
-        Platform.exit();
+    public void setStageProvider(StageProvider stageProvider) {
+        this.stage = stageProvider.getStage();
     }
 }

@@ -103,6 +103,7 @@
     </build>
 
     <modules>
+        <module>org.lorainelab.igb.main</module>
         <module>org.lorainelab.igb.data.model</module>
         <module>org.lorainelab.igb.visualization</module>
         <module>org.lorainelab.igb.demo</module>

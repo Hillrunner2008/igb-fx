@@ -59,7 +59,7 @@ import org.reactfx.EventStream;
 import static org.reactfx.EventStreams.eventsOf;
 import org.reactfx.util.Either;
 
-@Component
+@Component(immediate = true, provide = GenoVixFxController.class)
 public class GenoVixFxController {
 
     @FXML
@@ -115,7 +115,11 @@ public class GenoVixFxController {
     }
 
     private void addMockData() {
-
+        int[] i = {0};
+        trackRendererProvider.getTrackRenderers().stream().forEach(trackRenderer -> {
+            trackRenderers.put(i[0], trackRenderer);
+            i[0]++;
+        });
     }
 
     private void initCanvasMouseListeners() {
@@ -727,6 +731,7 @@ public class GenoVixFxController {
     public DoubleProperty getHSliderValue() {
         return hSlider.valueProperty();
     }
+
     public DoubleProperty getXScrollPosition() {
         return scrollX;
     }

@@ -45,6 +45,7 @@ public class TrackLabel {
         this.parent = parent;
         final URL resource = TrackLabel.class.getClassLoader().getResource("trackLabel.fxml");
         FXMLLoader fxmlLoader = new FXMLLoader(resource);
+        fxmlLoader.setClassLoader(this.getClass().getClassLoader());
         fxmlLoader.setController(this);
         try {
             fxmlLoader.load();

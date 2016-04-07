@@ -2,7 +2,7 @@
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
 
     <feature name="${project.artifactId}" version="${project.version}">	
-       
+        <feature>scr</feature>
         <bundle>wrap:mvn:org.reactfx/reactfx/2.0-M4u1</bundle>
         <bundle>wrap:mvn:com.miglayout/miglayout-javafx/5.0</bundle>
         <bundle>mvn:com.google.guava/guava/19.0</bundle>
@@ -10,6 +10,7 @@
         <bundle>mvn:org.apache.commons/commons-lang3/3.4</bundle>
         <bundle>wrap:mvn:com.github.samtools/htsjdk/2.1.0</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.visualization/${project.version}</bundle>
+        <bundle>mvn:${project.groupId}/org.lorainelab.igb.main/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.data.model/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.demo/${project.version}</bundle>
     </feature>
