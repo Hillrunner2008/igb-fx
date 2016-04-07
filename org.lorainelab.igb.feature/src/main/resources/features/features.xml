@@ -9,10 +9,10 @@
         <bundle>wrap:mvn:de.jensd/fontawesomefx/8.9</bundle>
         <bundle>mvn:org.apache.commons/commons-lang3/3.4</bundle>
         <bundle>wrap:mvn:com.github.samtools/htsjdk/2.1.0</bundle>
-        <bundle>mvn:${project.groupId}/org.lorainelab.igb.visualization/${project.version}</bundle>
-        <bundle>mvn:${project.groupId}/org.lorainelab.igb.main/${project.version}</bundle>
-        <bundle>mvn:${project.groupId}/org.lorainelab.igb.data.model/${project.version}</bundle>
-        <bundle>mvn:${project.groupId}/org.lorainelab.igb.demo/${project.version}</bundle>
+        <bundle start-level="90">mvn:${project.groupId}/org.lorainelab.igb.visualization/${project.version}</bundle>
+        <bundle start-level="90">mvn:${project.groupId}/org.lorainelab.igb.main/${project.version}</bundle>
+        <bundle start-level="90">mvn:${project.groupId}/org.lorainelab.igb.data.model/${project.version}</bundle>
+        <bundle start-level="100">mvn:${project.groupId}/org.lorainelab.igb.demo/${project.version}</bundle>
     </feature>
 
 </features>
