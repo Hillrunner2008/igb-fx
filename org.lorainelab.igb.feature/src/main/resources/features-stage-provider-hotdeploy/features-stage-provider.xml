@@ -3,7 +3,7 @@
     <repository>mvn:org.lorainelab/org.lorainelab.igb.feature/0.0.1/xml/features</repository>
     <feature name="${project.artifactId}.main" version="${project.version}" install="auto">	
         <feature>scr</feature>
-        <bundle start-level="90">mvn:${project.groupId}/org.lorainelab.igb.stage.provider.api/${project.version}</bundle>
-        <bundle start-level="90">mvn:${project.groupId}/org.lorainelab.igb.main/${project.version}</bundle>
+        <bundle>mvn:${project.groupId}/org.lorainelab.igb.stage.provider.api/${project.version}</bundle>
+        <bundle>mvn:${project.groupId}/org.lorainelab.igb.main/${project.version}</bundle>
     </feature>
 </features>

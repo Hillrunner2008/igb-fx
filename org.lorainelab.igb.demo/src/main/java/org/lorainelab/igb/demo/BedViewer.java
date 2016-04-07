@@ -89,7 +89,7 @@ public class BedViewer {
     }
 
     private void initiailize() throws IOException {
-        new JFXPanel(); // runtime initializer, do not remove
+        initializeFxRuntime();
         final URL resource = BedViewer.class.getClassLoader().getResource("genoVizFx.fxml");
         FXMLLoader loader = new FXMLLoader(resource);
         loader.setClassLoader(this.getClass().getClassLoader());
@@ -144,6 +144,11 @@ public class BedViewer {
             stage.setScene(scene);
             stage.show();
         });
+    }
+
+    private void initializeFxRuntime() {
+        new JFXPanel(); // runtime initializer, do not remove
+        Platform.setImplicitExit(false);
     }
 
     @Deactivate
