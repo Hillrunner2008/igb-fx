@@ -1,6 +1,6 @@
 target
 nbactions-fx.xml
-
+nb-configuration.xml
 /org.lorainelab.igb.demo/target/
 
 #karaf
