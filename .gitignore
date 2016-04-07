@@ -55,3 +55,8 @@ local.properties
 .recommenders/
 
 /org.lorainelab.igb.demo/target/
+
+#karaf
+karaf/data/**/*
+karaf/instances
+karaf/lock
