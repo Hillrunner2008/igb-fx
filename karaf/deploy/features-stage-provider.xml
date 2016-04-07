@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<features xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
-    <repository>mvn:org.lorainelab/org.lorainelab.igb.feature/0.0.1/xml/features</repository>
-    <feature name="org.lorainelab.igb.feature.main" version="0.0.1" install="auto">	
-        <feature>scr</feature>
-        <bundle>mvn:org.lorainelab/org.lorainelab.igb.stage.provider.api/0.0.1</bundle>
-        <bundle>mvn:org.lorainelab/org.lorainelab.igb.main/0.0.1</bundle>
-    </feature>
-</features>
