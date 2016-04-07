@@ -72,17 +72,17 @@ public class CanvasContext {
         return relativeTrackOffset;
     }
 
-    public EventStream<MouseEvent> getMouseClickEventStream() {
-        return mouseClickEventStream;
-    }
-
-    public EventStream<MouseEvent> getDoubleClickEventStream() {
-        return doubleClickEventStream;
-    }
-
-    public EventStream<Either<Point2D, Void>> getTooltipEventStream() {
-        return toolTipEventStream;
-    }
+//    public EventStream<MouseEvent> getMouseClickEventStream() {
+//        return mouseClickEventStream;
+//    }
+//
+//    public EventStream<MouseEvent> getDoubleClickEventStream() {
+//        return doubleClickEventStream;
+//    }
+//
+//    public EventStream<Either<Point2D, Void>> getTooltipEventStream() {
+//        return toolTipEventStream;
+//    }
 
     void setIsVisible(boolean isVisible) {
         this.isVisible = isVisible;
