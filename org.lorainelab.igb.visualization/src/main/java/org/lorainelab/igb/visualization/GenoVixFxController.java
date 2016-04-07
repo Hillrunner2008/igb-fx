@@ -1,5 +1,6 @@
 package org.lorainelab.igb.visualization;
 
+import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Maps;
@@ -95,19 +96,22 @@ public class GenoVixFxController {
     private Canvas canvas;
     private double totalTrackHeight;
     private TrackRendererProvider trackRendererProvider;
+    private EventBusService eventBusService;
 
     public GenoVixFxController() {
         trackRenderers = Sets.newHashSet();
         labelPaneMap = Maps.newHashMap();
-        eventBus = new EventBus();
-        eventBus.register(this);
         scrollX = new SimpleDoubleProperty(0);
         hSliderWidget = new SimpleDoubleProperty(0);
         ignoreScrollXEvent = false;
         ignoreHSliderEvent = false;
         zoomStripeCoordinate = -1;
         lastDragX = 0;
-
+    }
+    
+    @Activate
+    public void activate() {
+        eventBus = eventBusService.getEventBus();
     }
 
     private void addMockData() {
@@ -729,6 +733,11 @@ public class GenoVixFxController {
     @Reference
     public void setCanvasPane(CanvasPane canvasPane) {
         this.canvasPane = canvasPane;
+    }
+    
+     @Reference
+    public void setEventBusService(EventBusService eventBusService) {
+        this.eventBusService = eventBusService;
     }
 
 }
