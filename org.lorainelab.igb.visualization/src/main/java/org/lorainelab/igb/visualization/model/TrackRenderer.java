@@ -5,11 +5,15 @@
  */
 package org.lorainelab.igb.visualization.model;
 
+import java.util.Comparator;
+
 /**
  * = TrackRenderer
  *
  */
 public interface TrackRenderer {
+
+    final Comparator<TrackRenderer> SORT_BY_WEIGHT = (TrackRenderer o1, TrackRenderer o2) -> Double.compare(o1.getWeight(), o2.getWeight());
 
     final int MAX_ZOOM_MODEL_COORDINATES_X = 85;
     final int MAX_ZOOM_MODEL_COORDINATES_Y = 50;
@@ -34,5 +38,7 @@ public interface TrackRenderer {
      *@return the weight that will be used for sorting tracks. Lower weights will be
      */
     int getWeight();
+
+    void setWeight(int weight);
 
 }

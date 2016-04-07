@@ -30,8 +30,10 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     private Tooltip tooltip = new Tooltip();
     private CanvasContext canvasContext;
     private GraphicsContext gc;
+    private int weight;
 
     public ZoomableTrackRenderer(CanvasPane canvasPane, Track track, int modelCoordinatesGridSize) {
+        weight = 0;
         this.eventBus = canvasPane.getEventBus();
         eventBus.register(this);
         this.track = track;
@@ -237,7 +239,12 @@ public class ZoomableTrackRenderer implements TrackRenderer {
 
     @Override
     public int getWeight() {
-        return -1;
+        return weight;
+    }
+
+    @Override
+    public void setWeight(int weight) {
+        this.weight = weight;
     }
 
 }
