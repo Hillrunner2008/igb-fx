@@ -5,9 +5,6 @@ import com.google.common.collect.Maps;
 import java.net.URL;
 import java.util.List;
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.junit.Test;
 import org.lorainelab.igb.data.model.bam.AlignmentBlock;
@@ -26,8 +23,6 @@ import org.slf4j.LoggerFactory;
 public class BamViewer extends Application {
 
     private static final Logger logger = LoggerFactory.getLogger(BamViewer.class);
-
-    private GenoVixFxController controller;
 
     private List<Shape> shapes = Lists.newArrayList();
 
@@ -48,15 +43,15 @@ public class BamViewer extends Application {
         });
 
         final URL resource = GenoVixFxController.class.getClassLoader().getResource("genoVizFx.fxml");
-        FXMLLoader loader = new FXMLLoader(resource);
-        Parent root = loader.load();
-        controller = loader.getController();
+//        FXMLLoader loader = new FXMLLoader(resource);
+//        Parent root = loader.load();
+//        controller = loader.getController();
 //        final Track track = controller.getPositiveStrandTrack();
-        Scene scene = new Scene(root);
-        scene.getStylesheets().add("/styles/Styles.css");
-        stage.setTitle("GenoViz Fx");
-        stage.setScene(scene);
-        stage.show();
+//        Scene scene = new Scene(root);
+//        scene.getStylesheets().add("/styles/Styles.css");
+//        stage.setTitle("GenoViz Fx");
+//        stage.setScene(scene);
+//        stage.show();
         shapes.forEach(shape -> {
             if (Rectangle.class.isAssignableFrom(shape.getClass())) {
                 System.out.println(shape.getClass());

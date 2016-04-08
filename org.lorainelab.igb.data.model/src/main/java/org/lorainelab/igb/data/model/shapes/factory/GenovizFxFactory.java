@@ -13,6 +13,7 @@ import org.lorainelab.igb.visualization.model.CompositionGlyph;
 import org.lorainelab.igb.visualization.model.Glyph;
 import org.lorainelab.igb.visualization.model.LineGlyph;
 import org.lorainelab.igb.visualization.model.RectangleGlyph;
+import static org.lorainelab.igb.visualization.model.Track.MODEL_HEIGHT_PADDING;
 
 /**
  *
@@ -30,7 +31,7 @@ public class GenovizFxFactory {
         if (rectangle.getAttributes().contains(org.lorainelab.igb.data.model.shapes.Rectangle.Attribute.thick)) {
             height = 15;
         }
-        double y = height == 15 ? 17.5 : 20;
+        double y = height == 15 ? MODEL_HEIGHT_PADDING : 20;
         RectangleGlyph toReturn = new RectangleGlyph(rectangle.getOffset(), y, rectangle.getWidth(), height);
         toReturn.setFill(Color.BLUE);
         toReturn.setStrokeColor(Color.web(PRIMARY_TEXT_COLOR));
