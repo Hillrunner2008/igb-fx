@@ -5,7 +5,7 @@
  */
 package org.lorainelab.igb.menu.api;
 
-import org.lorainelab.igb.menu.api.model.MenuItem;
+import org.lorainelab.igb.menu.api.model.WeightedMenu;
 
 /**
  * This interface allows Apps to provide top level extensions to the IGB menubar.
@@ -18,7 +18,7 @@ public interface MenuBarParentProvider {
     /**
      * @return The MenuItem that will be added to the IGB menubar. 
      */
-    public MenuItem getParentMenuItem();
+    public WeightedMenu getParentMenu();
 
     /**
      * Weight

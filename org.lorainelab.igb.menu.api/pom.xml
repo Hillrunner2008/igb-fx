@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.lorainelab.igb</groupId>
+    <groupId>org.lorainelab</groupId>
     <artifactId>org.lorainelab.igb.menu.api</artifactId>
     <packaging>bundle</packaging>
 
@@ -25,15 +25,6 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.lorainelab</groupId>
-            <artifactId>org.lorainelab.igb.visualization</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
         </dependency>
     </dependencies>
 

@@ -23,11 +23,11 @@ package org.lorainelab.igb.menu.api.model;
  * @author dcnorris
  * @module.info context-menu-api
  */
-public enum MenuBarParentMenu {
+public enum ParentMenu {
     FILE("file"), EDIT("edit"), VIEW("view"), TOOLS("tools"), HELP("help");
     private final String name;
 
-    private MenuBarParentMenu(String name) {
+    private ParentMenu(String name) {
         this.name = name;
     }
 

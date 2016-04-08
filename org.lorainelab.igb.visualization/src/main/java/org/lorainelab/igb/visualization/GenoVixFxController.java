@@ -32,11 +32,13 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Transform;
 import org.lorainelab.igb.visualization.event.ClickDragZoomEvent;
 import org.lorainelab.igb.visualization.event.ScaleEvent;
 import org.lorainelab.igb.visualization.event.ScrollXUpdate;
+import org.lorainelab.igb.visualization.menubar.MenuBarManager;
 import org.lorainelab.igb.visualization.model.CoordinateTrackRenderer;
 import org.lorainelab.igb.visualization.model.JumpZoomEvent;
 import org.lorainelab.igb.visualization.model.TrackLabel;
@@ -75,6 +77,9 @@ public class GenoVixFxController {
     private Rectangle rightSliderThumb;
 
     @FXML
+    private VBox root;
+
+    @FXML
     private AnchorPane rightSplitAnchorPane;
 
     @FXML
@@ -101,6 +106,7 @@ public class GenoVixFxController {
     private EventBusService eventBusService;
     private TabPaneManager tabPaneManager;
     private ZoomSliderMiniMapWidget zoomSliderMiniMapWidget;
+    private MenuBarManager menuBarManager;
 
     public GenoVixFxController() {
         trackRenderers = Sets.newHashSet();
@@ -492,6 +498,7 @@ public class GenoVixFxController {
 
     private void initializeGuiComponents() {
         addZoomSliderMiniMapWidget();
+        addMenuBar();
         addTabPanes();
         labelPane = new Pane();
         HBox.setHgrow(labelPane, Priority.ALWAYS);
@@ -715,6 +722,11 @@ public class GenoVixFxController {
         this.tabPaneManager = tabPaneManager;
     }
 
+    @Reference
+    public void setMenuBarManager(MenuBarManager menuBarManager) {
+        this.menuBarManager = menuBarManager;
+    }
+
 //    @Reference
 //    public void setZoomSliderMiniMapWidget(ZoomSliderMiniMapWidget zoomSliderMiniMapWidget) {
 //        this.zoomSliderMiniMapWidget = zoomSliderMiniMapWidget;
@@ -734,6 +746,10 @@ public class GenoVixFxController {
         rightSplitAnchorPane.getChildren().clear();
         bottomSplitAnchorPane.getChildren().clear();
         zoomSliderMiniMapWidgetContainer.getChildren().clear();
+    }
+
+    private void addMenuBar() {
+        root.getChildren().add(0, menuBarManager.getMenuBar());
     }
 
 }
