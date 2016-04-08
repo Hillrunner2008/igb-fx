@@ -223,7 +223,7 @@ public class CanvasPane extends Region {
     }
 
     private void drawZoomCoordinateLine(MouseEvent event) {
-        zoomStripeCoordinate = (event.getX() / xFactor) + xOffset;
+        zoomStripeCoordinate = Math.floor((event.getX() / xFactor) + xOffset);
         drawZoomCoordinateLine();
 
     }
@@ -235,7 +235,7 @@ public class CanvasPane extends Region {
             gc.save();
             gc.setStroke(Color.rgb(0, 0, 0, .3));
             gc.scale(xFactor, 1);
-            double x = Math.floor(zoomStripeCoordinate) - xOffset;
+            double x = (zoomStripeCoordinate) - xOffset;
             double width = canvas.getWidth() / xFactor;
             if (width > 500) {
                 gc.setLineWidth(width * 0.002);
@@ -258,8 +258,8 @@ public class CanvasPane extends Region {
     @Subscribe
     private void handleScaleEvent(ScaleEvent scaleEvent) {
         xFactor = CanvasUtils.exponentialScaleTransform(this, scaleEvent.getScaleX());
-        visibleVirtualCoordinatesX = Math.floor(canvas.getWidth() / xFactor);
-        xOffset = Math.round((scaleEvent.getScrollX() / 100) * (modelWidth - visibleVirtualCoordinatesX));
+        visibleVirtualCoordinatesX = (canvas.getWidth() / xFactor);
+        xOffset = ((scaleEvent.getScrollX() / 100) * (modelWidth - visibleVirtualCoordinatesX));
     }
 
     @Reference(optional = true)
