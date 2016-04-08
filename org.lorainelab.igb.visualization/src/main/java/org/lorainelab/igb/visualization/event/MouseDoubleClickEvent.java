@@ -5,10 +5,16 @@
  */
 package org.lorainelab.igb.visualization.event;
 
+import javafx.geometry.Point2D;
+
 /**
  *
  * @author jeckstei
  */
-public class MouseDoubleClickEvent {
+public class MouseDoubleClickEvent extends MouseEvent {
+
+    public MouseDoubleClickEvent(Point2D local, Point2D screen) {
+        super(local, screen);
+    }
     
 }

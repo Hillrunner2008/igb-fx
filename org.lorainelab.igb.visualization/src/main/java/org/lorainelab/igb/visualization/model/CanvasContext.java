@@ -5,16 +5,9 @@
  */
 package org.lorainelab.igb.visualization.model;
 
-import java.time.Duration;
-import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.input.MouseEvent;
-import org.reactfx.EventStream;
-import org.reactfx.EventStreams;
-import org.reactfx.util.Either;
-import static org.reactfx.EventStreams.eventsOf;
 
 /**
  *
@@ -26,8 +19,6 @@ public class CanvasContext {
     private Rectangle2D boundingRectangle;
     private double trackHeight;
     private double relativeTrackOffset;
-    private EventStream<MouseEvent> mouseClickEventStream;
-    private EventStream<MouseEvent> doubleClickEventStream;
     private boolean isVisible;
 
     CanvasContext(Canvas canvas, Rectangle2D boundingRectangle, double trackHeight, double relativeTrackOffset) {
@@ -36,25 +27,7 @@ public class CanvasContext {
         this.trackHeight = trackHeight;
         this.relativeTrackOffset = relativeTrackOffset;
         isVisible = false;
-        setupMouseEventStreams();
     }
-
-    private void setupMouseEventStreams() {
-        mouseClickEventStream = EventStreams.eventsOf(canvas, MouseEvent.MOUSE_CLICKED).filter((e) -> boundingRectangle.contains(new Point2D(e.getX(), e.getY())));
-        doubleClickEventStream = mouseClickEventStream.filter(event -> event.getClickCount() == 2);
-        EventStream<MouseEvent> mouseEvents = eventsOf(canvas, MouseEvent.ANY);
-        EventStream<Point2D> stationaryPositions = mouseEvents
-                .successionEnds(Duration.ofSeconds(1))
-                .filter(e -> e.getEventType() == MouseEvent.MOUSE_MOVED)
-                .map(e -> {
-                    return new Point2D(e.getScreenX(), e.getScreenY());
-
-                });
-        EventStream<Void> stoppers = mouseEvents.supply((Void) null);
-        toolTipEventStream = stationaryPositions.or(stoppers)
-                .distinct();
-    }
-    private EventStream<Either<Point2D, Void>> toolTipEventStream;
 
     public Rectangle2D getBoundingRect() {
         return boundingRectangle;
@@ -71,18 +44,6 @@ public class CanvasContext {
     public double getRelativeTrackOffset() {
         return relativeTrackOffset;
     }
-
-//    public EventStream<MouseEvent> getMouseClickEventStream() {
-//        return mouseClickEventStream;
-//    }
-//
-//    public EventStream<MouseEvent> getDoubleClickEventStream() {
-//        return doubleClickEventStream;
-//    }
-//
-//    public EventStream<Either<Point2D, Void>> getTooltipEventStream() {
-//        return toolTipEventStream;
-//    }
 
     void setIsVisible(boolean isVisible) {
         this.isVisible = isVisible;

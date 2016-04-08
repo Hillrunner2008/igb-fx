@@ -1,5 +1,6 @@
 package org.lorainelab.igb.visualization;
 
+import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Maps;
@@ -39,6 +40,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Transform;
 import org.lorainelab.igb.visualization.event.ClickDragZoomEvent;
 import org.lorainelab.igb.visualization.event.MouseStationaryEventOld;
+import org.lorainelab.igb.visualization.event.ScaleEvent;
 import org.lorainelab.igb.visualization.event.ScrollXUpdate;
 import org.lorainelab.igb.visualization.event.ZoomStripeEvent;
 import org.lorainelab.igb.visualization.model.CoordinateTrackRenderer;
@@ -95,12 +97,12 @@ public class GenoVixFxController {
     private Canvas canvas;
     private double totalTrackHeight;
     private TrackRendererProvider trackRendererProvider;
+    private EventBusService eventBusService;
 
     public GenoVixFxController() {
         trackRenderers = Sets.newHashSet();
         labelPaneMap = Maps.newHashMap();
-        eventBus = new EventBus();
-        eventBus.register(this);
+
         scrollX = new SimpleDoubleProperty(0);
         hSliderWidget = new SimpleDoubleProperty(0);
         ignoreScrollXEvent = false;
@@ -108,6 +110,12 @@ public class GenoVixFxController {
         zoomStripeCoordinate = -1;
         lastDragX = 0;
 
+    }
+
+    @Activate
+    public void activate() {
+        eventBus = eventBusService.getEventBus();
+        eventBus.register(this);
     }
 
     private void addMockData() {
@@ -290,6 +298,7 @@ public class GenoVixFxController {
             }
             final boolean isSnapEvent = newValue.doubleValue() % hSlider.getMajorTickUnit() == 0;
             if (lastHSliderFire < 0 || Math.abs(lastHSliderFire - newValue.doubleValue()) > 1 || isSnapEvent) {
+                eventBus.post(new ScaleEvent(newValue.doubleValue(), vSlider.getValue(), scrollX.getValue(), scrollY.getValue()));
                 scaleTrackRenderers();
                 syncWidgetSlider();
                 lastHSliderFire = newValue.doubleValue();
@@ -336,25 +345,6 @@ public class GenoVixFxController {
             refreshSliderWidget();
             scaleTrackRenderers();
         });
-
-        EventStream<MouseEvent> mouseEvents = eventsOf(canvasPane, MouseEvent.ANY);
-        EventStream<Point2D> stationaryPositions = mouseEvents
-                .successionEnds(Duration.ofSeconds(1))
-                .filter(e -> e.getEventType() == MouseEvent.MOUSE_MOVED)
-                .map(e -> {
-                    return new Point2D(e.getScreenX(), e.getScreenY());
-
-                });
-
-        EventStream<Void> stoppers = mouseEvents.supply((Void) null);
-
-        EventStream<Either<Point2D, Void>> stationaryEvents
-                = stationaryPositions.or(stoppers)
-                .distinct();
-
-        stationaryEvents.<Event>map(either -> either.unify(pos -> MouseStationaryEventOld.beginAt(pos),
-                stop -> MouseStationaryEventOld.end()))
-                .subscribe(evt -> Event.fireEvent(canvasPane, evt));
     }
 
     private void initializeZoomScrollBar() {
@@ -471,31 +461,11 @@ public class GenoVixFxController {
     }
 
     public void drawZoomCoordinateLine() {
-        if (zoomStripeCoordinate >= 0) {
-            Optional<TrackRenderer> trackRenderer = trackRenderers.stream().filter(tr -> !(tr instanceof CoordinateTrackRenderer)).findFirst();
-            if (trackRenderer.isPresent()) {
-                GraphicsContext gc = canvas.getGraphicsContext2D();
-                gc.save();
-                gc.setStroke(Color.rgb(0, 0, 0, .3));
-                View view = trackRenderer.get().getView();
-                gc.scale(view.getXfactor(), 1);
-                double x = Math.floor(zoomStripeCoordinate) - view.getBoundingRect().getMinX();
-                double width = view.getBoundingRect().getWidth();
-
-                if (width > 500) {
-                    gc.setLineWidth(width * 0.002);
-                }
-                if (x >= 0 && x <= width) {
-                    gc.strokeLine(x + .5, 0, x + .5, canvas.getHeight());
-                }
-                gc.restore();
-            }
-        }
+        canvasPane.drawZoomCoordinateLine();
     }
 
     public void resetZoomStripe() {
-        this.zoomStripeCoordinate = -1;
-        eventBus.post(new ZoomStripeEvent(zoomStripeCoordinate));
+        canvasPane.resetZoomStripe();
     }
 
     private void scaleTrackRenderers() {
@@ -554,12 +524,12 @@ public class GenoVixFxController {
             trackRenderers.stream()
                     .filter(trackRenderer -> trackRenderer.getCanvasContext().isVisible())
                     .forEach(trackRenderer -> {
-                double y = trackRenderer.getCanvasContext().getBoundingRect().getMinY();
-                double height = trackRenderer.getCanvasContext().getBoundingRect().getHeight();
-                TrackLabel trackLabel = new TrackLabel(trackRenderer, labelPane);
-                StackPane root = trackLabel.getRoot();
-                labelPane.getChildren().add(root);
-                labelPaneMap.put(root, trackRenderer);
+                        double y = trackRenderer.getCanvasContext().getBoundingRect().getMinY();
+                        double height = trackRenderer.getCanvasContext().getBoundingRect().getHeight();
+                        TrackLabel trackLabel = new TrackLabel(trackRenderer, labelPane);
+                        StackPane root = trackLabel.getRoot();
+                        labelPane.getChildren().add(root);
+                        labelPaneMap.put(root, trackRenderer);
                     });
             labelPane.getChildren().stream()
                     .filter(node -> node instanceof StackPane)
@@ -585,31 +555,31 @@ public class GenoVixFxController {
                                     event.consume();
                                 }
                         );
-                trackLabelNode.setOnDragDropped((DragEvent event) -> {
-                    final Object dropLocationSource = event.getSource();
-                    if (dropLocationSource instanceof StackPane) {
-                        StackPane dropLocationLabelNode = StackPane.class.cast(dropLocationSource);
-                        double dropLocationMinY = dropLocationLabelNode.getBoundsInParent().getMinY();
-                        Dragboard db = event.getDragboard();
-                        Object dragboardContent = db.getContent(DataFormat.PLAIN_TEXT);
-                        if (dragboardContent instanceof Double) {
-                            double eventTriggerMinY = (Double) dragboardContent;
-                            if (dropLocationMinY != eventTriggerMinY) {
-                                labelPaneMap.keySet().stream().filter(labelNode -> labelNode.getBoundsInParent().getMinY() == eventTriggerMinY).findFirst().ifPresent(eventTrigger -> {
-                                    TrackRenderer draggedTrackRenderer = labelPaneMap.get(eventTrigger);
-                                    TrackRenderer droppedTrackRenderer = labelPaneMap.get(dropLocationLabelNode);
-                                    Integer draggedIndex = draggedTrackRenderer.getWeight();
-                                    Integer droppedIndex = droppedTrackRenderer.getWeight();
-                                    draggedTrackRenderer.setWeight(droppedIndex);
-                                    droppedTrackRenderer.setWeight(draggedIndex);
-                                    scaleTrackRenderers();
-                                });
-                            }
-                        }
+                        trackLabelNode.setOnDragDropped((DragEvent event) -> {
+                            final Object dropLocationSource = event.getSource();
+                            if (dropLocationSource instanceof StackPane) {
+                                StackPane dropLocationLabelNode = StackPane.class.cast(dropLocationSource);
+                                double dropLocationMinY = dropLocationLabelNode.getBoundsInParent().getMinY();
+                                Dragboard db = event.getDragboard();
+                                Object dragboardContent = db.getContent(DataFormat.PLAIN_TEXT);
+                                if (dragboardContent instanceof Double) {
+                                    double eventTriggerMinY = (Double) dragboardContent;
+                                    if (dropLocationMinY != eventTriggerMinY) {
+                                        labelPaneMap.keySet().stream().filter(labelNode -> labelNode.getBoundsInParent().getMinY() == eventTriggerMinY).findFirst().ifPresent(eventTrigger -> {
+                                            TrackRenderer draggedTrackRenderer = labelPaneMap.get(eventTrigger);
+                                            TrackRenderer droppedTrackRenderer = labelPaneMap.get(dropLocationLabelNode);
+                                            Integer draggedIndex = draggedTrackRenderer.getWeight();
+                                            Integer droppedIndex = droppedTrackRenderer.getWeight();
+                                            draggedTrackRenderer.setWeight(droppedIndex);
+                                            droppedTrackRenderer.setWeight(draggedIndex);
+                                            scaleTrackRenderers();
+                                        });
+                                    }
+                                }
 
-                    }
-                    event.consume();
-                });
+                            }
+                            event.consume();
+                        });
                     });
         });
     }
@@ -728,6 +698,11 @@ public class GenoVixFxController {
     @Reference
     public void setCanvasPane(CanvasPane canvasPane) {
         this.canvasPane = canvasPane;
+    }
+
+    @Reference
+    public void setEventBusService(EventBusService eventBusService) {
+        this.eventBusService = eventBusService;
     }
 
 }

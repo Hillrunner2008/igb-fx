@@ -5,10 +5,16 @@
  */
 package org.lorainelab.igb.visualization.event;
 
+import javafx.geometry.Point2D;
+
 /**
  *
  * @author jeckstei
  */
-public class MouseDragReleasedEvent {
+public class MouseDragReleasedEvent extends MouseEvent {
+
+    public MouseDragReleasedEvent(Point2D local, Point2D screen) {
+        super(local, screen);
+    }
     
 }

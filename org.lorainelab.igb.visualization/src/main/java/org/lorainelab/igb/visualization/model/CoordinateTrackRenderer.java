@@ -1,5 +1,9 @@
 package org.lorainelab.igb.visualization.model;
 
+import aQute.bnd.annotation.component.Activate;
+import aQute.bnd.annotation.component.Component;
+import aQute.bnd.annotation.component.Deactivate;
+import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Range;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -13,7 +17,11 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import org.lorainelab.igb.visualization.CanvasPane;
+import org.lorainelab.igb.visualization.EventBusService;
 import org.lorainelab.igb.visualization.event.ClickDragZoomEvent;
+import org.lorainelab.igb.visualization.event.MouseDraggedEvent;
+import org.lorainelab.igb.visualization.event.MousePressedEvent;
+import org.lorainelab.igb.visualization.event.MouseReleasedEvent;
 import org.lorainelab.igb.visualization.event.ZoomStripeEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +30,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author dcnorris
  */
+@Component
 public class CoordinateTrackRenderer implements TrackRenderer {
 
     private static final Logger LOG = LoggerFactory.getLogger(CoordinateTrackRenderer.class);
@@ -39,9 +48,9 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     private double xfactor = 1;
     private final RefrenceSequenceProvider refrenceSequenceProvider;
     double zoomStripeCoordinate = -1;
-    protected final EventBus eventBus;
-    private CanvasContext canvasContext;
-    private GraphicsContext gc;
+    protected EventBus eventBus;
+    private final CanvasContext canvasContext;
+    private final GraphicsContext gc;
     private int weight;
 
     public CoordinateTrackRenderer(CanvasPane canvasPane, RefrenceSequenceProvider refrenceSequenceProvider) {
@@ -332,7 +341,8 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     private double lastMouseClickX = -1;
     private double lastMouseDragX = -1;
 
-    public void handleMouseReleased(MouseEvent mouseEvent) {
+    @Subscribe
+    public void handleMouseReleased(MouseReleasedEvent mouseEvent) {
         ClickDragZoomEvent event;
         double x1 = viewBoundingRectangle.getMinX() + lastMouseClickX;
         double x2 = viewBoundingRectangle.getMinX() + lastMouseDragX;
@@ -347,13 +357,15 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         render();
     }
 
-    public void handleMouseDraggedEvent(MouseEvent e) {
-        lastMouseDragX = Math.floor(e.getX() / xfactor);
+    @Subscribe
+    public void handleMouseDraggedEvent(MouseDraggedEvent event) {
+        lastMouseDragX = Math.floor(event.getLocal().getX() / xfactor);
         render();
     }
 
-    public void handleMousePressedEvent(MouseEvent e) {
-        lastMouseClickX = Math.floor(e.getX() / xfactor);
+    @Subscribe
+    public void handleMousePressedEvent(MousePressedEvent event) {
+        lastMouseClickX = Math.floor(event.getLocal().getX() / xfactor);
     }
 
     @Override

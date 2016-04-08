@@ -11,10 +11,11 @@ import javafx.geometry.Point2D;
  *
  * @author jeckstei
  */
-public class MouseEnteredEvent extends MouseEvent {
+public class MouseStationaryStartEvent extends MouseEvent implements MouseStationaryEvent {
 
-    public MouseEnteredEvent(Point2D local, Point2D screen) {
+    public MouseStationaryStartEvent(Point2D local, Point2D screen) {
         super(local, screen);
     }
+    
     
 }

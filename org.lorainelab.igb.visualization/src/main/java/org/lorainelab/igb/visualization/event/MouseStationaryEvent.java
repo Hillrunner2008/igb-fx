@@ -5,22 +5,10 @@
  */
 package org.lorainelab.igb.visualization.event;
 
-import javafx.geometry.Point2D;
-
 /**
  *
  * @author jeckstei
  */
-public class MouseStationaryEvent {
-    private final Point2D location;
-
-    public MouseStationaryEvent(Point2D location) {
-        this.location = location;
-    }
-
-    public Point2D getLocation() {
-        return location;
-    }
-    
+public interface MouseStationaryEvent {
     
 }

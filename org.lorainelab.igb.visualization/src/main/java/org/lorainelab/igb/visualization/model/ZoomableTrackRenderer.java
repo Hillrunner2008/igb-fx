@@ -1,5 +1,9 @@
 package org.lorainelab.igb.visualization.model;
 
+import aQute.bnd.annotation.component.Activate;
+import aQute.bnd.annotation.component.Component;
+import aQute.bnd.annotation.component.Deactivate;
+import aQute.bnd.annotation.component.Reference;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import java.util.Optional;
@@ -8,10 +12,14 @@ import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Tooltip;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import org.apache.commons.lang3.text.WordUtils;
 import org.lorainelab.igb.visualization.CanvasPane;
+import org.lorainelab.igb.visualization.EventBusService;
+import org.lorainelab.igb.visualization.event.MouseClickedEvent;
+import org.lorainelab.igb.visualization.event.MouseDoubleClickEvent;
+import org.lorainelab.igb.visualization.event.MouseStationaryEndEvent;
+import org.lorainelab.igb.visualization.event.MouseStationaryStartEvent;
 import org.lorainelab.igb.visualization.event.ScrollXUpdate;
 import org.lorainelab.igb.visualization.event.ZoomStripeEvent;
 
@@ -25,11 +33,11 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     final double modelHeight;
     final Track track;
     double zoomStripeCoordinate = -1;
-    protected final EventBus eventBus;
+    protected EventBus eventBus;
     private final View view;
-    private Tooltip tooltip = new Tooltip();
-    private CanvasContext canvasContext;
-    private GraphicsContext gc;
+    private final Tooltip tooltip = new Tooltip();
+    private final CanvasContext canvasContext;
+    private final GraphicsContext gc;
     private int weight;
 
     public ZoomableTrackRenderer(CanvasPane canvasPane, Track track, int modelCoordinatesGridSize) {
@@ -42,9 +50,8 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         view = new View(new Rectangle2D(0, 0, modelWidth, modelHeight));
         canvasContext = new CanvasContext(canvasPane.getCanvas(), Rectangle2D.EMPTY, 0, 0);
         gc = canvasPane.getCanvas().getGraphicsContext2D();
-        initializeMouseEventStreamSubscriptions();
     }
-
+    
     @Override
     public void updateView(double scrollX, double scrollY) {
         if (canvasContext.isVisible()) {
@@ -158,8 +165,19 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         }
     }
 
-    private void handleMouseClickEvent(MouseEvent mouseEvent) {
-        Rectangle2D mouseEventBoundingBox = mouseEventToViewCoordinates(new Point2D(mouseEvent.getX(), mouseEvent.getY()));
+    @Subscribe
+    private void handleMouseStationaryStartEvent(MouseStationaryStartEvent event) {
+        showToolTip(event.getScreen());
+    }
+    
+    @Subscribe
+    private void handleMouseStationaryEndEvent(MouseStationaryEndEvent event) {
+        hideTooltip();
+    }
+    
+    @Subscribe
+    private void handleMouseClickEvent(MouseClickedEvent event) {
+        Rectangle2D mouseEventBoundingBox = mouseEventToViewCoordinates(event.getLocal());
         track.getGlyphs().stream().forEach(glyph -> glyph.setIsSelected(false));
         track.getGlyphs().stream()
                 .filter(glyph -> view.getBoundingRect().intersects(glyph.getBoundingRect()))
@@ -170,7 +188,8 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         render();
     }
 
-    private void handleMouseDoubleClickEvent(MouseEvent mouseEvent) {
+    @Subscribe
+    private void handleMouseDoubleClickEvent(MouseDoubleClickEvent event) {
         zoomStripeCoordinate = -1;
         track.getGlyphs().stream()
                 .filter(glyph -> glyph.isSelected())
@@ -200,7 +219,6 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     @Subscribe
     private void zoomStripeListener(ZoomStripeEvent event) {
         zoomStripeCoordinate = event.getZoomStripeCoordinate();// / view.getXfactor();
-        //render();
     }
 
     @Override
@@ -228,15 +246,6 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         return modelHeight;
     }
 
-    private void initializeMouseEventStreamSubscriptions() {
-//         canvasContext.getMouseClickEventStream().subscribe(event -> handleMouseClickEvent(event));
-//        canvasContext.getDoubleClickEventStream().subscribe(event -> handleMouseDoubleClickEvent(event));
-//        canvasContext.getTooltipEventStream().subscribe(either -> either.exec(
-//                pos -> showToolTip(pos),
-//                stop -> hideTooltip()
-//        ));
-    }
-
     @Override
     public int getWeight() {
         return weight;
@@ -246,5 +255,6 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     public void setWeight(int weight) {
         this.weight = weight;
     }
+
 
 }
