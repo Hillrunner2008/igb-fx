@@ -12,7 +12,4 @@ public interface TrackRendererProvider {
 
     Set<TrackRenderer> getTrackRenderers();
 
-    Track getNegativeStrandTrack();
-
-    Track getPositiveStrandTrack();
 }
