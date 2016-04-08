@@ -343,6 +343,9 @@ public class CoordinateTrackRenderer implements TrackRenderer {
 
     @Subscribe
     public void handleMouseReleased(MouseReleasedEvent mouseEvent) {
+        if (!canvasContext.getBoundingRect().contains(mouseEvent.getLocal())) {
+            return;
+        }
         ClickDragZoomEvent event;
         double x1 = viewBoundingRectangle.getMinX() + lastMouseClickX;
         double x2 = viewBoundingRectangle.getMinX() + lastMouseDragX;
@@ -359,12 +362,18 @@ public class CoordinateTrackRenderer implements TrackRenderer {
 
     @Subscribe
     public void handleMouseDraggedEvent(MouseDraggedEvent event) {
+        if (!canvasContext.getBoundingRect().contains(event.getLocal())) {
+            return;
+        }
         lastMouseDragX = Math.floor(event.getLocal().getX() / xfactor);
         render();
     }
 
     @Subscribe
     public void handleMousePressedEvent(MousePressedEvent event) {
+        if (!canvasContext.getBoundingRect().contains(event.getLocal())) {
+            return;
+        }
         lastMouseClickX = Math.floor(event.getLocal().getX() / xfactor);
     }
 

@@ -7,21 +7,16 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-import java.time.Duration;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.event.Event;
 import javafx.fxml.FXML;
-import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.Slider;
 import javafx.scene.image.WritableImage;
@@ -36,14 +31,11 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Transform;
 import org.lorainelab.igb.visualization.event.ClickDragZoomEvent;
-import org.lorainelab.igb.visualization.event.MouseStationaryEventOld;
 import org.lorainelab.igb.visualization.event.ScaleEvent;
 import org.lorainelab.igb.visualization.event.ScrollXUpdate;
-import org.lorainelab.igb.visualization.event.ZoomStripeEvent;
 import org.lorainelab.igb.visualization.model.CoordinateTrackRenderer;
 import org.lorainelab.igb.visualization.model.JumpZoomEvent;
 import org.lorainelab.igb.visualization.model.TrackLabel;
@@ -56,9 +48,6 @@ import org.lorainelab.igb.visualization.tabs.TabPaneManager;
 import static org.lorainelab.igb.visualization.util.CanvasUtils.exponentialScaleTransform;
 import static org.lorainelab.igb.visualization.util.CanvasUtils.invertExpScaleTransform;
 import static org.lorainelab.igb.visualization.util.CanvasUtils.linearScaleTransform;
-import org.reactfx.EventStream;
-import static org.reactfx.EventStreams.eventsOf;
-import org.reactfx.util.Either;
 
 @Component(immediate = true, provide = GenoVixFxController.class)
 public class GenoVixFxController {
@@ -299,13 +288,14 @@ public class GenoVixFxController {
             scaleTrackRenderers();
         });
         hSlider.valueProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+            
             if (ignoreHSliderEvent) {
                 ignoreHSliderEvent = false;
                 return;
             }
             final boolean isSnapEvent = newValue.doubleValue() % hSlider.getMajorTickUnit() == 0;
             if (lastHSliderFire < 0 || Math.abs(lastHSliderFire - newValue.doubleValue()) > 1 || isSnapEvent) {
-                eventBus.post(new ScaleEvent(newValue.doubleValue(), vSlider.getValue(), scrollX.getValue(), scrollY.getValue()));
+                
                 scaleTrackRenderers();
                 syncWidgetSlider();
                 lastHSliderFire = newValue.doubleValue();
@@ -478,6 +468,7 @@ public class GenoVixFxController {
     private void scaleTrackRenderers() {
         updateCanvasContexts();
         trackRenderers.forEach(trackRenderer -> trackRenderer.scaleCanvas(exponentialScaleTransform(canvasPane, hSlider.getValue()), scrollX.get(), scrollY.getValue()));
+        eventBus.post(new ScaleEvent(hSlider.getValue(), vSlider.getValue(), scrollX.getValue(), scrollY.getValue()));
         drawZoomCoordinateLine();
     }
 

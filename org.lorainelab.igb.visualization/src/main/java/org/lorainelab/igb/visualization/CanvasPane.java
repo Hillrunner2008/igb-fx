@@ -81,10 +81,10 @@ public class CanvasPane extends Region {
     private void initializeMouseEventHandlers() {
         canvas.setOnMouseClicked((MouseEvent event) -> {
             boolean isDoubleClick = false;
-//            eventBus.post(new MouseClickedEvent(
-//                    getLocalPoint2DFromMouseEvent(event),
-//                    getScreenPoint2DFromMouseEvent(event))
-//            );
+            eventBus.post(new MouseClickedEvent(
+                    getLocalPoint2DFromMouseEvent(event),
+                    getScreenPoint2DFromMouseEvent(event))
+            );
             if (event.getClickCount() == 2) {
                 isDoubleClick = true;
                 resetZoomStripe();
@@ -109,63 +109,63 @@ public class CanvasPane extends Region {
                 drawZoomCoordinateLine(event);
             }
         });
-//        canvas.setOnMouseDragEntered((MouseEvent event) -> {
-//            eventBus.post(new MouseDragEnteredEvent(
-//                    getLocalPoint2DFromMouseEvent(event),
-//                    getScreenPoint2DFromMouseEvent(event))
-//            );
+        canvas.setOnMouseDragEntered((MouseEvent event) -> {
+            eventBus.post(new MouseDragEnteredEvent(
+                    getLocalPoint2DFromMouseEvent(event),
+                    getScreenPoint2DFromMouseEvent(event))
+            );
+        });
+        canvas.setOnMouseDragExited((MouseEvent event) -> {
+            eventBus.post(new MouseDragExitedEvent(
+                    getLocalPoint2DFromMouseEvent(event),
+                    getScreenPoint2DFromMouseEvent(event))
+            );
+        });
+        canvas.setOnMouseDragOver((MouseEvent event) -> {
+            eventBus.post(new MouseDragOverEvent(
+                    getLocalPoint2DFromMouseEvent(event),
+                    getScreenPoint2DFromMouseEvent(event))
+            );
+        });
+        canvas.setOnMouseDragReleased((MouseEvent event) -> {
+            eventBus.post(new MouseDragReleasedEvent(
+                    getLocalPoint2DFromMouseEvent(event),
+                    getScreenPoint2DFromMouseEvent(event))
+            );
+        });
+        canvas.setOnMouseDragged((MouseEvent event) -> {
+            eventBus.post(new MouseDraggedEvent(
+                    getLocalPoint2DFromMouseEvent(event),
+                    getScreenPoint2DFromMouseEvent(event))
+            );
+        });
+        canvas.setOnMouseEntered((MouseEvent event) -> {
+            eventBus.post(new MouseEnteredEvent(
+                    getLocalPoint2DFromMouseEvent(event),
+                    getScreenPoint2DFromMouseEvent(event))
+            );
+        });
+        canvas.setOnMouseExited((MouseEvent event) -> {
+            eventBus.post(new MouseExitedEvent(
+                    getLocalPoint2DFromMouseEvent(event),
+                    getScreenPoint2DFromMouseEvent(event))
+            );
+        });
+//        canvas.setOnMouseMoved((MouseEvent event) -> {
+//            eventBus.post(new MouseMovedEvent());
 //        });
-//        canvas.setOnMouseDragExited((MouseEvent event) -> {
-//            eventBus.post(new MouseDragExitedEvent(
-//                    getLocalPoint2DFromMouseEvent(event),
-//                    getScreenPoint2DFromMouseEvent(event))
-//            );
-//        });
-//        canvas.setOnMouseDragOver((MouseEvent event) -> {
-//            eventBus.post(new MouseDragOverEvent(
-//                    getLocalPoint2DFromMouseEvent(event),
-//                    getScreenPoint2DFromMouseEvent(event))
-//            );
-//        });
-//        canvas.setOnMouseDragReleased((MouseEvent event) -> {
-//            eventBus.post(new MouseDragReleasedEvent(
-//                    getLocalPoint2DFromMouseEvent(event),
-//                    getScreenPoint2DFromMouseEvent(event))
-//            );
-//        });
-//        canvas.setOnMouseDragged((MouseEvent event) -> {
-//            eventBus.post(new MouseDraggedEvent(
-//                    getLocalPoint2DFromMouseEvent(event),
-//                    getScreenPoint2DFromMouseEvent(event))
-//            );
-//        });
-//        canvas.setOnMouseEntered((MouseEvent event) -> {
-//            eventBus.post(new MouseEnteredEvent(
-//                    getLocalPoint2DFromMouseEvent(event),
-//                    getScreenPoint2DFromMouseEvent(event))
-//            );
-//        });
-//        canvas.setOnMouseExited((MouseEvent event) -> {
-//            eventBus.post(new MouseExitedEvent(
-//                    getLocalPoint2DFromMouseEvent(event),
-//                    getScreenPoint2DFromMouseEvent(event))
-//            );
-//        });
-////        canvas.setOnMouseMoved((MouseEvent event) -> {
-////            eventBus.post(new MouseMovedEvent());
-////        });
-//        canvas.setOnMousePressed((MouseEvent event) -> {
-//            eventBus.post(new MousePressedEvent(
-//                    getLocalPoint2DFromMouseEvent(event),
-//                    getScreenPoint2DFromMouseEvent(event))
-//            );
-//        });
-//        canvas.setOnMouseReleased((MouseEvent event) -> {
-//            eventBus.post(new MouseReleasedEvent(
-//                    getLocalPoint2DFromMouseEvent(event),
-//                    getScreenPoint2DFromMouseEvent(event))
-//            );
-//        });
+        canvas.setOnMousePressed((MouseEvent event) -> {
+            eventBus.post(new MousePressedEvent(
+                    getLocalPoint2DFromMouseEvent(event),
+                    getScreenPoint2DFromMouseEvent(event))
+            );
+        });
+        canvas.setOnMouseReleased((MouseEvent event) -> {
+            eventBus.post(new MouseReleasedEvent(
+                    getLocalPoint2DFromMouseEvent(event),
+                    getScreenPoint2DFromMouseEvent(event))
+            );
+        });
 
         EventStream<MouseEvent> mouseEvents = EventStreams.eventsOf(canvas, MouseEvent.ANY);
         EventStream<Point2D> stationaryPositions = mouseEvents
@@ -258,8 +258,8 @@ public class CanvasPane extends Region {
     @Subscribe
     private void handleScaleEvent(ScaleEvent scaleEvent) {
         xFactor = CanvasUtils.exponentialScaleTransform(this, scaleEvent.getScaleX());
-        visibleVirtualCoordinatesX = (canvas.getWidth() / xFactor);
-        xOffset = ((scaleEvent.getScrollX() / 100) * (modelWidth - visibleVirtualCoordinatesX));
+        visibleVirtualCoordinatesX = Math.floor(canvas.getWidth() / xFactor);
+        xOffset = Math.round((scaleEvent.getScrollX() / 100) * (modelWidth - visibleVirtualCoordinatesX));
     }
 
     @Reference(optional = true)

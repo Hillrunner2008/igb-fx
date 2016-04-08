@@ -51,7 +51,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         canvasContext = new CanvasContext(canvasPane.getCanvas(), Rectangle2D.EMPTY, 0, 0);
         gc = canvasPane.getCanvas().getGraphicsContext2D();
     }
-    
+
     @Override
     public void updateView(double scrollX, double scrollY) {
         if (canvasContext.isVisible()) {
@@ -167,16 +167,22 @@ public class ZoomableTrackRenderer implements TrackRenderer {
 
     @Subscribe
     private void handleMouseStationaryStartEvent(MouseStationaryStartEvent event) {
+        if (!canvasContext.getBoundingRect().contains(event.getLocal())) {
+            return;
+        }
         showToolTip(event.getScreen());
     }
-    
+
     @Subscribe
     private void handleMouseStationaryEndEvent(MouseStationaryEndEvent event) {
         hideTooltip();
     }
-    
+
     @Subscribe
     private void handleMouseClickEvent(MouseClickedEvent event) {
+        if (!canvasContext.getBoundingRect().contains(event.getLocal())) {
+            return;
+        }
         Rectangle2D mouseEventBoundingBox = mouseEventToViewCoordinates(event.getLocal());
         track.getGlyphs().stream().forEach(glyph -> glyph.setIsSelected(false));
         track.getGlyphs().stream()
@@ -190,6 +196,9 @@ public class ZoomableTrackRenderer implements TrackRenderer {
 
     @Subscribe
     private void handleMouseDoubleClickEvent(MouseDoubleClickEvent event) {
+        if (!canvasContext.getBoundingRect().contains(event.getLocal())) {
+            return;
+        }
         zoomStripeCoordinate = -1;
         track.getGlyphs().stream()
                 .filter(glyph -> glyph.isSelected())
@@ -255,6 +264,5 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     public void setWeight(int weight) {
         this.weight = weight;
     }
-
 
 }
