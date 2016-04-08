@@ -8,8 +8,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Tab;
 import javafx.scene.layout.AnchorPane;
-import org.lorainelab.igb.visualization.tabs.TabDockingPosition;
-import org.lorainelab.igb.visualization.tabs.TabProvider;
+import org.lorainelab.igb.visualization.tabs.api.TabDockingPosition;
+import org.lorainelab.igb.visualization.tabs.api.TabProvider;
 
 @Component(immediate = true)
 public class GenomeAssemblyTab implements TabProvider {

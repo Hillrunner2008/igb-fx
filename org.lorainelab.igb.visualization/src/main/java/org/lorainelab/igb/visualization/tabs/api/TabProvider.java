@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.lorainelab.igb.visualization.tabs;
+package org.lorainelab.igb.visualization.tabs.api;
 
 import javafx.scene.control.Tab;
 

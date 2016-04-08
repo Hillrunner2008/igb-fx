@@ -1,5 +1,6 @@
 package org.lorainelab.igb.visualization.tabs;
 
+import org.lorainelab.igb.visualization.tabs.api.TabProvider;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
