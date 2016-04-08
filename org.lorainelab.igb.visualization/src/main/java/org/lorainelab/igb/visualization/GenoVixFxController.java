@@ -2,6 +2,7 @@ package org.lorainelab.igb.visualization;
 
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
+import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -79,6 +80,9 @@ public class GenoVixFxController {
     @FXML
     private AnchorPane bottomSplitAnchorPane;
 
+    @FXML
+    private HBox zoomSliderMiniMapWidgetContainer;
+
     private Pane labelPane;
     private Map<StackPane, TrackRenderer> labelPaneMap;
     private Set<TrackRenderer> trackRenderers;
@@ -96,6 +100,7 @@ public class GenoVixFxController {
     private TrackRendererProvider trackRendererProvider;
     private EventBusService eventBusService;
     private TabPaneManager tabPaneManager;
+    private ZoomSliderMiniMapWidget zoomSliderMiniMapWidget;
 
     public GenoVixFxController() {
         trackRenderers = Sets.newHashSet();
@@ -486,6 +491,7 @@ public class GenoVixFxController {
     }
 
     private void initializeGuiComponents() {
+        addZoomSliderMiniMapWidget();
         addTabPanes();
         labelPane = new Pane();
         HBox.setHgrow(labelPane, Priority.ALWAYS);
@@ -709,8 +715,25 @@ public class GenoVixFxController {
         this.tabPaneManager = tabPaneManager;
     }
 
+//    @Reference
+//    public void setZoomSliderMiniMapWidget(ZoomSliderMiniMapWidget zoomSliderMiniMapWidget) {
+//        this.zoomSliderMiniMapWidget = zoomSliderMiniMapWidget;
+//    }
+
     private void addTabPanes() {
         rightSplitAnchorPane.getChildren().add(tabPaneManager.getRightTabPane());
         bottomSplitAnchorPane.getChildren().add(tabPaneManager.getBottomTabPane());
     }
+
+    private void addZoomSliderMiniMapWidget() {
+//        zoomSliderMiniMapWidgetContainer.getChildren().add(zoomSliderMiniMapWidget.getContent());
+    }
+
+    @Deactivate
+    private void deactivate() {
+        rightSplitAnchorPane.getChildren().clear();
+        bottomSplitAnchorPane.getChildren().clear();
+        zoomSliderMiniMapWidgetContainer.getChildren().clear();
+    }
+
 }
