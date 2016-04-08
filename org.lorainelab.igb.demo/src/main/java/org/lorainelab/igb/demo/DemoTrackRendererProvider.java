@@ -35,8 +35,8 @@ import org.slf4j.LoggerFactory;
 public class DemoTrackRendererProvider implements TrackRendererProvider {
 
     private static final Logger LOG = LoggerFactory.getLogger(DemoTrackRendererProvider.class);
-    Set<TrackRenderer> trackRenderers;
-    RefrenceSequenceProvider refrenceSequenceProvider;
+    private Set<TrackRenderer> trackRenderers;
+    private RefrenceSequenceProvider refrenceSequenceProvider;
     private CanvasPane canvasPane;
     private Track negativeStrandTrack;
     private Track positiveStrandTrack;
@@ -70,16 +70,6 @@ public class DemoTrackRendererProvider implements TrackRendererProvider {
     @Override
     public Set<TrackRenderer> getTrackRenderers() {
         return trackRenderers;
-    }
-
-    @Reference
-    public void setRefrenceSequenceProvider(RefrenceSequenceProvider refrenceSequenceProvider) {
-        this.refrenceSequenceProvider = refrenceSequenceProvider;
-    }
-
-    @Reference
-    public void setCanvasPane(CanvasPane canvasPane) {
-        this.canvasPane = canvasPane;
     }
 
     @Override
@@ -140,5 +130,15 @@ public class DemoTrackRendererProvider implements TrackRendererProvider {
             }
         });
         return toReturn;
+    }
+
+    @Reference
+    public void setRefrenceSequenceProvider(RefrenceSequenceProvider refrenceSequenceProvider) {
+        this.refrenceSequenceProvider = refrenceSequenceProvider;
+    }
+
+    @Reference
+    public void setCanvasPane(CanvasPane canvasPane) {
+        this.canvasPane = canvasPane;
     }
 }

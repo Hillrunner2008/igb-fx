@@ -17,16 +17,18 @@ import javafx.scene.canvas.GraphicsContext;
 public class Track {
 
     public static final int SLOT_HEIGHT = 30;
-    private static final double MODEL_HEIGHT_PADDING = 17.5;
+    public static final double MODEL_HEIGHT_PADDING = 17.5;
     private final String trackLabel;
     private List<CompositionGlyph> glyphs;
     private TreeMultimap<Integer, CompositionGlyph> slotMap;
     private static Comparator<CompositionGlyph> byMinX
-            = (CompositionGlyph o1, CompositionGlyph o2) -> ComparisonChain.start()
-            .compare(o1.getBoundingRect().getMinX(), o2.getBoundingRect().getMinX())
-            .compare(o1.getBoundingRect().getWidth(), o2.getBoundingRect().getWidth())
-            .compare(o1.getLabel(), o2.getLabel())
-            .result();
+            = (glyph1, glyph2) -> {
+                return ComparisonChain.start()
+                .compare(glyph1.getBoundingRect().getMinX(), glyph2.getBoundingRect().getMinX())
+                .compare(glyph1.getBoundingRect().getWidth(), glyph2.getBoundingRect().getWidth())
+                .compare(glyph1.getLabel(), glyph2.getLabel())
+                .result();
+            };
     private final boolean isNegative;
     private double modelHeight;
     private int maxStackHeight;

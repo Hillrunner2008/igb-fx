@@ -31,6 +31,7 @@ import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
@@ -50,6 +51,7 @@ import static org.lorainelab.igb.visualization.model.TrackRenderer.MAX_ZOOM_MODE
 import org.lorainelab.igb.visualization.model.TrackRendererProvider;
 import org.lorainelab.igb.visualization.model.View;
 import org.lorainelab.igb.visualization.model.ViewPortManager;
+import org.lorainelab.igb.visualization.tabs.TabPaneManager;
 import static org.lorainelab.igb.visualization.util.CanvasUtils.exponentialScaleTransform;
 import static org.lorainelab.igb.visualization.util.CanvasUtils.invertExpScaleTransform;
 import static org.lorainelab.igb.visualization.util.CanvasUtils.linearScaleTransform;
@@ -81,6 +83,12 @@ public class GenoVixFxController {
     @FXML
     private Rectangle rightSliderThumb;
 
+    @FXML
+    private AnchorPane rightSplitAnchorPane;
+
+    @FXML
+    private AnchorPane bottomSplitAnchorPane;
+
     private Pane labelPane;
     private Map<StackPane, TrackRenderer> labelPaneMap;
     private Set<TrackRenderer> trackRenderers;
@@ -97,6 +105,7 @@ public class GenoVixFxController {
     private double totalTrackHeight;
     private TrackRendererProvider trackRendererProvider;
     private EventBusService eventBusService;
+    private TabPaneManager tabPaneManager;
 
     public GenoVixFxController() {
         trackRenderers = Sets.newHashSet();
@@ -108,7 +117,7 @@ public class GenoVixFxController {
         zoomStripeCoordinate = -1;
         lastDragX = 0;
     }
-    
+
     @Activate
     public void activate() {
         eventBus = eventBusService.getEventBus();
@@ -523,6 +532,7 @@ public class GenoVixFxController {
     }
 
     private void initializeGuiComponents() {
+        addTabPanes();
         labelPane = new Pane();
         HBox.setHgrow(labelPane, Priority.ALWAYS);
         labelHbox.getChildren().add(labelPane);
@@ -717,11 +727,6 @@ public class GenoVixFxController {
         hSlider.setValue(invertExpScaleTransform(canvasPane, xFactor));
     }
 
-    @Reference
-    public void setTrackRendererProvider(TrackRendererProvider trackRendererProvider) {
-        this.trackRendererProvider = trackRendererProvider;
-    }
-
     public DoubleProperty getHSliderValue() {
         return hSlider.valueProperty();
     }
@@ -731,13 +736,28 @@ public class GenoVixFxController {
     }
 
     @Reference
+    public void setTrackRendererProvider(TrackRendererProvider trackRendererProvider) {
+        this.trackRendererProvider = trackRendererProvider;
+    }
+
+    @Reference
     public void setCanvasPane(CanvasPane canvasPane) {
         this.canvasPane = canvasPane;
     }
-    
-     @Reference
+
+    @Reference
     public void setEventBusService(EventBusService eventBusService) {
         this.eventBusService = eventBusService;
+    }
+
+    @Reference
+    public void setTabPaneManager(TabPaneManager tabPaneManager) {
+        this.tabPaneManager = tabPaneManager;
+    }
+
+    private void addTabPanes() {
+        rightSplitAnchorPane.getChildren().add(tabPaneManager.getRightTabPane());
+        bottomSplitAnchorPane.getChildren().add(tabPaneManager.getBottomTabPane());
     }
 
 }
