@@ -58,7 +58,6 @@ public class TrackLabel {
     public void setDimensions(Pane parent) {
         double y = trackRenderer.getCanvasContext().getBoundingRect().getMinY();
         double height = trackRenderer.getCanvasContext().getBoundingRect().getHeight();
-        LOG.info(trackLabelText + " : height : " + height);
         root.setLayoutY(y - root.getLayoutBounds().getMinY());
         root.setPrefSize(parent.getWidth(), height);
         if (height < 80) {
@@ -66,8 +65,7 @@ public class TrackLabel {
         } else {
             showOptionalWidgets();
         }
-        Rectangle clipRect = new Rectangle(root.getLayoutX(), root.getLayoutY(), root.getWidth(), root.getHeight());
-        System.out.println(clipRect);
+//        Rectangle clipRect = new Rectangle(root.getLayoutX(), root.getLayoutY(), root.getWidth(), root.getHeight());
     }
 
     @FXML
