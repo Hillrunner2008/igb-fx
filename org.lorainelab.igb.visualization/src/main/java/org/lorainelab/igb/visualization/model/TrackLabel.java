@@ -65,7 +65,8 @@ public class TrackLabel {
         } else {
             showOptionalWidgets();
         }
-//        Rectangle clipRect = new Rectangle(root.getLayoutX(), root.getLayoutY(), root.getWidth(), root.getHeight());
+        Rectangle clipRect = new Rectangle(0, 0, root.getWidth(), root.getHeight());
+        root.setClip(clipRect);
     }
 
     @FXML
@@ -104,6 +105,6 @@ public class TrackLabel {
         leftSideColorIndicator.setStyle(colorToWebStyle(Color.DODGERBLUE));
         colorChooserRect.setVisible(true);
         GridPane.setRowIndex(dragGrip, 0);
-        GridPane.setRowSpan(dragGrip, 3);
+        GridPane.setRowSpan(dragGrip, 1);
     }
 }
