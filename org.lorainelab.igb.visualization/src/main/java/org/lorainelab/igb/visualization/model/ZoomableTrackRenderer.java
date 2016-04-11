@@ -131,8 +131,9 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         });
     }
 
-    private void showToolTip(Point2D clickLocation) {
-        Rectangle2D modelCoordinateBoundingBox = mouseEventToViewCoordinates(clickLocation);
+    private void showToolTip(Point2D local, Point2D screen) {
+        
+        Rectangle2D modelCoordinateBoundingBox = mouseEventToViewCoordinates(local);
         Optional<CompositionGlyph> intersect = track.getGlyphs().stream().filter(glyph -> glyph.getBoundingRect().intersects(modelCoordinateBoundingBox))
                 .findFirst();
 
@@ -158,8 +159,8 @@ public class ZoomableTrackRenderer implements TrackRenderer {
                         });
 
                 tooltip.setText(sb.toString());
-                double newX = clickLocation.getX() + 10;
-                double newY = clickLocation.getY() + 10;
+                double newX = screen.getX() + 10;
+                double newY = screen.getY() + 10;
                 tooltip.show(gc.getCanvas(), newX, newY);
             });
         }
@@ -170,7 +171,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         if (!canvasContext.getBoundingRect().contains(event.getLocal())) {
             return;
         }
-        showToolTip(event.getScreen());
+        showToolTip(event.getLocal(), event.getScreen());
     }
 
     @Subscribe

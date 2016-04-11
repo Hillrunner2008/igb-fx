@@ -10,5 +10,6 @@ package org.lorainelab.igb.visualization.event;
  * @author jeckstei
  */
 public interface MouseStationaryEvent {
+
     
 }

@@ -168,20 +168,24 @@ public class CanvasPane extends Region {
         });
 
         EventStream<MouseEvent> mouseEvents = EventStreams.eventsOf(canvas, MouseEvent.ANY);
-        EventStream<Point2D> stationaryPositions = mouseEvents
+        EventStream<org.lorainelab.igb.visualization.event.MouseEvent> stationaryPositions = mouseEvents
                 .successionEnds(Duration.ofSeconds(1))
                 .filter(e -> e.getEventType() == MouseEvent.MOUSE_MOVED)
                 .map(e -> {
-                    return new Point2D(e.getScreenX(), e.getScreenY());
+                    return new org.lorainelab.igb.visualization.event.MouseEvent(
+                            new Point2D(e.getX(), e.getY()),
+                            new Point2D(e.getScreenX(), e.getScreenY())
+                    );
                 });
 
         EventStream<Void> stoppers = mouseEvents.supply((Void) null);
 
-        EventStream<Either<Point2D, Void>> stationaryEvents
+        EventStream<Either<org.lorainelab.igb.visualization.event.MouseEvent, Void>> stationaryEvents
                 = stationaryPositions.or(stoppers)
                 .distinct();
 
-        stationaryEvents.<MouseStationaryEvent>map(either -> either.unify(pos -> new MouseStationaryStartEvent(pos, pos),
+        stationaryEvents.<MouseStationaryEvent>map(either -> either.unify(
+                pos -> new MouseStationaryStartEvent(pos),
                 stop -> new MouseStationaryEndEvent()))
                 .subscribe(evt -> eventBus.post(evt));
     }
