@@ -29,6 +29,7 @@ import org.lorainelab.igb.visualization.event.MouseReleasedEvent;
 import org.lorainelab.igb.visualization.event.MouseStationaryEndEvent;
 import org.lorainelab.igb.visualization.event.MouseStationaryEvent;
 import org.lorainelab.igb.visualization.event.MouseStationaryStartEvent;
+import org.lorainelab.igb.visualization.event.RefreshTrackEvent;
 import org.lorainelab.igb.visualization.event.ScaleEvent;
 import org.lorainelab.igb.visualization.event.ZoomStripeEvent;
 import org.lorainelab.igb.visualization.model.RefrenceSequenceProvider;
@@ -80,6 +81,7 @@ public class CanvasPane extends Region {
 
     private void initializeMouseEventHandlers() {
         canvas.setOnMouseClicked((MouseEvent event) -> {
+            eventBus.post(new RefreshTrackEvent());
             boolean isDoubleClick = false;
             eventBus.post(new MouseClickedEvent(
                     getLocalPoint2DFromMouseEvent(event),

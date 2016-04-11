@@ -20,6 +20,7 @@ import org.lorainelab.igb.visualization.event.MouseClickedEvent;
 import org.lorainelab.igb.visualization.event.MouseDoubleClickEvent;
 import org.lorainelab.igb.visualization.event.MouseStationaryEndEvent;
 import org.lorainelab.igb.visualization.event.MouseStationaryStartEvent;
+import org.lorainelab.igb.visualization.event.RefreshTrackEvent;
 import org.lorainelab.igb.visualization.event.ScrollXUpdate;
 import org.lorainelab.igb.visualization.event.ZoomStripeEvent;
 
@@ -207,6 +208,11 @@ public class ZoomableTrackRenderer implements TrackRenderer {
                 .ifPresent(t -> {
                     jumpZoom(t.getBoundingRect());
                 });
+    }
+    
+    @Subscribe
+    private void handleRefreshTrackEvent(RefreshTrackEvent event) {
+        render();
     }
 
     private Rectangle2D mouseEventToViewCoordinates(Point2D clickLocation) {

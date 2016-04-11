@@ -22,6 +22,7 @@ import org.lorainelab.igb.visualization.event.ClickDragZoomEvent;
 import org.lorainelab.igb.visualization.event.MouseDraggedEvent;
 import org.lorainelab.igb.visualization.event.MousePressedEvent;
 import org.lorainelab.igb.visualization.event.MouseReleasedEvent;
+import org.lorainelab.igb.visualization.event.RefreshTrackEvent;
 import org.lorainelab.igb.visualization.event.ZoomStripeEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -375,6 +376,11 @@ public class CoordinateTrackRenderer implements TrackRenderer {
             return;
         }
         lastMouseClickX = Math.floor(event.getLocal().getX() / xfactor);
+    }
+
+    @Subscribe
+    private void handleRefreshTrackEvent(RefreshTrackEvent event) {
+        render();
     }
 
     @Override
