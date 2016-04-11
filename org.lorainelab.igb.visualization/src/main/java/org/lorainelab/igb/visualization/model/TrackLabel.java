@@ -65,7 +65,7 @@ public class TrackLabel {
         } else {
             showOptionalWidgets();
         }
-        Rectangle clipRect = new Rectangle(0, 0, root.getWidth(), root.getHeight());
+        Rectangle clipRect = new Rectangle(0, 0, parent.getWidth(), height);
         root.setClip(clipRect);
     }
 
