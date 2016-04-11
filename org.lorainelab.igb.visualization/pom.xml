@@ -57,8 +57,12 @@
         <dependency>
             <groupId>org.lorainelab</groupId>
             <artifactId>org.lorainelab.igb.stage.provider.api</artifactId>
-            <version>0.0.1</version>
-            <type>jar</type>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.lorainelab</groupId>
+            <artifactId>org.lorainelab.igb.menu.api</artifactId>
+            <version>${project.parent.version}</version>
         </dependency>
     </dependencies>
     <build>

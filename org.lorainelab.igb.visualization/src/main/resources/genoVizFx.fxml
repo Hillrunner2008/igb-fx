@@ -3,11 +3,7 @@
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Menu?>
-<?import javafx.scene.control.MenuBar?>
-<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ScrollBar?>
-<?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.Slider?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TextField?>
@@ -20,57 +16,8 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Rectangle?>
 
-<VBox prefHeight="950" prefWidth="1600" xmlns="http://javafx.com/javafx/8.0.74" xmlns:fx="http://javafx.com/fxml/1">
+<VBox fx:id="root" prefHeight="950" prefWidth="1600" xmlns="http://javafx.com/javafx/8.0.74" xmlns:fx="http://javafx.com/fxml/1">
     <children>
-        <MenuBar fx:id="menuBar" prefWidth="697.0" VBox.vgrow="NEVER">
-            <menus>
-                <Menu fx:id="fileMenu" mnemonicParsing="false" text="File">
-                    <items>
-                        <MenuItem mnemonicParsing="false" text="New" />
-                        <MenuItem mnemonicParsing="false" text="Open…" />
-                        <Menu mnemonicParsing="false" text="Open Recent" />
-                        <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem mnemonicParsing="false" text="Close" />
-                        <MenuItem mnemonicParsing="false" text="Save" />
-                        <MenuItem mnemonicParsing="false" text="Save As…" />
-                        <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem mnemonicParsing="false" text="Preferences…" />
-                        <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem mnemonicParsing="false" text="Quit" />
-                    </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Edit">
-                    <items>
-                        <MenuItem mnemonicParsing="false" text="Action 1" />
-                    </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="View">
-                    <items>
-                        <MenuItem mnemonicParsing="false" text="Action 1" />
-                    </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Tools">
-                    <items>
-                        <MenuItem mnemonicParsing="false" text="Action 1" />
-                    </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Tabs">
-                    <items>
-                        <MenuItem mnemonicParsing="false" text="Action 1" />
-                    </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Bookmarks">
-                    <items>
-                        <MenuItem mnemonicParsing="false" text="Action 1" />
-                    </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Help">
-                    <items>
-                        <MenuItem mnemonicParsing="false" text="Action 1" />
-                    </items>
-                </Menu>
-            </menus>
-        </MenuBar>
         <ToolBar prefHeight="40.0" prefWidth="200.0">
             <items>
             <FontAwesomeIconView glyphName="FOLDER_OPEN" size="18" />
@@ -162,7 +109,7 @@
                                                                                           <VBox fx:id="canvasVBox" layoutX="223.0" layoutY="72.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                                              <children>
                                                                                                 <StackPane fx:id="stackPane" prefHeight="150.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
-                                                                                                <HBox maxHeight="80.0" minHeight="80.0">
+                                                                                                <HBox fx:id="zoomSliderMiniMapWidgetContainer" maxHeight="80.0" minHeight="80.0">
                                                                                                    <children>
                                                                                                       <Pane maxHeight="80.0" minHeight="80.0" prefHeight="80.0" style="-fx-background-image: url('track_overview.png'); -fx-background-repeat: stretch; -fx-background-size: stretch;" HBox.hgrow="ALWAYS" fx:id="xSliderPane">
                                                                                                           <children>
@@ -196,12 +143,12 @@
                                     </VBox>
                                  </children>
                               </StackPane>
-                              <AnchorPane fx:id="bottomSplitAnchorPane" />
+                              <AnchorPane fx:id="bottomTabPaneContainer" />
                            </items>
                         </SplitPane>
                      </children>
                   </AnchorPane>
-                <AnchorPane fx:id="rightSplitAnchorPane" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" />
+                <AnchorPane fx:id="rightTabPaneContainer" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" />
               </items>
             </SplitPane>
          </children>

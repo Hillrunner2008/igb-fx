@@ -2,12 +2,11 @@ package org.lorainelab.igb.visualization;
 
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
+import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-import java.util.Map;
 import java.util.Set;
 import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
@@ -31,11 +30,13 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Transform;
 import org.lorainelab.igb.visualization.event.ClickDragZoomEvent;
 import org.lorainelab.igb.visualization.event.ScaleEvent;
 import org.lorainelab.igb.visualization.event.ScrollXUpdate;
+import org.lorainelab.igb.visualization.menubar.MenuBarManager;
 import org.lorainelab.igb.visualization.model.CoordinateTrackRenderer;
 import org.lorainelab.igb.visualization.model.JumpZoomEvent;
 import org.lorainelab.igb.visualization.model.TrackLabel;
@@ -74,13 +75,18 @@ public class GenoVixFxController {
     private Rectangle rightSliderThumb;
 
     @FXML
-    private AnchorPane rightSplitAnchorPane;
+    private VBox root;
 
     @FXML
-    private AnchorPane bottomSplitAnchorPane;
+    private AnchorPane rightTabPaneContainer;
+
+    @FXML
+    private AnchorPane bottomTabPaneContainer;
+
+    @FXML
+    private HBox zoomSliderMiniMapWidgetContainer;
 
     private Pane labelPane;
-    private Map<StackPane, TrackRenderer> labelPaneMap;
     private Set<TrackRenderer> trackRenderers;
     private DoubleProperty scrollX;
     private DoubleProperty hSliderWidget;
@@ -96,10 +102,11 @@ public class GenoVixFxController {
     private TrackRendererProvider trackRendererProvider;
     private EventBusService eventBusService;
     private TabPaneManager tabPaneManager;
+    private ZoomSliderMiniMapWidget zoomSliderMiniMapWidget;
+    private MenuBarManager menuBarManager;
 
     public GenoVixFxController() {
         trackRenderers = Sets.newHashSet();
-        labelPaneMap = Maps.newHashMap();
         scrollX = new SimpleDoubleProperty(0);
         hSliderWidget = new SimpleDoubleProperty(0);
         ignoreScrollXEvent = false;
@@ -119,152 +126,6 @@ public class GenoVixFxController {
     }
 
     private void initCanvasMouseListeners() {
-//        canvasPane.setOnMouseClicked((MouseEvent event) -> {
-//            boolean isDoubleClick = event.getClickCount() >= 2;
-//
-//            Point2D mouseEventLocation = new Point2D(event.getX(), event.getY());
-//            trackRenderers.keySet().stream().sorted().map(key -> trackRenderers.get(key))
-//                    .filter(trackRenderer -> trackRenderer.getCanvasContext().isPresent())
-//                    .filter(trackRenderer -> trackRenderer.getCanvasContext().get().getBoundingRect().contains(mouseEventLocation))
-//                    .forEach(trackRender -> {
-//                        if (isDoubleClick) {
-//                            resetZoomStripe();
-//                            trackRender.handleMouseDoubleClickEvent(event);
-//                        } else {
-//                            trackRender.handleMouseClickEvent(event);
-//                        }
-//                    });
-//
-//            if (!isDoubleClick) {
-//                Optional<TrackRenderer> trc = trackRenderers.keySet().stream().map(key -> trackRenderers.get(key))
-//                        .filter(trackRenderer -> trackRenderer.getCanvasContext().isPresent())
-//                        .filter(trackRenderer -> trackRenderer.getCanvasContext().get().getBoundingRect().contains(mouseEventLocation))
-//                        .findFirst();
-//                if (trc.isPresent()) {
-//           zoomStripeCoordinate         View view = trc.get().getView();
-//                    double offsetX = view.getBoundingRect().getMinX();
-//                    zoomStripeCoordinate = (event.getX() / view.getXfactor()) + offsetX;
-//                    refreshTrackRenderers();
-//                    eventBus.post(new ZoomStripeEvent(zoomStripeCoordinate));
-//                }
-//            }
-//        });
-//        canvasPane.setOnMouseDragEntered((MouseEvent event) -> {
-//            Point2D mouseEventLocation = new Point2D(event.getX(), event.getY());
-//            trackRenderers.keySet().stream().sorted().map(key -> trackRenderers.get(key))
-//                    .filter(trackRenderer -> trackRenderer.getCanvasContext().isPresent())
-//                    .filter(trackRenderer -> trackRenderer.getCanvasContext().get().getBoundingRect().contains(mouseEventLocation))
-//                    .forEach(trackRender -> {
-//                        trackRender.handleMouseDragEnteredEvent(event);
-//                    });
-//        });
-//        canvasPane.setOnMouseDragExited((MouseEvent event) -> {
-//            Point2D mouseEventLocation = new Point2D(event.getX(), event.getY());
-//            trackRenderers.keySet().stream().sorted().map(key -> trackRenderers.get(key)).forEach(trackRender -> {
-//                trackRender.handleMouseDragExitedEvent(event);
-//            });
-//        });
-//        canvasPane.setOnMouseDragOver((MouseEvent event) -> {
-//            Point2D mouseEventLocation = new Point2D(event.getX(), event.getY());
-//            trackRenderers.keySet().stream().sorted().map(key -> trackRenderers.get(key))
-//                    .filter(trackRenderer -> trackRenderer.getCanvasContext().isPresent())
-//                    .filter(trackRenderer -> trackRenderer.getCanvasContext().get().getBoundingRect().contains(mouseEventLocation))
-//                    .forEach(trackRender -> {
-//                        trackRender.handleMouseClickEvent(event);
-//                    });
-//        });
-//        canvasPane.setOnMouseDragReleased((MouseEvent event) -> {
-//            Point2D mouseEventLocation = new Point2D(event.getX(), event.getY());
-//            trackRenderers.keySet().stream().sorted().map(key -> trackRenderers.get(key))
-//                    .filter(trackRenderer -> trackRenderer.getCanvasContext().isPresent())
-//                    .filter(trackRenderer -> trackRenderer.getCanvasContext().get().getBoundingRect().contains(mouseEventLocation))
-//                    .forEach(trackRender -> {
-//                        trackRender.handleMouseDragReleasedEvent(event);
-//                    });
-//        });
-//        canvasPane.setOnMouseDragged((MouseEvent event) -> {
-//            Point2D mouseEventLocation = new Point2D(event.getX(), event.getY());
-//            trackRenderers.keySet().stream().sorted().map(key -> trackRenderers.get(key))
-//                    .filter(trackRenderer -> trackRenderer.getCanvasContext().isPresent())
-//                    .filter(trackRenderer -> trackRenderer.getCanvasContext().get().getBoundingRect().contains(mouseEventLocation))
-//                    .forEach(trackRender -> {
-//                        trackRender.handleMouseDraggedEvent(event);
-//                    });
-//        });
-//        canvasPane.setOnMouseEntered((MouseEvent event) -> {
-//            Point2D mouseEventLocation = new Point2D(event.getX(), event.getY());
-//            trackRenderers.keySet().stream().sorted().map(key -> trackRenderers.get(key))
-//                    .filter(trackRenderer -> trackRenderer.getCanvasContext().isPresent())
-//                    .filter(trackRenderer -> trackRenderer.getCanvasContext().get().getBoundingRect().contains(mouseEventLocation))
-//                    .forEach(trackRender -> {
-//                        trackRender.handleMouseEnteredEvent(event);
-//                    });
-//        });
-//        canvasPane.setOnMouseExited((MouseEvent event) -> {
-////            Point2D mouseEventLocation = new Point2D(event.getX(), event.getY());
-//            trackRenderers.keySet().stream().sorted().map(key -> trackRenderers.get(key)).forEach(trackRender -> {
-//                trackRender.handleMouseExited(event);
-//            });
-////            trackRenderers.stream()
-////                    .filter(trackRenderer -> trackRenderer.getCanvasContext().isPresent())
-////                    .filter(trackRenderer -> trackRenderer.getCanvasContext().get().getBoundingRect().contains(mouseEventLocation))
-////                    .forEach(trackRender -> {
-////                        trackRender.handleMouseExited(event);
-////                    });
-//        });
-//        canvasPane.setOnMouseMoved((MouseEvent event) -> {
-//            Point2D mouseEventLocation = new Point2D(event.getX(), event.getY());
-//            trackRenderers.keySet().stream().sorted().map(key -> trackRenderers.get(key))
-//                    .filter(trackRenderer -> trackRenderer.getCanvasContext().isPresent())
-//                    .filter(trackRenderer -> trackRenderer.getCanvasContext().get().getBoundingRect().contains(mouseEventLocation))
-//                    .forEach(trackRender -> {
-//                        trackRender.handleMouseMovedEvent(event);
-//                    });
-//        });
-//        canvasPane.setOnMouseMoved((MouseEvent event) -> {
-//            Point2D mouseEventLocation = new Point2D(event.getX(), event.getY());
-//            trackRenderers.keySet().stream().sorted().map(key -> trackRenderers.get(key))
-//                    .filter(trackRenderer -> trackRenderer.getCanvasContext().isPresent())
-//                    .filter(trackRenderer -> !trackRenderer.getCanvasContext().get().getBoundingRect().contains(mouseEventLocation))
-//                    .forEach(trackRender -> {
-//                        trackRender.handleMouseExited(event);
-//                    });
-//        });
-//        canvasPane.setOnMousePressed((MouseEvent event) -> {
-//            Point2D mouseEventLocation = new Point2D(event.getX(), event.getY());
-//            trackRenderers.keySet().stream().sorted().map(key -> trackRenderers.get(key))
-//                    .filter(trackRenderer -> trackRenderer.getCanvasContext().isPresent())
-//                    .filter(trackRenderer -> trackRenderer.getCanvasContext().get().getBoundingRect().contains(mouseEventLocation))
-//                    .forEach(trackRender -> {
-//                        trackRender.handleMousePressedEvent(event);
-//                    });
-//        });
-//        canvasPane.setOnMouseReleased((MouseEvent event) -> {
-//            Point2D mouseEventLocation = new Point2D(event.getX(), event.getY());
-//            trackRenderers.keySet().stream().sorted().map(key -> trackRenderers.get(key))
-//                    .filter(trackRenderer -> trackRenderer.getCanvasContext().isPresent())
-//                    .filter(trackRenderer -> trackRenderer.getCanvasContext().get().getBoundingRect().contains(mouseEventLocation))
-//                    .forEach(trackRender -> {
-//                        trackRender.handleMouseReleased(event);
-//                    });
-//        });
-//
-//        canvasPane.addEventHandler(MOUSE_STATIONARY_BEGIN, event -> {
-//            Point2D mouseEventLocation = event.getPosition();
-//            trackRenderers.keySet().stream().sorted().map(key -> trackRenderers.get(key))
-//                    .filter(trackRenderer -> trackRenderer.getCanvasContext().isPresent())
-//                    .filter(trackRenderer -> trackRenderer.getCanvasContext().get().getBoundingRect().contains(mouseEventLocation))
-//                    .forEach(trackRender -> {
-//                        trackRender.handleMouseStopped(event);
-//                    });
-//        });
-//
-//        canvasPane.addEventHandler(MOUSE_STATIONARY_END, event -> {
-//            trackRenderers.keySet().stream().sorted().map(key -> trackRenderers.get(key)).forEach(trackRender -> {
-//                trackRender.handleMouseStarted(event);
-//            });
-//        });
-
         canvas.setOnScroll(scrollEvent -> {
             final boolean isForwardScroll = scrollEvent.getDeltaY() > 0.0;
             if (isForwardScroll) {
@@ -288,14 +149,14 @@ public class GenoVixFxController {
             scaleTrackRenderers();
         });
         hSlider.valueProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-            
+
             if (ignoreHSliderEvent) {
                 ignoreHSliderEvent = false;
                 return;
             }
             final boolean isSnapEvent = newValue.doubleValue() % hSlider.getMajorTickUnit() == 0;
             if (lastHSliderFire < 0 || Math.abs(lastHSliderFire - newValue.doubleValue()) > 1 || isSnapEvent) {
-                
+
                 scaleTrackRenderers();
                 syncWidgetSlider();
                 lastHSliderFire = newValue.doubleValue();
@@ -486,6 +347,8 @@ public class GenoVixFxController {
     }
 
     private void initializeGuiComponents() {
+        addZoomSliderMiniMapWidget();
+        addMenuBar();
         addTabPanes();
         labelPane = new Pane();
         HBox.setHgrow(labelPane, Priority.ALWAYS);
@@ -518,69 +381,76 @@ public class GenoVixFxController {
 
     private void updateTrackLabels() {
         Platform.runLater(() -> {
-            labelPaneMap.clear();
             labelPane.getChildren().clear();
             trackRenderers.stream()
                     .filter(trackRenderer -> trackRenderer.getCanvasContext().isVisible())
                     .forEach(trackRenderer -> {
-                        double y = trackRenderer.getCanvasContext().getBoundingRect().getMinY();
-                        double height = trackRenderer.getCanvasContext().getBoundingRect().getHeight();
-                        TrackLabel trackLabel = new TrackLabel(trackRenderer, labelPane);
-                        StackPane root = trackLabel.getRoot();
-                        labelPane.getChildren().add(root);
-                        labelPaneMap.put(root, trackRenderer);
-                    });
-            labelPane.getChildren().stream()
-                    .filter(node -> node instanceof StackPane)
-                    .map(node -> (StackPane) node)
-                    .forEach((StackPane trackLabelNode) -> {
-                        trackLabelNode.setOnDragDetected(
-                                (MouseEvent event) -> {
-                                    if (event.getSource() instanceof StackPane) {
-                                        Pane rootPane = (Pane) trackLabelNode.getScene().getRoot();
-                                        rootPane.setOnDragOver(dragEvent -> {
-                                            dragEvent.acceptTransferModes(TransferMode.ANY);
-                                            dragEvent.consume();
-                                        });
-                                        SnapshotParameters snapshotParams = new SnapshotParameters();
-                                        snapshotParams.setTransform(Transform.scale(0.75, 0.75));
-                                        WritableImage snapshot = trackLabelNode.snapshot(snapshotParams, null);
-                                        Dragboard db = trackLabelNode.startDragAndDrop(TransferMode.MOVE);
-                                        ClipboardContent clipboardContent = new ClipboardContent();
-                                        clipboardContent.put(DataFormat.PLAIN_TEXT, trackLabelNode.getBoundsInParent().getMinY());
-                                        db.setDragView(snapshot, 5, 5);
-                                        db.setContent(clipboardContent);
-                                    }
-                                    event.consume();
-                                }
-                        );
-                        trackLabelNode.setOnDragDropped((DragEvent event) -> {
-                            final Object dropLocationSource = event.getSource();
-                            if (dropLocationSource instanceof StackPane) {
-                                StackPane dropLocationLabelNode = StackPane.class.cast(dropLocationSource);
-                                double dropLocationMinY = dropLocationLabelNode.getBoundsInParent().getMinY();
-                                Dragboard db = event.getDragboard();
-                                Object dragboardContent = db.getContent(DataFormat.PLAIN_TEXT);
-                                if (dragboardContent instanceof Double) {
-                                    double eventTriggerMinY = (Double) dragboardContent;
-                                    if (dropLocationMinY != eventTriggerMinY) {
-                                        labelPaneMap.keySet().stream().filter(labelNode -> labelNode.getBoundsInParent().getMinY() == eventTriggerMinY).findFirst().ifPresent(eventTrigger -> {
-                                            TrackRenderer draggedTrackRenderer = labelPaneMap.get(eventTrigger);
-                                            TrackRenderer droppedTrackRenderer = labelPaneMap.get(dropLocationLabelNode);
-                                            Integer draggedIndex = draggedTrackRenderer.getWeight();
-                                            Integer droppedIndex = droppedTrackRenderer.getWeight();
-                                            draggedTrackRenderer.setWeight(droppedIndex);
-                                            droppedTrackRenderer.setWeight(draggedIndex);
-                                            scaleTrackRenderers();
-                                        });
-                                    }
-                                }
-
-                            }
-                            event.consume();
-                        });
+                TrackLabel trackLabel = trackRenderer.getTrackLabel();
+                trackLabel.setDimensions(labelPane);
+                        StackPane content = trackLabel.getContent();
+                        labelPane.getChildren().add(content);
                     });
         });
+        labelPane.getChildren().stream()
+                .filter(node -> node instanceof StackPane)
+                .map(node -> (StackPane) node)
+                .forEach((StackPane trackLabelNode) -> {
+                    trackLabelNode.setOnDragDetected(
+                            (MouseEvent event) -> {
+                                if (event.getSource() instanceof StackPane) {
+                                    Pane rootPane = (Pane) trackLabelNode.getScene().getRoot();
+                                    rootPane.setOnDragOver(dragEvent -> {
+                                        dragEvent.acceptTransferModes(TransferMode.ANY);
+                                        dragEvent.consume();
+                                    });
+                                    SnapshotParameters snapshotParams = new SnapshotParameters();
+                                    snapshotParams.setTransform(Transform.scale(0.75, 0.75));
+                                    WritableImage snapshot = trackLabelNode.snapshot(snapshotParams, null);
+                                    Dragboard db = trackLabelNode.startDragAndDrop(TransferMode.MOVE);
+                                    ClipboardContent clipboardContent = new ClipboardContent();
+                                    clipboardContent.put(DataFormat.PLAIN_TEXT, trackLabelNode.getBoundsInParent().getMinY());
+                                    db.setDragView(snapshot, 5, 5);
+                                    db.setContent(clipboardContent);
+                                }
+                                event.consume();
+                            }
+                    );
+                    trackLabelNode.setOnDragDropped((DragEvent event) -> {
+                        final Object dropLocationSource = event.getSource();
+                        if (dropLocationSource instanceof StackPane) {
+                            StackPane dropLocationLabelNode = StackPane.class.cast(dropLocationSource);
+                            double dropLocationMinY = dropLocationLabelNode.getBoundsInParent().getMinY();
+                            Dragboard db = event.getDragboard();
+                            Object dragboardContent = db.getContent(DataFormat.PLAIN_TEXT);
+                            if (dragboardContent instanceof Double) {
+                                double eventTriggerMinY = (Double) dragboardContent;
+                                if (dropLocationMinY != eventTriggerMinY) {
+                                    trackRenderers.stream()
+                                            .filter(trackRenderer -> trackRenderer.getCanvasContext().isVisible())
+                                            .forEach(draggedTrackRenderer -> {
+                                                StackPane labelNode = draggedTrackRenderer.getTrackLabel().getContent();
+                                                if (labelNode.getBoundsInParent().getMinY() == eventTriggerMinY) {
+                                                    trackRenderers.stream()
+                                                            .filter(trackRenderer -> trackRenderer.getTrackLabel().getContent() == dropLocationLabelNode)
+                                                            .findFirst()
+                                                            .ifPresent(droppedTrackRenderer -> {
+                                                                Integer draggedIndex = draggedTrackRenderer.getWeight();
+                                                                Integer droppedIndex = droppedTrackRenderer.getWeight();
+                                                                draggedTrackRenderer.setWeight(droppedIndex);
+                                                                droppedTrackRenderer.setWeight(draggedIndex);
+                                                                scaleTrackRenderers();
+                                                            });
+                                                }
+                                            });
+
+                                }
+                            }
+
+                        }
+                        event.consume();
+                    });
+                });
+
     }
 
     private void refreshSliderWidget() {
@@ -709,8 +579,31 @@ public class GenoVixFxController {
         this.tabPaneManager = tabPaneManager;
     }
 
-    private void addTabPanes() {
-        rightSplitAnchorPane.getChildren().add(tabPaneManager.getRightTabPane());
-        bottomSplitAnchorPane.getChildren().add(tabPaneManager.getBottomTabPane());
+    @Reference
+    public void setMenuBarManager(MenuBarManager menuBarManager) {
+        this.menuBarManager = menuBarManager;
     }
+
+//    @Reference
+//    public void setZoomSliderMiniMapWidget(ZoomSliderMiniMapWidget zoomSliderMiniMapWidget) {
+//        this.zoomSliderMiniMapWidget = zoomSliderMiniMapWidget;
+//    }
+    private void addTabPanes() {
+        rightTabPaneContainer.getChildren().add(tabPaneManager.getRightTabPane());
+        bottomTabPaneContainer.getChildren().add(tabPaneManager.getBottomTabPane());
+    }
+
+    private void addZoomSliderMiniMapWidget() {
+//        zoomSliderMiniMapWidgetContainer.getChildren().add(zoomSliderMiniMapWidget.getContent());
+    }
+
+    @Deactivate
+    private void deactivate() {
+        root.getChildren().clear();
+    }
+
+    private void addMenuBar() {
+        root.getChildren().add(0, menuBarManager.getMenuBar());
+    }
+
 }
