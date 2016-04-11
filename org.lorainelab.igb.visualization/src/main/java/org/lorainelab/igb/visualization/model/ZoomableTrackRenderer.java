@@ -1,9 +1,5 @@
 package org.lorainelab.igb.visualization.model;
 
-import aQute.bnd.annotation.component.Activate;
-import aQute.bnd.annotation.component.Component;
-import aQute.bnd.annotation.component.Deactivate;
-import aQute.bnd.annotation.component.Reference;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import java.util.Optional;
@@ -15,7 +11,6 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.paint.Color;
 import org.apache.commons.lang3.text.WordUtils;
 import org.lorainelab.igb.visualization.CanvasPane;
-import org.lorainelab.igb.visualization.EventBusService;
 import org.lorainelab.igb.visualization.event.MouseClickedEvent;
 import org.lorainelab.igb.visualization.event.MouseDoubleClickEvent;
 import org.lorainelab.igb.visualization.event.MouseStationaryEndEvent;
@@ -29,6 +24,7 @@ import org.lorainelab.igb.visualization.event.ZoomStripeEvent;
  */
 public class ZoomableTrackRenderer implements TrackRenderer {
 
+    private TrackLabel trackLabel;
     final int modelWidth;
     final double modelHeight;
     final Track track;
@@ -41,14 +37,15 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     private int weight;
 
     public ZoomableTrackRenderer(CanvasPane canvasPane, Track track, int modelCoordinatesGridSize) {
-        weight = 0;
+        this.weight = 0;
         this.eventBus = canvasPane.getEventBus();
-        eventBus.register(this);
+        this.eventBus.register(this);
         this.track = track;
         this.modelWidth = modelCoordinatesGridSize;
         this.modelHeight = track.getModelHeight();
         view = new View(new Rectangle2D(0, 0, modelWidth, modelHeight));
         canvasContext = new CanvasContext(canvasPane.getCanvas(), Rectangle2D.EMPTY, 0, 0);
+        trackLabel = new TrackLabel(this, track.getTrackLabel());
         gc = canvasPane.getCanvas().getGraphicsContext2D();
     }
 
@@ -242,7 +239,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     }
 
     @Override
-    public String getTrackLabel() {
+    public String getTrackLabelText() {
         return track.getTrackLabel();
     }
 
@@ -264,6 +261,11 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     @Override
     public void setWeight(int weight) {
         this.weight = weight;
+    }
+
+    @Override
+    public TrackLabel getTrackLabel() {
+        return trackLabel;
     }
 
 }

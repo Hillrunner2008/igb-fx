@@ -14,6 +14,8 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import static org.lorainelab.igb.visualization.util.ColorUtils.colorToWebStyle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -21,6 +23,7 @@ import static org.lorainelab.igb.visualization.util.ColorUtils.colorToWebStyle;
  */
 public class TrackLabel {
 
+    private static final Logger LOG = LoggerFactory.getLogger(TrackLabel.class);
     @FXML
     private StackPane leftSideColorIndicator;
     @FXML
@@ -37,53 +40,48 @@ public class TrackLabel {
     private StackPane dragGrip;
     private final TrackRenderer trackRenderer;
     private String trackLabelText;
-    private final Pane parent;
 
-    public TrackLabel(TrackRenderer trackRenderer, Pane parent) {
+    public TrackLabel(TrackRenderer trackRenderer, String trackLabelText) {
         this.trackRenderer = trackRenderer;
-        this.trackLabelText = trackRenderer.getTrackLabel();
-        this.parent = parent;
+        this.trackLabelText = trackLabelText;
         final URL resource = TrackLabel.class.getClassLoader().getResource("trackLabel.fxml");
         FXMLLoader fxmlLoader = new FXMLLoader(resource);
         fxmlLoader.setClassLoader(this.getClass().getClassLoader());
         fxmlLoader.setController(this);
         try {
             fxmlLoader.load();
-            setDimensions();
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
     }
 
-    private void setDimensions() {
+    public void setDimensions(Pane parent) {
         double y = trackRenderer.getCanvasContext().getBoundingRect().getMinY();
         double height = trackRenderer.getCanvasContext().getBoundingRect().getHeight();
+        LOG.info(trackLabelText + " : height : " + height);
         root.setLayoutY(y - root.getLayoutBounds().getMinY());
         root.setPrefSize(parent.getWidth(), height);
-        if (height < 75) {
+        if (height < 80) {
             hideOptionalWidgets();
+        } else {
+            showOptionalWidgets();
         }
+        Rectangle clipRect = new Rectangle(root.getLayoutX(), root.getLayoutY(), root.getWidth(), root.getHeight());
+        System.out.println(clipRect);
     }
 
     @FXML
     private void initialize() {
-        if (isCanvasTrack()) {
-            hideOptionalWidgets();
-        } else {
-            colorChooserRect.setFill(Color.DODGERBLUE.brighter());
-            leftSideColorIndicator.setStyle(colorToWebStyle(Color.DODGERBLUE));
-        }
+        colorChooserRect.setFill(Color.DODGERBLUE.brighter());
+        leftSideColorIndicator.setStyle(colorToWebStyle(Color.DODGERBLUE));
         trackLabel.setText(trackLabelText);
+        trackLabel.setWrapText(true);
         dragGrip.setOnMouseEntered(event -> root.getScene().setCursor(Cursor.HAND));
         dragGrip.setOnMouseExited(event -> root.getScene().setCursor(Cursor.DEFAULT));
     }
 
-    public StackPane getRoot() {
+    public StackPane getContent() {
         return root;
-    }
-
-    private boolean isCanvasTrack() {
-        return trackRenderer instanceof CoordinateTrackRenderer;
     }
 
     private void hideOptionalWidgets() {
@@ -94,4 +92,20 @@ public class TrackLabel {
         GridPane.setRowSpan(dragGrip, 3);
     }
 
+    public String getTrackLabelText() {
+        return trackLabelText;
+    }
+
+    public void setTrackLabelText(String trackLabelText) {
+        this.trackLabelText = trackLabelText;
+    }
+
+    private void showOptionalWidgets() {
+        lockIcon.setVisible(true);
+        colorChooserRect.setFill(Color.DODGERBLUE.brighter());
+        leftSideColorIndicator.setStyle(colorToWebStyle(Color.DODGERBLUE));
+        colorChooserRect.setVisible(true);
+        GridPane.setRowIndex(dragGrip, 0);
+        GridPane.setRowSpan(dragGrip, 3);
+    }
 }

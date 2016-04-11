@@ -4,11 +4,9 @@ import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-import java.util.Map;
 import java.util.Set;
 import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
@@ -80,16 +78,15 @@ public class GenoVixFxController {
     private VBox root;
 
     @FXML
-    private AnchorPane rightSplitAnchorPane;
+    private AnchorPane rightTabPaneContainer;
 
     @FXML
-    private AnchorPane bottomSplitAnchorPane;
+    private AnchorPane bottomTabPaneContainer;
 
     @FXML
     private HBox zoomSliderMiniMapWidgetContainer;
 
     private Pane labelPane;
-    private Map<StackPane, TrackRenderer> labelPaneMap;
     private Set<TrackRenderer> trackRenderers;
     private DoubleProperty scrollX;
     private DoubleProperty hSliderWidget;
@@ -110,7 +107,6 @@ public class GenoVixFxController {
 
     public GenoVixFxController() {
         trackRenderers = Sets.newHashSet();
-        labelPaneMap = Maps.newHashMap();
         scrollX = new SimpleDoubleProperty(0);
         hSliderWidget = new SimpleDoubleProperty(0);
         ignoreScrollXEvent = false;
@@ -299,14 +295,14 @@ public class GenoVixFxController {
             scaleTrackRenderers();
         });
         hSlider.valueProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-            
+
             if (ignoreHSliderEvent) {
                 ignoreHSliderEvent = false;
                 return;
             }
             final boolean isSnapEvent = newValue.doubleValue() % hSlider.getMajorTickUnit() == 0;
             if (lastHSliderFire < 0 || Math.abs(lastHSliderFire - newValue.doubleValue()) > 1 || isSnapEvent) {
-                
+
                 scaleTrackRenderers();
                 syncWidgetSlider();
                 lastHSliderFire = newValue.doubleValue();
@@ -531,17 +527,14 @@ public class GenoVixFxController {
 
     private void updateTrackLabels() {
         Platform.runLater(() -> {
-            labelPaneMap.clear();
             labelPane.getChildren().clear();
             trackRenderers.stream()
                     .filter(trackRenderer -> trackRenderer.getCanvasContext().isVisible())
                     .forEach(trackRenderer -> {
-                        double y = trackRenderer.getCanvasContext().getBoundingRect().getMinY();
-                        double height = trackRenderer.getCanvasContext().getBoundingRect().getHeight();
-                        TrackLabel trackLabel = new TrackLabel(trackRenderer, labelPane);
-                        StackPane root = trackLabel.getRoot();
-                        labelPane.getChildren().add(root);
-                        labelPaneMap.put(root, trackRenderer);
+                TrackLabel trackLabel = trackRenderer.getTrackLabel();
+                trackLabel.setDimensions(labelPane);
+                        StackPane content = trackLabel.getContent();
+                        labelPane.getChildren().add(content);
                     });
             labelPane.getChildren().stream()
                     .filter(node -> node instanceof StackPane)
@@ -577,15 +570,24 @@ public class GenoVixFxController {
                                 if (dragboardContent instanceof Double) {
                                     double eventTriggerMinY = (Double) dragboardContent;
                                     if (dropLocationMinY != eventTriggerMinY) {
-                                        labelPaneMap.keySet().stream().filter(labelNode -> labelNode.getBoundsInParent().getMinY() == eventTriggerMinY).findFirst().ifPresent(eventTrigger -> {
-                                            TrackRenderer draggedTrackRenderer = labelPaneMap.get(eventTrigger);
-                                            TrackRenderer droppedTrackRenderer = labelPaneMap.get(dropLocationLabelNode);
-                                            Integer draggedIndex = draggedTrackRenderer.getWeight();
-                                            Integer droppedIndex = droppedTrackRenderer.getWeight();
-                                            draggedTrackRenderer.setWeight(droppedIndex);
-                                            droppedTrackRenderer.setWeight(draggedIndex);
-                                            scaleTrackRenderers();
-                                        });
+                                        trackRenderers.stream()
+                                                .filter(trackRenderer -> trackRenderer.getCanvasContext().isVisible())
+                                                .forEach(draggedTrackRenderer -> {
+                                                    StackPane labelNode = draggedTrackRenderer.getTrackLabel().getContent();
+                                                    if (labelNode.getBoundsInParent().getMinY() == eventTriggerMinY) {
+                                                        trackRenderers.stream()
+                                                                .filter(trackRenderer -> trackRenderer.getTrackLabel().getContent() == dropLocationLabelNode)
+                                                                .findFirst()
+                                                                .ifPresent(droppedTrackRenderer -> {
+                                                                    Integer draggedIndex = draggedTrackRenderer.getWeight();
+                                                                    Integer droppedIndex = droppedTrackRenderer.getWeight();
+                                                                    draggedTrackRenderer.setWeight(droppedIndex);
+                                                                    droppedTrackRenderer.setWeight(draggedIndex);
+                                                                    scaleTrackRenderers();
+                                                                });
+                                            }
+                                                });
+
                                     }
                                 }
 
@@ -731,10 +733,9 @@ public class GenoVixFxController {
 //    public void setZoomSliderMiniMapWidget(ZoomSliderMiniMapWidget zoomSliderMiniMapWidget) {
 //        this.zoomSliderMiniMapWidget = zoomSliderMiniMapWidget;
 //    }
-
     private void addTabPanes() {
-        rightSplitAnchorPane.getChildren().add(tabPaneManager.getRightTabPane());
-        bottomSplitAnchorPane.getChildren().add(tabPaneManager.getBottomTabPane());
+        rightTabPaneContainer.getChildren().add(tabPaneManager.getRightTabPane());
+        bottomTabPaneContainer.getChildren().add(tabPaneManager.getBottomTabPane());
     }
 
     private void addZoomSliderMiniMapWidget() {
@@ -743,9 +744,7 @@ public class GenoVixFxController {
 
     @Deactivate
     private void deactivate() {
-        rightSplitAnchorPane.getChildren().clear();
-        bottomSplitAnchorPane.getChildren().clear();
-        zoomSliderMiniMapWidgetContainer.getChildren().clear();
+        root.getChildren().clear();
     }
 
     private void addMenuBar() {

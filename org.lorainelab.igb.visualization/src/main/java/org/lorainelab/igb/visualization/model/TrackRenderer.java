@@ -18,7 +18,9 @@ public interface TrackRenderer {
     final int MAX_ZOOM_MODEL_COORDINATES_X = 85;
     final int MAX_ZOOM_MODEL_COORDINATES_Y = 50;
 
-    String getTrackLabel();
+    String getTrackLabelText();
+
+    TrackLabel getTrackLabel();
 
     void render();
 

@@ -1,9 +1,6 @@
 package org.lorainelab.igb.visualization.model;
 
-import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
-import aQute.bnd.annotation.component.Deactivate;
-import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Range;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -12,12 +9,10 @@ import com.sun.javafx.tk.Toolkit;
 import java.text.DecimalFormat;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import org.lorainelab.igb.visualization.CanvasPane;
-import org.lorainelab.igb.visualization.EventBusService;
 import org.lorainelab.igb.visualization.event.ClickDragZoomEvent;
 import org.lorainelab.igb.visualization.event.MouseDraggedEvent;
 import org.lorainelab.igb.visualization.event.MousePressedEvent;
@@ -52,6 +47,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     private final CanvasContext canvasContext;
     private final GraphicsContext gc;
     private int weight;
+    private TrackLabel trackLabel;
 
     public CoordinateTrackRenderer(CanvasPane canvasPane, RefrenceSequenceProvider refrenceSequenceProvider) {
         weight = 0;
@@ -62,6 +58,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         this.modelHeight = 50;
         viewBoundingRectangle = new Rectangle2D(0, 0, modelWidth, modelHeight);
         canvasContext = new CanvasContext(canvasPane.getCanvas(), Rectangle2D.EMPTY, 0, 0);
+        trackLabel = new TrackLabel(this, COORDINATES_TRACK_LABEL);
         gc = canvasPane.getCanvas().getGraphicsContext2D();
     }
 
@@ -403,7 +400,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     }
 
     @Override
-    public String getTrackLabel() {
+    public String getTrackLabelText() {
         return COORDINATES_TRACK_LABEL;
     }
 
@@ -423,6 +420,10 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     @Override
     public void setWeight(int weight) {
         this.weight = weight;
+    }
+
+    public TrackLabel getTrackLabel() {
+        return trackLabel;
     }
 
 }
