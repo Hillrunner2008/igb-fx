@@ -11,10 +11,11 @@ import javafx.geometry.Point2D;
  *
  * @author jeckstei
  */
-public class MouseExitedEvent extends MouseEvent {
+public class ClickDragEndEvent extends MouseEvent {
 
-    public MouseExitedEvent(Point2D local, Point2D screen) {
+    public ClickDragEndEvent(Point2D local, Point2D screen) {
         super(local, screen);
     }
+    
     
 }

@@ -5,16 +5,10 @@
  */
 package org.lorainelab.igb.visualization.event;
 
-import javafx.geometry.Point2D;
-
 /**
  *
  * @author jeckstei
  */
-public class MouseEnteredEvent extends MouseEvent {
-
-    public MouseEnteredEvent(Point2D local, Point2D screen) {
-        super(local, screen);
-    }
+public class ClickDragCancelEvent {
     
 }

@@ -13,10 +13,11 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import org.lorainelab.igb.visualization.CanvasPane;
+import org.lorainelab.igb.visualization.event.ClickDragCancelEvent;
+import org.lorainelab.igb.visualization.event.ClickDragEndEvent;
+import org.lorainelab.igb.visualization.event.ClickDragStartEvent;
 import org.lorainelab.igb.visualization.event.ClickDragZoomEvent;
-import org.lorainelab.igb.visualization.event.MouseDraggedEvent;
-import org.lorainelab.igb.visualization.event.MousePressedEvent;
-import org.lorainelab.igb.visualization.event.MouseReleasedEvent;
+import org.lorainelab.igb.visualization.event.ClickDraggingEvent;
 import org.lorainelab.igb.visualization.event.RefreshTrackEvent;
 import org.lorainelab.igb.visualization.event.ZoomStripeEvent;
 import org.slf4j.Logger;
@@ -338,9 +339,16 @@ public class CoordinateTrackRenderer implements TrackRenderer {
 
     private double lastMouseClickX = -1;
     private double lastMouseDragX = -1;
+    
+    @Subscribe
+    private void handleClickDragCancelEvent(ClickDragCancelEvent event) {
+        lastMouseClickX = -1;
+        lastMouseDragX = -1;
+        render();
+    }
 
     @Subscribe
-    public void handleMouseReleased(MouseReleasedEvent mouseEvent) {
+    public void handleClickDragEndEvent(ClickDragEndEvent mouseEvent) {
         if (!canvasContext.getBoundingRect().contains(mouseEvent.getLocal())) {
             return;
         }
@@ -359,7 +367,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     }
 
     @Subscribe
-    public void handleMouseDraggedEvent(MouseDraggedEvent event) {
+    public void handleClickDraggingEven(ClickDraggingEvent event) {
         if (!canvasContext.getBoundingRect().contains(event.getLocal())) {
             return;
         }
@@ -368,7 +376,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     }
 
     @Subscribe
-    public void handleMousePressedEvent(MousePressedEvent event) {
+    public void handleClickDragStartEvent(ClickDragStartEvent event) {
         if (!canvasContext.getBoundingRect().contains(event.getLocal())) {
             return;
         }

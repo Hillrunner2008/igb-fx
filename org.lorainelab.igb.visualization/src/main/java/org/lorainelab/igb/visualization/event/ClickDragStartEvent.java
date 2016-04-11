@@ -11,9 +11,9 @@ import javafx.geometry.Point2D;
  *
  * @author jeckstei
  */
-public class MousePressedEvent extends MouseEvent {
+public class ClickDragStartEvent extends MouseEvent {
 
-    public MousePressedEvent(Point2D local, Point2D screen) {
+    public ClickDragStartEvent(Point2D local, Point2D screen) {
         super(local, screen);
     }
     

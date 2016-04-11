@@ -6,6 +6,10 @@ import aQute.bnd.annotation.component.Reference;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import javafx.event.EventType;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
@@ -13,17 +17,12 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
+import org.lorainelab.igb.visualization.event.ClickDragCancelEvent;
+import org.lorainelab.igb.visualization.event.ClickDragEndEvent;
+import org.lorainelab.igb.visualization.event.ClickDragStartEvent;
+import org.lorainelab.igb.visualization.event.ClickDraggingEvent;
 import org.lorainelab.igb.visualization.event.MouseClickedEvent;
 import org.lorainelab.igb.visualization.event.MouseDoubleClickEvent;
-import org.lorainelab.igb.visualization.event.MouseDragEnteredEvent;
-import org.lorainelab.igb.visualization.event.MouseDragExitedEvent;
-import org.lorainelab.igb.visualization.event.MouseDragOverEvent;
-import org.lorainelab.igb.visualization.event.MouseDragReleasedEvent;
-import org.lorainelab.igb.visualization.event.MouseDraggedEvent;
-import org.lorainelab.igb.visualization.event.MouseEnteredEvent;
-import org.lorainelab.igb.visualization.event.MouseExitedEvent;
-import org.lorainelab.igb.visualization.event.MousePressedEvent;
-import org.lorainelab.igb.visualization.event.MouseReleasedEvent;
 import org.lorainelab.igb.visualization.event.MouseStationaryEndEvent;
 import org.lorainelab.igb.visualization.event.MouseStationaryEvent;
 import org.lorainelab.igb.visualization.event.MouseStationaryStartEvent;
@@ -49,6 +48,7 @@ public class CanvasPane extends Region {
     private GenoVixFxController controller;
     private RefrenceSequenceProvider refrenceSequenceProvider;
     private EventBusService eventBusService;
+    private List<MouseEvent> mouseEvents;
 
     public CanvasPane() {
     }
@@ -57,6 +57,7 @@ public class CanvasPane extends Region {
     public void activate() {
         eventBus = eventBusService.getEventBus();
         eventBus.register(this);
+        mouseEvents = new ArrayList<>();
         this.modelWidth = refrenceSequenceProvider.getReferenceDna().length();
         canvas = new Canvas();
         getChildren().add(canvas);
@@ -79,96 +80,72 @@ public class CanvasPane extends Region {
 
     private void initializeMouseEventHandlers() {
         canvas.setOnMouseClicked((MouseEvent event) -> {
-            eventBus.post(new RefreshTrackEvent());
-            boolean isDoubleClick = false;
-            eventBus.post(new MouseClickedEvent(
-                    getLocalPoint2DFromMouseEvent(event),
-                    getScreenPoint2DFromMouseEvent(event))
-            );
-            if (event.getClickCount() == 2) {
-                isDoubleClick = true;
-                resetZoomStripe();
-                eventBus.post(new MouseDoubleClickEvent(
-                        getLocalPoint2DFromMouseEvent(event),
-                        getScreenPoint2DFromMouseEvent(event))
-                );
-            }
-            if (!isDoubleClick) {
-//                Optional<TrackRenderer> trc = trackRenderers.keySet().stream().map(key -> trackRenderers.get(key))
-//                        .filter(trackRenderer -> trackRenderer.getCanvasContext().isPresent())
-//                        .filter(trackRenderer -> trackRenderer.getCanvasContext().get().getBoundingRect().contains(mouseEventLocation))
-//                        .findFirst();
-//                if (trc.isPresent()) {
-//           zoomStripeCoordinate         View view = trc.get().getView();
-//                    double offsetX = view.getBoundingRect().getMinX();
-//                    zoomStripeCoordinate = (event.getX() / view.getXfactor()) + offsetX;
-//                    refreshTrackRenderers();
-//                    eventBus.post(new ZoomStripeEvent(zoomStripeCoordinate));
-//                }
-//            }
-                drawZoomCoordinateLine(event);
-            }
+            mouseEvents.add(event);
         });
         canvas.setOnMouseDragEntered((MouseEvent event) -> {
-            eventBus.post(new MouseDragEnteredEvent(
-                    getLocalPoint2DFromMouseEvent(event),
-                    getScreenPoint2DFromMouseEvent(event))
-            );
+            mouseEvents.add(event);
         });
         canvas.setOnMouseDragExited((MouseEvent event) -> {
-            eventBus.post(new MouseDragExitedEvent(
-                    getLocalPoint2DFromMouseEvent(event),
-                    getScreenPoint2DFromMouseEvent(event))
-            );
+            mouseEvents.add(event);
         });
         canvas.setOnMouseDragOver((MouseEvent event) -> {
-            eventBus.post(new MouseDragOverEvent(
-                    getLocalPoint2DFromMouseEvent(event),
-                    getScreenPoint2DFromMouseEvent(event))
-            );
+            mouseEvents.add(event);
         });
         canvas.setOnMouseDragReleased((MouseEvent event) -> {
-            eventBus.post(new MouseDragReleasedEvent(
-                    getLocalPoint2DFromMouseEvent(event),
-                    getScreenPoint2DFromMouseEvent(event))
-            );
+            mouseEvents.add(event);
         });
         canvas.setOnMouseDragged((MouseEvent event) -> {
-            eventBus.post(new MouseDraggedEvent(
+            mouseEvents.add(event);
+            eventBus.post(new ClickDraggingEvent(
                     getLocalPoint2DFromMouseEvent(event),
                     getScreenPoint2DFromMouseEvent(event))
             );
         });
         canvas.setOnMouseEntered((MouseEvent event) -> {
-            eventBus.post(new MouseEnteredEvent(
-                    getLocalPoint2DFromMouseEvent(event),
-                    getScreenPoint2DFromMouseEvent(event))
-            );
+            mouseEvents.add(event);
         });
         canvas.setOnMouseExited((MouseEvent event) -> {
-            eventBus.post(new MouseExitedEvent(
-                    getLocalPoint2DFromMouseEvent(event),
-                    getScreenPoint2DFromMouseEvent(event))
-            );
+            mouseEvents.add(event);
         });
-//        canvas.setOnMouseMoved((MouseEvent event) -> {
-//            eventBus.post(new MouseMovedEvent());
-//        });
         canvas.setOnMousePressed((MouseEvent event) -> {
-            eventBus.post(new MousePressedEvent(
+            mouseEvents.add(event);
+            resetZoomStripe();
+            eventBus.post(new ClickDragStartEvent(
                     getLocalPoint2DFromMouseEvent(event),
                     getScreenPoint2DFromMouseEvent(event))
             );
         });
         canvas.setOnMouseReleased((MouseEvent event) -> {
-            eventBus.post(new MouseReleasedEvent(
-                    getLocalPoint2DFromMouseEvent(event),
-                    getScreenPoint2DFromMouseEvent(event))
-            );
+            resetZoomStripe();
+            List<EventType<? extends MouseEvent>> types = mouseEvents.stream().map(e -> e.getEventType()).collect(Collectors.toList());
+            if (types.contains(MouseEvent.MOUSE_DRAGGED)) {
+                eventBus.post(new ClickDragEndEvent(
+                        getLocalPoint2DFromMouseEvent(event),
+                        getScreenPoint2DFromMouseEvent(event))
+                );
+            } else {
+                eventBus.post(new ClickDragCancelEvent());
+                if (event.getClickCount() >= 2) {
+                    
+                    eventBus.post(new MouseDoubleClickEvent(
+                            getLocalPoint2DFromMouseEvent(event),
+                            getScreenPoint2DFromMouseEvent(event))
+                    );
+                } else {
+
+                    eventBus.post(new MouseClickedEvent(
+                            getLocalPoint2DFromMouseEvent(event),
+                            getScreenPoint2DFromMouseEvent(event))
+                    );
+                    drawZoomCoordinateLine(event);
+                }
+            }
+            mouseEvents.clear();
+            
         });
 
-        EventStream<MouseEvent> mouseEvents = EventStreams.eventsOf(canvas, MouseEvent.ANY);
-        EventStream<org.lorainelab.igb.visualization.event.MouseEvent> stationaryPositions = mouseEvents
+        EventStream<MouseEvent> mouseEventsStream = EventStreams.eventsOf(canvas, MouseEvent.ANY);
+        EventStream<org.lorainelab.igb.visualization.event.MouseEvent> stationaryPositions = mouseEventsStream
                 .successionEnds(Duration.ofSeconds(1))
                 .filter(e -> e.getEventType() == MouseEvent.MOUSE_MOVED)
                 .map(e -> {
@@ -178,7 +155,7 @@ public class CanvasPane extends Region {
                     );
                 });
 
-        EventStream<Void> stoppers = mouseEvents.supply((Void) null);
+        EventStream<Void> stoppers = mouseEventsStream.supply((Void) null);
 
         EventStream<Either<org.lorainelab.igb.visualization.event.MouseEvent, Void>> stationaryEvents
                 = stationaryPositions.or(stoppers)
@@ -193,6 +170,8 @@ public class CanvasPane extends Region {
     public void resetZoomStripe() {
         this.zoomStripeCoordinate = -1;
         eventBus.post(new ZoomStripeEvent(zoomStripeCoordinate));
+        eventBus.post(new RefreshTrackEvent());
+        
     }
 
     @Override
