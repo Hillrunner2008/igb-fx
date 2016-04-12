@@ -28,6 +28,8 @@ import org.lorainelab.igb.visualization.event.MouseStationaryEvent;
 import org.lorainelab.igb.visualization.event.MouseStationaryStartEvent;
 import org.lorainelab.igb.visualization.event.RefreshTrackEvent;
 import org.lorainelab.igb.visualization.event.ScaleEvent;
+import org.lorainelab.igb.visualization.event.ScrollScaleEvent;
+import org.lorainelab.igb.visualization.event.ScrollScaleEvent.Direction;
 import org.lorainelab.igb.visualization.event.ZoomStripeEvent;
 import org.lorainelab.igb.visualization.model.RefrenceSequenceProvider;
 import org.lorainelab.igb.visualization.util.CanvasUtils;
@@ -165,6 +167,15 @@ public class CanvasPane extends Region {
                 pos -> new MouseStationaryStartEvent(pos),
                 stop -> new MouseStationaryEndEvent()))
                 .subscribe(evt -> eventBus.post(evt));
+        
+        canvas.setOnScroll(scrollEvent -> {
+            final boolean isForwardScroll = scrollEvent.getDeltaY() > 0.0;
+            if (isForwardScroll) {
+                eventBus.post(new ScrollScaleEvent(Direction.INCREMENT));
+            } else {
+                eventBus.post(new ScrollScaleEvent(Direction.DECREMENT));
+            }
+        });
     }
 
     public void resetZoomStripe() {

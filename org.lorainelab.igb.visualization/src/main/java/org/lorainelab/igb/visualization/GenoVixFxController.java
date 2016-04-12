@@ -35,6 +35,8 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Transform;
 import org.lorainelab.igb.visualization.event.ClickDragZoomEvent;
 import org.lorainelab.igb.visualization.event.ScaleEvent;
+import org.lorainelab.igb.visualization.event.ScrollScaleEvent;
+import org.lorainelab.igb.visualization.event.ScrollScaleEvent.Direction;
 import org.lorainelab.igb.visualization.event.ScrollXUpdate;
 import org.lorainelab.igb.visualization.menubar.MenuBarManager;
 import org.lorainelab.igb.visualization.model.CoordinateTrackRenderer;
@@ -125,17 +127,16 @@ public class GenoVixFxController {
         trackRenderers = trackRendererProvider.getTrackRenderers();
     }
 
-    private void initCanvasMouseListeners() {
-        canvas.setOnScroll(scrollEvent -> {
-            final boolean isForwardScroll = scrollEvent.getDeltaY() > 0.0;
-            if (isForwardScroll) {
-                hSlider.increment();
-            } else {
-                hSlider.decrement();
-            }
-        });
+    @Subscribe
+    private void handleScrollScaleEvent(ScrollScaleEvent event) {
+        if(event.getDirection().equals(Direction.INCREMENT)) {
+            hSlider.increment();
+        } else {
+            hSlider.decrement();
+        }
     }
 
+    
     private double lastHSliderFire = -1;
 
     @FXML
@@ -369,7 +370,6 @@ public class GenoVixFxController {
         scrollY.setMin(0);
         scrollY.setMax(100);
         scrollY.setVisibleAmount(100);
-        initCanvasMouseListeners();
     }
 
     private void updateCanvasContexts() {
