@@ -3,6 +3,12 @@ package org.lorainelab.igb.main;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Deactivate;
+import java.io.IOException;
+import java.net.ConnectException;
+import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import org.lorainelab.igb.stage.provider.api.StageProvider;
@@ -28,9 +34,10 @@ public class StageProviderRegistrationManager {
     }
 
     @Deactivate
-    public void deactivate() {
+    public void deactivate() throws IOException {
         Platform.runLater(() -> {
             stage.hide();
+            
         });
         registerService.unregister();
     }

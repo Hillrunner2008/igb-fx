@@ -1,3 +1,4 @@
+karaf/etc/org.ops4j.pax.logging.cfg
 target
 nbactions-fx.xml
 nb-configuration.xml

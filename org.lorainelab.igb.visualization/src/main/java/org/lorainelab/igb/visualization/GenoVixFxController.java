@@ -204,6 +204,7 @@ public class GenoVixFxController {
             refreshSliderWidget();
             scaleTrackRenderers();
         });
+        
     }
 
     private void initializeZoomScrollBar() {
