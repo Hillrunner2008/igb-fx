@@ -9,6 +9,10 @@ import java.util.Comparator;
 import java.util.List;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
+import org.lorainelab.igb.data.model.View;
+import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
+import static org.lorainelab.igb.data.model.glyph.Glyph.MODEL_HEIGHT_PADDING;
+import static org.lorainelab.igb.data.model.glyph.Glyph.SLOT_HEIGHT;
 
 /**
  *
@@ -16,8 +20,6 @@ import javafx.scene.canvas.GraphicsContext;
  */
 public class Track {
 
-    public static final int SLOT_HEIGHT = 30;
-    public static final double MODEL_HEIGHT_PADDING = 17.5;
     private final String trackLabel;
     private List<CompositionGlyph> glyphs;
     private TreeMultimap<Integer, CompositionGlyph> slotMap;
@@ -37,7 +39,7 @@ public class Track {
         this.isNegative = isNegative;
         this.trackLabel = trackLabel;
         this.maxStackHeight = stackHeight;
-        this.modelHeight = (Track.SLOT_HEIGHT * stackHeight) + MODEL_HEIGHT_PADDING;
+        this.modelHeight = (SLOT_HEIGHT * stackHeight) + MODEL_HEIGHT_PADDING;
         slotMap = TreeMultimap.create(Ordering.natural(), byMinX);
         glyphs = Lists.newArrayList();
     }
@@ -107,7 +109,7 @@ public class Track {
 
     public void setMaxStackHeight(int maxStackHeight) {
         this.maxStackHeight = maxStackHeight;
-        this.modelHeight = (Track.SLOT_HEIGHT * maxStackHeight) + MODEL_HEIGHT_PADDING;
+        this.modelHeight = (SLOT_HEIGHT * maxStackHeight) + MODEL_HEIGHT_PADDING;
         buildSlots();
     }
 

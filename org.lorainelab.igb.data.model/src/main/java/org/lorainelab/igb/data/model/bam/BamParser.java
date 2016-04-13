@@ -15,7 +15,6 @@ import htsjdk.samtools.util.CloserUtil;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import org.lorainelab.igb.data.model.bed.BedParser;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -34,8 +33,8 @@ public class BamParser {
 
     private void parse() {
         try {
-            SeekableBufferedStream bamSeekableStream = new SeekableBufferedStream(new SeekableFileStream(new File(BedParser.class.getClassLoader().getResource("small.bam").getFile())));
-            SeekableBufferedStream indexSeekableStream = new SeekableBufferedStream(new SeekableFileStream(new File(BedParser.class.getClassLoader().getResource("small.bam.bai").getFile())));
+            SeekableBufferedStream bamSeekableStream = new SeekableBufferedStream(new SeekableFileStream(new File(BamParser.class.getClassLoader().getResource("small.bam").getFile())));
+            SeekableBufferedStream indexSeekableStream = new SeekableBufferedStream(new SeekableFileStream(new File(BamParser.class.getClassLoader().getResource("small.bam.bai").getFile())));
             final SAMSequenceDictionary samSequenceDictionary = new SAMSequenceDictionary();
             samSequenceDictionary.addSequence(new SAMSequenceRecord("chr1", 30427671));
             final DiskBasedBAMFileIndex bamIndex = new DiskBasedBAMFileIndex(indexSeekableStream, samSequenceDictionary);

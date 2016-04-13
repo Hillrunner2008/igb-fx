@@ -2,7 +2,6 @@ package org.lorainelab.igb.data.model.bam.view;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import java.net.URL;
 import java.util.List;
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -16,7 +15,6 @@ import org.lorainelab.igb.data.model.shapes.Rectangle;
 import org.lorainelab.igb.data.model.shapes.Shape;
 import org.lorainelab.igb.data.model.view.Layer;
 import org.lorainelab.igb.data.model.view.Renderer;
-import org.lorainelab.igb.visualization.GenoVixFxController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +40,7 @@ public class BamViewer extends Application {
             });
         });
 
-        final URL resource = GenoVixFxController.class.getClassLoader().getResource("genoVizFx.fxml");
+//        final URL resource = GenoVixFxController.class.getClassLoader().getResource("genoVizFx.fxml");
 //        FXMLLoader loader = new FXMLLoader(resource);
 //        Parent root = loader.load();
 //        controller = loader.getController();

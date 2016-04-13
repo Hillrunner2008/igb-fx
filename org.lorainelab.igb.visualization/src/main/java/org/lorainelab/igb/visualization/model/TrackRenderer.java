@@ -5,6 +5,7 @@
  */
 package org.lorainelab.igb.visualization.model;
 
+import org.lorainelab.igb.data.model.View;
 import java.util.Comparator;
 
 /**

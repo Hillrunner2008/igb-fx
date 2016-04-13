@@ -8,12 +8,12 @@ package org.lorainelab.igb.data.model.shapes.factory;
 import java.util.List;
 import java.util.Map;
 import javafx.scene.paint.Color;
-import static org.lorainelab.igb.visualization.Palette.PRIMARY_TEXT_COLOR;
-import org.lorainelab.igb.visualization.model.CompositionGlyph;
-import org.lorainelab.igb.visualization.model.Glyph;
-import org.lorainelab.igb.visualization.model.LineGlyph;
-import org.lorainelab.igb.visualization.model.RectangleGlyph;
-import static org.lorainelab.igb.visualization.model.Track.MODEL_HEIGHT_PADDING;
+import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
+import org.lorainelab.igb.data.model.glyph.Glyph;
+import static org.lorainelab.igb.data.model.glyph.Glyph.MODEL_HEIGHT_PADDING;
+import org.lorainelab.igb.data.model.glyph.LineGlyph;
+import org.lorainelab.igb.data.model.glyph.RectangleGlyph;
+import static org.lorainelab.igb.data.model.shapes.factory.Palette.PRIMARY_TEXT_COLOR;
 
 /**
  *

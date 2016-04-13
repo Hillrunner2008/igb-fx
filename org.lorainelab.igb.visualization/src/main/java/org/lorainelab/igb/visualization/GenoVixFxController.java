@@ -33,6 +33,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Transform;
+import org.lorainelab.igb.data.model.View;
 import org.lorainelab.igb.visualization.event.ClickDragZoomEvent;
 import org.lorainelab.igb.visualization.event.ScaleEvent;
 import org.lorainelab.igb.visualization.event.ScrollScaleEvent;
@@ -44,8 +45,6 @@ import org.lorainelab.igb.visualization.model.JumpZoomEvent;
 import org.lorainelab.igb.visualization.model.TrackLabel;
 import org.lorainelab.igb.visualization.model.TrackRenderer;
 import static org.lorainelab.igb.visualization.model.TrackRenderer.MAX_ZOOM_MODEL_COORDINATES_X;
-import org.lorainelab.igb.visualization.model.TrackRendererProvider;
-import org.lorainelab.igb.visualization.model.View;
 import org.lorainelab.igb.visualization.model.ViewPortManager;
 import org.lorainelab.igb.visualization.tabs.TabPaneManager;
 import static org.lorainelab.igb.visualization.util.CanvasUtils.exponentialScaleTransform;
@@ -101,7 +100,6 @@ public class GenoVixFxController {
     private CanvasPane canvasPane;
     private Canvas canvas;
     private double totalTrackHeight;
-    private TrackRendererProvider trackRendererProvider;
     private EventBusService eventBusService;
     private TabPaneManager tabPaneManager;
     private ZoomSliderMiniMapWidget zoomSliderMiniMapWidget;
@@ -123,26 +121,20 @@ public class GenoVixFxController {
         eventBus.register(this);
     }
 
-    private void addMockData() {
-        trackRenderers = trackRendererProvider.getTrackRenderers();
-    }
-
     @Subscribe
     private void handleScrollScaleEvent(ScrollScaleEvent event) {
-        if(event.getDirection().equals(Direction.INCREMENT)) {
+        if (event.getDirection().equals(Direction.INCREMENT)) {
             hSlider.increment();
         } else {
             hSlider.decrement();
         }
     }
 
-    
     private double lastHSliderFire = -1;
 
     @FXML
     private void initialize() {
         initializeGuiComponents();
-        addMockData();
         initializeZoomScrollBar();
         viewPortManager = new ViewPortManager(canvas, trackRenderers, 0, 0);
 
@@ -204,7 +196,7 @@ public class GenoVixFxController {
             refreshSliderWidget();
             scaleTrackRenderers();
         });
-        
+
     }
 
     private void initializeZoomScrollBar() {
@@ -558,11 +550,6 @@ public class GenoVixFxController {
 
     public DoubleProperty getXScrollPosition() {
         return scrollX;
-    }
-
-    @Reference
-    public void setTrackRendererProvider(TrackRendererProvider trackRendererProvider) {
-        this.trackRendererProvider = trackRendererProvider;
     }
 
     @Reference

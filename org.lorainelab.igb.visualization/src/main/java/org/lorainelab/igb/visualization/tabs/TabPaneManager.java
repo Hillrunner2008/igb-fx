@@ -1,12 +1,13 @@
 package org.lorainelab.igb.visualization.tabs;
 
-import org.lorainelab.igb.visualization.tabs.api.TabProvider;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
+import javafx.application.Platform;
 import javafx.geometry.Side;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.AnchorPane;
+import org.lorainelab.igb.visualization.tabs.api.TabProvider;
 
 /**
  *
@@ -17,8 +18,6 @@ public class TabPaneManager {
 
     private final TabPane rightTabPane;
     private final TabPane bottomTabPane;
-//    private boolean componentActivated;
-//    private final List<TabProvider> tabQueue;
 
     public TabPaneManager() {
         rightTabPane = new TabPane();
@@ -30,35 +29,33 @@ public class TabPaneManager {
 
     @Activate
     public void activate() {
-//        componentActivated = true;
     }
 
     @Reference(optional = true, multiple = true, unbind = "removeTab", dynamic = true)
     public void addTab(TabProvider tabProvider) {
-        switch (tabProvider.getTabDockingPosition()) {
-            case BOTTOM:
-                bottomTabPane.getTabs().add(tabProvider.getTab());
-                break;
-            case RIGHT:
-                rightTabPane.getTabs().add(tabProvider.getTab());
-                break;
-        }
-//        if (componentActivated) {
-//
-//        } else {
-//            tabQueue.add(tabProvider);
-//        }
+        Platform.runLater(() -> {
+            switch (tabProvider.getTabDockingPosition()) {
+                case BOTTOM:
+                    bottomTabPane.getTabs().add(tabProvider.getTab());
+                    break;
+                case RIGHT:
+                    rightTabPane.getTabs().add(tabProvider.getTab());
+                    break;
+            }
+        });
     }
 
     public void removeTab(TabProvider tabProvider) {
-        switch (tabProvider.getTabDockingPosition()) {
-            case BOTTOM:
-                bottomTabPane.getTabs().remove(tabProvider.getTab());
-                break;
-            case RIGHT:
-                rightTabPane.getTabs().remove(tabProvider.getTab());
-                break;
-        }
+        Platform.runLater(() -> {
+            switch (tabProvider.getTabDockingPosition()) {
+                case BOTTOM:
+                    bottomTabPane.getTabs().remove(tabProvider.getTab());
+                    break;
+                case RIGHT:
+                    rightTabPane.getTabs().remove(tabProvider.getTab());
+                    break;
+            }
+        });
     }
 
     public TabPane getRightTabPane() {

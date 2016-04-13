@@ -15,7 +15,6 @@ import htsjdk.samtools.util.CloserUtil;
 import java.io.File;
 import java.io.FileNotFoundException;
 import org.junit.Test;
-import org.lorainelab.igb.data.model.bed.BedParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,8 +28,8 @@ public class BamIndexReaderExample {
 
     @Test
     public void queryBamFileFromIndex() throws FileNotFoundException {
-        SeekableBufferedStream bamSeekableStream = new SeekableBufferedStream(new SeekableFileStream(new File(BedParser.class.getClassLoader().getResource("small.bam").getFile())));
-        SeekableBufferedStream indexSeekableStream = new SeekableBufferedStream(new SeekableFileStream(new File(BedParser.class.getClassLoader().getResource("small.bam.bai").getFile())));
+        SeekableBufferedStream bamSeekableStream = new SeekableBufferedStream(new SeekableFileStream(new File(BamIndexReaderExample.class.getClassLoader().getResource("small.bam").getFile())));
+        SeekableBufferedStream indexSeekableStream = new SeekableBufferedStream(new SeekableFileStream(new File(BamIndexReaderExample.class.getClassLoader().getResource("small.bam.bai").getFile())));
         final SAMSequenceDictionary samSequenceDictionary = new SAMSequenceDictionary();
         samSequenceDictionary.addSequence(new SAMSequenceRecord("chr1", 30427671));
         final DiskBasedBAMFileIndex bamIndex = new DiskBasedBAMFileIndex(indexSeekableStream, samSequenceDictionary);

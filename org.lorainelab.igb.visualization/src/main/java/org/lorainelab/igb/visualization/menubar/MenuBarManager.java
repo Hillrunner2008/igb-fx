@@ -6,6 +6,7 @@ import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.TreeMultimap;
 import java.util.EnumMap;
+import javafx.application.Platform;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -78,7 +79,6 @@ public class MenuBarManager {
     private void initFileMenu() {
         fileMenu = new Menu("File");
         fileMenu.setMnemonicParsing(true);
-        fileMenuEntries.put(1, new MenuItem("Load File"));
         fileMenuEntries.put(5, new MenuItem("Load Url"));
         fileMenuEntries.put(10, new SeparatorMenuItem());
         fileMenuEntries.put(70, getExitMenuItem());
@@ -189,12 +189,14 @@ public class MenuBarManager {
     }
 
     private void rebuildMenus() {
-        rebuildFileMenu();
-        rebuildEditMenu();
-        rebuildViewMenu();
-        rebuildToolsMenu();
-        rebuildHelpMenu();
-        rebuildParentMenus();
+        Platform.runLater(() -> {
+            rebuildFileMenu();
+            rebuildEditMenu();
+            rebuildViewMenu();
+            rebuildToolsMenu();
+            rebuildHelpMenu();
+            rebuildParentMenus();
+        });
     }
 
     private void rebuildParentMenus() {

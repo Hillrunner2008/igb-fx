@@ -31,7 +31,6 @@ import org.lorainelab.igb.visualization.event.ScaleEvent;
 import org.lorainelab.igb.visualization.event.ScrollScaleEvent;
 import org.lorainelab.igb.visualization.event.ScrollScaleEvent.Direction;
 import org.lorainelab.igb.visualization.event.ZoomStripeEvent;
-import org.lorainelab.igb.visualization.model.RefrenceSequenceProvider;
 import org.lorainelab.igb.visualization.util.CanvasUtils;
 import org.reactfx.EventStream;
 import org.reactfx.EventStreams;
@@ -48,7 +47,6 @@ public class CanvasPane extends Region {
     private double visibleVirtualCoordinatesX;
     private EventBus eventBus;
     private GenoVixFxController controller;
-    private RefrenceSequenceProvider refrenceSequenceProvider;
     private EventBusService eventBusService;
     private List<MouseEvent> mouseEvents;
 
@@ -60,7 +58,7 @@ public class CanvasPane extends Region {
         eventBus = eventBusService.getEventBus();
         eventBus.register(this);
         mouseEvents = new ArrayList<>();
-        this.modelWidth = refrenceSequenceProvider.getReferenceDna().length();
+        this.modelWidth = 1;
         canvas = new Canvas();
         getChildren().add(canvas);
         canvas.widthProperty().addListener(observable -> {
@@ -264,11 +262,6 @@ public class CanvasPane extends Region {
 //            visibleVirtualCoordinatesX = Math.floor(canvas.getWidth() / xFactor);
 //            xOffset = Math.round((controller.getXScrollPosition().doubleValue() / 100) * (modelWidth - visibleVirtualCoordinatesX));
 //        });
-    }
-
-    @Reference
-    public void setRefrenceSequenceProvider(RefrenceSequenceProvider refrenceSequenceProvider) {
-        this.refrenceSequenceProvider = refrenceSequenceProvider;
     }
 
     @Reference
