@@ -56,7 +56,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         this.eventBus = canvasPane.getEventBus();
         eventBus.register(this);
         this.chromosome = chromosome;
-        this.modelWidth = chromosome.getLength().get();
+        this.modelWidth = chromosome.getLength();
         this.modelHeight = 50;
         viewBoundingRectangle = new Rectangle2D(0, 0, modelWidth, modelHeight);
         canvasContext = new CanvasContext(canvasPane.getCanvas(), Rectangle2D.EMPTY, 0, 0);
@@ -237,7 +237,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
             if (viewYcoordinateRange.contains(y * textScale)) {
                 int startDna = (int) Math.ceil(viewBoundingRectangle.getMinX());
                 int length = (int) Math.ceil(viewBoundingRectangle.getWidth());
-                char[] dna = chromosome.getReferenceSequenceProvider().getSequence(chromosome.getName().get(), startDna, length).toCharArray();
+                char[] dna = chromosome.getReferenceSequenceProvider().getSequence(chromosome.getName(), startDna, length).toCharArray();
 
                 gc.scale(textScale, textScale);
                 int start = (int) Math.ceil(viewBoundingRectangle.getMinX());
@@ -252,7 +252,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
                     }
                     gc.fillRect(index, y1, 1, 12);
                     if (index < 1 && (i - 1) >= 0) {
-                        char outOfviewChar = chromosome.getReferenceSequenceProvider().getSequence(chromosome.getName().get(), i, 1).charAt(0);
+                        char outOfviewChar = chromosome.getReferenceSequenceProvider().getSequence(chromosome.getName(), i, 1).charAt(0);
                         gc.setFill(getBaseColor(outOfviewChar));
                         gc.fillRect(0, y1, index, 12);
                     }

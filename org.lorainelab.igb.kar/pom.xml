@@ -8,22 +8,27 @@
     </parent>
     <artifactId>org.lorainelab.igb.kar</artifactId>
     <packaging>kar</packaging>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-maven-plugin</artifactId>
+                <version>4.0.4</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <includeTransitiveDependency>true</includeTransitiveDependency>
+                    <featuresFile>${project.groupId}.igb.feature/target/features/features.xml</featuresFile>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
     
     <profiles>
         <profile>
             <id>distribute</id>
             <build>
                 <plugins>
-                    <plugin>
-                        <groupId>org.apache.karaf.tooling</groupId>
-                        <artifactId>karaf-maven-plugin</artifactId>
-                        <version>4.0.4</version>
-                        <extensions>true</extensions>
-                        <configuration>
-                            <includeTransitiveDependency>true</includeTransitiveDependency>
-                            <featuresFile>${project.groupId}.igb.feature/target/features/features.xml</featuresFile>
-                        </configuration>
-                    </plugin>
                     <plugin>
                         <artifactId>maven-antrun-plugin</artifactId>
                         <version>1.7</version>
