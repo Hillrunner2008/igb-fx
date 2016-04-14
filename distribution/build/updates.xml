@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<updateDescriptor baseUrl="">
+  <entry targetMediaFileId="179" updatableVersionMin="" updatableVersionMax="" fileName="IGB_windows_8_5_0.exe" newVersion="8.5.0" newMediaFileId="179" fileSize="78022144" bundledJre="windows-x86-1.8.0_77" archive="false">
+    <comment language="en" />
+  </entry>
+  <entry targetMediaFileId="23" updatableVersionMin="" updatableVersionMax="" fileName="IGB_windows-x64_8_5_0.exe" newVersion="8.5.0" newMediaFileId="23" fileSize="81597440" bundledJre="windows-amd64-1.8.0_77" archive="false">
+    <comment language="en" />
+  </entry>
+  <entry targetMediaFileId="552" updatableVersionMin="" updatableVersionMax="" fileName="IGB_macos_8_5_0.dmg" newVersion="8.5.0" newMediaFileId="552" fileSize="79900807" bundledJre="macosx-amd64-1.8.0_77" archive="false">
+    <comment language="en" />
+  </entry>
+</updateDescriptor>

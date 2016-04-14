@@ -128,6 +128,7 @@
         
         <module>org.lorainelab.igb.demo</module>
         <module>org.lorainelab.igb.feature</module>
+        <module>org.lorainelab.igb.kar</module>
     </modules>
 
 </project>

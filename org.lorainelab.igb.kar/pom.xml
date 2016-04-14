@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.lorainelab</groupId>
+        <artifactId>org.lorainelab.igb</artifactId>
+        <version>0.0.1</version>
+    </parent>
+    <artifactId>org.lorainelab.igb.kar</artifactId>
+    <packaging>kar</packaging>
+    
+    <profiles>
+        <profile>
+            <id>distribute</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.karaf.tooling</groupId>
+                        <artifactId>karaf-maven-plugin</artifactId>
+                        <version>4.0.4</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <includeTransitiveDependency>true</includeTransitiveDependency>
+                            <featuresFile>${project.groupId}.igb.feature/target/features/features.xml</featuresFile>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.7</version>
+                        <executions>
+                            <execution>
+                                <phase>install</phase>
+                                <configuration>
+                                    <tasks>
+                                        <echo message="Preparing Karaf for distribution"/>
+                                        <delete includeemptydirs="true">
+                                            <fileset dir="../karaf/deploy" includes="**/*"/>
+                                        </delete>
+                                        <copy todir="../karaf/deploy" overwrite="true">
+                                            <fileset dir="target" includes="**/*.kar"/>
+                                        </copy>
+                                        <copy file="../karaf/custom/config/org.apache.karaf.features.cfg-distribute" 
+                                              tofile="../karaf/etc/org.apache.karaf.features.cfg" overwrite="true"/>
+                                        <copy file="../karaf/custom/config/org.ops4j.pax.logging.cfg-noshell" 
+                                              tofile="../karaf/etc/org.ops4j.pax.logging.cfg" overwrite="true"/>
+                                    </tasks>
+                                </configuration>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>
