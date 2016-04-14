@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <install4j version="6.1.1" transformSequenceNumber="5">
-  <directoryPresets config="." />
+  <directoryPresets config="./branding" />
   <application name="Integrated Genome Browser" distributionSourceDir="" applicationId="8509-6574-3026-3381" mediaDir="${compiler:projectHomeDirectory}/distribution/build" mediaFilePattern="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}" compression="6" lzmaCompression="true" pack200Compression="false" excludeSignedFromPacking="true" commonExternalFiles="false" createMd5Sums="true" shrinkRuntime="false" shortName="IGB" publisher="Loraine Lab" publisherWeb="http://bioviz.org/igb/" version="${compiler:igbVersion}" allPathsRelative="true" backupOnSave="false" autoSave="false" convertDotsToUnderscores="true" macSignature="????" macVolumeId="a1638eb14df51528" javaMinVersion="1.8" javaMaxVersion="" allowBetaVM="false" jdkMode="runtimeJre" jdkName="">
     <languages skipLanguageSelection="false" languageSelectionInPrincipalLanguage="false">
       <principalLanguage id="en" customLocalizationFile="" />
@@ -58,7 +58,7 @@
   </files>
   <launchers>
     <launcher name="IGBfx_unix" id="727" customizedId="" external="false" excludeFromMenu="false" unixMode="755" menuName="" icnsFile="" customMacBundleIdentifier="false" macBundleIdentifier="" swtApp="false" fileset="" macBundleBinary="JavaApplicationStub" addMacEntitlements="false" macEntitlementsFile="" useCustomMacosExecutableName="false" customMacosExecutableName="">
-      <executable name="IGBfx" type="1" iconSet="false" iconFile="" executableDir="" redirectStderr="true" stderrFile="error.log" stderrMode="overwrite" redirectStdout="false" stdoutFile="output.log" stdoutMode="overwrite" failOnStderrOutput="true" executableMode="1" changeWorkingDirectory="true" workingDirectory="." singleInstance="false" serviceStartType="2" serviceDependencies="" serviceDescription="" jreLocation="" executionLevel="asInvoker" checkConsoleParameter="false" globalSingleInstance="false" singleInstanceActivate="true" dpiAware="false">
+      <executable name="IGBfx" type="1" iconSet="true" iconFile="" executableDir="" redirectStderr="true" stderrFile="error.log" stderrMode="overwrite" redirectStdout="false" stdoutFile="output.log" stdoutMode="overwrite" failOnStderrOutput="true" executableMode="1" changeWorkingDirectory="true" workingDirectory="." singleInstance="false" serviceStartType="2" serviceDependencies="" serviceDescription="" jreLocation="" executionLevel="asInvoker" checkConsoleParameter="false" globalSingleInstance="false" singleInstanceActivate="true" dpiAware="false">
         <versionInfo include="false" fileVersion="" fileDescription="" legalCopyright="" internalName="" productName="" />
       </executable>
       <splashScreen show="true" width="0" height="0" bitmapFile="./branding/igb_splash2.png" windowsNative="false" textOverlay="false">
@@ -88,10 +88,15 @@
       <infoPlist mode="1" file="">
         <content />
       </infoPlist>
-      <iconImageFiles />
+      <iconImageFiles>
+        <file path="./branding/igb_16.png" />
+        <file path="./branding/igb_32.png" />
+        <file path="./branding/igb_48.png" />
+        <file path="./branding/igb_128.png" />
+      </iconImageFiles>
     </launcher>
     <launcher name="IGBfx_WIndows_x64" id="731" customizedId="" external="false" excludeFromMenu="false" unixMode="755" menuName="" icnsFile="" customMacBundleIdentifier="false" macBundleIdentifier="" swtApp="false" fileset="" macBundleBinary="JavaApplicationStub" addMacEntitlements="false" macEntitlementsFile="" useCustomMacosExecutableName="false" customMacosExecutableName="">
-      <executable name="IGBfx" type="1" iconSet="false" iconFile="" executableDir="" redirectStderr="true" stderrFile="error.log" stderrMode="overwrite" redirectStdout="false" stdoutFile="output.log" stdoutMode="overwrite" failOnStderrOutput="true" executableMode="1" changeWorkingDirectory="true" workingDirectory="." singleInstance="false" serviceStartType="2" serviceDependencies="" serviceDescription="" jreLocation="" executionLevel="asInvoker" checkConsoleParameter="false" globalSingleInstance="false" singleInstanceActivate="true" dpiAware="false">
+      <executable name="IGBfx" type="1" iconSet="true" iconFile="" executableDir="" redirectStderr="true" stderrFile="error.log" stderrMode="overwrite" redirectStdout="false" stdoutFile="output.log" stdoutMode="overwrite" failOnStderrOutput="true" executableMode="1" changeWorkingDirectory="true" workingDirectory="." singleInstance="false" serviceStartType="2" serviceDependencies="" serviceDescription="" jreLocation="" executionLevel="asInvoker" checkConsoleParameter="false" globalSingleInstance="false" singleInstanceActivate="true" dpiAware="false">
         <versionInfo include="false" fileVersion="" fileDescription="" legalCopyright="" internalName="" productName="" />
       </executable>
       <splashScreen show="true" width="0" height="0" bitmapFile="./branding/igb_splash2.png" windowsNative="false" textOverlay="false">
@@ -121,10 +126,15 @@
       <infoPlist mode="1" file="">
         <content />
       </infoPlist>
-      <iconImageFiles />
+      <iconImageFiles>
+        <file path="./branding/igb_16.png" />
+        <file path="./branding/igb_32.png" />
+        <file path="./branding/igb_48.png" />
+        <file path="./branding/igb_128.png" />
+      </iconImageFiles>
     </launcher>
     <launcher name="IGBfx_WIndows_x86" id="738" customizedId="" external="false" excludeFromMenu="false" unixMode="755" menuName="" icnsFile="" customMacBundleIdentifier="false" macBundleIdentifier="" swtApp="false" fileset="" macBundleBinary="JavaApplicationStub" addMacEntitlements="false" macEntitlementsFile="" useCustomMacosExecutableName="false" customMacosExecutableName="">
-      <executable name="IGBfx" type="1" iconSet="false" iconFile="" executableDir="" redirectStderr="true" stderrFile="error.log" stderrMode="overwrite" redirectStdout="true" stdoutFile="output.log" stdoutMode="overwrite" failOnStderrOutput="true" executableMode="1" changeWorkingDirectory="true" workingDirectory="." singleInstance="false" serviceStartType="2" serviceDependencies="" serviceDescription="" jreLocation="" executionLevel="asInvoker" checkConsoleParameter="false" globalSingleInstance="false" singleInstanceActivate="true" dpiAware="false">
+      <executable name="IGBfx" type="1" iconSet="true" iconFile="" executableDir="" redirectStderr="true" stderrFile="error.log" stderrMode="overwrite" redirectStdout="true" stdoutFile="output.log" stdoutMode="overwrite" failOnStderrOutput="true" executableMode="1" changeWorkingDirectory="true" workingDirectory="." singleInstance="false" serviceStartType="2" serviceDependencies="" serviceDescription="" jreLocation="" executionLevel="asInvoker" checkConsoleParameter="false" globalSingleInstance="false" singleInstanceActivate="true" dpiAware="false">
         <versionInfo include="false" fileVersion="" fileDescription="" legalCopyright="" internalName="" productName="" />
       </executable>
       <splashScreen show="true" width="0" height="0" bitmapFile="./branding/igb_splash2.png" windowsNative="false" textOverlay="false">
@@ -154,7 +164,12 @@
       <infoPlist mode="1" file="">
         <content />
       </infoPlist>
-      <iconImageFiles />
+      <iconImageFiles>
+        <file path="./branding/igb_16.png" />
+        <file path="./branding/igb_32.png" />
+        <file path="./branding/igb_48.png" />
+        <file path="./branding/igb_128.png" />
+      </iconImageFiles>
     </launcher>
   </launchers>
   <installerGui installerType="1" addOnAppId="" suggestPreviousLocations="true" autoUpdateDescriptorUrl="${compiler:codeBaseUrl}/updates.xml" useAutoUpdateBaseUrl="false" autoUpdateBaseUrl="">
@@ -418,7 +433,7 @@
                       </void>
                       <void property="file">
                         <object class="java.io.File">
-                          <string>IntegratedGenomeBrowser</string>
+                          <string>IGBfx</string>
                         </object>
                       </void>
                       <void property="name">
@@ -1557,13 +1572,24 @@
       <overriddenPrincipalLanguage id="en" customLocalizationFile="" />
       <exclude>
         <entry location="org.lorainelab.igb.demo" fileType="regular" />
+        <entry location="org.lorainelab.igb.filehandler.registry" fileType="regular" />
+        <entry location="datasources" fileType="regular" />
         <entry location="org.lorainelab.igb.data.model" fileType="regular" />
         <entry location="org.lorainelab.igb.menu.api" fileType="regular" />
+        <entry location="org.lorainelab.igb.filehandler.api" fileType="regular" />
         <entry location="org.lorainelab.igb.feature" fileType="regular" />
         <entry location="org.lorainelab.igb.stage.provider.api" fileType="regular" />
         <entry location="org.lorainelab.igb.main" fileType="regular" />
+        <entry location="menus" fileType="regular" />
+        <entry location="org.lorainelab.igb.kar" fileType="regular" />
+        <entry location="start.sh" fileType="regular" />
         <entry location="tabs" fileType="regular" />
         <entry location="org.lorainelab.igb.visualization" fileType="regular" />
+        <entry location="start-shell.sh" fileType="regular" />
+        <entry location="org.lorainelab.igb.selections" fileType="regular" />
+        <entry location="start.bat" fileType="regular" />
+        <entry location="start-dev.sh" fileType="regular" />
+        <entry location="filetypeHandlers" fileType="regular" />
         <entry location="karaf/data/tmp" fileType="regular" />
         <entry location="karaf/data/log" fileType="regular" />
         <entry location="karaf/data/cache" fileType="regular" />
@@ -1588,13 +1614,25 @@
       <overriddenPrincipalLanguage id="en" customLocalizationFile="" />
       <exclude>
         <entry location="org.lorainelab.igb.demo" fileType="regular" />
+        <entry location="org.lorainelab.igb.filehandler.registry" fileType="regular" />
+        <entry location="datasources" fileType="regular" />
         <entry location="org.lorainelab.igb.data.model" fileType="regular" />
         <entry location="org.lorainelab.igb.menu.api" fileType="regular" />
+        <entry location="org.lorainelab.igb.filehandler.api" fileType="regular" />
         <entry location="org.lorainelab.igb.feature" fileType="regular" />
         <entry location="org.lorainelab.igb.stage.provider.api" fileType="regular" />
+        <entry location="start.command" fileType="regular" />
         <entry location="org.lorainelab.igb.main" fileType="regular" />
+        <entry location="menus" fileType="regular" />
+        <entry location="org.lorainelab.igb.kar" fileType="regular" />
+        <entry location="start.sh" fileType="regular" />
         <entry location="tabs" fileType="regular" />
         <entry location="org.lorainelab.igb.visualization" fileType="regular" />
+        <entry location="start-shell.sh" fileType="regular" />
+        <entry location="org.lorainelab.igb.selections" fileType="regular" />
+        <entry location="start.bat" fileType="regular" />
+        <entry location="start-dev.sh" fileType="regular" />
+        <entry location="filetypeHandlers" fileType="regular" />
         <entry location="karaf/data/tmp" fileType="regular" />
         <entry location="karaf/data/log" fileType="regular" />
         <entry location="karaf/data/cache" fileType="regular" />
@@ -1622,13 +1660,25 @@
       <overriddenPrincipalLanguage id="en" customLocalizationFile="" />
       <exclude>
         <entry location="org.lorainelab.igb.demo" fileType="regular" />
+        <entry location="org.lorainelab.igb.filehandler.registry" fileType="regular" />
+        <entry location="datasources" fileType="regular" />
         <entry location="org.lorainelab.igb.data.model" fileType="regular" />
         <entry location="org.lorainelab.igb.menu.api" fileType="regular" />
+        <entry location="org.lorainelab.igb.filehandler.api" fileType="regular" />
         <entry location="org.lorainelab.igb.feature" fileType="regular" />
         <entry location="org.lorainelab.igb.stage.provider.api" fileType="regular" />
+        <entry location="start.command" fileType="regular" />
         <entry location="org.lorainelab.igb.main" fileType="regular" />
+        <entry location="menus" fileType="regular" />
+        <entry location="org.lorainelab.igb.kar" fileType="regular" />
+        <entry location="start.sh" fileType="regular" />
         <entry location="tabs" fileType="regular" />
         <entry location="org.lorainelab.igb.visualization" fileType="regular" />
+        <entry location="start-shell.sh" fileType="regular" />
+        <entry location="org.lorainelab.igb.selections" fileType="regular" />
+        <entry location="start.bat" fileType="regular" />
+        <entry location="start-dev.sh" fileType="regular" />
+        <entry location="filetypeHandlers" fileType="regular" />
         <entry location="karaf/data/tmp" fileType="regular" />
         <entry location="karaf/data/log" fileType="regular" />
         <entry location="karaf/data/cache" fileType="regular" />
@@ -1653,13 +1703,26 @@
       <overriddenPrincipalLanguage id="en" customLocalizationFile="" />
       <exclude>
         <entry location="org.lorainelab.igb.demo" fileType="regular" />
+        <entry location="org.lorainelab.igb.filehandler.registry" fileType="regular" />
+        <entry location="datasources" fileType="regular" />
         <entry location="org.lorainelab.igb.data.model" fileType="regular" />
         <entry location="org.lorainelab.igb.menu.api" fileType="regular" />
+        <entry location="org.lorainelab.igb.filehandler.api" fileType="regular" />
         <entry location="org.lorainelab.igb.feature" fileType="regular" />
         <entry location="org.lorainelab.igb.stage.provider.api" fileType="regular" />
+        <entry location="start.command" fileType="regular" />
         <entry location="org.lorainelab.igb.main" fileType="regular" />
+        <entry location="menus" fileType="regular" />
+        <entry location="org.lorainelab.igb.kar" fileType="regular" />
+        <entry location="start.sh" fileType="regular" />
         <entry location="tabs" fileType="regular" />
+        <entry location="LICENSE.html" fileType="regular" />
         <entry location="org.lorainelab.igb.visualization" fileType="regular" />
+        <entry location="start-shell.sh" fileType="regular" />
+        <entry location="org.lorainelab.igb.selections" fileType="regular" />
+        <entry location="start.bat" fileType="regular" />
+        <entry location="start-dev.sh" fileType="regular" />
+        <entry location="filetypeHandlers" fileType="regular" />
         <entry location="karaf/data/tmp" fileType="regular" />
         <entry location="karaf/data/log" fileType="regular" />
         <entry location="karaf/data/cache" fileType="regular" />
@@ -1673,7 +1736,7 @@
     </macosFolder>
   </mediaSets>
   <buildIds buildAll="false">
-    <mediaSet refId="25" />
+    <mediaSet refId="179" />
   </buildIds>
-  <buildOptions verbose="true" faster="false" disableSigning="false" disableJreBundling="false" debug="false" />
+  <buildOptions verbose="true" faster="false" disableSigning="true" disableJreBundling="false" debug="false" />
 </install4j>
