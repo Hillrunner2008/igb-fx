@@ -9,3 +9,5 @@ karaf/data/**/*
 karaf/instances
 karaf/lock
 karaf/deploy
+
+distribution/build/
