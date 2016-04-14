@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.lorainelab.igb.visualization.model;
+package org.lorainelab.igb.data.model;
 
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.Canvas;
@@ -21,7 +21,7 @@ public class CanvasContext {
     private double relativeTrackOffset;
     private boolean isVisible;
 
-    CanvasContext(Canvas canvas, Rectangle2D boundingRectangle, double trackHeight, double relativeTrackOffset) {
+    public CanvasContext(Canvas canvas, Rectangle2D boundingRectangle, double trackHeight, double relativeTrackOffset) {
         this.canvas = canvas;
         this.boundingRectangle = boundingRectangle;
         this.trackHeight = trackHeight;
@@ -45,7 +45,7 @@ public class CanvasContext {
         return relativeTrackOffset;
     }
 
-    void setIsVisible(boolean isVisible) {
+    public void setIsVisible(boolean isVisible) {
         this.isVisible = isVisible;
     }
 
@@ -53,7 +53,7 @@ public class CanvasContext {
         return isVisible;
     }
 
-    void update(Rectangle2D boundingRectangle, double trackSize, double relativeTrackOffset) {
+    public void update(Rectangle2D boundingRectangle, double trackSize, double relativeTrackOffset) {
         this.boundingRectangle = boundingRectangle;
         this.trackHeight = trackSize;
         this.relativeTrackOffset = relativeTrackOffset;

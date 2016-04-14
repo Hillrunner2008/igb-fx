@@ -26,20 +26,20 @@ public class GenovizFxFactory {
         return cg;
     }
 
-    public static RectangleGlyph generateRectangleGlyph(org.lorainelab.igb.data.model.shapes.Rectangle rectangle) {
+    public static RectangleGlyph generateRectangleGlyph(org.lorainelab.igb.data.model.shapes.Rectangle rectangle, int layerStartPosition) {
         int height = 10;
         if (rectangle.getAttributes().contains(org.lorainelab.igb.data.model.shapes.Rectangle.Attribute.thick)) {
             height = 15;
         }
         double y = height == 15 ? MODEL_HEIGHT_PADDING : 20;
-        RectangleGlyph toReturn = new RectangleGlyph(rectangle.getOffset(), y, rectangle.getWidth(), height);
+        RectangleGlyph toReturn = new RectangleGlyph(layerStartPosition + rectangle.getOffset(), y, rectangle.getWidth(), height);
         toReturn.setFill(Color.BLUE);
         toReturn.setStrokeColor(Color.web(PRIMARY_TEXT_COLOR));
         return toReturn;
     }
 
-    public static LineGlyph generateLine(org.lorainelab.igb.data.model.shapes.Line line) {
-        LineGlyph toReturn = new LineGlyph(line.getOffset(), line.getWidth(), 25);
+    public static LineGlyph generateLine(org.lorainelab.igb.data.model.shapes.Line line, int layerStartPosition) {
+        LineGlyph toReturn = new LineGlyph(layerStartPosition + line.getOffset(), line.getWidth(), 25);
         toReturn.setFill(Color.BLUE);
         toReturn.setStrokeColor(Color.web(PRIMARY_TEXT_COLOR));
         return toReturn;

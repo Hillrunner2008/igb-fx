@@ -1,6 +1,6 @@
 package org.lorainelab.igb.data.model.bam;
 
-import org.lorainelab.igb.data.model.Range;
+import com.google.common.collect.Range;
 
 /**
  *
@@ -8,7 +8,7 @@ import org.lorainelab.igb.data.model.Range;
  */
 public class AlignmentBlock {
 
-    private final Range range;
+    private final Range<Integer> range;
     private final AlignmentType alignmentType;
 
     public enum AlignmentType {
@@ -19,12 +19,12 @@ public class AlignmentBlock {
         PADDING
     }
 
-    public AlignmentBlock(Range range, AlignmentType alignmentType) {
+    public AlignmentBlock(Range<Integer> range, AlignmentType alignmentType) {
         this.range = range;
         this.alignmentType = alignmentType;
     }
 
-    public Range getRange() {
+    public Range<Integer> getRange() {
         return range;
     }
 

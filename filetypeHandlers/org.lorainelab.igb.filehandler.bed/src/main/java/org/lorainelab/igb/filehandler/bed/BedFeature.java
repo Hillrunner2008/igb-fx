@@ -1,8 +1,8 @@
 package org.lorainelab.igb.filehandler.bed;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
-import com.google.common.collect.Sets;
 import com.google.common.collect.TreeRangeSet;
 import java.text.NumberFormat;
 import java.util.Locale;
@@ -11,7 +11,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.lorainelab.igb.data.model.Feature;
-import org.lorainelab.igb.data.model.Range;
 import org.lorainelab.igb.data.model.Strand;
 
 public class BedFeature implements Feature {
@@ -21,8 +20,8 @@ public class BedFeature implements Feature {
     protected Map<String, String> props;
     protected int cdsStart = -1;
     protected int cdsEnd = -1;
-    protected Set<Range> exons;
-    protected Range range;
+    protected RangeSet<Integer> exons;
+    protected Range<Integer> range;
     protected Strand strand;
     private String id;
     private final String chrId;
@@ -33,7 +32,7 @@ public class BedFeature implements Feature {
         this.chrId = chrId;
         this.range = range;
         this.strand = strand;
-        exons = Sets.newLinkedHashSet();
+        exons = TreeRangeSet.create();
     }
 
     public Map<String, String> getTooltipData() {
@@ -41,9 +40,9 @@ public class BedFeature implements Feature {
         if (strand.equals(Strand.POSITIVE)) {
             data.put("id", id);
             data.put("description", description);
-            data.put("start", NUMBER_FORMAT.format(range.getStart()) + "");
-            data.put("end", NUMBER_FORMAT.format(range.getEnd()) + "");
-            data.put("length", NUMBER_FORMAT.format(range.getLength()) + "");
+            data.put("start", NUMBER_FORMAT.format(range.lowerEndpoint()) + "");
+            data.put("end", NUMBER_FORMAT.format(range.upperEndpoint()) + "");
+            data.put("length", NUMBER_FORMAT.format(range.upperEndpoint() - range.lowerEndpoint()) + "");
             data.put("strand", strand.getName());
             data.put("cds start", NUMBER_FORMAT.format(cdsStart) + "");
             data.put("cds end", NUMBER_FORMAT.format(cdsEnd) + "");
@@ -53,9 +52,9 @@ public class BedFeature implements Feature {
         } else {
             data.put("id", id);
             data.put("description", description);
-            data.put("start", NUMBER_FORMAT.format(range.getEnd()) + "");
-            data.put("end", NUMBER_FORMAT.format(range.getStart()) + "");
-            data.put("length", NUMBER_FORMAT.format(range.getLength()) + "");
+            data.put("start", NUMBER_FORMAT.format(range.upperEndpoint()) + "");
+            data.put("end", NUMBER_FORMAT.format(range.lowerEndpoint()) + "");
+            data.put("length", NUMBER_FORMAT.format(range.upperEndpoint() - range.lowerEndpoint()) + "");
             data.put("strand", strand.getName());
             data.put("cds start", NUMBER_FORMAT.format(cdsEnd) + "");
             data.put("cds end", NUMBER_FORMAT.format(cdsStart) + "");
@@ -98,12 +97,8 @@ public class BedFeature implements Feature {
         this.cdsEnd = cdsEnd;
     }
 
-    public Set<Range> getRanges() {
-        return exons;
-    }
-
     @Override
-    public Range getRange() {
+    public Range<Integer> getRange() {
         return range;
     }
 
@@ -121,23 +116,21 @@ public class BedFeature implements Feature {
         this.id = id;
     }
 
-    public Set<Range> getIntrons() {
-        RangeSet<Integer> rangeSet = TreeRangeSet.create();
-        exons.stream().map(exon -> com.google.common.collect.Range.closed(exon.getStart(), exon.getEnd())).forEach(r -> rangeSet.add(r));
-        return rangeSet.complement()
-                .subRangeSet(rangeSet.span())
+    public Set<Range<Integer>> getIntrons() {
+        return exons.complement()
+                .subRangeSet(exons.span())
                 .asRanges()
                 .stream().map(intron -> {
                     return intron;
-                }).map(intron -> new Range(intron.lowerEndpoint(), intron.upperEndpoint()))
+                }).map(intron -> Range.closedOpen(intron.lowerEndpoint(), intron.upperEndpoint()))
                 .collect(Collectors.toSet());
     }
 
-    private Range getCds() {
+    private Range<Integer> getCds() {
         if (cdsStart == -1 || cdsEnd == -1) {
             return range;
         }
-        return new Range(cdsStart, cdsEnd);
+        return Range.closedOpen(cdsStart, cdsEnd);
     }
 
     @Override
@@ -145,7 +138,7 @@ public class BedFeature implements Feature {
         return chrId;
     }
 
-    public Set<Range> getExons() {
+    public RangeSet<Integer> getExons() {
         return exons;
     }
 

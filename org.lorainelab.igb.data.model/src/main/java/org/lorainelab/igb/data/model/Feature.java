@@ -5,6 +5,7 @@
  */
 package org.lorainelab.igb.data.model;
 
+import com.google.common.collect.Range;
 import java.util.Optional;
 
 /**
@@ -13,7 +14,7 @@ import java.util.Optional;
  */
 public interface Feature {
 
-    Range getRange();
+    Range<Integer> getRange();
 
     Strand getStrand();
 

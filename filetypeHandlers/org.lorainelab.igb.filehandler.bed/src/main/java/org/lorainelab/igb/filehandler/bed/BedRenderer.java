@@ -16,19 +16,19 @@ public class BedRenderer implements Renderer<BedFeature> {
                 bedFeature.getLabel(),
                 bedFeature.getTooltipData(),
                 layer(
-                        bedFeature.getRange().getStart(),
-                        bedFeature.getExons().stream().map(exon -> Rectangle.start(exon.getStart(), exon.getLength()).build()),
-                        bedFeature.getIntrons().stream().map(intron -> Line.start(intron.getStart(), intron.getLength()).build()),
+                        bedFeature.getRange().lowerEndpoint(),
+                        bedFeature.getExons().asRanges().stream().map(exon -> Rectangle.start(exon.lowerEndpoint(), exon.upperEndpoint() - exon.lowerEndpoint()).build()),
+                        bedFeature.getIntrons().stream().map(intron -> Line.start(intron.lowerEndpoint(), intron.upperEndpoint() - intron.lowerEndpoint()).build()),
                         calculateCds(bedFeature)
                 )
         );
     }
 
     private Stream<Shape> calculateCds(BedFeature bedFeature) {
-        Range<Integer> cdsRange = Range.closed(bedFeature.getCdsStart() - bedFeature.getRange().getStart(), bedFeature.getCdsEnd() - bedFeature.getRange().getStart());
+        Range<Integer> cdsRange = Range.closed(bedFeature.getCdsStart() - bedFeature.getRange().lowerEndpoint(), bedFeature.getCdsEnd() - bedFeature.getRange().lowerEndpoint());
 
-        return bedFeature.getExons().stream()
-                .map(exon -> Range.closed(exon.getStart(), exon.getEnd()))
+        return bedFeature.getExons().asRanges().stream()
+                .map(exon -> Range.closed(exon.lowerEndpoint(), exon.upperEndpoint()))
                 .filter(exonRange -> exonRange.isConnected(cdsRange))
                 .map(eoxnRange -> eoxnRange.intersection(cdsRange))
                 .map(intersectingRange -> Rectangle.start(intersectingRange.lowerEndpoint(), intersectingRange.upperEndpoint() - intersectingRange.lowerEndpoint())

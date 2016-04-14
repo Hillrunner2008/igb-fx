@@ -16,7 +16,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Rectangle?>
 
-<VBox fx:id="root" prefHeight="950" prefWidth="1600" xmlns="http://javafx.com/javafx/8.0.74" xmlns:fx="http://javafx.com/fxml/1">
+<VBox fx:id="root" prefHeight="950" prefWidth="1600" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <ToolBar prefHeight="40.0" prefWidth="200.0">
             <items>
@@ -69,7 +69,7 @@
                                                                                     <Insets bottom="5.0" left="10.0" right="10.0" top="10.0" />
                                                                                 </padding>
                                                                             </Slider>
-                                                                        <Button mnemonicParsing="false" text="Load Data">
+                                                                        <Button fx:id="loadDataButton" mnemonicParsing="false" text="Load Data">
                                                                            <HBox.margin>
                                                                               <Insets right="5.0" top="5.0" />
                                                                            </HBox.margin>

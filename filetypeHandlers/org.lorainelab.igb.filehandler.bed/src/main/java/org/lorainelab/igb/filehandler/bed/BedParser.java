@@ -8,6 +8,9 @@ package org.lorainelab.igb.filehandler.bed;
 import aQute.bnd.annotation.component.Component;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,13 +18,21 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import org.lorainelab.igb.data.model.Feature;
-import org.lorainelab.igb.data.model.Range;
 import org.lorainelab.igb.data.model.Strand;
-import org.lorainelab.igb.datasource.api.DataSource;
-import org.lorainelab.igb.datasource.api.DataSourceReference;
-import org.lorainelab.igb.filehandler.api.FileTypeHandler;
+import org.lorainelab.igb.data.model.datasource.DataSource;
+import org.lorainelab.igb.data.model.datasource.DataSourceReference;
+import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandler;
+import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
+import org.lorainelab.igb.data.model.glyph.Glyph;
+import org.lorainelab.igb.data.model.shapes.Composition;
+import org.lorainelab.igb.data.model.shapes.Line;
+import org.lorainelab.igb.data.model.shapes.Rectangle;
+import org.lorainelab.igb.data.model.shapes.Shape;
+import org.lorainelab.igb.data.model.shapes.factory.GenovizFxFactory;
+import org.lorainelab.igb.data.model.view.Layer;
+import org.lorainelab.igb.data.model.view.Renderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +44,11 @@ import org.slf4j.LoggerFactory;
 public class BedParser implements FileTypeHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(BedParser.class);
+    private Renderer<BedFeature> renderer;
+
+    public BedParser() {
+        renderer = new BedRenderer();//TODO make it possible to swap this for alternative renderers
+    }
 
     private BedFeature createAnnotation(List<String> fields) {
         String chrom = fields.get(0);
@@ -84,7 +100,12 @@ public class BedParser implements FileTypeHandler {
         if (fields.size() >= 14) {
             description = fields.get(13);
         }
-        Range annotationRange = new Range(annotationStart, annotationEnd);
+        Range<Integer> annotationRange;
+        if (annotationStart > annotationEnd) {
+            annotationRange = Range.closedOpen(annotationEnd, annotationStart);
+        } else {
+            annotationRange = Range.closedOpen(annotationStart, annotationEnd);
+        }
         BedFeature bedFeature = new BedFeature(chrom, annotationRange, isForwardStrand ? Strand.POSITIVE : Strand.NEGATIVE);
         bedFeature.setId(name);
         bedFeature.setCdsStart(thickStart);
@@ -95,7 +116,7 @@ public class BedParser implements FileTypeHandler {
         for (int i = 0; i < exonCount; i++) {
             final int exonStart = exonStartPositions[i];
             final int exonEnd = exonStartPositions[i] + exonSizes[i];
-            bedFeature.getExons().add(new Range(exonStart, exonEnd));
+            bedFeature.getExons().add(Range.closedOpen(exonStart, exonEnd));
         }
         return bedFeature;
     }
@@ -130,29 +151,39 @@ public class BedParser implements FileTypeHandler {
         return Sets.newHashSet("bed");
     }
 
-    @Override
-    public Set<? extends Feature> getRegion(DataSourceReference dataSourceReference, Range range, String chromosomeId) {
-        final DataSource dataSource = dataSourceReference.getDataSource();
-        final String path = dataSourceReference.getPath();
-        Set<BedFeature> annotations = Sets.newLinkedHashSet();
-        dataSource.getInputStream(path).ifPresent(inputStream -> {
-            try (InputStream resourceAsStream = inputStream;
-                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resourceAsStream))) {
-                Iterator<String> iterator = bufferedReader.lines().iterator();
-                while (iterator.hasNext()) {
-                    String line = iterator.next().trim();
-                    List<String> fields = Splitter.on("\t").splitToList(line);
-                    annotations.add(createAnnotation(fields));
-                }
-            } catch (IOException ex) {
-                LOG.error(ex.getMessage(), ex);
-            }
+    private Set<CompositionGlyph> convertBedFeaturesToCompositionGlyphs(Set<BedFeature> annotations) {
+        Set<CompositionGlyph> primaryGlyphs = Sets.newLinkedHashSet();
+        String[] label = {""};
+        Map[] tooltipData = {Maps.newConcurrentMap()};
+        annotations.stream().map((BedFeature annotation) -> {
+            BedRenderer view = new BedRenderer();
+            final Composition composition = view.render(annotation);
+            composition.getLabel().ifPresent(compositionLabel -> label[0] = compositionLabel);
+            tooltipData[0] = composition.getTooltipData();
+            return composition.getLayers();
+        }).forEach(layersList -> {
+            List<Glyph> children = Lists.newArrayList();
+            layersList
+                    .stream().forEach((Layer layer) -> {
+                        getShapes(layer).forEach(shape -> {
+                            if (Rectangle.class
+                                    .isAssignableFrom(shape.getClass())) {
+                                children.add(GenovizFxFactory.generateRectangleGlyph((Rectangle) shape, layer.getStart()));
+
+                            }
+                            if (Line.class
+                                    .isAssignableFrom(shape.getClass())) {
+                                children.add(GenovizFxFactory.generateLine((Line) shape, layer.getStart()));
+                            }
+                        });
+                    });
+            primaryGlyphs.add(GenovizFxFactory.generateCompositionGlyph(label[0], tooltipData[0], children));
         });
-        return annotations;
+        return primaryGlyphs;
     }
 
     @Override
-    public Set<? extends Feature> getChromosome(DataSourceReference dataSourceReference, String chromosomeId) {
+    public Set<CompositionGlyph> getChromosome(DataSourceReference dataSourceReference, String chromosomeId) {
         final DataSource dataSource = dataSourceReference.getDataSource();
         final String path = dataSourceReference.getPath();
         Set<BedFeature> annotations = Sets.newLinkedHashSet();
@@ -163,18 +194,54 @@ public class BedParser implements FileTypeHandler {
                 while (iterator.hasNext()) {
                     String line = iterator.next().trim();
                     List<String> fields = Splitter.on("\t").splitToList(line);
-                    annotations.add(createAnnotation(fields));
+                    final BedFeature bedFeature = createAnnotation(fields);
+                    annotations.add(bedFeature);
                 }
             } catch (IOException ex) {
                 LOG.error(ex.getMessage(), ex);
             }
         });
-        return annotations;
+
+        return convertBedFeaturesToCompositionGlyphs(annotations);
+    }
+
+    private List<Shape> getShapes(Layer layer) {
+        List<Shape> toReturn = Lists.newArrayList();
+        layer.getItems().forEach(s -> {
+            if (s instanceof Layer) {
+                toReturn.addAll(getShapes((Layer) s));
+            } else {
+                toReturn.add(s);
+            }
+        });
+        return toReturn;
     }
 
     @Override
     public String getName() {
         return "Bed File";
+    }
+
+    @Override
+    public Set<CompositionGlyph> getRegion(DataSourceReference dataSourceReference, com.google.common.collect.Range range, String chromosomeId) {
+        final DataSource dataSource = dataSourceReference.getDataSource();
+        final String path = dataSourceReference.getPath();
+        Set<BedFeature> annotations = Sets.newLinkedHashSet();
+        dataSource.getInputStream(path).ifPresent(inputStream -> {
+            try (InputStream resourceAsStream = inputStream;
+                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resourceAsStream))) {
+                Iterator<String> iterator = bufferedReader.lines().iterator();
+                while (iterator.hasNext()) {
+                    String line = iterator.next().trim();
+                    List<String> fields = Splitter.on("\t").splitToList(line);
+                    final BedFeature bedFeature = createAnnotation(fields);
+                    annotations.add(bedFeature);
+                }
+            } catch (IOException ex) {
+                LOG.error(ex.getMessage(), ex);
+            }
+        });
+        return convertBedFeaturesToCompositionGlyphs(annotations);
     }
 
 }

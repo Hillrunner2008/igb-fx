@@ -1,16 +1,14 @@
-package org.lorainelab.igb.visualization.model;
+package org.lorainelab.igb.data.model;
 
-import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.TreeMultimap;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
-import org.lorainelab.igb.data.model.View;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
+import static org.lorainelab.igb.data.model.glyph.Glyph.MIN_X_COMPARATOR;
 import static org.lorainelab.igb.data.model.glyph.Glyph.MODEL_HEIGHT_PADDING;
 import static org.lorainelab.igb.data.model.glyph.Glyph.SLOT_HEIGHT;
 
@@ -23,14 +21,7 @@ public class Track {
     private final String trackLabel;
     private List<CompositionGlyph> glyphs;
     private TreeMultimap<Integer, CompositionGlyph> slotMap;
-    private static Comparator<CompositionGlyph> byMinX
-            = (glyph1, glyph2) -> {
-                return ComparisonChain.start()
-                .compare(glyph1.getBoundingRect().getMinX(), glyph2.getBoundingRect().getMinX())
-                .compare(glyph1.getBoundingRect().getWidth(), glyph2.getBoundingRect().getWidth())
-                .compare(glyph1.getLabel(), glyph2.getLabel())
-                .result();
-            };
+
     private final boolean isNegative;
     private double modelHeight;
     private int maxStackHeight;
@@ -40,7 +31,7 @@ public class Track {
         this.trackLabel = trackLabel;
         this.maxStackHeight = stackHeight;
         this.modelHeight = (SLOT_HEIGHT * stackHeight) + MODEL_HEIGHT_PADDING;
-        slotMap = TreeMultimap.create(Ordering.natural(), byMinX);
+        slotMap = TreeMultimap.create(Ordering.natural(), MIN_X_COMPARATOR);
         glyphs = Lists.newArrayList();
     }
 
@@ -79,7 +70,7 @@ public class Track {
     }
 
     public void buildSlots() {
-        Collections.sort(glyphs, byMinX);
+        Collections.sort(glyphs, MIN_X_COMPARATOR);
         for (CompositionGlyph glyph : glyphs) {
             int slotToadd = 0;
             for (Integer key : slotMap.keySet()) {

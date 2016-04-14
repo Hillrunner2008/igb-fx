@@ -1,11 +1,11 @@
 package org.lorainelab.igb.filehandler.registry;
 
-import org.lorainelab.igb.filehandler.api.FileTypeHandlerRegistry;
+import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandlerRegistry;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Sets;
 import java.util.Set;
-import org.lorainelab.igb.filehandler.api.FileTypeHandler;
+import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandler;
 
 /**
  *

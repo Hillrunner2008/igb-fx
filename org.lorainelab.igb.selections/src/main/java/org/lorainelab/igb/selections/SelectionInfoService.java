@@ -1,6 +1,7 @@
 package org.lorainelab.igb.selections;
 
 import java.util.Optional;
+import javafx.beans.property.ObjectProperty;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.GenomeVersion;
 
@@ -10,7 +11,7 @@ import org.lorainelab.igb.data.model.GenomeVersion;
  */
 public interface SelectionInfoService {
 
-    Optional<GenomeVersion> getSelectedGenomeVersion();
+    ObjectProperty<Optional<GenomeVersion>> getSelectedGenomeVersion();
 
-    Optional<Chromosome> getSelectedChromosome();
+    ObjectProperty<Optional<Chromosome>> getSelectedChromosome();
 }

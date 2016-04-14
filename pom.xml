@@ -111,12 +111,9 @@
         
         <module>org.lorainelab.igb.data.model</module>
         
-        <module>datasources/org.lorainelab.igb.datasource.api</module>
         <module>datasources/org.lorainelab.igb.datasource.local</module>
         
         <module>org.lorainelab.igb.selections</module>
-        
-        <module>org.lorainelab.igb.filehandler.api</module>
         <module>org.lorainelab.igb.filehandler.registry</module>
         
         <module>filetypeHandlers/org.lorainelab.igb.filehandler.bed</module>

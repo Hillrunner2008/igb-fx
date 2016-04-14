@@ -3,6 +3,8 @@ package org.lorainelab.igb.data.model;
 import aQute.bnd.annotation.component.Component;
 import com.google.common.collect.Sets;
 import java.util.Optional;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 
@@ -10,14 +12,15 @@ import javafx.collections.ObservableSet;
  *
  * @author dcnorris
  */
-@Component(immediate = true, provide = {GenomeVersionRegistry.class, GenomeVersionSelectionManager.class})
-public class GenomeVersionRegistryImpl implements GenomeVersionRegistry, GenomeVersionSelectionManager {
+@Component(immediate = true)
+public class GenomeVersionRegistryImpl implements GenomeVersionRegistry {
 
     private final ObservableSet<GenomeVersion> registeredGenomeVersions;
-    private GenomeVersion selectedGenomeVersion;
+    private final ObjectProperty<Optional<GenomeVersion>> selectedGenomeVersionProperty;
 
     public GenomeVersionRegistryImpl() {
         registeredGenomeVersions = FXCollections.observableSet(Sets.newConcurrentHashSet());
+        selectedGenomeVersionProperty = new SimpleObjectProperty<>(Optional.empty());
     }
 
     @Override
@@ -26,13 +29,14 @@ public class GenomeVersionRegistryImpl implements GenomeVersionRegistry, GenomeV
     }
 
     @Override
-    public Optional<GenomeVersion> getSelectedGenomeVersion() {
-        return Optional.ofNullable(selectedGenomeVersion);
+    public void setSelectedGenomeVersion(GenomeVersion selectedGenomeVersion) {
+        selectedGenomeVersionProperty.setValue(Optional.ofNullable(selectedGenomeVersion));
     }
 
     @Override
-    public void setSelectedGenomeVersion(GenomeVersion selectedGenomeVersion) {
-        this.selectedGenomeVersion = selectedGenomeVersion;
+    public ObjectProperty<Optional<GenomeVersion>> getSelectedGenomeVersion() {
+        return selectedGenomeVersionProperty;
     }
+
 
 }

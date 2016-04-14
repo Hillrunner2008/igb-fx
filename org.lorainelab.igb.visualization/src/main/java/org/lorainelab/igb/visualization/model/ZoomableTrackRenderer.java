@@ -1,5 +1,7 @@
 package org.lorainelab.igb.visualization.model;
 
+import org.lorainelab.igb.data.model.CanvasContext;
+import org.lorainelab.igb.data.model.Track;
 import org.lorainelab.igb.data.model.View;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;

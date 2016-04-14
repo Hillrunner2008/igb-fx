@@ -28,7 +28,7 @@
         </dependency>
         <dependency>
             <groupId>org.lorainelab</groupId>
-            <artifactId>org.lorainelab.igb.filehandler.api</artifactId>
+            <artifactId>org.lorainelab.igb.data.model</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

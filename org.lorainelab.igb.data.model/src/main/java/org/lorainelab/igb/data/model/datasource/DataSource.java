@@ -1,4 +1,4 @@
-package org.lorainelab.igb.datasource.api;
+package org.lorainelab.igb.data.model.datasource;
 
 import java.io.InputStream;
 import java.util.Optional;

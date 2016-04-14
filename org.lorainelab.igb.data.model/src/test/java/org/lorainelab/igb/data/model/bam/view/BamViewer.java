@@ -86,7 +86,7 @@ public class BamViewer extends Application {
                     layer(
                             0,
                             shapes(
-                                    Rectangle.start(bamFeature.getRange().getStart(), bamFeature.getRange().getEnd())
+                                    Rectangle.start(bamFeature.getRange().lowerEndpoint(), bamFeature.getRange().upperEndpoint() - bamFeature.getRange().lowerEndpoint())
                                     .linkToModel(bamFeature).build()
                             )
                     ),
@@ -99,19 +99,20 @@ public class BamViewer extends Application {
         private Shape convertAlignmentBlockToRect(AlignmentBlock alignmentBlock) {
             switch (alignmentBlock.getAlignmentType()) {
                 case DELETION:
-                    return Rectangle.start(alignmentBlock.getRange().getStart(), alignmentBlock.getRange().getLength())
+                    return Rectangle.start(alignmentBlock.getRange().lowerEndpoint(), alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint())
                             .addAttribute(Rectangle.Attribute.deletion).build();
                 case GAP:
-                    return Line.start(alignmentBlock.getRange().getStart(), alignmentBlock.getRange().getLength()).build();
+                    return Line.start(alignmentBlock.getRange().lowerEndpoint(), alignmentBlock.getRange().lowerEndpoint()
+                    ).build();
                 case INSERTION:
-                    return Rectangle.start(alignmentBlock.getRange().getStart(), alignmentBlock.getRange().getLength())
+                    return Rectangle.start(alignmentBlock.getRange().lowerEndpoint(), alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint())
                             .addAttribute(Rectangle.Attribute.insertion).build();
                 case MATCH:
-                    return Rectangle.start(alignmentBlock.getRange().getStart(), alignmentBlock.getRange().getLength()).build();
+                    return Rectangle.start(alignmentBlock.getRange().lowerEndpoint(), alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint()).build();
                 case PADDING:
-                    return Rectangle.start(alignmentBlock.getRange().getStart(), alignmentBlock.getRange().getLength()).build();
+                    return Rectangle.start(alignmentBlock.getRange().lowerEndpoint(), alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint()).build();
                 default:
-                    return Rectangle.start(alignmentBlock.getRange().getStart(), alignmentBlock.getRange().getLength()).build();
+                    return Rectangle.start(alignmentBlock.getRange().lowerEndpoint(), alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint()).build();
             }
         }
 
