@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<install4j version="6.0.3" transformSequenceNumber="5">
-  <directoryPresets config="/opt/igb/developerID_application_igb.p12" />
-  <application name="Integrated Genome Browser" distributionSourceDir="" applicationId="1717-8724-7098-6386" mediaDir="${compiler:projectHomeDirectory}/distribution/build" mediaFilePattern="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}" compression="6" lzmaCompression="true" pack200Compression="false" excludeSignedFromPacking="true" commonExternalFiles="false" createMd5Sums="true" shrinkRuntime="false" shortName="IGB" publisher="Loraine Lab" publisherWeb="http://bioviz.org/igb/" version="${compiler:igbVersion}" allPathsRelative="true" backupOnSave="false" autoSave="false" convertDotsToUnderscores="true" macSignature="????" macVolumeId="a1638eb14df51528" javaMinVersion="1.8" javaMaxVersion="" allowBetaVM="false" jdkMode="runtimeJre" jdkName="">
+<install4j version="6.1.1" transformSequenceNumber="5">
+  <directoryPresets config="." />
+  <application name="Integrated Genome Browser" distributionSourceDir="" applicationId="8509-6574-3026-3381" mediaDir="${compiler:projectHomeDirectory}/distribution/build" mediaFilePattern="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}" compression="6" lzmaCompression="true" pack200Compression="false" excludeSignedFromPacking="true" commonExternalFiles="false" createMd5Sums="true" shrinkRuntime="false" shortName="IGB" publisher="Loraine Lab" publisherWeb="http://bioviz.org/igb/" version="${compiler:igbVersion}" allPathsRelative="true" backupOnSave="false" autoSave="false" convertDotsToUnderscores="true" macSignature="????" macVolumeId="a1638eb14df51528" javaMinVersion="1.8" javaMaxVersion="" allowBetaVM="false" jdkMode="runtimeJre" jdkName="">
     <languages skipLanguageSelection="false" languageSelectionInPrincipalLanguage="false">
       <principalLanguage id="en" customLocalizationFile="" />
       <additionalLanguages />
@@ -12,7 +12,7 @@
       <envVar name="JDK_HOME" />
     </searchSequence>
     <variables>
-      <variable name="projectHomeDirectory" value="/home/dcnorris/NetBeansProjects/integrated-genome-browser" description="This variable should point to the source control root of the IGB project" category="" />
+      <variable name="projectHomeDirectory" value="/home/jeckstei/Projects/igb/code/igb-fx/" description="This variable should point to the source control root of the IGB project" category="" />
       <variable name="igbVersion" value="8.5.0" description="" category="" />
       <variable name="codeBaseUrl" value="http://eos.transvar.org/igb/" description="A variable holding the url location of the lateset IGB installers and update information" category="" />
     </variables>
@@ -57,25 +57,29 @@
     <components />
   </files>
   <launchers>
-    <launcher name="IntegratedGenomeBrowser" id="22" customizedId="" external="false" excludeFromMenu="false" unixMode="755" menuName="" icnsFile="" customMacBundleIdentifier="false" macBundleIdentifier="" swtApp="false" fileset="" macBundleBinary="JavaApplicationStub" addMacEntitlements="false" macEntitlementsFile="" useCustomMacosExecutableName="false" customMacosExecutableName="">
-      <executable name="IntegratedGenomeBrowser" type="1" iconSet="true" iconFile="" executableDir="." redirectStderr="false" stderrFile="error.log" stderrMode="overwrite" redirectStdout="false" stdoutFile="output.log" stdoutMode="overwrite" failOnStderrOutput="true" executableMode="1" changeWorkingDirectory="true" workingDirectory="." singleInstance="true" serviceStartType="2" serviceDependencies="" serviceDescription="" jreLocation="" executionLevel="asInvoker" checkConsoleParameter="false" globalSingleInstance="false" singleInstanceActivate="true" dpiAware="false">
+    <launcher name="IGBfx_unix" id="727" customizedId="" external="false" excludeFromMenu="false" unixMode="755" menuName="" icnsFile="" customMacBundleIdentifier="false" macBundleIdentifier="" swtApp="false" fileset="" macBundleBinary="JavaApplicationStub" addMacEntitlements="false" macEntitlementsFile="" useCustomMacosExecutableName="false" customMacosExecutableName="">
+      <executable name="IGBfx" type="1" iconSet="false" iconFile="" executableDir="" redirectStderr="true" stderrFile="error.log" stderrMode="overwrite" redirectStdout="false" stdoutFile="output.log" stdoutMode="overwrite" failOnStderrOutput="true" executableMode="1" changeWorkingDirectory="true" workingDirectory="." singleInstance="false" serviceStartType="2" serviceDependencies="" serviceDescription="" jreLocation="" executionLevel="asInvoker" checkConsoleParameter="false" globalSingleInstance="false" singleInstanceActivate="true" dpiAware="false">
         <versionInfo include="false" fileVersion="" fileDescription="" legalCopyright="" internalName="" productName="" />
       </executable>
-      <splashScreen show="true" width="0" height="0" bitmapFile="./branding/igb_splash.png" windowsNative="true" textOverlay="false">
+      <splashScreen show="true" width="0" height="0" bitmapFile="./branding/igb_splash2.png" windowsNative="false" textOverlay="false">
         <text>
           <statusLine x="20" y="20" text="" fontSize="8" fontColor="0,0,0" bold="false" />
           <versionLine x="20" y="40" text="version ${compiler:sys.version}" fontSize="8" fontColor="0,0,0" bold="false" />
         </text>
       </splashScreen>
-      <java mainClass="com.affymetrix.main.Main" vmParameters="-Dapple.laf.useScreenMenuBar=true" arguments="" allowVMPassthroughParameters="true" preferredVM="" bundleRuntime="true">
+      <java mainClass="org.apache.karaf.main.Main" vmParameters="-Dcom.sun.management.jmxremote &quot;-Djava.endorsed.dirs=${launcher:sys.jvmHome}lib/endorsed:${launcher:sys.jvmHome}lib/endorsed:${launcher:sys.launcherDirectory}karaf/lib/endorsed&quot; &quot;-Djava.ext.dirs=${launcher:sys.jvmHome}lib/ext:${launcher:sys.jvmHome}lib/ext:${launcher:sys.launcherDirectory}karaf/lib/ext&quot; &quot;-Dkaraf.instances=${launcher:sys.launcherDirectory}karaf/instances&quot; &quot;-Dkaraf.home=${launcher:sys.launcherDirectory}karaf&quot; &quot;-Dkaraf.base=${launcher:sys.launcherDirectory}karaf&quot; &quot;-Dkaraf.data=${launcher:sys.launcherDirectory}karaf/data&quot; &quot;-Dkaraf.etc=${launcher:sys.launcherDirectory}karaf/etc&quot; -Dkaraf.restart.jvm.supported=true &quot;-Djava.io.tmpdir=${launcher:sys.launcherDirectory}karaf/data/tmp&quot; &quot;-Djava.util.logging.config.file=${launcher:sys.launcherDirectory}karaf/etc/java.util.logging.properties&quot; -Dkaraf.startLocalConsole=false -Dkaraf.startRemoteShell=true" arguments="" allowVMPassthroughParameters="true" preferredVM="" bundleRuntime="true">
         <classPath>
-          <archive location="igb_exe.jar" failOnError="false" />
+          <archive location="karaf/lib/boot/org.apache.karaf.diagnostic.boot-4.0.4.jar" failOnError="false" />
+          <archive location="karaf/lib/boot/org.apache.karaf.jaas.boot-4.0.4.jar" failOnError="false" />
+          <archive location="karaf/lib/boot/org.apache.karaf.main-4.0.4.jar" failOnError="false" />
+          <archive location="karaf/lib/boot/org.osgi.core-6.0.0.jar" failOnError="false" />
         </classPath>
         <nativeLibraryDirectories />
+        <vmOptions />
       </java>
       <includedFiles />
       <unextractableFiles />
-      <vmOptionsFile mode="template" overwriteMode="1" fileMode="644">
+      <vmOptionsFile mode="template" overwriteMode="0" fileMode="644">
         <content />
       </vmOptionsFile>
       <customScript mode="1" file="">
@@ -84,32 +88,31 @@
       <infoPlist mode="1" file="">
         <content />
       </infoPlist>
-      <iconImageFiles>
-        <file path="${compiler:projectHomeDirectory}/distribution/branding/igb_16.png" />
-        <file path="${compiler:projectHomeDirectory}/distribution/branding/igb_32.png" />
-        <file path="${compiler:projectHomeDirectory}/distribution/branding/igb_48.png" />
-        <file path="${compiler:projectHomeDirectory}/distribution/branding/igb_128.png" />
-      </iconImageFiles>
+      <iconImageFiles />
     </launcher>
-    <launcher name="IntegratedGenomeBrowser_Windows32bit" id="368" customizedId="" external="false" excludeFromMenu="false" unixMode="755" menuName="" icnsFile="" customMacBundleIdentifier="false" macBundleIdentifier="" swtApp="false" fileset="" macBundleBinary="JavaApplicationStub" addMacEntitlements="false" macEntitlementsFile="" useCustomMacosExecutableName="false" customMacosExecutableName="">
-      <executable name="IntegratedGenomeBrowser" type="1" iconSet="true" iconFile="" executableDir="." redirectStderr="false" stderrFile="error.log" stderrMode="overwrite" redirectStdout="false" stdoutFile="output.log" stdoutMode="overwrite" failOnStderrOutput="true" executableMode="1" changeWorkingDirectory="true" workingDirectory="." singleInstance="true" serviceStartType="2" serviceDependencies="" serviceDescription="" jreLocation="" executionLevel="asInvoker" checkConsoleParameter="false" globalSingleInstance="false" singleInstanceActivate="true" dpiAware="false">
+    <launcher name="IGBfx_WIndows_x64" id="731" customizedId="" external="false" excludeFromMenu="false" unixMode="755" menuName="" icnsFile="" customMacBundleIdentifier="false" macBundleIdentifier="" swtApp="false" fileset="" macBundleBinary="JavaApplicationStub" addMacEntitlements="false" macEntitlementsFile="" useCustomMacosExecutableName="false" customMacosExecutableName="">
+      <executable name="IGBfx" type="1" iconSet="false" iconFile="" executableDir="" redirectStderr="true" stderrFile="error.log" stderrMode="overwrite" redirectStdout="false" stdoutFile="output.log" stdoutMode="overwrite" failOnStderrOutput="true" executableMode="1" changeWorkingDirectory="true" workingDirectory="." singleInstance="false" serviceStartType="2" serviceDependencies="" serviceDescription="" jreLocation="" executionLevel="asInvoker" checkConsoleParameter="false" globalSingleInstance="false" singleInstanceActivate="true" dpiAware="false">
         <versionInfo include="false" fileVersion="" fileDescription="" legalCopyright="" internalName="" productName="" />
       </executable>
-      <splashScreen show="true" width="0" height="0" bitmapFile="./branding/igb_splash.png" windowsNative="true" textOverlay="false">
+      <splashScreen show="true" width="0" height="0" bitmapFile="./branding/igb_splash2.png" windowsNative="false" textOverlay="false">
         <text>
           <statusLine x="20" y="20" text="" fontSize="8" fontColor="0,0,0" bold="false" />
           <versionLine x="20" y="40" text="version ${compiler:sys.version}" fontSize="8" fontColor="0,0,0" bold="false" />
         </text>
       </splashScreen>
-      <java mainClass="com.affymetrix.main.Main" vmParameters="-Dapple.laf.useScreenMenuBar=true -Xmx1024m" arguments="" allowVMPassthroughParameters="true" preferredVM="" bundleRuntime="true">
+      <java mainClass="org.apache.karaf.main.Main" vmParameters="-Dcom.sun.management.jmxremote &quot;-Djava.endorsed.dirs=${launcher:sys.jvmHome}\lib\endorsed;${launcher:sys.jvmHome}\lib\endorsed;${launcher:sys.launcherDirectory}\karaf\lib\endorsed&quot; &quot;-Djava.ext.dirs=${launcher:sys.jvmHome}\lib\ext;${launcher:sys.jvmHome}\lib\ext;${launcher:sys.launcherDirectory}\karaf\lib\ext&quot; &quot;-Dkaraf.instances=${launcher:sys.launcherDirectory}\karaf\instances&quot; &quot;-Dkaraf.home=${launcher:sys.launcherDirectory}\karaf&quot; &quot;-Dkaraf.base=${launcher:sys.launcherDirectory}\karaf&quot; &quot;-Dkaraf.data=${launcher:sys.launcherDirectory}\karaf\data&quot; &quot;-Dkaraf.etc=${launcher:sys.launcherDirectory}\karaf\etc&quot; -Dkaraf.restart.jvm.supported=true &quot;-Djava.io.tmpdir=${launcher:sys.launcherDirectory}\karaf\data\tmp&quot; &quot;-Djava.util.logging.config.file=${launcher:sys.launcherDirectory}\karaf\etc\java.util.logging.properties&quot; -Dkaraf.startLocalConsole=false -Dkaraf.startRemoteShell=true" arguments="" allowVMPassthroughParameters="true" preferredVM="" bundleRuntime="true">
         <classPath>
-          <archive location="igb_exe.jar" failOnError="false" />
+          <archive location="karaf/lib/boot/org.apache.karaf.diagnostic.boot-4.0.4.jar" failOnError="false" />
+          <archive location="karaf/lib/boot/org.apache.karaf.jaas.boot-4.0.4.jar" failOnError="false" />
+          <archive location="karaf/lib/boot/org.apache.karaf.main-4.0.4.jar" failOnError="false" />
+          <archive location="karaf/lib/boot/org.osgi.core-6.0.0.jar" failOnError="false" />
         </classPath>
         <nativeLibraryDirectories />
+        <vmOptions />
       </java>
       <includedFiles />
       <unextractableFiles />
-      <vmOptionsFile mode="template" overwriteMode="1" fileMode="644">
+      <vmOptionsFile mode="template" overwriteMode="0" fileMode="644">
         <content />
       </vmOptionsFile>
       <customScript mode="1" file="">
@@ -118,12 +121,40 @@
       <infoPlist mode="1" file="">
         <content />
       </infoPlist>
-      <iconImageFiles>
-        <file path="${compiler:projectHomeDirectory}/distribution/branding/igb_16.png" />
-        <file path="${compiler:projectHomeDirectory}/distribution/branding/igb_32.png" />
-        <file path="${compiler:projectHomeDirectory}/distribution/branding/igb_48.png" />
-        <file path="${compiler:projectHomeDirectory}/distribution/branding/igb_128.png" />
-      </iconImageFiles>
+      <iconImageFiles />
+    </launcher>
+    <launcher name="IGBfx_WIndows_x86" id="738" customizedId="" external="false" excludeFromMenu="false" unixMode="755" menuName="" icnsFile="" customMacBundleIdentifier="false" macBundleIdentifier="" swtApp="false" fileset="" macBundleBinary="JavaApplicationStub" addMacEntitlements="false" macEntitlementsFile="" useCustomMacosExecutableName="false" customMacosExecutableName="">
+      <executable name="IGBfx" type="1" iconSet="false" iconFile="" executableDir="" redirectStderr="true" stderrFile="error.log" stderrMode="overwrite" redirectStdout="true" stdoutFile="output.log" stdoutMode="overwrite" failOnStderrOutput="true" executableMode="1" changeWorkingDirectory="true" workingDirectory="." singleInstance="false" serviceStartType="2" serviceDependencies="" serviceDescription="" jreLocation="" executionLevel="asInvoker" checkConsoleParameter="false" globalSingleInstance="false" singleInstanceActivate="true" dpiAware="false">
+        <versionInfo include="false" fileVersion="" fileDescription="" legalCopyright="" internalName="" productName="" />
+      </executable>
+      <splashScreen show="true" width="0" height="0" bitmapFile="./branding/igb_splash2.png" windowsNative="false" textOverlay="false">
+        <text>
+          <statusLine x="20" y="20" text="" fontSize="8" fontColor="0,0,0" bold="false" />
+          <versionLine x="20" y="40" text="version ${compiler:sys.version}" fontSize="8" fontColor="0,0,0" bold="false" />
+        </text>
+      </splashScreen>
+      <java mainClass="org.apache.karaf.main.Main" vmParameters="-Dcom.sun.management.jmxremote &quot;-Djava.endorsed.dirs=${launcher:sys.jvmHome}\lib\endorsed;${launcher:sys.jvmHome}\lib\endorsed;${launcher:sys.launcherDirectory}\karaf\lib\endorsed&quot; &quot;-Djava.ext.dirs=${launcher:sys.jvmHome}\lib\ext;${launcher:sys.jvmHome}\lib\ext;${launcher:sys.launcherDirectory}\karaf\lib\ext&quot; &quot;-Dkaraf.instances=${launcher:sys.launcherDirectory}\karaf\instances&quot; &quot;-Dkaraf.home=${launcher:sys.launcherDirectory}\karaf&quot; &quot;-Dkaraf.base=${launcher:sys.launcherDirectory}\karaf&quot; &quot;-Dkaraf.data=${launcher:sys.launcherDirectory}\karaf\data&quot; &quot;-Dkaraf.etc=${launcher:sys.launcherDirectory}\karaf\etc&quot; -Dkaraf.restart.jvm.supported=true &quot;-Djava.io.tmpdir=${launcher:sys.launcherDirectory}\karaf\data\tmp&quot; &quot;-Djava.util.logging.config.file=${launcher:sys.launcherDirectory}\karaf\etc\java.util.logging.properties&quot; -Dkaraf.startLocalConsole=false -Dkaraf.startRemoteShell=true" arguments="" allowVMPassthroughParameters="true" preferredVM="" bundleRuntime="true">
+        <classPath>
+          <archive location="karaf/lib/boot/org.apache.karaf.diagnostic.boot-4.0.4.jar" failOnError="false" />
+          <archive location="karaf/lib/boot/org.apache.karaf.jaas.boot-4.0.4.jar" failOnError="false" />
+          <archive location="karaf/lib/boot/org.apache.karaf.main-4.0.4.jar" failOnError="false" />
+          <archive location="karaf/lib/boot/org.osgi.core-6.0.0.jar" failOnError="false" />
+        </classPath>
+        <nativeLibraryDirectories />
+        <vmOptions />
+      </java>
+      <includedFiles />
+      <unextractableFiles />
+      <vmOptionsFile mode="template" overwriteMode="0" fileMode="644">
+        <content />
+      </vmOptionsFile>
+      <customScript mode="1" file="">
+        <content />
+      </customScript>
+      <infoPlist mode="1" file="">
+        <content />
+      </infoPlist>
+      <iconImageFiles />
     </launcher>
   </launchers>
   <installerGui installerType="1" addOnAppId="" suggestPreviousLocations="true" autoUpdateDescriptorUrl="${compiler:codeBaseUrl}/updates.xml" useAutoUpdateBaseUrl="false" autoUpdateBaseUrl="">
@@ -346,27 +377,6 @@
             <preActivation />
             <postActivation />
             <actions>
-              <action name="" id="554" customizedId="" beanClass="com.install4j.runtime.beans.actions.files.DeleteFileAction" enabled="true" commentSet="false" comment="" actionElevationType="elevated" rollbackBarrier="false" multiExec="false" failureStrategy="1" errorMessage="">
-                <serializedBean>
-                  <java class="java.beans.XMLDecoder">
-                    <object class="com.install4j.runtime.beans.actions.files.DeleteFileAction">
-                      <void property="files">
-                        <array class="java.io.File" length="1">
-                          <void index="0">
-                            <object class="java.io.File">
-                              <string>${installer:sys.installationDir}/optionalPlugins</string>
-                            </object>
-                          </void>
-                        </array>
-                      </void>
-                      <void property="recursive">
-                        <boolean>true</boolean>
-                      </void>
-                    </object>
-                  </java>
-                </serializedBean>
-                <condition />
-              </action>
               <action name="" id="9" customizedId="" beanClass="com.install4j.runtime.beans.actions.InstallFilesAction" enabled="true" commentSet="false" comment="" actionElevationType="elevated" rollbackBarrier="false" multiExec="false" failureStrategy="2" errorMessage="${i18n:FileCorrupted}">
                 <serializedBean>
                   <java class="java.beans.XMLDecoder">
@@ -424,41 +434,49 @@
                 </serializedBean>
                 <condition>context.getBooleanVariable("createDesktopLinkAction")</condition>
               </action>
-              <action name="Define OSGi cache variable" id="468" customizedId="" beanClass="com.install4j.runtime.beans.actions.control.RunScriptAction" enabled="true" commentSet="false" comment="" actionElevationType="inherit" rollbackBarrier="false" multiExec="false" failureStrategy="1" errorMessage="">
+              <action name="" id="712" customizedId="" beanClass="com.install4j.runtime.beans.actions.files.SetModeAction" enabled="true" commentSet="false" comment="" actionElevationType="elevated" rollbackBarrier="false" multiExec="false" failureStrategy="1" errorMessage="">
                 <serializedBean>
                   <java class="java.beans.XMLDecoder">
-                    <object class="com.install4j.runtime.beans.actions.control.RunScriptAction">
-                      <void property="script">
-                        <object class="com.install4j.api.beans.ScriptProperty">
-                          <void property="value">
-                            <string>boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("windows");
-                                                            String igbHomeDirName = ".igb";
-                                                            String igbDataHome = "";
-                                                            if (IS_WINDOWS) {
-                                                            igbDataHome = System.getenv("AppData") + File.separator + "IGB";
-                                                            } else {
-                                                            igbDataHome = System.getProperty("user.home") + File.separator + igbHomeDirName;
-                                                            }
-                                                            File igbDataHomeFile = new File(igbDataHome);
-                                                            if (!igbDataHomeFile.mkdir()) {
-                                                            File osgiBundleCacheDir = new File(igbDataHome + File.separator + "bundles");
-                                                            osgiBundleCacheDir.mkdir();
-                                                            context.setVariable("osgiBundleCacheDir", igbDataHome + File.separator + "bundles");
-                                                            }else{
-                                                            context.setVariable("osgiBundleCacheDir", "");
-                                                            }
-
-
-                                                            return true;</string>
+                    <object class="com.install4j.runtime.beans.actions.files.SetModeAction">
+                      <void property="files">
+                        <array class="java.io.File" length="1">
+                          <void index="0">
+                            <object class="java.io.File">
+                              <string>.</string>
+                            </object>
                           </void>
-                        </object>
+                        </array>
+                      </void>
+                      <void property="mode">
+                        <string>775</string>
+                      </void>
+                      <void property="recursive">
+                        <boolean>true</boolean>
                       </void>
                     </object>
                   </java>
                 </serializedBean>
                 <condition />
               </action>
-              <action name="Delete OSGi Cache" id="469" customizedId="" beanClass="com.install4j.runtime.beans.actions.files.DeleteFileAction" enabled="true" commentSet="false" comment="" actionElevationType="elevated" rollbackBarrier="false" multiExec="false" failureStrategy="1" errorMessage="">
+              <action name="" id="725" customizedId="" beanClass="com.install4j.runtime.beans.actions.files.AddWindowsFileRightsAction" enabled="true" commentSet="false" comment="" actionElevationType="elevated" rollbackBarrier="false" multiExec="false" failureStrategy="1" errorMessage="">
+                <serializedBean>
+                  <java class="java.beans.XMLDecoder">
+                    <object class="com.install4j.runtime.beans.actions.files.AddWindowsFileRightsAction">
+                      <void property="files">
+                        <array class="java.io.File" length="1">
+                          <void index="0">
+                            <object class="java.io.File">
+                              <string>karaf</string>
+                            </object>
+                          </void>
+                        </array>
+                      </void>
+                    </object>
+                  </java>
+                </serializedBean>
+                <condition />
+              </action>
+              <action name="" id="763" customizedId="" beanClass="com.install4j.runtime.beans.actions.files.DeleteFileAction" enabled="true" commentSet="false" comment="" actionElevationType="elevated" rollbackBarrier="false" multiExec="false" failureStrategy="1" errorMessage="">
                 <serializedBean>
                   <java class="java.beans.XMLDecoder">
                     <object class="com.install4j.runtime.beans.actions.files.DeleteFileAction">
@@ -469,29 +487,13 @@
                         <array class="java.io.File" length="1">
                           <void index="0">
                             <object class="java.io.File">
-                              <string>${installer:osgiBundleCacheDir}</string>
+                              <string>karaf/data/cache</string>
                             </object>
                           </void>
                         </array>
                       </void>
                       <void property="recursive">
                         <boolean>true</boolean>
-                      </void>
-                    </object>
-                  </java>
-                </serializedBean>
-                <condition>com.install4j.api.Util.logInfo(null, context.getVariable("osgiBundleCacheDir").toString());
-                                    return !context.getVariable("osgiBundleCacheDir").toString().equalsIgnoreCase("");</condition>
-              </action>
-              <action name="Remove Window Preferences" id="697" customizedId="" beanClass="com.install4j.runtime.beans.actions.registry.DeletePreferenceItemAction" enabled="true" commentSet="false" comment="" actionElevationType="elevated" rollbackBarrier="false" multiExec="false" failureStrategy="1" errorMessage="">
-                <serializedBean>
-                  <java class="java.beans.XMLDecoder">
-                    <object class="com.install4j.runtime.beans.actions.registry.DeletePreferenceItemAction">
-                      <void property="onlyIfEmpty">
-                        <boolean>false</boolean>
-                      </void>
-                      <void property="packageName">
-                        <string>com.affymetrix.igb.window</string>
                       </void>
                     </object>
                   </java>
@@ -512,12 +514,36 @@
             <preActivation />
             <postActivation />
             <actions>
-              <action name="" id="287" customizedId="" beanClass="com.install4j.runtime.beans.actions.finish.ExecuteLauncherAction" enabled="true" commentSet="false" comment="" actionElevationType="none" rollbackBarrier="false" multiExec="false" failureStrategy="1" errorMessage="">
+              <action name="Execute Unix" id="287" customizedId="" beanClass="com.install4j.runtime.beans.actions.finish.ExecuteLauncherAction" enabled="true" commentSet="false" comment="" actionElevationType="elevated" rollbackBarrier="false" multiExec="false" failureStrategy="1" errorMessage="">
                 <serializedBean>
                   <java class="java.beans.XMLDecoder">
                     <object class="com.install4j.runtime.beans.actions.finish.ExecuteLauncherAction">
                       <void property="launcherId">
-                        <string>22</string>
+                        <string>727</string>
+                      </void>
+                    </object>
+                  </java>
+                </serializedBean>
+                <condition>context.getBooleanVariable("executeLauncherAction") &amp;&amp; (!context.isUnattended())</condition>
+              </action>
+              <action name="Execute Windows_x64" id="773" customizedId="" beanClass="com.install4j.runtime.beans.actions.finish.ExecuteLauncherAction" enabled="true" commentSet="false" comment="" actionElevationType="none" rollbackBarrier="false" multiExec="false" failureStrategy="1" errorMessage="">
+                <serializedBean>
+                  <java class="java.beans.XMLDecoder">
+                    <object class="com.install4j.runtime.beans.actions.finish.ExecuteLauncherAction">
+                      <void property="launcherId">
+                        <string>731</string>
+                      </void>
+                    </object>
+                  </java>
+                </serializedBean>
+                <condition>context.getBooleanVariable("executeLauncherAction") &amp;&amp; (!context.isUnattended())</condition>
+              </action>
+              <action name="Execute WIndows_x86" id="774" customizedId="" beanClass="com.install4j.runtime.beans.actions.finish.ExecuteLauncherAction" enabled="true" commentSet="false" comment="" actionElevationType="none" rollbackBarrier="false" multiExec="false" failureStrategy="1" errorMessage="">
+                <serializedBean>
+                  <java class="java.beans.XMLDecoder">
+                    <object class="com.install4j.runtime.beans.actions.finish.ExecuteLauncherAction">
+                      <void property="launcherId">
+                        <string>738</string>
                       </void>
                     </object>
                   </java>
@@ -1517,30 +1543,62 @@
     </applications>
   </installerGui>
   <mediaSets>
-    <windows name="Windows_x86_64" id="23" customizedId="" mediaFileName="" installDir="${compiler:sys.shortName}" overridePrincipalLanguage="false" jreBitType="64" runPostProcessor="false" postProcessor="" failOnPostProcessorError="false" useLegacyMediaFileIds="false" legacyMediaFileIds="" downloadURL="" includeAllDownloadableComponents="false" includedJRE="windows-amd64-1.8.0_66" manualJREEntry="false" bundleType="1" jreURL="" jreShared="false" directDownload="false" installOnlyIfNecessary="false" customInstallBaseDir="" contentFilesType="1" verifyIntegrity="true">
+    <windows name="Windows_x86_64" id="23" customizedId="" mediaFileName="" installDir="${compiler:sys.shortName}" overridePrincipalLanguage="false" jreBitType="64" runPostProcessor="false" postProcessor="" failOnPostProcessorError="false" useLegacyMediaFileIds="false" legacyMediaFileIds="" downloadURL="" includeAllDownloadableComponents="false" includedJRE="windows-amd64-1.8.0_77" manualJREEntry="false" bundleType="1" jreURL="" jreShared="false" directDownload="false" installOnlyIfNecessary="false" customInstallBaseDir="" contentFilesType="1" verifyIntegrity="true">
       <excludedComponents />
       <includedDownloadableComponents />
       <excludedLaunchers>
-        <launcher id="368" />
+        <launcher id="727" />
+        <launcher id="738" />
       </excludedLaunchers>
-      <excludedBeans />
+      <excludedBeans>
+        <bean refId="287" />
+        <bean refId="774" />
+      </excludedBeans>
       <overriddenPrincipalLanguage id="en" customLocalizationFile="" />
-      <exclude />
+      <exclude>
+        <entry location="org.lorainelab.igb.demo" fileType="regular" />
+        <entry location="org.lorainelab.igb.data.model" fileType="regular" />
+        <entry location="org.lorainelab.igb.menu.api" fileType="regular" />
+        <entry location="org.lorainelab.igb.feature" fileType="regular" />
+        <entry location="org.lorainelab.igb.stage.provider.api" fileType="regular" />
+        <entry location="org.lorainelab.igb.main" fileType="regular" />
+        <entry location="tabs" fileType="regular" />
+        <entry location="org.lorainelab.igb.visualization" fileType="regular" />
+        <entry location="karaf/data/tmp" fileType="regular" />
+        <entry location="karaf/data/log" fileType="regular" />
+        <entry location="karaf/data/cache" fileType="regular" />
+      </exclude>
       <variables />
       <autoUpdate useMinUpdatableVersion="false" minUpdatableVersion="" useMaxUpdatableVersion="false" maxUpdatableVersion="">
         <commentFiles />
         <customAttributes />
       </autoUpdate>
     </windows>
-    <unixInstaller name="Unix Installer" id="25" customizedId="" mediaFileName="" installDir="${compiler:sys.shortName}" overridePrincipalLanguage="false" jreBitType="all" runPostProcessor="false" postProcessor="" failOnPostProcessorError="false" useLegacyMediaFileIds="false" legacyMediaFileIds="" downloadURL="" includeAllDownloadableComponents="false" includedJRE="linux-amd64-1.8.0_65" manualJREEntry="false" bundleType="1" jreURL="" jreShared="false" directDownload="false" installOnlyIfNecessary="false" customInstallBaseDir="" contentFilesType="1">
+    <unixInstaller name="Unix Installer" id="25" customizedId="" mediaFileName="" installDir="${compiler:sys.shortName}" overridePrincipalLanguage="false" jreBitType="all" runPostProcessor="false" postProcessor="" failOnPostProcessorError="false" useLegacyMediaFileIds="false" legacyMediaFileIds="" downloadURL="" includeAllDownloadableComponents="false" includedJRE="linux-amd64-1.8.0_77" manualJREEntry="false" bundleType="1" jreURL="" jreShared="false" directDownload="false" installOnlyIfNecessary="false" customInstallBaseDir="" contentFilesType="1">
       <excludedComponents />
       <includedDownloadableComponents />
       <excludedLaunchers>
-        <launcher id="368" />
+        <launcher id="731" />
+        <launcher id="738" />
       </excludedLaunchers>
-      <excludedBeans />
+      <excludedBeans>
+        <bean refId="773" />
+        <bean refId="774" />
+      </excludedBeans>
       <overriddenPrincipalLanguage id="en" customLocalizationFile="" />
-      <exclude />
+      <exclude>
+        <entry location="org.lorainelab.igb.demo" fileType="regular" />
+        <entry location="org.lorainelab.igb.data.model" fileType="regular" />
+        <entry location="org.lorainelab.igb.menu.api" fileType="regular" />
+        <entry location="org.lorainelab.igb.feature" fileType="regular" />
+        <entry location="org.lorainelab.igb.stage.provider.api" fileType="regular" />
+        <entry location="org.lorainelab.igb.main" fileType="regular" />
+        <entry location="tabs" fileType="regular" />
+        <entry location="org.lorainelab.igb.visualization" fileType="regular" />
+        <entry location="karaf/data/tmp" fileType="regular" />
+        <entry location="karaf/data/log" fileType="regular" />
+        <entry location="karaf/data/cache" fileType="regular" />
+      </exclude>
       <variables />
       <autoUpdate useMinUpdatableVersion="false" minUpdatableVersion="" useMaxUpdatableVersion="false" maxUpdatableVersion="">
         <commentFiles />
@@ -1550,32 +1608,62 @@
         <content />
       </installerScript>
     </unixInstaller>
-    <windows name="Windows_x86" id="179" customizedId="" mediaFileName="" installDir="${compiler:sys.shortName}" overridePrincipalLanguage="false" jreBitType="32" runPostProcessor="false" postProcessor="" failOnPostProcessorError="false" useLegacyMediaFileIds="false" legacyMediaFileIds="" downloadURL="" includeAllDownloadableComponents="false" includedJRE="windows-x86-1.8.0_66" manualJREEntry="false" bundleType="1" jreURL="" jreShared="false" directDownload="false" installOnlyIfNecessary="false" customInstallBaseDir="" contentFilesType="1" verifyIntegrity="true">
+    <windows name="Windows_x86" id="179" customizedId="" mediaFileName="" installDir="${compiler:sys.shortName}" overridePrincipalLanguage="false" jreBitType="32" runPostProcessor="false" postProcessor="" failOnPostProcessorError="false" useLegacyMediaFileIds="false" legacyMediaFileIds="" downloadURL="" includeAllDownloadableComponents="false" includedJRE="windows-x86-1.8.0_77" manualJREEntry="false" bundleType="1" jreURL="" jreShared="false" directDownload="false" installOnlyIfNecessary="false" customInstallBaseDir="" contentFilesType="1" verifyIntegrity="true">
       <excludedComponents />
       <includedDownloadableComponents />
       <excludedLaunchers>
-        <launcher id="22" />
+        <launcher id="727" />
+        <launcher id="731" />
       </excludedLaunchers>
       <excludedBeans>
         <bean refId="287" />
+        <bean refId="773" />
       </excludedBeans>
       <overriddenPrincipalLanguage id="en" customLocalizationFile="" />
-      <exclude />
+      <exclude>
+        <entry location="org.lorainelab.igb.demo" fileType="regular" />
+        <entry location="org.lorainelab.igb.data.model" fileType="regular" />
+        <entry location="org.lorainelab.igb.menu.api" fileType="regular" />
+        <entry location="org.lorainelab.igb.feature" fileType="regular" />
+        <entry location="org.lorainelab.igb.stage.provider.api" fileType="regular" />
+        <entry location="org.lorainelab.igb.main" fileType="regular" />
+        <entry location="tabs" fileType="regular" />
+        <entry location="org.lorainelab.igb.visualization" fileType="regular" />
+        <entry location="karaf/data/tmp" fileType="regular" />
+        <entry location="karaf/data/log" fileType="regular" />
+        <entry location="karaf/data/cache" fileType="regular" />
+      </exclude>
       <variables />
       <autoUpdate useMinUpdatableVersion="false" minUpdatableVersion="" useMaxUpdatableVersion="false" maxUpdatableVersion="">
         <commentFiles />
         <customAttributes />
       </autoUpdate>
     </windows>
-    <macosFolder name="Mac OS X Folder" id="552" customizedId="" mediaFileName="" installDir="${compiler:sys.fullName}" overridePrincipalLanguage="false" jreBitType="all" runPostProcessor="false" postProcessor="" failOnPostProcessorError="false" useLegacyMediaFileIds="false" legacyMediaFileIds="" downloadURL="" includeAllDownloadableComponents="false" includedJRE="macosx-amd64-1.8.0_66" manualJREEntry="false" bundleType="1" jreURL="" jreShared="false" directDownload="false" installOnlyIfNecessary="false" appleJre="false" requiredVmIdPrefix="" customInstallBaseDir="" contentFilesType="1" installerName="${i18n:InstallerName(${compiler:sys.fullName})}" volumeName="${compiler:sys.shortName}" compressDmg="false" signLaunchers="true">
+    <macosFolder name="Mac OS X Folder" id="552" customizedId="" mediaFileName="" installDir="${compiler:sys.fullName}" overridePrincipalLanguage="false" jreBitType="all" runPostProcessor="false" postProcessor="" failOnPostProcessorError="false" useLegacyMediaFileIds="false" legacyMediaFileIds="" downloadURL="" includeAllDownloadableComponents="false" includedJRE="macosx-amd64-1.8.0_77" manualJREEntry="false" bundleType="1" jreURL="" jreShared="false" directDownload="false" installOnlyIfNecessary="false" appleJre="false" requiredVmIdPrefix="" customInstallBaseDir="" contentFilesType="1" installerName="${i18n:InstallerName(${compiler:sys.fullName})}" volumeName="${compiler:sys.shortName}" compressDmg="false" signLaunchers="true">
       <excludedComponents />
       <includedDownloadableComponents />
       <excludedLaunchers>
-        <launcher id="368" />
+        <launcher id="731" />
+        <launcher id="738" />
       </excludedLaunchers>
-      <excludedBeans />
+      <excludedBeans>
+        <bean refId="773" />
+        <bean refId="774" />
+      </excludedBeans>
       <overriddenPrincipalLanguage id="en" customLocalizationFile="" />
-      <exclude />
+      <exclude>
+        <entry location="org.lorainelab.igb.demo" fileType="regular" />
+        <entry location="org.lorainelab.igb.data.model" fileType="regular" />
+        <entry location="org.lorainelab.igb.menu.api" fileType="regular" />
+        <entry location="org.lorainelab.igb.feature" fileType="regular" />
+        <entry location="org.lorainelab.igb.stage.provider.api" fileType="regular" />
+        <entry location="org.lorainelab.igb.main" fileType="regular" />
+        <entry location="tabs" fileType="regular" />
+        <entry location="org.lorainelab.igb.visualization" fileType="regular" />
+        <entry location="karaf/data/tmp" fileType="regular" />
+        <entry location="karaf/data/log" fileType="regular" />
+        <entry location="karaf/data/cache" fileType="regular" />
+      </exclude>
       <variables />
       <autoUpdate useMinUpdatableVersion="false" minUpdatableVersion="" useMaxUpdatableVersion="false" maxUpdatableVersion="">
         <commentFiles />
@@ -1587,5 +1675,5 @@
   <buildIds buildAll="false">
     <mediaSet refId="25" />
   </buildIds>
-  <buildOptions verbose="true" faster="true" disableSigning="true" disableJreBundling="true" debug="false" />
+  <buildOptions verbose="true" faster="false" disableSigning="false" disableJreBundling="false" debug="false" />
 </install4j>
