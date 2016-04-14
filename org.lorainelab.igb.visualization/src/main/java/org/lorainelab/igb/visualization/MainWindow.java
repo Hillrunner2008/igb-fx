@@ -4,6 +4,7 @@ import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
+import java.awt.SplashScreen;
 import java.io.IOException;
 import java.net.URL;
 import javafx.application.Platform;
@@ -37,6 +38,12 @@ public class MainWindow {
     }
 
     private void initiailize() throws IOException {
+        
+        SplashScreen splashScreen = SplashScreen.getSplashScreen();
+        if(splashScreen != null) {       
+            splashScreen.close();
+        }
+        
         initializeFxRuntime();
         final URL resource = MainWindow.class.getClassLoader().getResource("genoVizFx.fxml");
         FXMLLoader loader = new FXMLLoader(resource);
