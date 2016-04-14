@@ -38,6 +38,7 @@
                                 <configuration>
                                     <tasks>
                                         <echo message="Preparing Karaf for distribution"/>
+                                        <mkdir dir="../karaf/deploy"/>
                                         <delete includeemptydirs="true">
                                             <fileset dir="../karaf/deploy" includes="**/*"/>
                                         </delete>
