@@ -5,6 +5,8 @@ package org.lorainelab.igb.data.model.glyph;
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+import com.google.common.collect.ComparisonChain;
+import java.util.Comparator;
 import java.util.Optional;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
@@ -72,4 +74,13 @@ public interface Glyph {
         }
         return Optional.of(new Rectangle2D(x, y + additionalYoffset, width, height));
     }
+
+    static Comparator<CompositionGlyph> MIN_X_COMPARATOR
+            = (glyph1, glyph2) -> {
+                return ComparisonChain.start()
+                .compare(glyph1.getBoundingRect().getMinX(), glyph2.getBoundingRect().getMinX())
+                .compare(glyph1.getBoundingRect().getWidth(), glyph2.getBoundingRect().getWidth())
+                .compare(glyph1.getLabel(), glyph2.getLabel())
+                .result();
+            };
 }

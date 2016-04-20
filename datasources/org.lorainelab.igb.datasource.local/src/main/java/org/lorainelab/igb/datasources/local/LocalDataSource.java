@@ -7,8 +7,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
-import org.lorainelab.igb.datasource.api.DataSource;
-import org.lorainelab.igb.datasource.api.DataSourceReference;
+import org.lorainelab.igb.data.model.datasource.DataSource;
+import org.lorainelab.igb.data.model.datasource.DataSourceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,9 +1,9 @@
-package org.lorainelab.igb.filehandler.api;
+package org.lorainelab.igb.data.model.filehandler.api;
 
+import com.google.common.collect.Range;
 import java.util.Set;
-import org.lorainelab.igb.data.model.Feature;
-import org.lorainelab.igb.data.model.Range;
-import org.lorainelab.igb.datasource.api.DataSourceReference;
+import org.lorainelab.igb.data.model.datasource.DataSourceReference;
+import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
 
 /**
  *
@@ -32,7 +32,7 @@ public interface FileTypeHandler {
      * @param chromosomeId - the id of the chromosome
      * @return Set of features in the requested range
      */
-    Set<? extends Feature> getRegion(DataSourceReference dataSourceReference, final Range range, String chromosomeId);
+    Set<CompositionGlyph> getRegion(DataSourceReference dataSourceReference, final Range range, String chromosomeId);
 
     /**
      * Get all features in a chromosome
@@ -41,5 +41,5 @@ public interface FileTypeHandler {
      * @param chromosomeId - the id of the chromosome
      * @return Set of features in the requested range
      */
-    Set<? extends Feature> getChromosome(DataSourceReference dataSourceReference, String chromosomeId);
+    Set<CompositionGlyph> getChromosome(DataSourceReference dataSourceReference, String chromosomeId);
 }

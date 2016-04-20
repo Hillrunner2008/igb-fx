@@ -9,11 +9,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javafx.stage.FileChooser;
-import org.lorainelab.igb.datasource.api.DataSource;
-import org.lorainelab.igb.filehandler.api.FileTypeHandlerRegistry;
+import org.lorainelab.igb.data.model.DataSet;
+import org.lorainelab.igb.data.model.datasource.DataSource;
+import org.lorainelab.igb.data.model.datasource.DataSourceReference;
+import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandlerRegistry;
 import org.lorainelab.igb.menu.api.MenuBarEntryProvider;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
 import org.lorainelab.igb.menu.api.model.WeightedMenuItem;
+import org.lorainelab.igb.selections.SelectionInfoService;
 
 /**
  *
@@ -25,10 +28,15 @@ public class OpenFileMenuItem implements MenuBarEntryProvider {
     private DataSource dataSource;
     private WeightedMenuItem menuItem;
     private FileTypeHandlerRegistry fileTypeHandlerRegistry;
+    private SelectionInfoService selectionInfoService;
 
     @Activate
     public void activate() {
         menuItem = new WeightedMenuItem(1, "Load File");
+        menuItem.setDisable(!selectionInfoService.getSelectedGenomeVersion().get().isPresent());
+        selectionInfoService.getSelectedGenomeVersion().addListener((observable, oldValue, newValue) -> {
+            menuItem.setDisable(!selectionInfoService.getSelectedGenomeVersion().get().isPresent());
+        });
         menuItem.setOnAction(action -> {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Load File");
@@ -36,7 +44,12 @@ public class OpenFileMenuItem implements MenuBarEntryProvider {
             fileChooser.setInitialDirectory(homeDirectory);
             addFileExtensionFilters(fileChooser);
             Optional.ofNullable(fileChooser.showOpenMultipleDialog(null)).ifPresent(selectedFiles -> {
-
+                selectedFiles.forEach(file -> {
+                    selectionInfoService.getSelectedGenomeVersion().get().ifPresent(gv -> {
+                        DataSourceReference dataSourceReference = new DataSourceReference(file.getPath(), dataSource);
+                        gv.getLoadedDataSets().add(new DataSet("test", dataSourceReference, fileTypeHandlerRegistry.getFileTypeHandlers().stream().findFirst().get()));
+                    });
+                });
             });
         });
     }
@@ -60,6 +73,11 @@ public class OpenFileMenuItem implements MenuBarEntryProvider {
     @Reference
     public void setFileTypeHandlerRegistry(FileTypeHandlerRegistry fileTypeHandlerRegistry) {
         this.fileTypeHandlerRegistry = fileTypeHandlerRegistry;
+    }
+
+    @Reference
+    public void setSelectionInfoService(SelectionInfoService selectionInfoService) {
+        this.selectionInfoService = selectionInfoService;
     }
 
     private void addFileExtensionFilters(FileChooser fileChooser) {

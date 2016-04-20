@@ -3,10 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.lorainelab.igb.filehandler.api;
+package org.lorainelab.igb.data.model.filehandler.api;
 
 import java.util.Set;
-import org.lorainelab.igb.filehandler.api.FileTypeHandler;
+import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandler;
 
 /**
  *

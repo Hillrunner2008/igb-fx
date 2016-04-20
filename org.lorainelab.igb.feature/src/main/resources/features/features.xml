@@ -18,8 +18,6 @@
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.tabs.genome/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.tabs.selection/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.data.model/${project.version}</bundle>
-        <bundle>mvn:${project.groupId}/org.lorainelab.igb.datasource.api/${project.version}</bundle>
-        <bundle>mvn:${project.groupId}/org.lorainelab.igb.filehandler.api/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.datasource.local/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.menu.openfile/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.filehandler.registry/${project.version}</bundle>

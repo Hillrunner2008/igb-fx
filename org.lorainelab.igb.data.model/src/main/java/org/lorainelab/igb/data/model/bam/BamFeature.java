@@ -1,5 +1,6 @@
 package org.lorainelab.igb.data.model.bam;
 
+import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
 import htsjdk.samtools.Cigar;
 import htsjdk.samtools.CigarElement;
@@ -7,13 +8,12 @@ import htsjdk.samtools.SAMRecord;
 import java.util.Optional;
 import java.util.Set;
 import org.lorainelab.igb.data.model.Feature;
-import org.lorainelab.igb.data.model.Range;
 import org.lorainelab.igb.data.model.Strand;
 import org.lorainelab.igb.data.model.bam.AlignmentBlock.AlignmentType;
 
 public class BamFeature implements Feature {
 
-    private final Range range;
+    private final Range<Integer> range;
     private final Strand strand;
     private final SAMRecord samRecord;
     private final int alignmentStart;
@@ -25,15 +25,15 @@ public class BamFeature implements Feature {
         alignmentEnd = samRecord.getAlignmentEnd() - 1;
         if (!samRecord.getReadNegativeStrandFlag()) {
             strand = Strand.POSITIVE;
-            range = new Range(alignmentStart, alignmentEnd);
+            range = Range.closedOpen(alignmentStart, alignmentEnd);
         } else {
             strand = Strand.NEGATIVE;
-            range = new Range(alignmentStart, alignmentEnd);
+            range = Range.closedOpen(alignmentStart, alignmentEnd);
         }
     }
 
     @Override
-    public Range getRange() {
+    public Range<Integer> getRange() {
         return range;
     }
 
@@ -65,9 +65,9 @@ public class BamFeature implements Feature {
     }
 
     public String getAlignmentBlockSequence(AlignmentBlock alignmentBlock) {
-        Range alignmentBlockRange = alignmentBlock.getRange();
-        final int sequenceStartPos = alignmentBlockRange.getStart() - alignmentStart;
-        final int sequenceEndPos = sequenceStartPos + alignmentBlockRange.getLength();
+        Range<Integer> alignmentBlockRange = alignmentBlock.getRange();
+        final int sequenceStartPos = alignmentBlockRange.lowerEndpoint() - alignmentStart;
+        final int sequenceEndPos = sequenceStartPos + alignmentBlockRange.upperEndpoint() - alignmentBlockRange.lowerEndpoint();
         return samRecord.getReadString().substring(sequenceStartPos, sequenceEndPos);
     }
 
@@ -78,18 +78,18 @@ public class BamFeature implements Feature {
         for (CigarElement cigarElement : cigar.getCigarElements()) {
             switch (cigarElement.getOperator()) {
                 case D:
-                    blocks.add(new AlignmentBlock(new Range(start, start + cigarElement.getLength()), AlignmentType.DELETION));
+                    blocks.add(new AlignmentBlock(Range.closedOpen(start, start + cigarElement.getLength()), AlignmentType.DELETION));
                     start += cigarElement.getLength();
                     break;
                 case I:
-                    blocks.add(new AlignmentBlock(new Range(start, start + cigarElement.getLength()), AlignmentType.INSERTION));
+                    blocks.add(new AlignmentBlock(Range.closedOpen(start, start + cigarElement.getLength()), AlignmentType.INSERTION));
                     break;
                 case M:
-                    blocks.add(new AlignmentBlock(new Range(start, start + cigarElement.getLength()), AlignmentType.MATCH));
+                    blocks.add(new AlignmentBlock(Range.closedOpen(start, start + cigarElement.getLength()), AlignmentType.MATCH));
                     start += cigarElement.getLength();
                     break;
                 case N:
-                    blocks.add(new AlignmentBlock(new Range(start, start + cigarElement.getLength()), AlignmentType.GAP));
+                    blocks.add(new AlignmentBlock(Range.closedOpen(start, start + cigarElement.getLength()), AlignmentType.GAP));
                     start += cigarElement.getLength();
                     break;
                 case P:

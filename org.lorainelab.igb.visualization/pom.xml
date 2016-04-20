@@ -66,6 +66,11 @@
         </dependency>
         <dependency>
             <groupId>org.lorainelab</groupId>
+            <artifactId>org.lorainelab.igb.selections</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.lorainelab</groupId>
             <artifactId>org.lorainelab.igb.menu.api</artifactId>
             <version>${project.parent.version}</version>
         </dependency>

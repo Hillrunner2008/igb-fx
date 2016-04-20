@@ -17,6 +17,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
+import org.lorainelab.igb.selections.SelectionInfoService;
 import org.lorainelab.igb.visualization.event.ClickDragCancelEvent;
 import org.lorainelab.igb.visualization.event.ClickDragEndEvent;
 import org.lorainelab.igb.visualization.event.ClickDragStartEvent;
@@ -49,6 +50,7 @@ public class CanvasPane extends Region {
     private GenoVixFxController controller;
     private EventBusService eventBusService;
     private List<MouseEvent> mouseEvents;
+    private SelectionInfoService selectionInfoService;
 
     public CanvasPane() {
     }
@@ -68,6 +70,12 @@ public class CanvasPane extends Region {
         canvas.heightProperty().addListener(observable -> draw());
         zoomStripeCoordinate = -1;
         initializeMouseEventHandlers();
+        selectionInfoService.getSelectedChromosome().addListener((observable, oldValue, newValue) -> {
+            if (newValue.isPresent()) {
+                modelWidth = newValue.get().getLength();
+                xFactor = canvas.getWidth() / modelWidth;
+            }
+        });
     }
 
     private Point2D getLocalPoint2DFromMouseEvent(MouseEvent event) {
@@ -126,7 +134,7 @@ public class CanvasPane extends Region {
             } else {
                 eventBus.post(new ClickDragCancelEvent());
                 if (event.getClickCount() >= 2) {
-                    
+
                     eventBus.post(new MouseDoubleClickEvent(
                             getLocalPoint2DFromMouseEvent(event),
                             getScreenPoint2DFromMouseEvent(event))
@@ -141,7 +149,7 @@ public class CanvasPane extends Region {
                 }
             }
             mouseEvents.clear();
-            
+
         });
 
         EventStream<MouseEvent> mouseEventsStream = EventStreams.eventsOf(canvas, MouseEvent.ANY);
@@ -165,7 +173,7 @@ public class CanvasPane extends Region {
                 pos -> new MouseStationaryStartEvent(pos),
                 stop -> new MouseStationaryEndEvent()))
                 .subscribe(evt -> eventBus.post(evt));
-        
+
         canvas.setOnScroll(scrollEvent -> {
             final boolean isForwardScroll = scrollEvent.getDeltaY() > 0.0;
             if (isForwardScroll) {
@@ -180,7 +188,7 @@ public class CanvasPane extends Region {
         this.zoomStripeCoordinate = -1;
         eventBus.post(new ZoomStripeEvent(zoomStripeCoordinate));
         eventBus.post(new RefreshTrackEvent());
-        
+
     }
 
     @Override
@@ -257,15 +265,15 @@ public class CanvasPane extends Region {
     @Reference(optional = true)
     public void setMainViewController(GenoVixFxController controller) {
         this.controller = controller;
-//        controller.getHSliderValue().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-//            xFactor = CanvasUtils.exponentialScaleTransform(this, newValue.doubleValue());
-//            visibleVirtualCoordinatesX = Math.floor(canvas.getWidth() / xFactor);
-//            xOffset = Math.round((controller.getXScrollPosition().doubleValue() / 100) * (modelWidth - visibleVirtualCoordinatesX));
-//        });
     }
 
     @Reference
     public void setEventBusService(EventBusService eventBusService) {
         this.eventBusService = eventBusService;
+    }
+
+    @Reference
+    public void setSelectionInfoService(SelectionInfoService selectionInfoService) {
+        this.selectionInfoService = selectionInfoService;
     }
 }

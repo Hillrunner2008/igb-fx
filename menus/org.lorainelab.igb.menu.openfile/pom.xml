@@ -9,7 +9,7 @@
         <groupId>org.lorainelab</groupId>
         <artifactId>org.lorainelab.igb</artifactId>
         <version>0.0.1</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
     
     
@@ -28,19 +28,13 @@
         </dependency>
         <dependency>
             <groupId>org.lorainelab</groupId>
-            <artifactId>org.lorainelab.igb.menu.api</artifactId>
-            <version>${project.version}</version>  
-        </dependency>
-        <dependency>
-             <groupId>org.lorainelab</groupId>
-    <artifactId>org.lorainelab.igb.datasource.api</artifactId>
-            <version>${project.version}</version>  
+            <artifactId>org.lorainelab.igb.selections</artifactId>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>org.lorainelab</groupId>
-            <artifactId>org.lorainelab.igb.filehandler.api</artifactId>
-            <version>0.0.1</version>
-            <type>jar</type>
+            <artifactId>org.lorainelab.igb.menu.api</artifactId>
+            <version>${project.version}</version>  
         </dependency>
     </dependencies>
 

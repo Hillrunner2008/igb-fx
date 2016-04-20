@@ -39,6 +39,9 @@ public class ViewPortManager {
         if (totalTrackSize < canvasHeight) {
             double availableTrackSpace = canvas.getHeight() - COORDINATE_TRACK_HEIGHT;
             MIN_TRACK_HEIGHT = availableTrackSpace / trackCountExcludingCoordinates;
+            if (!Range.closedOpen((double) 0, canvasHeight).contains(MIN_TRACK_HEIGHT)) {
+                MIN_TRACK_HEIGHT = 100;
+            }
             trackSize = MIN_TRACK_HEIGHT + (MAX_TRACK_HEIGHT - MIN_TRACK_HEIGHT) * vSliderValue / 100;
             totalTrackSize = trackSize * trackCountExcludingCoordinates + COORDINATE_TRACK_HEIGHT;
         }
@@ -85,7 +88,7 @@ public class ViewPortManager {
 
     private void updateCanvasContexts() {
         int[] i = {0};
-        trackRenderers.stream().sorted(SORT_BY_WEIGHT).forEach(trackRenderer -> {
+        trackRenderers.stream().sorted(SORT_BY_WEIGHT.reversed()).forEach(trackRenderer -> {
             double startPosition = calculateTrackStartPosition(i[0]);
             double endPosition = calculateEndPosition(i[0], startPosition);
             if (startPosition >= 0 && endPosition > 0 && startPosition < endPosition) {

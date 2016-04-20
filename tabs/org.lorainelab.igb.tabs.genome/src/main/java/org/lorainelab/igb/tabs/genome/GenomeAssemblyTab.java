@@ -92,14 +92,29 @@ public class GenomeAssemblyTab implements TabProvider {
             }
         });
         genomeVersionComboBox.setDisable(true);
-        genomeVersionComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
-            tableData.clear();
-            tableData.addAll(newValue.getReferenceSequenceProvider().getChromosomes());
-            newValue.getReferenceSequenceProvider().getChromosomes().stream()
+        genomeVersionComboBox.valueProperty().addListener((observable, oldValue, selectedGenomeVersion) -> {
+            Platform.runLater(() -> {
+                tableData.clear();
+                tableData.addAll(selectedGenomeVersion.getReferenceSequenceProvider().getChromosomes());
+            });
+            selectedGenomeVersion.getReferenceSequenceProvider().getChromosomes().addListener((SetChangeListener.Change<? extends Chromosome> change) -> {
+                Platform.runLater(() -> {
+                    if (change.wasAdded()) {
+                        tableData.add(change.getElementAdded());
+                    } else {
+                        tableData.remove(change.getElementRemoved());
+                    }
+                });
+            });
+            sequenceInfoTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, selectedChromosome) -> {
+                selectedGenomeVersion.setSelectedChromosome(selectedChromosome);
+            });
+            selectedGenomeVersion.getReferenceSequenceProvider().getChromosomes().stream()
                     .findFirst()
                     .ifPresent(chromosome -> {
                         sequenceInfoTable.getSelectionModel().select(chromosome);
                     });
+            genomeVersionRegistry.setSelectedGenomeVersion(selectedGenomeVersion);
         });
     }
 

@@ -8,7 +8,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.util.HashMap;
-import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableSet;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.ReferenceSequenceProvider;
 import org.slf4j.LoggerFactory;
@@ -52,7 +56,7 @@ public class TwoBitParser extends InputStream implements ReferenceSequenceProvid
     private static final char[] bit_chars = {
         'T', 'C', 'A', 'G'
     };
-    private Set<Chromosome> chromosomes;
+    private ObservableSet<Chromosome> chromosomes;
 
     public TwoBitParser(File f) throws Exception {
         this.f = f;
@@ -88,8 +92,13 @@ public class TwoBitParser extends InputStream implements ReferenceSequenceProvid
                         + "pos=" + pos);
             }
         }
-        chromosomes = Sets.newTreeSet((o1, o2) -> Ordering.natural().compare(o1.getName(), o2.getName()));
-        initializeChromosomeInfo();
+        chromosomes = FXCollections.observableSet(Sets.newTreeSet((o1, o2) -> Ordering.natural().compare(o1.getName(), o2.getName())));
+        FutureTask<Void> initChromosomesTask = new FutureTask<>(() -> {
+            initializeChromosomeInfo();
+            return null;
+        });
+        ExecutorService executor = Executors.newFixedThreadPool(1);
+        executor.execute(initChromosomesTask);
     }
 
     private long readFourBytes() throws Exception {
@@ -378,6 +387,7 @@ public class TwoBitParser extends InputStream implements ReferenceSequenceProvid
         try {
             setCurrentSequence(chromosomeId);
             sequence = loadFragment(0, available());
+            close();
         } catch (Exception ex) {
             LOG.error(ex.getMessage(), ex);
         }
@@ -390,6 +400,7 @@ public class TwoBitParser extends InputStream implements ReferenceSequenceProvid
         try {
             setCurrentSequence(chromosomeId);
             sequence = loadFragment(start, length);
+            close();
         } catch (Exception ex) {
             LOG.error(ex.getMessage(), ex);
         }
@@ -409,7 +420,7 @@ public class TwoBitParser extends InputStream implements ReferenceSequenceProvid
     }
 
     @Override
-    public Set<Chromosome> getChromosomes() {
+    public ObservableSet<Chromosome> getChromosomes() {
         return chromosomes;
     }
 
