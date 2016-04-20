@@ -83,6 +83,22 @@
                 <version>4.12</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>1.10</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>2.4</version>
+            </dependency>
+        
+            <dependency>
+                <groupId>org.lorainelab</groupId>
+                <artifactId>org.lorainelab.igb.cache.api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>
@@ -126,6 +142,9 @@
         <module>tabs/org.lorainelab.igb.tabs.genome</module>
         <module>tabs/org.lorainelab.igb.tabs.selection</module>
         
+        <module>cache/org.lorainelab.igb.cache.api</module>
+        <module>cache/org.lorainelab.igb.cache.http</module> 
+               
         <module>org.lorainelab.igb.demo</module>
         <module>org.lorainelab.igb.feature</module>
         <module>org.lorainelab.igb.kar</module>
