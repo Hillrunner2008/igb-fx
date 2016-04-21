@@ -13,9 +13,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
-import org.lorainelab.igb.cache.api.CacheStatus;
-import org.lorainelab.igb.cache.api.ChangeEvent;
-import org.lorainelab.igb.cache.api.RemoteFileCacheService;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -55,6 +52,9 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.lorainelab.igb.cache.api.CacheStatus;
+import org.lorainelab.igb.cache.api.ChangeEvent;
+import org.lorainelab.igb.cache.api.RemoteFileCacheService;
 import org.lorainelab.igb.stage.provider.api.StageProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -175,16 +175,16 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
 
         final Popup popup = new Popup();
         popup.centerOnScreen();
-        
+
         final Spinner spinner = new Spinner();
 
-        spinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(min, 1024*100, incrementSizeInMB.intValue(), step));
+        spinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(min, 1024 * 100, incrementSizeInMB.intValue(), step));
         spinner.setEditable(true);
         //TODO: default options
         Text text = new Text("Would you like to increase the max cache size?  Alternatively, you can manage the cache manually.");
 
         Button yes = new Button("Yes");
-        
+
         final BigInteger yesDefaultIncrementSize = incrementSizeInMB;
         yes.setOnAction((ActionEvent event) -> {
             Platform.runLater(() -> {
@@ -585,8 +585,7 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
 
     private boolean verifyFile(String md5fromHeader, File file) {
         try {
-            String md5Calculated = convertByteArrayToHexString(
-                    DigestUtils.md5(new FileInputStream(file)));
+            String md5Calculated = convertByteArrayToHexString(DigestUtils.md5(new FileInputStream(file)));
             if (md5Calculated.equals(md5fromHeader)) {
                 LOG.debug("Correct hash - original(" + md5fromHeader + ") - downloaded(" + md5Calculated + ")");
                 return true;
