@@ -5,9 +5,6 @@ import com.google.common.collect.Ordering;
 import com.google.common.collect.Range;
 import com.google.common.collect.TreeMultimap;
 import java.util.Comparator;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
 import java.util.stream.Collectors;
 import org.lorainelab.igb.data.model.datasource.DataSourceReference;
 import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandler;
@@ -82,16 +79,10 @@ public class DataSet {
 
     public void loadRegion(String chrId, Range<Integer> range) {
         activeLoadRequests.put(chrId, range);
-        FutureTask<Void> loadDataTask = new FutureTask<>(() -> {
-            loadedAnnoations.putAll(chrId, fileTypeHandler.getRegion(dataSourceReference, range, chrId));
-            refreshPositiveStrandTrack(chrId);
-            refreshNegativeStrandTrack(chrId);
-            refreshCombinedTrack(chrId);
-            return null;
-        });
-        ExecutorService executor = Executors.newFixedThreadPool(1);
-        executor.execute(loadDataTask);
-
+        loadedAnnoations.putAll(chrId, fileTypeHandler.getRegion(dataSourceReference, range, chrId));
+        refreshPositiveStrandTrack(chrId);
+        refreshNegativeStrandTrack(chrId);
+        refreshCombinedTrack(chrId);
     }
 
 }

@@ -1,16 +1,13 @@
 package org.lorainelab.igb.data.model.util;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Ordering;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import java.io.File;
+import htsjdk.samtools.seekablestream.SeekableBufferedStream;
+import htsjdk.samtools.seekablestream.SeekableStream;
+import htsjdk.samtools.seekablestream.SeekableStreamFactory;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.RandomAccessFile;
-import java.util.HashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 import org.lorainelab.igb.data.model.Chromosome;
@@ -28,17 +25,14 @@ import org.slf4j.LoggerFactory;
  *
  * @author Roman Sutormin
  */
-public class TwoBitParser extends InputStream implements ReferenceSequenceProvider {
+public class TwoBitParser implements ReferenceSequenceProvider {
 
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(TwoBitParser.class);
-    public static boolean DEBUG = false;
-    public int DEFAULT_BUFFER_SIZE = 10000;
-    //
-    private RandomAccessFile raf;
-    private File f;
-    private boolean reverse = false;
+    public static int DEFAULT_BUFFER_SIZE = 10000;
+    private static final int MAGIC_NUMBER = 0x1A412743;
+    private boolean reverse;
     private String[] seq_names;
-    private HashMap<String, Long> seq2pos = new HashMap<String, Long>();
+    private Map<String, Long> seq2pos;
     private String cur_seq_name;
     private long[][] cur_nn_blocks;
     private long[][] cur_mask_blocks;
@@ -50,69 +44,56 @@ public class TwoBitParser extends InputStream implements ReferenceSequenceProvid
     private byte[] buffer;
     private long buffer_size;
     private long buffer_pos;
-    private long start_file_pos;
+    private long startFilePos;
     private long file_pos;
-    //
-    private static final char[] bit_chars = {
-        'T', 'C', 'A', 'G'
-    };
+    private static final char[] BIT_CHARS = {'T', 'C', 'A', 'G'};
     private ObservableSet<Chromosome> chromosomes;
+    private CompletableFuture<Void> initializationTask;
+    private final String path;
 
-    public TwoBitParser(File f) throws Exception {
-        this.f = f;
-        raf = new RandomAccessFile(f, "r");
-        long sign = readFourBytes();
-        if (sign == 0x1A412743) {
-            if (DEBUG) {
-                System.err.println("2bit: Normal number architecture");
+    public TwoBitParser(String path) throws Exception {
+        this.path = path;
+        try (SeekableStream seekableStream = new SeekableBufferedStream(SeekableStreamFactory.getInstance().getBufferedStream(SeekableStreamFactory.getInstance().getStreamFor(path)))) {
+            seq2pos = Maps.newLinkedHashMap();
+            long sign = readFourBytes(seekableStream);
+            reverse = isLittleEndianByteOrder(sign);
+            readFourBytes(seekableStream);
+            int seq_qnt = (int) readFourBytes(seekableStream);
+            readFourBytes(seekableStream);
+            seq_names = new String[seq_qnt];
+            for (int i = 0; i < seq_qnt; i++) {
+                int name_len = seekableStream.read();
+                char[] chars = new char[name_len];
+                for (int j = 0; j < name_len; j++) {
+                    chars[j] = (char) seekableStream.read();
+                }
+                seq_names[i] = new String(chars);
+                long pos = readFourBytes(seekableStream);
+                seq2pos.put(seq_names[i], pos);
             }
-        } else if (sign == 0x4327411A) {
-            reverse = true;
-            if (DEBUG) {
-                System.err.println("2bit: Reverse number architecture");
-            }
-        } else {
-            throw new Exception("Wrong start signature in 2BIT format");
+            chromosomes = FXCollections.observableSet(Sets.newTreeSet((o1, o2) -> o1.compareTo(o2)));
+            initializationTask = CompletableFuture.<Void>supplyAsync(() -> {
+                initializeChromosomeInfo();
+                return null;
+            }).exceptionally(ex -> {
+                LOG.error(ex.getMessage(), ex);
+                return null;
+            });
         }
-        readFourBytes();
-        int seq_qnt = (int) readFourBytes();
-        readFourBytes();
-        seq_names = new String[seq_qnt];
-        for (int i = 0; i < seq_qnt; i++) {
-            int name_len = raf.read();
-            char[] chars = new char[name_len];
-            for (int j = 0; j < name_len; j++) {
-                chars[j] = (char) raf.read();
-            }
-            seq_names[i] = new String(chars);
-            long pos = readFourBytes();
-            seq2pos.put(seq_names[i], pos);
-            if (DEBUG) {
-                System.err.println("2bit: Sequence name=[" + seq_names[i] + "], "
-                        + "pos=" + pos);
-            }
-        }
-        chromosomes = FXCollections.observableSet(Sets.newTreeSet((o1, o2) -> Ordering.natural().compare(o1.getName(), o2.getName())));
-        FutureTask<Void> initChromosomesTask = new FutureTask<>(() -> {
-            initializeChromosomeInfo();
-            return null;
-        });
-        ExecutorService executor = Executors.newFixedThreadPool(1);
-        executor.execute(initChromosomesTask);
     }
 
-    private long readFourBytes() throws Exception {
+    private long readFourBytes(SeekableStream seekableStream) throws Exception {
         long ret = 0;
         if (!reverse) {
-            ret = raf.read();
-            ret += raf.read() * 0x100;
-            ret += raf.read() * 0x10000;
-            ret += raf.read() * 0x1000000;
+            ret = seekableStream.read();
+            ret += seekableStream.read() * 0x100;
+            ret += seekableStream.read() * 0x10000;
+            ret += seekableStream.read() * 0x1000000;
         } else {
-            ret = raf.read() * 0x1000000;
-            ret += raf.read() * 0x10000;
-            ret += raf.read() * 0x100;
-            ret += raf.read();
+            ret = seekableStream.read() * 0x1000000;
+            ret += seekableStream.read() * 0x10000;
+            ret += seekableStream.read() * 0x100;
+            ret += seekableStream.read();
         }
         return ret;
     }
@@ -126,56 +107,39 @@ public class TwoBitParser extends InputStream implements ReferenceSequenceProvid
     /**
      * Method open nucleotide stream for sequence with given name.
      *
-     * @param seq_name name of sequence (one of returned by getSequenceNames()).
+     * @param seqName name of sequence (one of returned by getSequenceNames()).
      * @throws Exception
      */
-    public void setCurrentSequence(String seq_name) throws Exception {
+    public void setCurrentSequence(SeekableStream seekableStream, String seqName) throws Exception {
         if (cur_seq_name != null) {
             throw new Exception("Sequence [" + cur_seq_name + "] was not closed");
         }
-        if (seq2pos.get(seq_name) == null) {
-            throw new Exception("Sequence [" + seq_name + "] was not found in 2bit file");
+        if (seq2pos.get(seqName) == null) {
+            throw new Exception("Sequence [" + seqName + "] was not found in 2bit file");
         }
-        cur_seq_name = seq_name;
-        long pos = seq2pos.get(seq_name);
-        raf.seek(pos);
-        long dna_size = readFourBytes();
-        if (DEBUG) {
-            System.err.println("2bit: Sequence name=[" + cur_seq_name + "], dna_size=" + dna_size);
-        }
+        cur_seq_name = seqName;
+        long pos = seq2pos.get(seqName);
+        seekableStream.seek(pos);
+        long dna_size = readFourBytes(seekableStream);
         cur_dna_size = dna_size;
-        int nn_block_qnt = (int) readFourBytes();
+        int nn_block_qnt = (int) readFourBytes(seekableStream);
         cur_nn_blocks = new long[nn_block_qnt][2];
         for (int i = 0; i < nn_block_qnt; i++) {
-            cur_nn_blocks[i][0] = readFourBytes();
+            cur_nn_blocks[i][0] = readFourBytes(seekableStream);
         }
         for (int i = 0; i < nn_block_qnt; i++) {
-            cur_nn_blocks[i][1] = readFourBytes();
+            cur_nn_blocks[i][1] = readFourBytes(seekableStream);
         }
-        if (DEBUG) {
-            System.err.print("NN-blocks: ");
-            for (int i = 0; i < nn_block_qnt; i++) {
-                System.err.print("[" + cur_nn_blocks[i][0] + "," + cur_nn_blocks[i][1] + "] ");
-            }
-            System.err.println();
-        }
-        int mask_block_qnt = (int) readFourBytes();
+        int mask_block_qnt = (int) readFourBytes(seekableStream);
         cur_mask_blocks = new long[mask_block_qnt][2];
         for (int i = 0; i < mask_block_qnt; i++) {
-            cur_mask_blocks[i][0] = readFourBytes();
+            cur_mask_blocks[i][0] = readFourBytes(seekableStream);
         }
         for (int i = 0; i < mask_block_qnt; i++) {
-            cur_mask_blocks[i][1] = readFourBytes();
+            cur_mask_blocks[i][1] = readFourBytes(seekableStream);
         }
-        if (DEBUG) {
-            System.err.print("Mask-blocks: ");
-            for (int i = 0; i < mask_block_qnt; i++) {
-                System.err.print("[" + cur_mask_blocks[i][0] + "," + cur_mask_blocks[i][1] + "] ");
-            }
-            System.err.println();
-        }
-        readFourBytes();
-        start_file_pos = raf.getFilePointer();
+        readFourBytes(seekableStream);
+        startFilePos = seekableStream.position();
         reset();
     }
 
@@ -187,7 +151,7 @@ public class TwoBitParser extends InputStream implements ReferenceSequenceProvid
         cur_nn_block_num = (cur_nn_blocks.length > 0) ? 0 : -1;
         cur_mask_block_num = (cur_mask_blocks.length > 0) ? 0 : -1;
         cur_bits = new int[4];
-        file_pos = start_file_pos;
+        file_pos = startFilePos;
         buffer_size = 0;
         buffer_pos = -1;
     }
@@ -202,7 +166,7 @@ public class TwoBitParser extends InputStream implements ReferenceSequenceProvid
         return cur_seq_pos;
     }
 
-    public void setCurrentSequencePosition(long pos) throws IOException {
+    public void setCurrentSequencePosition(SeekableStream seekableStream, long pos) throws IOException {
         if (cur_seq_name == null) {
             throw new RuntimeException("Sequence is not set");
         }
@@ -213,17 +177,17 @@ public class TwoBitParser extends InputStream implements ReferenceSequenceProvid
         if (cur_seq_pos > pos) {
             reset();
         }
-        skip(pos - cur_seq_pos);
+        skip(seekableStream, pos - cur_seq_pos);
     }
 
-    private void loadBits() throws IOException {
+    private void loadBits(SeekableStream seekableStream) throws IOException {
         if ((buffer == null) || (buffer_pos < 0) || (file_pos < buffer_pos)
                 || (file_pos >= buffer_pos + buffer_size)) {
             if ((buffer == null) || (buffer.length != DEFAULT_BUFFER_SIZE)) {
                 buffer = new byte[DEFAULT_BUFFER_SIZE];
             }
             buffer_pos = file_pos;
-            buffer_size = raf.read(buffer);
+            buffer_size = seekableStream.read(buffer);
         }
         int cur_byte = buffer[(int) (file_pos - buffer_pos)] & 0xff;
         for (int i = 0; i < 4; i++) {
@@ -236,19 +200,16 @@ public class TwoBitParser extends InputStream implements ReferenceSequenceProvid
      * Method reads 1 nucleotide from sequence stream. You should set current sequence
      * before use it.
      */
-    public int read() throws IOException {
+    public int read(SeekableStream seekableStream) throws IOException {
         if (cur_seq_name == null) {
             throw new IOException("Sequence is not set");
         }
         if (cur_seq_pos == cur_dna_size) {
-            if (DEBUG) {
-                System.err.println("End of sequence (file position:" + raf.getFilePointer() + " )");
-            }
             return -1;
         }
         int bit_num = (int) cur_seq_pos % 4;
         if (bit_num == 0) {
-            loadBits();
+            loadBits(seekableStream);
         } else if (bit_num == 3) {
             file_pos++;
         }
@@ -267,7 +228,7 @@ public class TwoBitParser extends InputStream implements ReferenceSequenceProvid
             }
             ret = 'N';
         } else {
-            ret = bit_chars[cur_bits[bit_num]];
+            ret = BIT_CHARS[cur_bits[bit_num]];
         }
         if ((cur_mask_block_num >= 0)
                 && (cur_mask_blocks[cur_mask_block_num][0] <= cur_seq_pos)) {
@@ -287,13 +248,13 @@ public class TwoBitParser extends InputStream implements ReferenceSequenceProvid
      * Method skips n nucleotides in sequence stream. You should set current sequence
      * before use it.
      */
-    public synchronized long skip(long n) throws IOException {
+    public synchronized long skip(SeekableStream seekableStream, long n) throws IOException {
         if (cur_seq_name == null) {
             throw new IOException("Sequence is not set");
         }
         if (n < 4) {
             int ret = 0;
-            while ((ret < n) && (read() >= 0)) {
+            while ((ret < n) && (read(seekableStream) >= 0)) {
                 ret++;
             }
             return ret;
@@ -302,10 +263,10 @@ public class TwoBitParser extends InputStream implements ReferenceSequenceProvid
             n = cur_dna_size - cur_seq_pos;
         }
         cur_seq_pos += n;
-        file_pos = start_file_pos + (cur_seq_pos / 4);
-        raf.seek(file_pos);
+        file_pos = startFilePos + (cur_seq_pos / 4);
+        seekableStream.seek(file_pos);
         if ((cur_seq_pos % 4) != 0) {
-            loadBits();
+            loadBits(seekableStream);
         }
         while ((cur_nn_block_num >= 0)
                 && (cur_nn_blocks[cur_nn_block_num][0] + cur_nn_blocks[cur_nn_block_num][1] <= cur_seq_pos)) {
@@ -328,7 +289,7 @@ public class TwoBitParser extends InputStream implements ReferenceSequenceProvid
      * Method closes current sequence and it's necessary to invoke it before setting
      * new current sequence.
      */
-    public void close() throws IOException {
+    public void close() {
         cur_seq_name = null;
         cur_nn_blocks = null;
         cur_mask_blocks = null;
@@ -340,7 +301,7 @@ public class TwoBitParser extends InputStream implements ReferenceSequenceProvid
         buffer_size = 0;
         buffer_pos = -1;
         file_pos = -1;
-        start_file_pos = -1;
+        startFilePos = -1;
     }
 
     public int available() throws IOException {
@@ -350,29 +311,15 @@ public class TwoBitParser extends InputStream implements ReferenceSequenceProvid
         return (int) (cur_dna_size - cur_seq_pos);
     }
 
-    /**
-     * Method closes random access file descriptor. You can't use any reading methods
-     * after it.
-     *
-     * @throws Exception
-     */
-    public void closeParser() throws Exception {
-        raf.close();
-    }
-
-    public File getFile() {
-        return f;
-    }
-
-    public String loadFragment(long seq_pos, int len) throws IOException {
+    public String loadFragment(SeekableStream seekableStream, long seq_pos, int len) throws IOException {
         if (cur_seq_name == null) {
             throw new IOException("Sequence is not set");
         }
-        setCurrentSequencePosition(seq_pos);
+        setCurrentSequencePosition(seekableStream, seq_pos);
         char[] ret = new char[len];
         int i = 0;
         for (; i < len; i++) {
-            int ch = read();
+            int ch = read(seekableStream);
             if (ch < 0) {
                 break;
             }
@@ -384,9 +331,12 @@ public class TwoBitParser extends InputStream implements ReferenceSequenceProvid
     @Override
     public String getSequence(String chromosomeId) {
         String sequence = "";
-        try {
-            setCurrentSequence(chromosomeId);
-            sequence = loadFragment(0, available());
+        try (SeekableStream seekableStream = new SeekableBufferedStream(SeekableStreamFactory.getInstance().getBufferedStream(SeekableStreamFactory.getInstance().getStreamFor(path)))) {
+            if (!initializationTask.isDone()) {
+                initializationTask.get();
+            }
+            setCurrentSequence(seekableStream, chromosomeId);
+            sequence = loadFragment(seekableStream, 0, available());
             close();
         } catch (Exception ex) {
             LOG.error(ex.getMessage(), ex);
@@ -397,9 +347,12 @@ public class TwoBitParser extends InputStream implements ReferenceSequenceProvid
     @Override
     public String getSequence(String chromosomeId, int start, int length) {
         String sequence = "";
-        try {
-            setCurrentSequence(chromosomeId);
-            sequence = loadFragment(start, length);
+        try (SeekableStream seekableStream = new SeekableBufferedStream(SeekableStreamFactory.getInstance().getBufferedStream(SeekableStreamFactory.getInstance().getStreamFor(path)))) {
+            if (!initializationTask.isDone()) {
+                initializationTask.get();
+            }
+            setCurrentSequence(seekableStream, chromosomeId);
+            sequence = loadFragment(seekableStream, start, length);
             close();
         } catch (Exception ex) {
             LOG.error(ex.getMessage(), ex);
@@ -408,20 +361,35 @@ public class TwoBitParser extends InputStream implements ReferenceSequenceProvid
     }
 
     private void initializeChromosomeInfo() {
-        Lists.newArrayList(seq_names).forEach(seqName -> {
-            try {
-                setCurrentSequence(seqName);
-                chromosomes.add(new Chromosome(seqName, available(), this));
-                close();
-            } catch (Exception ex) {
-                LOG.error(ex.getMessage(), ex);
-            }
-        });
+        try (SeekableStream seekableStream = new SeekableBufferedStream(SeekableStreamFactory.getInstance().getBufferedStream(SeekableStreamFactory.getInstance().getStreamFor(path)))) {
+            seq2pos.entrySet().forEach(entry -> {
+                try {
+                    long pos = seq2pos.get(entry.getKey());
+                    seekableStream.seek(pos);
+                    long size = readFourBytes(seekableStream);
+                    chromosomes.add(new Chromosome(entry.getKey(), (int) size, this));
+                } catch (Exception ex) {
+                    LOG.error(ex.getMessage(), ex);
+                }
+            });
+        } catch (IOException ex) {
+            LOG.error(ex.getMessage(), ex);
+        }
     }
 
     @Override
     public ObservableSet<Chromosome> getChromosomes() {
         return chromosomes;
+    }
+
+    private boolean isLittleEndianByteOrder(long sign) throws Exception {
+        if ((int) sign == MAGIC_NUMBER) {
+            return false;
+        } else if (sign == 0x4327411A) {
+            return true;
+        } else {
+            throw new Exception("Wrong start signature in 2BIT format");
+        }
     }
 
 }

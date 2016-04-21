@@ -1,7 +1,9 @@
 package org.lorainelab.igb.visualization.model;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
-import java.util.Optional;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.Canvas;
@@ -16,30 +18,38 @@ public class ViewPortManager {
     private static double MIN_TRACK_HEIGHT = 100;
     private static final int MAX_TRACK_HEIGHT = 1000;
     private static final int COORDINATE_TRACK_HEIGHT = 50;
-    private final Set<TrackRenderer> trackRenderers;
+    private final Set<TrackRenderer> unsortedTrackRenderers;
+    private List<TrackRenderer> sortedTrackRenderers;
     private double canvasWidth;
     private double canvasHeight;
     private double viewPortOffset;
     private double totalTrackSize;
     private double trackSize;
     private final Canvas canvas;
+    private int indexOfCoordinateTrack;
 
     public ViewPortManager(Canvas canvas, Set<TrackRenderer> trackRenderers, double vSliderValue, double yScrollerPosition) {
         this.canvas = canvas;
-        this.trackRenderers = trackRenderers;
+        unsortedTrackRenderers = trackRenderers;
+        this.sortedTrackRenderers = Lists.newArrayList(trackRenderers);
+        Collections.sort(sortedTrackRenderers, SORT_BY_WEIGHT);
+        indexOfCoordinateTrack = -1;
         refresh(vSliderValue, yScrollerPosition);
     }
 
     public final void refresh(double vSliderValue, double yScrollerPosition) {
+        sortedTrackRenderers = Lists.newArrayList(unsortedTrackRenderers);
+        Collections.sort(sortedTrackRenderers, SORT_BY_WEIGHT);
+        updateCoordinateTrackIndex();
         canvasWidth = canvas.getWidth();
         canvasHeight = canvas.getHeight();
-        int trackCountExcludingCoordinates = (int) trackRenderers.stream().filter(track -> !(track instanceof CoordinateTrackRenderer)).count();
+        int trackCountExcludingCoordinates = (int) unsortedTrackRenderers.stream().filter(track -> !(track instanceof CoordinateTrackRenderer)).count();
         trackSize = MIN_TRACK_HEIGHT + (MAX_TRACK_HEIGHT - MIN_TRACK_HEIGHT) * vSliderValue / 100;
-        totalTrackSize = trackSize * trackCountExcludingCoordinates + COORDINATE_TRACK_HEIGHT;
+        totalTrackSize = (trackSize * trackCountExcludingCoordinates) + COORDINATE_TRACK_HEIGHT;
         if (totalTrackSize < canvasHeight) {
             double availableTrackSpace = canvas.getHeight() - COORDINATE_TRACK_HEIGHT;
             MIN_TRACK_HEIGHT = availableTrackSpace / trackCountExcludingCoordinates;
-            if (!Range.closedOpen((double) 0, canvasHeight).contains(MIN_TRACK_HEIGHT)) {
+            if (!Range.closedOpen(0d, canvasHeight).contains(MIN_TRACK_HEIGHT)) {
                 MIN_TRACK_HEIGHT = 100;
             }
             trackSize = MIN_TRACK_HEIGHT + (MAX_TRACK_HEIGHT - MIN_TRACK_HEIGHT) * vSliderValue / 100;
@@ -50,15 +60,12 @@ public class ViewPortManager {
     }
 
     private double calculateTrackStartPosition(int trackRendererIndex) {
+
         double startPosition = -1;
-        final Optional<TrackRenderer> coordinateTrackRenderer = trackRenderers.stream().filter(track -> track instanceof CoordinateTrackRenderer).findFirst();
-        if (coordinateTrackRenderer.isPresent()) {
-            int indexOfCoordinateTrack = coordinateTrackRenderer.get().getWeight();
-            if (trackRendererIndex > indexOfCoordinateTrack) {
-                startPosition = (trackRendererIndex - 1) * trackSize;
-                startPosition += COORDINATE_TRACK_HEIGHT;
-                return startPosition;
-            }
+        if (trackRendererIndex > indexOfCoordinateTrack) {
+            startPosition = (trackRendererIndex - 1) * trackSize;
+            startPosition += COORDINATE_TRACK_HEIGHT;
+            return startPosition;
         }
         startPosition = trackRendererIndex * trackSize;
         return startPosition;
@@ -66,9 +73,7 @@ public class ViewPortManager {
 
     private double calculateEndPosition(int trackRendererIndex, double startPosition) {
         double endPosition = -1;
-        final Optional<TrackRenderer> coordinateTrackRenderer = trackRenderers.stream().filter(track -> track instanceof CoordinateTrackRenderer).findFirst();
-        if (coordinateTrackRenderer.isPresent()) {
-            int indexOfCoordinateTrack = coordinateTrackRenderer.get().getWeight();
+        if (coordinateTrackExist()) {
             if (trackRendererIndex == indexOfCoordinateTrack) {
                 endPosition = startPosition + COORDINATE_TRACK_HEIGHT;
                 return endPosition;
@@ -78,17 +83,13 @@ public class ViewPortManager {
         return endPosition;
     }
 
-    public static boolean isNegative(double d) {
-        return Double.doubleToRawLongBits(d) < 0;
-    }
-
     public double getTotalTrackSize() {
         return totalTrackSize;
     }
 
     private void updateCanvasContexts() {
         int[] i = {0};
-        trackRenderers.stream().sorted(SORT_BY_WEIGHT.reversed()).forEach(trackRenderer -> {
+        sortedTrackRenderers.stream().forEachOrdered(trackRenderer -> {
             double startPosition = calculateTrackStartPosition(i[0]);
             double endPosition = calculateEndPosition(i[0], startPosition);
             if (startPosition >= 0 && endPosition > 0 && startPosition < endPosition) {
@@ -121,4 +122,19 @@ public class ViewPortManager {
 
     }
 
+    private boolean coordinateTrackExist() {
+        return unsortedTrackRenderers.stream().anyMatch(t -> t instanceof CoordinateTrackRenderer);
+    }
+
+    private void updateCoordinateTrackIndex() {
+        int i = 0;
+        for (TrackRenderer t : sortedTrackRenderers) {
+            if (t instanceof CoordinateTrackRenderer) {
+                indexOfCoordinateTrack = i;
+                return;
+            }
+            i++;
+        }
+        indexOfCoordinateTrack = -1;
+    }
 }

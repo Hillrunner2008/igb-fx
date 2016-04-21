@@ -74,7 +74,7 @@
                                                                               <Insets right="5.0" top="5.0" />
                                                                            </HBox.margin>
                                                                         </Button>
-                                                                        <Button mnemonicParsing="false" text="Load Sequence">
+                                                                        <Button fx:id="loadSequenceButton" mnemonicParsing="false" text="Load Sequence">
                                                                            <HBox.margin>
                                                                               <Insets right="5.0" top="5.0" />
                                                                            </HBox.margin>
