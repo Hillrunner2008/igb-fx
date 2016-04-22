@@ -74,6 +74,10 @@
             <artifactId>org.lorainelab.igb.menu.api</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.controlsfx</groupId>
+            <artifactId>controlsfx</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

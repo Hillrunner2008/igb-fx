@@ -41,6 +41,9 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Transform;
+import org.controlsfx.control.PlusMinusSlider;
+import org.controlsfx.control.PlusMinusSlider.PlusMinusEvent;
+import org.controlsfx.control.RangeSlider;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.DataSet;
 import org.lorainelab.igb.data.model.GenomeVersion;
@@ -106,6 +109,12 @@ public class GenoVixFxController {
     private AnchorPane bottomTabPaneContainer;
 
     @FXML
+    private PlusMinusSlider plusMinusSlider;
+
+    @FXML
+    private RangeSlider rangeSlider;
+
+    @FXML
     private HBox zoomSliderMiniMapWidgetContainer;
 
     private Pane labelPane;
@@ -158,7 +167,9 @@ public class GenoVixFxController {
                             vSlider.setValue(0);
                             scrollY.setValue(0);
                             scrollY.setVisibleAmount(100);
-                            updateTrackRenderers(gv);
+                            Platform.runLater(() -> {
+                                updateTrackRenderers(gv);
+                            });
                         }
                     });
                 }
@@ -177,7 +188,9 @@ public class GenoVixFxController {
             newValue.ifPresent(genomeVersion -> {
                 if (selectedGenomeVersion != genomeVersion) {
                     selectedGenomeVersion = genomeVersion;
-                    updateTrackRenderers(genomeVersion);
+                    Platform.runLater(() -> {
+                        updateTrackRenderers(genomeVersion);
+                    });
                 }
             });
         });
@@ -201,6 +214,10 @@ public class GenoVixFxController {
     }
 
     private void loadDataSets(GenomeVersion gv, final Chromosome chromosome) {
+        if (gv.getLoadedDataSets().isEmpty()) {
+            updateTrackRenderers();
+            return;
+        }
         gv.getLoadedDataSets().forEach(dataSet -> {
             Track positiveStrandTrack = dataSet.getPositiveStrandTrack(chromosome.getName());
             Track negativeStrandTrack = dataSet.getNegativeStrandTrack(gv.getSelectedChromosomeProperty().get().get().getName());
@@ -210,7 +227,7 @@ public class GenoVixFxController {
             negativeStrandTrackRenderer.setWeight(getMaxWeight());
             trackRenderers.add(positiveStrandTrackRenderer);
             trackRenderers.add(negativeStrandTrackRenderer);
-            scaleTrackRenderers();
+            updateTrackRenderers();
         });
         gv.getLoadedDataSets().addListener((SetChangeListener.Change<? extends DataSet> change) -> {
             Platform.runLater(() -> {
@@ -223,7 +240,7 @@ public class GenoVixFxController {
                     negativeStrandTrackRenderer.setWeight(getMaxWeight());
                     trackRenderers.add(positiveStrandTrackRenderer);
                     trackRenderers.add(negativeStrandTrackRenderer);
-                    scaleTrackRenderers();
+                    updateTrackRenderers();
                 } else {
                     //todo implement remove
                 }
@@ -268,7 +285,7 @@ public class GenoVixFxController {
         viewPortManager = new ViewPortManager(canvas, trackRenderers, 0, 0);
 
         vSlider.valueProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-            scaleTrackRenderers();
+            updateTrackRenderers();
         });
         hSlider.valueProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
 
@@ -278,7 +295,7 @@ public class GenoVixFxController {
             }
             final boolean isSnapEvent = newValue.doubleValue() % hSlider.getMajorTickUnit() == 0;
             if (lastHSliderFire < 0 || Math.abs(lastHSliderFire - newValue.doubleValue()) > 1 || isSnapEvent) {
-                scaleTrackRenderers();
+                updateTrackRenderers();
                 syncWidgetSlider();
                 lastHSliderFire = newValue.doubleValue();
             }
@@ -298,31 +315,31 @@ public class GenoVixFxController {
             Platform.runLater(() -> {
                 refreshSliderWidget();
             });
-            scaleTrackRenderers();
+            updateTrackRenderers();
         });
 
         canvas.heightProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             Platform.runLater(() -> {
                 refreshSliderWidget();
             });
-            scaleTrackRenderers();
+            updateTrackRenderers();
         });
 
         scrollX.addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             if (ignoreScrollXEvent) {
                 ignoreScrollXEvent = false;
             } else {
-                scaleTrackRenderers();
+                updateTrackRenderers();
             }
         });
 
         scrollY.valueProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-            scaleTrackRenderers();
+            updateTrackRenderers();
         });
         //fixes initialization race condition
         Platform.runLater(() -> {
             refreshSliderWidget();
-            scaleTrackRenderers();
+            updateTrackRenderers();
         });
 
     }
@@ -448,17 +465,13 @@ public class GenoVixFxController {
         canvasPane.resetZoomStripe();
     }
 
-    private void scaleTrackRenderers() {
+    private void updateTrackRenderers() {
         updateCanvasContexts();
         trackRenderers.forEach(trackRenderer -> trackRenderer.scaleCanvas(exponentialScaleTransform(canvasPane, hSlider.getValue()), scrollX.get(), scrollY.getValue()));
         eventBus.post(new ScaleEvent(hSlider.getValue(), vSlider.getValue(), scrollX.getValue(), scrollY.getValue()));
         drawZoomCoordinateLine();
     }
 
-//    private void refreshTrackRenderers() {
-//        trackRenderers.keySet().stream().sorted().map(key -> trackRenderers.get(key)).forEach(trackRenderer -> trackRenderer.render());
-//        drawZoomCoordinateLine();
-//    }
     private void updateScrollY() {
         double sum = trackRenderers.stream()
                 .map(trackRenderer -> trackRenderer.getCanvasContext())
@@ -469,6 +482,7 @@ public class GenoVixFxController {
     }
 
     private void initializeGuiComponents() {
+        setupPlusMinusSlider();
         addZoomSliderMiniMapWidget();
         addMenuBar();
         addTabPanes();
@@ -500,7 +514,7 @@ public class GenoVixFxController {
                             return null;
                         }).thenRun(() -> {
                             Platform.runLater(() -> {
-                                scaleTrackRenderers();
+                                updateTrackRenderers();
                             });
                         });
                     });
@@ -514,7 +528,7 @@ public class GenoVixFxController {
                     return null;
                 }).thenRun(() -> {
                     Platform.runLater(() -> {
-                        scaleTrackRenderers();
+                        updateTrackRenderers();
                     });
                 }).exceptionally(ex -> {
                     LOG.error(ex.getMessage(), ex);
@@ -610,7 +624,7 @@ public class GenoVixFxController {
                                                                             draggedTrackRenderer.setWeight(droppedIndex + 1);
                                                                             trackRenderers.add(draggedTrackRenderer);
                                                                         }
-                                                                        scaleTrackRenderers();
+                                                                        updateTrackRenderers();
                                                                     });
                                                         }
                                                     });
@@ -784,7 +798,37 @@ public class GenoVixFxController {
         final double xFactor = exponentialScaleTransform(canvasPane, hSlider.getValue());
         final double visibleVirtualCoordinatesX = Math.floor(canvasPane.getWidth() / xFactor);
         double xOffset = Math.round((scrollX.doubleValue() / 100) * (canvasPane.getModelWidth() - visibleVirtualCoordinatesX));
-        return Range.closedOpen((int) xOffset, (int) xOffset+(int) visibleVirtualCoordinatesX   );
+        return Range.closedOpen((int) xOffset, (int) xOffset + (int) visibleVirtualCoordinatesX);
+    }
+
+    private void setupPlusMinusSlider() {
+        plusMinusSlider.setOnValueChanged(new EventHandler<PlusMinusEvent>() {
+            @Override
+            public void handle(PlusMinusEvent event) {
+                final double adjustedEventValue = getAdjustedScrollValue(event.getValue());
+                double updatedScrollXValue = scrollX.doubleValue() + adjustedEventValue;
+                if (updatedScrollXValue < 0) {
+                    updatedScrollXValue = 0;
+                } else if (updatedScrollXValue > 100) {
+                    updatedScrollXValue = 100;
+                }
+                if (updatedScrollXValue != scrollX.doubleValue()) {
+                    scrollX.setValue(updatedScrollXValue);
+                }
+            }
+
+            private double getAdjustedScrollValue(double value) {
+                if (value < -0.8 || value > 0.8) {
+                    return value;
+                } else if ((value < 0 && value > -0.1) || value < .1) {
+                    return value / 10000;
+                } else if ((value < 0 && value > -0.2) || value < .2) {
+                    return value / 2000;
+                }
+                return value / 50;
+            }
+        }
+        );
     }
 
 }
