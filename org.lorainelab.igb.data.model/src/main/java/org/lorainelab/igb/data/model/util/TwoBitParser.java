@@ -14,17 +14,6 @@ import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.ReferenceSequenceProvider;
 import org.slf4j.LoggerFactory;
 
-/**
- * Class is a parser of UCSC Genome Browser file format .2bit used to store
- * nucleotide sequence information. This class extends InputStream and can
- * be used as it after choosing one of names of containing sequences. This
- * parser can be used to do some work like UCSC tool named twoBitToFa. For
- * it just run this class with input file path as single parameter and set
- * stdout stream into output file. If you have any problems or ideas don't
- * hesitate to contact me through email: rsutormin[at]gmail.com.
- *
- * @author Roman Sutormin
- */
 public class TwoBitParser implements ReferenceSequenceProvider {
 
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(TwoBitParser.class);
@@ -48,7 +37,6 @@ public class TwoBitParser implements ReferenceSequenceProvider {
     private long file_pos;
     private static final char[] BIT_CHARS = {'T', 'C', 'A', 'G'};
     private ObservableSet<Chromosome> chromosomes;
-    private CompletableFuture<Void> initializationTask;
     private final String path;
 
     public TwoBitParser(String path) throws Exception {
@@ -72,7 +60,7 @@ public class TwoBitParser implements ReferenceSequenceProvider {
                 seq2pos.put(seq_names[i], pos);
             }
             chromosomes = FXCollections.observableSet(Sets.newTreeSet((o1, o2) -> o1.compareTo(o2)));
-            initializationTask = CompletableFuture.<Void>supplyAsync(() -> {
+            CompletableFuture.<Void>supplyAsync(() -> {
                 initializeChromosomeInfo();
                 return null;
             }).exceptionally(ex -> {
@@ -332,9 +320,6 @@ public class TwoBitParser implements ReferenceSequenceProvider {
     public String getSequence(String chromosomeId) {
         String sequence = "";
         try (SeekableStream seekableStream = new SeekableBufferedStream(SeekableStreamFactory.getInstance().getBufferedStream(SeekableStreamFactory.getInstance().getStreamFor(path)))) {
-            if (!initializationTask.isDone()) {
-                initializationTask.get();
-            }
             setCurrentSequence(seekableStream, chromosomeId);
             sequence = loadFragment(seekableStream, 0, available());
             close();
@@ -348,9 +333,6 @@ public class TwoBitParser implements ReferenceSequenceProvider {
     public String getSequence(String chromosomeId, int start, int length) {
         String sequence = "";
         try (SeekableStream seekableStream = new SeekableBufferedStream(SeekableStreamFactory.getInstance().getBufferedStream(SeekableStreamFactory.getInstance().getStreamFor(path)))) {
-            if (!initializationTask.isDone()) {
-                initializationTask.get();
-            }
             setCurrentSequence(seekableStream, chromosomeId);
             sequence = loadFragment(seekableStream, start, length);
             close();

@@ -3,6 +3,7 @@
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.ScrollBar?>
 <?import javafx.scene.control.Slider?>
@@ -15,8 +16,6 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.shape.Rectangle?>
-<?import javafx.scene.text.Text?>
 <?import org.controlsfx.control.PlusMinusSlider?>
 <?import org.controlsfx.control.RangeSlider?>
 <?import org.controlsfx.control.StatusBar?>
@@ -41,7 +40,7 @@
         </ToolBar>
       <StackPane VBox.vgrow="ALWAYS">
          <children>
-            <SplitPane dividerPositions="0.85" prefHeight="160.0" prefWidth="200.0">
+            <SplitPane fx:id="rightPanelSplitPane" dividerPositions="0.85" prefHeight="160.0" prefWidth="200.0">
               <items>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                      <children>
@@ -92,7 +91,7 @@
                                                                            <children>
                                                                               <SplitPane fx:id="trackLabelSplitPane" dividerPositions="0.1" prefHeight="160.0" prefWidth="200.0" HBox.hgrow="ALWAYS">
                                                                                 <items>
-                                                                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                                                                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" SplitPane.resizableWithParent="false">
                                                                                        <children>
                                                                                           <HBox fx:id="labelHbox" layoutX="17.0" layoutY="141.0" prefHeight="100.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                                              <children>
@@ -114,17 +113,6 @@
                                                                                           <VBox fx:id="canvasVBox" layoutX="223.0" layoutY="72.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                                              <children>
                                                                                                 <StackPane fx:id="stackPane" prefHeight="150.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
-                                                                                                <HBox fx:id="zoomSliderMiniMapWidgetContainer" maxHeight="25.0" minHeight="25.0" prefHeight="25.0" prefWidth="1194.0">
-                                                                                                   <children>
-                                                                                                      <Pane maxHeight="25.0" minHeight="25.0" prefHeight="25.0" prefWidth="1194.0" style="-fx-background-image: url('track_overview.png'); -fx-background-repeat: stretch; -fx-background-size: stretch;" HBox.hgrow="ALWAYS" fx:id="xSliderPane">
-                                                                                                          <children>
-                                                                                                            <Rectangle fx:id="slider" arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="15.0" layoutY="4.0" opacity="0.3" stroke="BLACK" strokeType="INSIDE" width="832.0" />
-                                                                                                            <Rectangle fx:id="rightSliderThumb" arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="23.0" layoutX="810.0" opacity="0.5" stroke="BLACK" strokeType="INSIDE" width="23.0" />
-                                                                                                            <Rectangle fx:id="leftSliderThumb" arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="23.0" layoutX="1.0" opacity="0.5" stroke="BLACK" strokeType="INSIDE" width="23.0" />
-                                                                                                          </children>
-                                                                                                       </Pane>
-                                                                                                    </children>
-                                                                                                </HBox>
                                                                                                 <RangeSlider fx:id="rangeSlider" />
                                                                                                 <PlusMinusSlider fx:id="plusMinusSlider" />
                                                                                              </children>
@@ -155,7 +143,7 @@
                         </SplitPane>
                      </children>
                   </AnchorPane>
-                <AnchorPane fx:id="rightTabPaneContainer" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" />
+                <AnchorPane fx:id="rightTabPaneContainer" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" SplitPane.resizableWithParent="false" />
               </items>
             </SplitPane>
          </children>
@@ -164,8 +152,13 @@
          <items>
             <StackPane maxHeight="20.0" maxWidth="200.0" prefHeight="20.0" prefWidth="200.0">
                <children>
-                  <ProgressBar maxHeight="20.0" prefHeight="20.0" prefWidth="200.0" progress="0.27" />
-                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="220M of 910M" />
+                  <ProgressBar fx:id="memoryProgressBar" maxHeight="20.0" prefHeight="20.0" prefWidth="200.0" progress="0.27" />
+                  <Label fx:id="memoryLabel" text="0M of 64M" />
+                  <FontAwesomeIconView fx:id="gcTrashIcon" glyphName="TRASH" StackPane.alignment="CENTER_RIGHT">
+                     <StackPane.margin>
+                        <Insets right="7.0" />
+                     </StackPane.margin>
+                  </FontAwesomeIconView>
                </children>
             </StackPane>
             <Pane HBox.hgrow="ALWAYS" />

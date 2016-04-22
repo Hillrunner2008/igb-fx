@@ -38,12 +38,12 @@ public class MainWindow {
     }
 
     private void initiailize() throws IOException {
-        
+
         SplashScreen splashScreen = SplashScreen.getSplashScreen();
-        if(splashScreen != null) {       
+        if (splashScreen != null) {
             splashScreen.close();
         }
-        
+
         initializeFxRuntime();
         final URL resource = MainWindow.class.getClassLoader().getResource("genoVizFx.fxml");
         FXMLLoader loader = new FXMLLoader(resource);
@@ -67,8 +67,12 @@ public class MainWindow {
     @Deactivate
     public void deactivate() {
         Platform.runLater(() -> {
-            stage.hide();
-            root.getChildren().clear();
+            try {
+                stage.hide();
+                root.getChildren().clear();
+            } catch (Exception ex) {
+                //do nothing
+            }
         });
     }
 
