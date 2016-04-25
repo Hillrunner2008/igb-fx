@@ -10,7 +10,6 @@ import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -21,7 +20,6 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.SetChangeListener;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.SnapshotParameters;
@@ -589,61 +587,42 @@ public class GenoVixFxController {
                                     event.consume();
                                 }
                         );
-                        trackLabelNode.setOnDragDropped(new EventHandler<DragEvent>() {
-                            @Override
-                            public void handle(DragEvent event) {
-                                final Object dropLocationSource = event.getSource();
-                                if (dropLocationSource instanceof StackPane) {
-                                    StackPane dropLocationLabelNode = StackPane.class.cast(dropLocationSource);
-                                    boolean droppedAbove = event.getY() < (dropLocationLabelNode.getHeight() / 2);
-                                    double dropLocationMinY = dropLocationLabelNode.getBoundsInParent().getMinY();
-                                    Dragboard db = event.getDragboard();
-                                    Object dragboardContent = db.getContent(DataFormat.PLAIN_TEXT);
-                                    if (dragboardContent instanceof Double) {
-                                        double eventTriggerMinY = (Double) dragboardContent;
-                                        if (dropLocationMinY != eventTriggerMinY) {
-
-                                            Iterator<TrackRenderer> iterator = trackRenderers.iterator();
-                                            while (iterator.hasNext()) {
-                                                TrackRenderer trackRenderer = iterator.next();
-                                                if (trackRenderer.getCanvasContext().isVisible()) {
-                                                    StackPane labelNode = trackRenderer.getTrackLabel().getContent();
-                                                    if (labelNode.getBoundsInParent().getMinY() == eventTriggerMinY) {
-
-                                                    }
-                                                }
-                                            }
-
-                                            Lists.newArrayList(trackRenderers).stream()
-                                                    .filter(trackRenderer -> trackRenderer.getCanvasContext().isVisible())
-                                                    .forEach(draggedTrackRenderer -> {
-                                                        StackPane labelNode = draggedTrackRenderer.getTrackLabel().getContent();
-                                                        if (labelNode.getBoundsInParent().getMinY() == eventTriggerMinY) {
-                                                            Lists.newArrayList(trackRenderers).stream()
-                                                                    .filter(trackRenderer -> trackRenderer.getTrackLabel().getContent() == dropLocationLabelNode)
-                                                                    .findFirst()
-                                                                    .ifPresent(droppedTrackRenderer -> {
-                                                                        int droppedIndex = droppedTrackRenderer.getWeight();
-                                                                        if (droppedAbove) {
-                                                                            trackRenderers.remove(draggedTrackRenderer);
-                                                                            draggedTrackRenderer.setWeight(droppedIndex - 1);
-                                                                            trackRenderers.add(draggedTrackRenderer);
-                                                                        } else {
-                                                                            trackRenderers.remove(draggedTrackRenderer);
-                                                                            draggedTrackRenderer.setWeight(droppedIndex + 1);
-                                                                            trackRenderers.add(draggedTrackRenderer);
-                                                                        }
-                                                                        updateTrackRenderers();
-                                                                    });
-                                                        }
-                                                    });
-
-                                        }
+                        trackLabelNode.setOnDragDropped((DragEvent event) -> {
+                            if (event.getSource() instanceof StackPane) {
+                                StackPane dropLocationLabelNode = StackPane.class.cast(event.getSource());
+                                boolean droppedAbove = event.getY() < (dropLocationLabelNode.getHeight() / 2);
+                                double dropLocationMinY = dropLocationLabelNode.getBoundsInParent().getMinY();
+                                Object dragboardContent = event.getDragboard().getContent(DataFormat.PLAIN_TEXT);
+                                if (dragboardContent instanceof Double) {
+                                    double eventTriggerMinY = (Double) dragboardContent;
+                                    if (dropLocationMinY != eventTriggerMinY) {
+                                        Lists.newArrayList(trackRenderers).stream()
+                                                .filter(trackRenderer -> trackRenderer.getCanvasContext().isVisible())
+                                                .filter(draggedTrackRenderer -> draggedTrackRenderer.getTrackLabel().getContent().getBoundsInParent().getMinY() == eventTriggerMinY)
+                                                .findFirst()
+                                                .ifPresent(draggedTrackRenderer -> {
+                                                    Lists.newArrayList(trackRenderers).stream()
+                                                            .filter(trackRenderer -> trackRenderer.getTrackLabel().getContent() == dropLocationLabelNode)
+                                                            .findFirst()
+                                                            .ifPresent(droppedTrackRenderer -> {
+                                                                int droppedIndex = droppedTrackRenderer.getWeight();
+                                                                if (droppedAbove) {
+                                                                    trackRenderers.remove(draggedTrackRenderer);
+                                                                    draggedTrackRenderer.setWeight(droppedIndex - 1);
+                                                                    trackRenderers.add(draggedTrackRenderer);
+                                                                } else {
+                                                                    trackRenderers.remove(draggedTrackRenderer);
+                                                                    draggedTrackRenderer.setWeight(droppedIndex + 1);
+                                                                    trackRenderers.add(draggedTrackRenderer);
+                                                                }
+                                                                updateTrackRenderers();
+                                                            });
+                                                });
                                     }
-
                                 }
-                                event.consume();
+
                             }
+                            event.consume();
                         });
                     });
         });
@@ -722,20 +701,16 @@ public class GenoVixFxController {
     }
 
     private void syncWidgetSlider() {
-        double[] scaledPercentage = {0};
-        trackRenderers.stream()
-                .filter(tr -> !(tr instanceof CoordinateTrackRenderer))
-                .filter(tr -> tr.getCanvasContext().isVisible()).findFirst()
-                .ifPresent(trackRenderer -> {
-                    double minScaleX = trackRenderer.getModelWidth();
-                    double maxScaleX = MAX_ZOOM_MODEL_COORDINATES_X - 1;
-                    final double scaleRange = maxScaleX - minScaleX;
-                    final double current = trackRenderer.getView().getBoundingRect().getWidth();
-                    scaledPercentage[0] = (current - minScaleX) / scaleRange;
-                });
+        double minScaleX = canvasPane.getModelWidth();
+        double maxScaleX = MAX_ZOOM_MODEL_COORDINATES_X - 1;
+        final double scaleRange = maxScaleX - minScaleX;
+        final double xFactor = exponentialScaleTransform(canvasPane, hSlider.getValue());
+        final double current = Math.floor(canvasPane.getWidth() / xFactor);
+        double scaledPercentage = (current - minScaleX) / scaleRange;
+
         double oldWidth = slider.getWidth();
         double oldX = slider.getX();
-        double width = ((1 - scaledPercentage[0]) * (xSliderPane.getWidth() - TOTAL_SLIDER_THUMB_WIDTH)) + TOTAL_SLIDER_THUMB_WIDTH;
+        double width = ((1 - scaledPercentage) * (xSliderPane.getWidth() - TOTAL_SLIDER_THUMB_WIDTH)) + TOTAL_SLIDER_THUMB_WIDTH;
         double x = ((scrollX.getValue() / 100)) * (xSliderPane.getWidth() - width);
         slider.setX(x);
         leftSliderThumb.setX(x);
@@ -811,42 +786,43 @@ public class GenoVixFxController {
     }
 
     private void setupPlusMinusSlider() {
-        plusMinusSlider.setOnValueChanged(new EventHandler<PlusMinusEvent>() {
-            @Override
-            public void handle(PlusMinusEvent event) {
-                final double adjustedEventValue = getAdjustedScrollValue(event.getValue());
-                double updatedScrollXValue = scrollX.doubleValue() + adjustedEventValue;
-                if (updatedScrollXValue < 0) {
-                    updatedScrollXValue = 0;
-                } else if (updatedScrollXValue > 100) {
-                    updatedScrollXValue = 100;
-                }
-                if (updatedScrollXValue != scrollX.doubleValue()) {
-                    if (Platform.isFxApplicationThread()) {
+        plusMinusSlider.setOnValueChanged((PlusMinusEvent event) -> {
+            final double updatedScrollXValue = getUpdatedScrollxValue(event.getValue());
+            if (updatedScrollXValue != scrollX.doubleValue()) {
+                if (Platform.isFxApplicationThread()) {
+                    scrollX.setValue(updatedScrollXValue);
+                    resetZoomStripe();
+                    syncWidgetSlider();
+                } else {
+                    Platform.runLater(() -> {
                         scrollX.setValue(updatedScrollXValue);
-                        refreshSliderWidget();
-                    } else {
-                        final double updatedScrollXValueFinal = updatedScrollXValue;//...
-                        Platform.runLater(() -> {
-                            scrollX.setValue(updatedScrollXValueFinal);
-                            refreshSliderWidget();
-                        });
-                    }
+                        resetZoomStripe();
+                        syncWidgetSlider();
+                    });
                 }
             }
+        });
+    }
 
-            private double getAdjustedScrollValue(double value) {
-                if (value < -0.8 || value > 0.8) {
-                    return value;
-                } else if ((value < 0 && value > -0.1) || value < .1) {
-                    return value / 10000;
-                } else if ((value < 0 && value > -0.2) || value < .2) {
-                    return value / 2000;
-                }
-                return value / 50;
-            }
+    private double getUpdatedScrollxValue(double eventValue) {
+        double updatedScrollXValue = scrollX.doubleValue() + getAdjustedScrollValue(eventValue);
+        if (updatedScrollXValue < 0) {
+            updatedScrollXValue = 0;
+        } else if (updatedScrollXValue > 100) {
+            updatedScrollXValue = 100;
         }
-        );
+        return updatedScrollXValue;
+    }
+
+    private double getAdjustedScrollValue(double value) {
+        if (value < -0.8 || value > 0.8) {
+            return value;
+        } else if ((value < 0 && value > -0.1) || value < .1) {
+            return value / 10000;
+        } else if ((value < 0 && value > -0.2) || value < .2) {
+            return value / 2000;
+        }
+        return value / 50;
     }
 
     private void setupMemoryInfoWidget() {
