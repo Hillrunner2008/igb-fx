@@ -53,7 +53,6 @@ public class OpenFileMenuItem implements MenuBarEntryProvider {
             });
         });
     }
-
     @Override
     public Optional<List<WeightedMenuItem>> getMenuItems() {
         final List<WeightedMenuItem> menuItems = Lists.newArrayList(menuItem);

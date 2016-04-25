@@ -16,8 +16,8 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Rectangle?>
 <?import org.controlsfx.control.PlusMinusSlider?>
-<?import org.controlsfx.control.RangeSlider?>
 <?import org.controlsfx.control.StatusBar?>
 
 <VBox fx:id="root" prefHeight="950" prefWidth="1600" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
@@ -113,7 +113,17 @@
                                                                                           <VBox fx:id="canvasVBox" layoutX="223.0" layoutY="72.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                                                              <children>
                                                                                                 <StackPane fx:id="stackPane" prefHeight="150.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
-                                                                                                <RangeSlider fx:id="rangeSlider" />
+                                                                                                <HBox fx:id="zoomSliderMiniMapWidgetContainer" maxHeight="20.0" minHeight="20.0" prefHeight="20.0" prefWidth="1194.0">
+                                                                                                   <children>
+                                                                                                      <Pane maxHeight="15.0" minHeight="15.0" prefHeight="15.0" prefWidth="1194.0" style="-fx-background-image: url('track_overview.png'); -fx-background-repeat: stretch; -fx-background-size: stretch;" HBox.hgrow="ALWAYS" fx:id="xSliderPane">
+                                                                                                          <children>
+                                                                                                            <Rectangle fx:id="slider" arcHeight="5.0" arcWidth="5.0" fill="#0397c9" height="10.0" layoutY="3.0" stroke="BLACK" strokeType="INSIDE" width="832.0" />
+                                                                                                            <Rectangle fx:id="rightSliderThumb" arcHeight="5.0" arcWidth="5.0" fill="#dddddd" height="15.0" layoutX="818.0" stroke="BLACK" strokeType="INSIDE" width="15.0" />
+                                                                                                            <Rectangle fx:id="leftSliderThumb" arcHeight="5.0" arcWidth="5.0" fill="#dddddd" height="15.0" stroke="BLACK" strokeType="INSIDE" width="15.0" />
+                                                                                                          </children>
+                                                                                                       </Pane>
+                                                                                                    </children>
+                                                                                                </HBox>
                                                                                                 <PlusMinusSlider fx:id="plusMinusSlider" />
                                                                                              </children>
                                                                                           </VBox>

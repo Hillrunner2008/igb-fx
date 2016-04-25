@@ -19,7 +19,6 @@ import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.SetChangeListener;
 import javafx.event.EventHandler;
@@ -45,11 +44,11 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Transform;
 import javafx.util.Duration;
 import org.controlsfx.control.PlusMinusSlider;
 import org.controlsfx.control.PlusMinusSlider.PlusMinusEvent;
-import org.controlsfx.control.RangeSlider;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.DataSet;
 import org.lorainelab.igb.data.model.GenomeVersion;
@@ -93,6 +92,14 @@ public class GenoVixFxController {
     @FXML
     private ScrollBar scrollY;
     @FXML
+    private Pane xSliderPane;
+    @FXML
+    private Rectangle slider;
+    @FXML
+    private Rectangle leftSliderThumb;
+    @FXML
+    private Rectangle rightSliderThumb;
+    @FXML
     private Button loadDataButton;
     @FXML
     private Button loadSequenceButton;
@@ -108,9 +115,6 @@ public class GenoVixFxController {
 
     @FXML
     private PlusMinusSlider plusMinusSlider;
-
-    @FXML
-    private RangeSlider rangeSlider;
 
     @FXML
     private ProgressBar memoryProgressBar;
@@ -282,6 +286,7 @@ public class GenoVixFxController {
         initializeGuiComponents();
         initializeChromosomeSelectionListener();
         initializeGenomeVersionSelectionListener();
+        initializeZoomScrollBar();
         viewPortManager = new ViewPortManager(canvas, trackRenderers, 0, 0);
 
         vSlider.valueProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
@@ -295,8 +300,8 @@ public class GenoVixFxController {
             }
             final boolean isSnapEvent = newValue.doubleValue() % hSlider.getMajorTickUnit() == 0;
             if (lastHSliderFire < 0 || Math.abs(lastHSliderFire - newValue.doubleValue()) > 1 || isSnapEvent) {
-                updatedRangeSlider();
                 updateTrackRenderers();
+                syncWidgetSlider();
                 lastHSliderFire = newValue.doubleValue();
             }
         });
@@ -313,16 +318,16 @@ public class GenoVixFxController {
         });
         canvas.widthProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             Platform.runLater(() -> {
-                updatedRangeSlider();
-                updateTrackRenderers();
+                refreshSliderWidget();
             });
+                updateTrackRenderers();
         });
 
         canvas.heightProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             Platform.runLater(() -> {
-                updatedRangeSlider();
-                updateTrackRenderers();
+               refreshSliderWidget();
             });
+                updateTrackRenderers();
         });
 
         scrollX.addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
@@ -338,11 +343,125 @@ public class GenoVixFxController {
         });
         //fixes initialization race condition
         Platform.runLater(() -> {
-//            updatedRangeSlider();
+            refreshSliderWidget();
             updateTrackRenderers();
         });
 
     }
+
+    private void initializeZoomScrollBar() {
+        slider.setOnMousePressed((MouseEvent event) -> {
+            lastDragX = event.getX();
+        });
+        leftSliderThumb.setOnMousePressed((MouseEvent event) -> {
+            lastDragX = event.getX();
+        });
+        rightSliderThumb.setOnMousePressed((MouseEvent event) -> {
+            lastDragX = event.getX();
+        });
+
+        rightSliderThumb.setOnMouseDragged((MouseEvent event) -> {
+            double increment = Math.round(event.getX() - lastDragX);
+            double newSliderValue = slider.getWidth() + increment;
+            double newRightThumbValue = rightSliderThumb.getX() + increment;
+            if (newSliderValue < TOTAL_SLIDER_THUMB_WIDTH) {
+                newSliderValue = TOTAL_SLIDER_THUMB_WIDTH;
+                newRightThumbValue = rightSliderThumb.getX() - slider.getWidth() + newSliderValue;
+            }
+            if (newSliderValue > xSliderPane.getWidth()) {
+                double tmp = slider.getWidth() + (xSliderPane.getWidth() - slider.getWidth() - slider.getX());
+                double diff = Math.abs(newSliderValue - tmp);
+                newRightThumbValue -= diff;
+                newSliderValue = tmp;
+            }
+            if (newSliderValue >= 0 && newSliderValue <= (xSliderPane.getWidth() - slider.getX())) {
+                slider.setWidth(newSliderValue);
+                rightSliderThumb.setX(newRightThumbValue);
+                double max = xSliderPane.getWidth() - TOTAL_SLIDER_THUMB_WIDTH;
+                double current = slider.getWidth() - TOTAL_SLIDER_THUMB_WIDTH;
+
+                double maxSlider = xSliderPane.getWidth() - slider.getWidth();
+                double currentSlider = slider.getX();
+                double newScrollX;
+                if (maxSlider <= 0) {
+                    newScrollX = 0;
+                } else {
+                    newScrollX = (currentSlider / maxSlider) * 100;
+                }
+                ignoreScrollXEvent = true;
+                scrollX.setValue(newScrollX);
+                hSliderWidget.setValue((1 - (current / max)) * 100);
+            }
+            lastDragX = event.getX();
+        });
+
+        leftSliderThumb.setOnMouseDragged((MouseEvent event) -> {
+            double increment = Math.round(event.getX() - lastDragX);
+            double newSliderValue = slider.getX() + increment;
+            double newLeftThumbValue = leftSliderThumb.getX() + increment;
+            double newSliderWidth = (slider.getWidth() - increment);
+            if (newSliderWidth < TOTAL_SLIDER_THUMB_WIDTH) {
+                newSliderWidth = TOTAL_SLIDER_THUMB_WIDTH;
+                newSliderValue = slider.getX() + slider.getWidth() - newSliderWidth;
+                newLeftThumbValue = leftSliderThumb.getX() + slider.getWidth() - newSliderWidth;
+            }
+            if (newSliderValue < 0) {
+                newSliderValue = 0;
+                newLeftThumbValue = 0;
+                newSliderWidth = slider.getWidth() + slider.getX();
+            }
+            if (newSliderValue > xSliderPane.getWidth()) {
+                newSliderValue = xSliderPane.getWidth();
+            }
+            if (newSliderValue >= 0 && newSliderValue <= xSliderPane.getWidth()) {
+                slider.setX(newSliderValue);
+                slider.setWidth(newSliderWidth);
+                leftSliderThumb.setX(newLeftThumbValue);
+                double max = xSliderPane.getWidth() - TOTAL_SLIDER_THUMB_WIDTH;
+                double current = slider.getWidth() - TOTAL_SLIDER_THUMB_WIDTH;
+
+                double maxSlider = xSliderPane.getWidth() - slider.getWidth();
+                double currentSlider = slider.getX();
+                double newScrollX;
+                if (maxSlider <= 0) {
+                    newScrollX = 0;
+                } else {
+                    newScrollX = (currentSlider / maxSlider) * 100;
+                }
+                ignoreScrollXEvent = true;
+                scrollX.setValue(newScrollX);
+                hSliderWidget.setValue((1 - (current / max)) * 100);
+            }
+            lastDragX = event.getX();
+        });
+
+        slider.setOnMouseDragged((MouseEvent event) -> {
+
+            double increment = Math.round(event.getX() - lastDragX);
+            double newSliderValue = slider.getX() + increment;
+            double newRightThumbValue = rightSliderThumb.getX() + increment;
+            double newLeftThumbValue = leftSliderThumb.getX() + increment;
+            if (newSliderValue < 0) {
+                newSliderValue = 0;
+                newLeftThumbValue = 0;
+                newRightThumbValue = rightSliderThumb.getX() - slider.getX();
+            } else if (newSliderValue > (xSliderPane.getWidth() - slider.getWidth())) {
+                newSliderValue = (xSliderPane.getWidth() - slider.getWidth());
+                newLeftThumbValue = newSliderValue;
+                newRightThumbValue = rightSliderThumb.getX() + xSliderPane.getWidth() - slider.getX() - slider.getWidth();
+
+            }
+            slider.setX(newSliderValue);
+            leftSliderThumb.setX(newLeftThumbValue);
+            rightSliderThumb.setX(newRightThumbValue);
+            double max = xSliderPane.getWidth() - slider.getWidth();
+            double current = slider.getX();
+            resetZoomStripe();
+            scrollX.setValue((current / max) * 100);
+            lastDragX = event.getX();
+        });
+    }
+    private static final int TOTAL_SLIDER_THUMB_WIDTH = 30;
 
     public void drawZoomCoordinateLine() {
         canvasPane.drawZoomCoordinateLine();
@@ -371,7 +490,7 @@ public class GenoVixFxController {
     private void initializeGuiComponents() {
         setupMemoryInfoWidget();
         setupPlusMinusSlider();
-        setupRangeSlider();
+//        setupRangeSlider();
         addZoomSliderMiniMapWidget();
         addMenuBar();
         addTabPanes();
@@ -530,6 +649,37 @@ public class GenoVixFxController {
 
     }
 
+    private void refreshSliderWidget() {
+        if (xSliderPane.getWidth() > 0) {
+            double max = xSliderPane.getWidth() - slider.getWidth();
+            double current = slider.getX();
+            double newXValue = (max * scrollX.getValue() / 100);
+
+            if (newXValue <= 0) {
+                newXValue = 0;
+            }
+            if (slider.getWidth() >= xSliderPane.getWidth()) {
+                double newWidth = xSliderPane.getWidth();
+                if (newWidth < TOTAL_SLIDER_THUMB_WIDTH) {
+                    newWidth = TOTAL_SLIDER_THUMB_WIDTH;
+                }
+                double oldWidth = slider.getWidth();
+                slider.setWidth(newWidth);
+                rightSliderThumb.setX(rightSliderThumb.getX() + newWidth - oldWidth);
+            }
+            if (scrollX.getValue() >= 0 && xSliderPane.getWidth() > TOTAL_SLIDER_THUMB_WIDTH) {
+                slider.setX(newXValue);
+                leftSliderThumb.setX(newXValue);
+                double maxPaneWidth = xSliderPane.getWidth() - TOTAL_SLIDER_THUMB_WIDTH;
+                double newSliderWidth = -maxPaneWidth * ((hSliderWidget.getValue() / 100) - 1) + TOTAL_SLIDER_THUMB_WIDTH;
+                double rightThumbX = rightSliderThumb.getX() + newXValue - current - slider.getWidth() + newSliderWidth;
+                rightSliderThumb.setX(rightThumbX);
+                slider.setWidth(newSliderWidth);
+
+            }
+        }
+    }
+
     @Subscribe
     private void jumpZoom(JumpZoomEvent jumpZoomEvent) {
         Rectangle2D focusRect = jumpZoomEvent.getRect();
@@ -568,6 +718,28 @@ public class GenoVixFxController {
                 .findFirst().ifPresent(coordinateRenderer -> {
                     jumpZoom(new JumpZoomEvent(zoomFocus, coordinateRenderer));
                 });
+    }
+
+    private void syncWidgetSlider() {
+        double[] scaledPercentage = {0};
+        trackRenderers.stream()
+                .filter(tr -> !(tr instanceof CoordinateTrackRenderer))
+                .filter(tr -> tr.getCanvasContext().isVisible()).findFirst()
+                .ifPresent(trackRenderer -> {
+                    double minScaleX = trackRenderer.getModelWidth();
+                    double maxScaleX = MAX_ZOOM_MODEL_COORDINATES_X - 1;
+                    final double scaleRange = maxScaleX - minScaleX;
+                    final double current = trackRenderer.getView().getBoundingRect().getWidth();
+                    scaledPercentage[0] = (current - minScaleX) / scaleRange;
+                });
+        double oldWidth = slider.getWidth();
+        double oldX = slider.getX();
+        double width = ((1 - scaledPercentage[0]) * (xSliderPane.getWidth() - TOTAL_SLIDER_THUMB_WIDTH)) + TOTAL_SLIDER_THUMB_WIDTH;
+        double x = ((scrollX.getValue() / 100)) * (xSliderPane.getWidth() - width);
+        slider.setX(x);
+        leftSliderThumb.setX(x);
+        slider.setWidth(width);
+        rightSliderThumb.setX(rightSliderThumb.getX() - (oldWidth + oldX - width - x));
     }
 
     private void syncHSlider(double xFactor) {
@@ -651,12 +823,12 @@ public class GenoVixFxController {
                 if (updatedScrollXValue != scrollX.doubleValue()) {
                     if (Platform.isFxApplicationThread()) {
                         scrollX.setValue(updatedScrollXValue);
-                        updatedRangeSlider();
+//                        updatedRangeSlider();
                     } else {
                         final double updatedScrollXValueFinal = updatedScrollXValue;//...
                         Platform.runLater(() -> {
                             scrollX.setValue(updatedScrollXValueFinal);
-                            updatedRangeSlider();
+//                            updatedRangeSlider();
                         });
                     }
                 }
@@ -698,40 +870,41 @@ public class GenoVixFxController {
         memoryInfoTimeline.play();
     }
 
-    private void setupRangeSlider() {
-        rangeSlider.setMin(0);
-        rangeSlider.setMax(100);
-        rangeSlider.setLowValue(0);
-        rangeSlider.setHighValue(100);
-        rangeSlider.setBlockIncrement(2);
-        rangeSlider.lowValueProperty().addListener((observable, oldValue, newValue) -> {
-            double updatedScrollX = newValue.doubleValue();
-            if (updatedScrollX < 0.1) {
-                updatedScrollX = 0;
-            } else if (updatedScrollX > 99.8) {
-                updatedScrollX = 100;
-            }
-            resetZoomStripe();
-            scrollX.setValue(newValue);
-            updateTrackRenderers();
-        });
-        rangeSliderHighValueListener = (observable, oldValue, newValue) -> {
-            final double updatedHsliderPosition = 100 - (newValue.doubleValue() - rangeSlider.lowValueProperty().doubleValue());
-            hSlider.setValue(updatedHsliderPosition);
-            resetZoomStripe();
-        };
-        rangeSlider.highValueProperty().addListener(rangeSliderHighValueListener);
-    }
-    private ChangeListener<Number> rangeSliderHighValueListener;
-
-    private void updatedRangeSlider() {
-        double modelWidth = canvasPane.getModelWidth();
-        final double xFactor = exponentialScaleTransform(canvasPane, hSlider.getValue());
-        final double visibleXCoordinates = Math.floor(canvasPane.getWidth() / xFactor);
-        double percentageInView = visibleXCoordinates / modelWidth;
-        rangeSlider.highValueProperty().removeListener(rangeSliderHighValueListener);
-        rangeSlider.highValueProperty().set(rangeSlider.lowValueProperty().doubleValue() + (percentageInView * 100));
-        rangeSlider.highValueProperty().addListener(rangeSliderHighValueListener);
-    }
+//    private void setupRangeSlider() {
+//        rangeSlider.setMin(0);
+//        rangeSlider.setMax(100);
+//        rangeSlider.setLowValue(0);
+//        rangeSlider.setHighValue(100);
+//        rangeSlider.setBlockIncrement(2);
+//        rangeSlider.lowValueProperty().addListener((observable, oldValue, newValue) -> {
+//            double updatedScrollX = newValue.doubleValue();
+//            if (updatedScrollX < 0.1) {
+//                updatedScrollX = 0;
+//            } else if (updatedScrollX > 99.8) {
+//                updatedScrollX = 100;
+//            }
+//            resetZoomStripe();
+//            scrollX.setValue(newValue);
+//            final double updatedHsliderPosition = 100 - (rangeSlider.highValueProperty().doubleValue() - newValue.doubleValue());
+//            hSlider.setValue(updatedHsliderPosition);
+//        });
+//        rangeSliderHighValueListener = (observable, oldValue, newValue) -> {
+//            final double updatedHsliderPosition = 100 - (newValue.doubleValue() - rangeSlider.lowValueProperty().doubleValue());
+//            hSlider.setValue(updatedHsliderPosition);
+//            resetZoomStripe();
+//        };
+//        rangeSlider.highValueProperty().addListener(rangeSliderHighValueListener);
+//    }
+//    private ChangeListener<Number> rangeSliderHighValueListener;
+//
+//    private void updatedRangeSlider() {
+//        double modelWidth = canvasPane.getModelWidth();
+//        final double xFactor = exponentialScaleTransform(canvasPane, hSlider.getValue());
+//        final double visibleXCoordinates = Math.floor(canvasPane.getWidth() / xFactor);
+//        double percentageInView = visibleXCoordinates / modelWidth;
+//        rangeSlider.highValueProperty().removeListener(rangeSliderHighValueListener);
+//        rangeSlider.highValueProperty().set(rangeSlider.lowValueProperty().doubleValue() + (percentageInView * 100));
+//        rangeSlider.highValueProperty().addListener(rangeSliderHighValueListener);
+//    }
 
 }
