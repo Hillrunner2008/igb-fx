@@ -236,7 +236,6 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     @Subscribe
     private void zoomStripeListener(ZoomStripeEvent event) {
         zoomStripeCoordinate = event.getZoomStripeCoordinate();// / view.getXfactor();
-        draw();
     }
 
     @Override

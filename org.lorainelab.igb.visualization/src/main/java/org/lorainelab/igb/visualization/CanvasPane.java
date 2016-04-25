@@ -130,6 +130,7 @@ public class CanvasPane extends Region {
                         getLocalPoint2DFromMouseEvent(event),
                         getScreenPoint2DFromMouseEvent(event))
                 );
+                drawZoomCoordinateLine();
             } else {
                 eventBus.post(new ClickDragCancelEvent());
                 if (event.getClickCount() >= 2) {
@@ -137,14 +138,15 @@ public class CanvasPane extends Region {
                             getLocalPoint2DFromMouseEvent(event),
                             getScreenPoint2DFromMouseEvent(event))
                     );
+                    drawZoomCoordinateLine();
                 } else {
                     eventBus.post(new MouseClickedEvent(
                             getLocalPoint2DFromMouseEvent(event),
                             getScreenPoint2DFromMouseEvent(event))
                     );
+                    drawZoomCoordinateLine(event);
                 }
             }
-            drawZoomCoordinateLine(event);
             mouseEvents.clear();
 
         });
@@ -222,13 +224,13 @@ public class CanvasPane extends Region {
     private void drawZoomCoordinateLine(MouseEvent event) {
         zoomStripeCoordinate = Math.floor((event.getX() / xFactor) + xOffset);
         drawZoomCoordinateLine();
-
     }
 
     public void drawZoomCoordinateLine() {
         if (zoomStripeCoordinate >= 0) {
             clear();
             eventBus.post(new ZoomStripeEvent(zoomStripeCoordinate));
+            eventBus.post(new RefreshTrackEvent());
             GraphicsContext gc = canvas.getGraphicsContext2D();
             gc.save();
             gc.setStroke(Color.rgb(0, 0, 0, .3));
