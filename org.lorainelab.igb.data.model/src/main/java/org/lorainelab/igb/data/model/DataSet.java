@@ -73,8 +73,8 @@ public class DataSet {
     }
 
     private void refreshCombinedTrack(String chrId) {
-        combinedStrandTrack.getGlyphs().addAll(loadedAnnoations.get(chrId));
-        combinedStrandTrack.buildSlots();
+//        combinedStrandTrack.getGlyphs().addAll(loadedAnnoations.get(chrId));
+//        combinedStrandTrack.buildSlots();
     }
 
     public void loadRegion(String chrId, Range<Integer> range) {

@@ -6,6 +6,7 @@ import com.google.common.eventbus.Subscribe;
 import com.sun.javafx.tk.FontMetrics;
 import com.sun.javafx.tk.Toolkit;
 import java.text.DecimalFormat;
+import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
@@ -340,7 +341,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
 
     private double lastMouseClickX = -1;
     private double lastMouseDragX = -1;
-    
+
     @Subscribe
     private void handleClickDragCancelEvent(ClickDragCancelEvent event) {
         lastMouseClickX = -1;
@@ -350,9 +351,11 @@ public class CoordinateTrackRenderer implements TrackRenderer {
 
     @Subscribe
     public void handleClickDragEndEvent(ClickDragEndEvent mouseEvent) {
-        if (!canvasContext.getBoundingRect().contains(mouseEvent.getLocal())) {
+        if (!canvasContext.getBoundingRect().contains(new Point2D(mouseEvent.getLocal().getX(), canvasContext.getBoundingRect().getMinY()))) {
+            render();
             return;
         }
+        lastMouseDragX = Math.floor(mouseEvent.getLocal().getX() / xfactor);
         ClickDragZoomEvent event;
         double x1 = viewBoundingRectangle.getMinX() + lastMouseClickX;
         double x2 = viewBoundingRectangle.getMinX() + lastMouseDragX;
@@ -368,7 +371,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     }
 
     @Subscribe
-    public void handleClickDraggingEven(ClickDraggingEvent event) {
+    public void handleClickDraggingEvent(ClickDraggingEvent event) {
         if (!canvasContext.getBoundingRect().contains(event.getLocal())) {
             return;
         }

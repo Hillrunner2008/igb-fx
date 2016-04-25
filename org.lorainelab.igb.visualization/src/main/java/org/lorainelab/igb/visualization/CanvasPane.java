@@ -36,10 +36,13 @@ import org.lorainelab.igb.visualization.util.CanvasUtils;
 import org.reactfx.EventStream;
 import org.reactfx.EventStreams;
 import org.reactfx.util.Either;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component(immediate = true, provide = CanvasPane.class)
 public class CanvasPane extends Region {
 
+    private static final Logger LOG = LoggerFactory.getLogger(CanvasPane.class);
     private Canvas canvas;
     private double modelWidth;
     private double xFactor;
@@ -126,10 +129,18 @@ public class CanvasPane extends Region {
             resetZoomStripe();
             List<EventType<? extends MouseEvent>> types = mouseEvents.stream().map(e -> e.getEventType()).collect(Collectors.toList());
             if (types.contains(MouseEvent.MOUSE_DRAGGED)) {
-                eventBus.post(new ClickDragEndEvent(
-                        getLocalPoint2DFromMouseEvent(event),
-                        getScreenPoint2DFromMouseEvent(event))
-                );
+                if (types.contains(MouseEvent.MOUSE_EXITED)) {
+                    eventBus.post(new ClickDragEndEvent(
+                            getCoordinateBoundedDragEventLocation(event),
+                            getScreenPoint2DFromMouseEvent(event)
+                    )
+                    );
+                } else {
+                    eventBus.post(new ClickDragEndEvent(
+                            getLocalPoint2DFromMouseEvent(event),
+                            getScreenPoint2DFromMouseEvent(event))
+                    );
+                }
                 drawZoomCoordinateLine();
             } else {
                 eventBus.post(new ClickDragCancelEvent());
@@ -181,6 +192,12 @@ public class CanvasPane extends Region {
                 eventBus.post(new ScrollScaleEvent(Direction.DECREMENT));
             }
         });
+    }
+
+    private Point2D getCoordinateBoundedDragEventLocation(MouseEvent event) {
+        double boundedEventX = event.getX() < 0 ? 0 : event.getX();
+        boundedEventX = Math.min(modelWidth, boundedEventX);
+        return new Point2D(boundedEventX, 0);
     }
 
     public void resetZoomStripe() {
