@@ -64,10 +64,10 @@ public class CanvasPane extends Region {
         canvas = new Canvas();
         getChildren().add(canvas);
         canvas.widthProperty().addListener(observable -> {
-            draw();
+            clear();
             xFactor = canvas.getWidth() / modelWidth;
         });
-        canvas.heightProperty().addListener(observable -> draw());
+        canvas.heightProperty().addListener(observable -> clear());
         zoomStripeCoordinate = -1;
         initializeMouseEventHandlers();
         selectionInfoService.getSelectedChromosome().addListener((observable, oldValue, newValue) -> {
@@ -117,7 +117,6 @@ public class CanvasPane extends Region {
         });
         canvas.setOnMousePressed((MouseEvent event) -> {
             mouseEvents.add(event);
-            resetZoomStripe();
             eventBus.post(new ClickDragStartEvent(
                     getLocalPoint2DFromMouseEvent(event),
                     getScreenPoint2DFromMouseEvent(event))
@@ -134,20 +133,18 @@ public class CanvasPane extends Region {
             } else {
                 eventBus.post(new ClickDragCancelEvent());
                 if (event.getClickCount() >= 2) {
-
                     eventBus.post(new MouseDoubleClickEvent(
                             getLocalPoint2DFromMouseEvent(event),
                             getScreenPoint2DFromMouseEvent(event))
                     );
                 } else {
-
                     eventBus.post(new MouseClickedEvent(
                             getLocalPoint2DFromMouseEvent(event),
                             getScreenPoint2DFromMouseEvent(event))
                     );
-                    drawZoomCoordinateLine(event);
                 }
             }
+            drawZoomCoordinateLine(event);
             mouseEvents.clear();
 
         });
@@ -206,7 +203,7 @@ public class CanvasPane extends Region {
         canvas.setHeight(contentHeight);
     }
 
-    private void draw() {
+    public void clear() {
         final double width = canvas.getWidth();
         final double height = canvas.getHeight();
         final GraphicsContext gc = canvas.getGraphicsContext2D();
@@ -230,6 +227,7 @@ public class CanvasPane extends Region {
 
     public void drawZoomCoordinateLine() {
         if (zoomStripeCoordinate >= 0) {
+            clear();
             eventBus.post(new ZoomStripeEvent(zoomStripeCoordinate));
             GraphicsContext gc = canvas.getGraphicsContext2D();
             gc.save();

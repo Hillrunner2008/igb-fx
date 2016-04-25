@@ -471,6 +471,7 @@ public class GenoVixFxController {
     }
 
     private void updateTrackRenderers() {
+        canvasPane.clear();
         updateCanvasContexts();
         trackRenderers.forEach(trackRenderer -> trackRenderer.scaleCanvas(exponentialScaleTransform(canvasPane, hSlider.getValue()), scrollX.get(), scrollY.getValue()));
         eventBus.post(new ScaleEvent(hSlider.getValue(), vSlider.getValue(), scrollX.getValue(), scrollY.getValue()));
@@ -489,7 +490,6 @@ public class GenoVixFxController {
     private void initializeGuiComponents() {
         setupMemoryInfoWidget();
         setupPlusMinusSlider();
-//        setupRangeSlider();
         addZoomSliderMiniMapWidget();
         addMenuBar();
         addTabPanes();
@@ -517,7 +517,7 @@ public class GenoVixFxController {
                 Optional.ofNullable(selectedChromosome).ifPresent(chr -> {
                     genomeVersion.getLoadedDataSets().forEach(dataSet -> {
                         CompletableFuture.supplyAsync(() -> {
-                            dataSet.loadRegion(selectedChromosome.getName(), Range.closedOpen(0, 20000));
+                            dataSet.loadRegion(selectedChromosome.getName(), getCurrentRange());
                             return null;
                         }).thenRun(() -> {
                             Platform.runLater(() -> {
@@ -680,14 +680,12 @@ public class GenoVixFxController {
             double scrollXValue = (minX / (modelWidth - width)) * 100;
             scrollX.setValue(scrollXValue);
         }
-
     }
 
     @Subscribe
     private void handleScrollXUpdateEvent(ScrollXUpdate e) {
         ignoreScrollXEvent = true;
         scrollX.setValue(e.getScrollX());
-//        syncSlider();
     }
 
     @Subscribe

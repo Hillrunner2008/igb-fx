@@ -168,12 +168,12 @@ public class BedParser implements FileTypeHandler {
                         getShapes(layer).forEach(shape -> {
                             if (Rectangle.class
                                     .isAssignableFrom(shape.getClass())) {
-                                children.add(GenovizFxFactory.generateRectangleGlyph((Rectangle) shape, layer.getStart()));
+                                children.add(GenovizFxFactory.generateRectangleGlyph((Rectangle) shape));
 
                             }
                             if (Line.class
                                     .isAssignableFrom(shape.getClass())) {
-                                children.add(GenovizFxFactory.generateLine((Line) shape, layer.getStart()));
+                                children.add(GenovizFxFactory.generateLine((Line) shape));
                             }
                         });
                     });
@@ -223,19 +223,31 @@ public class BedParser implements FileTypeHandler {
     }
 
     @Override
-    public Set<CompositionGlyph> getRegion(DataSourceReference dataSourceReference, com.google.common.collect.Range range, String chromosomeId) {
+    public Set<CompositionGlyph> getRegion(DataSourceReference dataSourceReference, Range range, String chromosomeId) {
         final DataSource dataSource = dataSourceReference.getDataSource();
         final String path = dataSourceReference.getPath();
         Set<BedFeature> annotations = Sets.newLinkedHashSet();
         dataSource.getInputStream(path).ifPresent(inputStream -> {
-            try (InputStream resourceAsStream = inputStream;
-                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resourceAsStream))) {
+            try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
                 Iterator<String> iterator = bufferedReader.lines().iterator();
+                boolean alreadyTraversedRange = false; //assumes sorted bed file
+                boolean alreadyTraversedChromosome = false; //assumes sorted bed file
                 while (iterator.hasNext()) {
                     String line = iterator.next().trim();
                     List<String> fields = Splitter.on("\t").splitToList(line);
-                    final BedFeature bedFeature = createAnnotation(fields);
-                    annotations.add(bedFeature);
+                    String annotaionChromId = fields.get(0);
+                    if (annotaionChromId.equals(chromosomeId)) {
+                        final BedFeature bedFeature = createAnnotation(fields);
+                        if (bedFeature.getRange().isConnected(range)) {
+                            annotations.add(bedFeature);
+                            alreadyTraversedRange = true;
+                        } else if (alreadyTraversedRange) {
+                            break;
+                        }
+                        alreadyTraversedChromosome = true;
+                    } else if (alreadyTraversedChromosome) {
+                        break;
+                    }
                 }
             } catch (IOException ex) {
                 LOG.error(ex.getMessage(), ex);

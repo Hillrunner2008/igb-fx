@@ -22,7 +22,7 @@
 
 <VBox fx:id="root" prefHeight="950" prefWidth="1600" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
     <children>
-        <ToolBar prefHeight="40.0" prefWidth="200.0">
+        <ToolBar fx:id="topToolBar" prefHeight="40.0" prefWidth="200.0">
             <items>
             <FontAwesomeIconView glyphName="FOLDER_OPEN" size="18" />
             <FontAwesomeIconView glyphName="CONNECTDEVELOP" size="18" />
@@ -158,7 +158,7 @@
             </SplitPane>
          </children>
       </StackPane>
-      <ToolBar maxHeight="25.0" prefHeight="25.0" prefWidth="200.0">
+      <ToolBar fx:id="bottomToolbar" maxHeight="25.0" prefHeight="25.0" prefWidth="200.0">
          <items>
             <StackPane maxHeight="20.0" maxWidth="200.0" prefHeight="20.0" prefWidth="200.0">
                <children>
@@ -172,7 +172,7 @@
                </children>
             </StackPane>
             <Pane HBox.hgrow="ALWAYS" />
-            <StatusBar prefWidth="373.0" />
+            <StatusBar fx:id="statusBar" prefWidth="373.0" />
          </items>
       </ToolBar>
     </children>

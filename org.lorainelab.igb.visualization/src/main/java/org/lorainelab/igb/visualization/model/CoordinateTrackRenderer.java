@@ -400,6 +400,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     @Subscribe
     private void zoomStripeListener(ZoomStripeEvent event) {
         zoomStripeCoordinate = event.getZoomStripeCoordinate();
+        draw();
     }
 
     @Override

@@ -1,8 +1,5 @@
 package org.lorainelab.igb.visualization.model;
 
-import org.lorainelab.igb.data.model.CanvasContext;
-import org.lorainelab.igb.data.model.Track;
-import org.lorainelab.igb.data.model.View;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import java.util.Optional;
@@ -13,6 +10,9 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Tooltip;
 import javafx.scene.paint.Color;
 import org.apache.commons.lang3.text.WordUtils;
+import org.lorainelab.igb.data.model.CanvasContext;
+import org.lorainelab.igb.data.model.Track;
+import org.lorainelab.igb.data.model.View;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
 import org.lorainelab.igb.visualization.CanvasPane;
 import org.lorainelab.igb.visualization.event.MouseClickedEvent;
@@ -236,6 +236,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     @Subscribe
     private void zoomStripeListener(ZoomStripeEvent event) {
         zoomStripeCoordinate = event.getZoomStripeCoordinate();// / view.getXfactor();
+        draw();
     }
 
     @Override
