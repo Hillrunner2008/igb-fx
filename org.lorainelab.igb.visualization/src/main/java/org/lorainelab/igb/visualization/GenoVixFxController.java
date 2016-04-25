@@ -307,7 +307,8 @@ public class GenoVixFxController {
         });
         hSliderWidget.addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             resetZoomStripe();
-            if (lastHSliderFire < 0 || Math.abs(lastHSliderFire - newValue.doubleValue()) > 1) {
+            boolean isNearMaxZoom = newValue.doubleValue() > 98;
+            if (lastHSliderFire < 0 || Math.abs(lastHSliderFire - newValue.doubleValue()) > 1 || isNearMaxZoom) {
                 final double xFactor = linearScaleTransform(canvasPane, newValue.doubleValue());
                 trackRenderers.forEach(trackRenderer -> {
                     trackRenderer.scaleCanvas(xFactor, scrollX.get(), scrollY.getValue());
@@ -320,14 +321,14 @@ public class GenoVixFxController {
             Platform.runLater(() -> {
                 refreshSliderWidget();
             });
-                updateTrackRenderers();
+            updateTrackRenderers();
         });
 
         canvas.heightProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             Platform.runLater(() -> {
-               refreshSliderWidget();
+                refreshSliderWidget();
             });
-                updateTrackRenderers();
+            updateTrackRenderers();
         });
 
         scrollX.addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
@@ -707,7 +708,7 @@ public class GenoVixFxController {
     private void handleScrollXUpdateEvent(ScrollXUpdate e) {
         ignoreScrollXEvent = true;
         scrollX.setValue(e.getScrollX());
-        //syncSlider();
+//        syncSlider();
     }
 
     @Subscribe
@@ -823,12 +824,12 @@ public class GenoVixFxController {
                 if (updatedScrollXValue != scrollX.doubleValue()) {
                     if (Platform.isFxApplicationThread()) {
                         scrollX.setValue(updatedScrollXValue);
-//                        updatedRangeSlider();
+                        refreshSliderWidget();
                     } else {
                         final double updatedScrollXValueFinal = updatedScrollXValue;//...
                         Platform.runLater(() -> {
                             scrollX.setValue(updatedScrollXValueFinal);
-//                            updatedRangeSlider();
+                            refreshSliderWidget();
                         });
                     }
                 }
@@ -869,42 +870,5 @@ public class GenoVixFxController {
         memoryInfoTimeline.setCycleCount(Timeline.INDEFINITE);
         memoryInfoTimeline.play();
     }
-
-//    private void setupRangeSlider() {
-//        rangeSlider.setMin(0);
-//        rangeSlider.setMax(100);
-//        rangeSlider.setLowValue(0);
-//        rangeSlider.setHighValue(100);
-//        rangeSlider.setBlockIncrement(2);
-//        rangeSlider.lowValueProperty().addListener((observable, oldValue, newValue) -> {
-//            double updatedScrollX = newValue.doubleValue();
-//            if (updatedScrollX < 0.1) {
-//                updatedScrollX = 0;
-//            } else if (updatedScrollX > 99.8) {
-//                updatedScrollX = 100;
-//            }
-//            resetZoomStripe();
-//            scrollX.setValue(newValue);
-//            final double updatedHsliderPosition = 100 - (rangeSlider.highValueProperty().doubleValue() - newValue.doubleValue());
-//            hSlider.setValue(updatedHsliderPosition);
-//        });
-//        rangeSliderHighValueListener = (observable, oldValue, newValue) -> {
-//            final double updatedHsliderPosition = 100 - (newValue.doubleValue() - rangeSlider.lowValueProperty().doubleValue());
-//            hSlider.setValue(updatedHsliderPosition);
-//            resetZoomStripe();
-//        };
-//        rangeSlider.highValueProperty().addListener(rangeSliderHighValueListener);
-//    }
-//    private ChangeListener<Number> rangeSliderHighValueListener;
-//
-//    private void updatedRangeSlider() {
-//        double modelWidth = canvasPane.getModelWidth();
-//        final double xFactor = exponentialScaleTransform(canvasPane, hSlider.getValue());
-//        final double visibleXCoordinates = Math.floor(canvasPane.getWidth() / xFactor);
-//        double percentageInView = visibleXCoordinates / modelWidth;
-//        rangeSlider.highValueProperty().removeListener(rangeSliderHighValueListener);
-//        rangeSlider.highValueProperty().set(rangeSlider.lowValueProperty().doubleValue() + (percentageInView * 100));
-//        rangeSlider.highValueProperty().addListener(rangeSliderHighValueListener);
-//    }
 
 }
