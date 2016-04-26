@@ -15,6 +15,7 @@ import org.lorainelab.igb.data.model.Track;
 import org.lorainelab.igb.data.model.View;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
 import org.lorainelab.igb.visualization.CanvasPane;
+import org.lorainelab.igb.visualization.event.ClickDragEndEvent;
 import org.lorainelab.igb.visualization.event.MouseClickedEvent;
 import org.lorainelab.igb.visualization.event.MouseDoubleClickEvent;
 import org.lorainelab.igb.visualization.event.MouseStationaryEndEvent;
@@ -22,6 +23,8 @@ import org.lorainelab.igb.visualization.event.MouseStationaryStartEvent;
 import org.lorainelab.igb.visualization.event.RefreshTrackEvent;
 import org.lorainelab.igb.visualization.event.ScrollXUpdate;
 import org.lorainelab.igb.visualization.event.ZoomStripeEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -29,6 +32,7 @@ import org.lorainelab.igb.visualization.event.ZoomStripeEvent;
  */
 public class ZoomableTrackRenderer implements TrackRenderer {
 
+    private static final Logger LOG = LoggerFactory.getLogger(ZoomableTrackRenderer.class);
     private TrackLabel trackLabel;
     final int modelWidth;
     final double modelHeight;
@@ -63,13 +67,11 @@ public class ZoomableTrackRenderer implements TrackRenderer {
             if (zoomStripeCoordinate != -1) {
                 double zoomStripePositionPercentage = (zoomStripeCoordinate - view.getBoundingRect().getMinX()) / view.getBoundingRect().getWidth();
                 xOffset = Math.max(zoomStripeCoordinate - (visibleVirtualCoordinatesX * zoomStripePositionPercentage), 0);
-                if (xOffset < 1) {
-                    xOffset = 0;
-                }
-                double coordOutOfView = modelWidth - visibleVirtualCoordinatesX;
+                double maxXoffset = modelWidth - visibleVirtualCoordinatesX;
+                xOffset = Math.min(maxXoffset, xOffset);
                 final double calculatedScrollXPosition;
-                if (coordOutOfView > 0) {
-                    calculatedScrollXPosition = (xOffset / (coordOutOfView)) * 100;
+                if (maxXoffset > 0) {
+                    calculatedScrollXPosition = (xOffset / (maxXoffset)) * 100;
                 } else {
                     calculatedScrollXPosition = 0;
                 }
@@ -134,7 +136,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     }
 
     private void showToolTip(Point2D local, Point2D screen) {
-        
+
         Rectangle2D modelCoordinateBoundingBox = mouseEventToViewCoordinates(local);
         Optional<CompositionGlyph> intersect = track.getGlyphs().stream().filter(glyph -> glyph.getBoundingRect().intersects(modelCoordinateBoundingBox))
                 .findFirst();
@@ -184,10 +186,15 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     @Subscribe
     private void handleMouseClickEvent(MouseClickedEvent event) {
         if (!canvasContext.getBoundingRect().contains(event.getLocal())) {
+            if (!event.isMultiSelectModeActive()) {
+                track.getGlyphs().stream().forEach(glyph -> glyph.setIsSelected(false));
+            }
             return;
         }
         Rectangle2D mouseEventBoundingBox = mouseEventToViewCoordinates(event.getLocal());
-        track.getGlyphs().stream().forEach(glyph -> glyph.setIsSelected(false));
+        if (!event.isMultiSelectModeActive()) {
+            track.getGlyphs().stream().forEach(glyph -> glyph.setIsSelected(false));
+        }
         track.getGlyphs().stream()
                 .filter(glyph -> view.getBoundingRect().intersects(glyph.getBoundingRect()))
                 .filter(glyph -> glyph.getBoundingRect().intersects(mouseEventBoundingBox))
@@ -199,21 +206,41 @@ public class ZoomableTrackRenderer implements TrackRenderer {
 
     @Subscribe
     private void handleMouseDoubleClickEvent(MouseDoubleClickEvent event) {
-        if (!canvasContext.getBoundingRect().contains(event.getLocal())) {
-            return;
+        if (canvasContext.isVisible()) {
+            if (!canvasContext.getBoundingRect().contains(event.getLocal())) {
+                return;
+            }
+            zoomStripeCoordinate = -1;
+            track.getGlyphs().stream()
+                    .filter(glyph -> glyph.isSelected())
+                    .findFirst()
+                    .ifPresent(t -> {
+                        jumpZoom(t.getBoundingRect());
+                    });
         }
-        zoomStripeCoordinate = -1;
-        track.getGlyphs().stream()
-                .filter(glyph -> glyph.isSelected())
-                .findFirst()
-                .ifPresent(t -> {
-                    jumpZoom(t.getBoundingRect());
-                });
     }
-    
+
     @Subscribe
     private void handleRefreshTrackEvent(RefreshTrackEvent event) {
         render();
+    }
+
+    @Subscribe
+    public void handleClickDragEndEvent(ClickDragEndEvent event) {
+        if (canvasContext.isVisible()) {
+            Rectangle2D selectionRectangle = event.getSelectionRectangle();
+            if (!canvasContext.getBoundingRect().intersects(selectionRectangle)) {
+                return;
+            }
+            track.getGlyphs().stream().forEach(glyph -> glyph.setIsSelected(false));
+            Rectangle2D mouseEventBoundingBox = mouseEventToViewCoordinates(selectionRectangle);
+            track.getGlyphs().stream()
+                    .filter(glyph -> view.getBoundingRect().intersects(glyph.getBoundingRect()))
+                    .filter(glyph -> glyph.getBoundingRect().intersects(mouseEventBoundingBox))
+                    .forEach(glyph -> {
+                        glyph.setIsSelected(true);
+                    });
+        }
     }
 
     private Rectangle2D mouseEventToViewCoordinates(Point2D clickLocation) {
@@ -224,6 +251,21 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         x += offsetX;
         y += offsetY;
         Rectangle2D mouseEventBoundingBox = new Rectangle2D(x, y, 1, 1);
+        return mouseEventBoundingBox;
+    }
+
+    private Rectangle2D mouseEventToViewCoordinates(Rectangle2D localSelectionRectangle) {
+        double minX = Math.floor(localSelectionRectangle.getMinX() / view.getXfactor());
+        double maxX = Math.floor(localSelectionRectangle.getMaxX() / view.getXfactor());
+        double minY = Math.floor((localSelectionRectangle.getMinY() - canvasContext.getBoundingRect().getMinY()) / view.getYfactor());
+        double maxY = Math.floor((localSelectionRectangle.getMaxY() - canvasContext.getBoundingRect().getMinY()) / view.getYfactor());
+        double offsetX = view.getBoundingRect().getMinX();
+        double offsetY = view.getBoundingRect().getMinY();
+        minX += offsetX;
+        maxX += offsetX;
+        minY += offsetY;
+        maxY += offsetY;
+        Rectangle2D mouseEventBoundingBox = new Rectangle2D(minX, minY, maxX - minX, maxY - minY);
         return mouseEventBoundingBox;
     }
 

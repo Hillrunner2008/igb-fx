@@ -67,6 +67,7 @@ import static org.lorainelab.igb.visualization.model.TrackRenderer.MAX_ZOOM_MODE
 import org.lorainelab.igb.visualization.model.ViewPortManager;
 import org.lorainelab.igb.visualization.model.ZoomableTrackRenderer;
 import org.lorainelab.igb.visualization.tabs.TabPaneManager;
+import static org.lorainelab.igb.visualization.util.BoundsUtil.enforceRangeBounds;
 import static org.lorainelab.igb.visualization.util.CanvasUtils.exponentialScaleTransform;
 import static org.lorainelab.igb.visualization.util.CanvasUtils.invertExpScaleTransform;
 import static org.lorainelab.igb.visualization.util.CanvasUtils.linearScaleTransform;
@@ -330,6 +331,11 @@ public class GenoVixFxController {
         });
 
         scrollX.addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+            final double boundedScrollValue = enforceRangeBounds(newValue.doubleValue(), 0, 100);
+            if (boundedScrollValue != newValue.doubleValue()) {
+                scrollX.setValue(boundedScrollValue);
+                return;
+            }
             if (ignoreScrollXEvent) {
                 ignoreScrollXEvent = false;
             } else {
@@ -382,7 +388,7 @@ public class GenoVixFxController {
                 double maxSlider = xSliderPane.getWidth() - slider.getWidth();
                 double currentSlider = slider.getX();
                 double newScrollX;
-                if (maxSlider <= 0) {
+                if (maxSlider < 0) {
                     newScrollX = 0;
                 } else {
                     newScrollX = (currentSlider / maxSlider) * 100;
@@ -666,7 +672,7 @@ public class GenoVixFxController {
         TrackRenderer eventLocationReference = jumpZoomEvent.getTrackRenderer();
         View view = eventLocationReference.getView();
         if (focusRect.intersects(view.getBoundingRect())) {
-            double modelWidth = eventLocationReference.getModelWidth();
+            double modelWidth = canvasPane.getModelWidth();
             double minX = Math.max(focusRect.getMinX(), view.getBoundingRect().getMinX());
             double maxX = Math.min(focusRect.getMaxX(), view.getBoundingRect().getMaxX());
             double width = maxX - minX;
@@ -678,6 +684,7 @@ public class GenoVixFxController {
             resetZoomStripe();
             hSlider.setValue(invertExpScaleTransform(canvasPane, scaleXalt));
             double scrollXValue = (minX / (modelWidth - width)) * 100;
+            scrollXValue = enforceRangeBounds(scrollXValue, 0, 100);
             scrollX.setValue(scrollXValue);
         }
     }
@@ -685,12 +692,15 @@ public class GenoVixFxController {
     @Subscribe
     private void handleScrollXUpdateEvent(ScrollXUpdate e) {
         ignoreScrollXEvent = true;
-        scrollX.setValue(e.getScrollX());
+        double scrollXValue = enforceRangeBounds(e.getScrollX(), 0, 100);
+        scrollX.setValue(scrollXValue);
     }
 
     @Subscribe
     private void clickDragZoomListener(ClickDragZoomEvent event) {
-        final Rectangle2D zoomFocus = new Rectangle2D(event.getStartX(), 0, event.getEndX() - event.getStartX(), Double.MAX_VALUE);
+        double x1 = event.getStartX();
+        final double x2 = event.getEndX() - event.getStartX();
+        final Rectangle2D zoomFocus = new Rectangle2D(x1, 0, x2, Double.MAX_VALUE);
         trackRenderers.stream()
                 .filter(track -> track instanceof CoordinateTrackRenderer)
                 .findFirst().ifPresent(coordinateRenderer -> {
@@ -804,11 +814,7 @@ public class GenoVixFxController {
 
     private double getUpdatedScrollxValue(double eventValue) {
         double updatedScrollXValue = scrollX.doubleValue() + getAdjustedScrollValue(eventValue);
-        if (updatedScrollXValue < 0) {
-            updatedScrollXValue = 0;
-        } else if (updatedScrollXValue > 100) {
-            updatedScrollXValue = 100;
-        }
+        updatedScrollXValue = enforceRangeBounds(updatedScrollXValue, 0, 100);
         return updatedScrollXValue;
     }
 

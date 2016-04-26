@@ -6,6 +6,7 @@
 package org.lorainelab.igb.visualization.event;
 
 import javafx.geometry.Point2D;
+import javafx.geometry.Rectangle2D;
 
 /**
  *
@@ -13,9 +14,15 @@ import javafx.geometry.Point2D;
  */
 public class ClickDragEndEvent extends MouseEvent {
 
-    public ClickDragEndEvent(Point2D local, Point2D screen) {
+    private final Rectangle2D selectionRectangle;
+
+    public ClickDragEndEvent(Point2D local, Point2D screen, Rectangle2D selectionRectangle) {
         super(local, screen);
+        this.selectionRectangle = selectionRectangle;
     }
-    
-    
+
+    public Rectangle2D getSelectionRectangle() {
+        return selectionRectangle;
+    }
+
 }

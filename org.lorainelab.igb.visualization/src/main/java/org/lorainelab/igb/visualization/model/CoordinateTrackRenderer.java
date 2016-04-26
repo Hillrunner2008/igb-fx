@@ -23,6 +23,7 @@ import org.lorainelab.igb.visualization.event.ClickDragZoomEvent;
 import org.lorainelab.igb.visualization.event.ClickDraggingEvent;
 import org.lorainelab.igb.visualization.event.RefreshTrackEvent;
 import org.lorainelab.igb.visualization.event.ZoomStripeEvent;
+import static org.lorainelab.igb.visualization.util.BoundsUtil.enforceRangeBounds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +53,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     private int weight;
     private TrackLabel trackLabel;
     private final Chromosome chromosome;
+    private final Range<Integer> validViewRange;
 
     public CoordinateTrackRenderer(CanvasPane canvasPane, Chromosome chromosome) {
         weight = 0;
@@ -60,6 +62,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         this.chromosome = chromosome;
         this.modelWidth = chromosome.getLength();
         this.modelHeight = 50;
+        validViewRange = Range.closedOpen(0, modelWidth);
         viewBoundingRectangle = new Rectangle2D(0, 0, modelWidth, modelHeight);
         canvasContext = new CanvasContext(canvasPane.getCanvas(), Rectangle2D.EMPTY, 0, 0);
         trackLabel = new TrackLabel(this, COORDINATES_TRACK_LABEL);
@@ -311,6 +314,15 @@ public class CoordinateTrackRenderer implements TrackRenderer {
             if (zoomStripeCoordinate != -1) {
                 double zoomStripePositionPercentage = (zoomStripeCoordinate - viewBoundingRectangle.getMinX()) / viewBoundingRectangle.getWidth();
                 xOffset = Math.max(zoomStripeCoordinate - (visibleVirtualCoordinatesX * zoomStripePositionPercentage), 0);
+                double maxXoffset = modelWidth - visibleVirtualCoordinatesX;
+                xOffset = Math.min(maxXoffset, xOffset);
+            }
+            xOffset = enforceRangeBounds(xOffset, 0, modelWidth);
+            Range<Integer> currentRange = Range.closedOpen((int) xOffset, (int) xOffset + (int) visibleVirtualCoordinatesX);
+            if (!validViewRange.encloses(currentRange)) {
+                LOG.error("this should not happen");
+                LOG.error("scrollX " + scrollX);
+                LOG.error("scrollY " + scrollY);
             }
             viewBoundingRectangle = new Rectangle2D(xOffset, canvasContext.getBoundingRect().getMinY(), visibleVirtualCoordinatesX, canvasContext.getBoundingRect().getHeight());
             viewYcoordinateRange = Range.<Double>closed(viewBoundingRectangle.getMinY(), viewBoundingRectangle.getMaxY());
@@ -351,17 +363,24 @@ public class CoordinateTrackRenderer implements TrackRenderer {
 
     @Subscribe
     public void handleClickDragEndEvent(ClickDragEndEvent mouseEvent) {
-        if (!canvasContext.getBoundingRect().contains(new Point2D(mouseEvent.getLocal().getX(), canvasContext.getBoundingRect().getMinY()))) {
+        if (lastMouseClickX == -1
+                || !canvasContext.getBoundingRect().contains(new Point2D(mouseEvent.getLocal().getX(), canvasContext.getBoundingRect().getMinY()))) {
             render();
             return;
         }
+        final double visibleVirtualCoordinatesX = viewBoundingRectangle.getWidth();
+        double xOffset = viewBoundingRectangle.getMinX();
+        Range<Double> currentRange = Range.closedOpen(xOffset, xOffset + visibleVirtualCoordinatesX);
+
         lastMouseDragX = Math.floor(mouseEvent.getLocal().getX() / xfactor);
         ClickDragZoomEvent event;
         double x1 = viewBoundingRectangle.getMinX() + lastMouseClickX;
         double x2 = viewBoundingRectangle.getMinX() + lastMouseDragX;
         if (lastMouseDragX > lastMouseClickX) {
+            LOG.info("isInRange " + currentRange.encloses(Range.closedOpen(x1, x2)));
             event = new ClickDragZoomEvent(x1, x2);
         } else {
+            LOG.info("isInRange " + currentRange.encloses(Range.closedOpen(x2, x1)));
             event = new ClickDragZoomEvent(x2, x1);
         }
         eventBus.post(event);
@@ -372,7 +391,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
 
     @Subscribe
     public void handleClickDraggingEvent(ClickDraggingEvent event) {
-        if (!canvasContext.getBoundingRect().contains(event.getLocal())) {
+        if (!canvasContext.getBoundingRect().contains(new Point2D(event.getLocal().getX(), canvasContext.getBoundingRect().getMinY()))) {
             return;
         }
         lastMouseDragX = Math.floor(event.getLocal().getX() / xfactor);

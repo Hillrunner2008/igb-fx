@@ -9,11 +9,15 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import javafx.event.EventHandler;
 import javafx.event.EventType;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import static javafx.scene.input.KeyCode.SHIFT;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
@@ -32,6 +36,7 @@ import org.lorainelab.igb.visualization.event.ScaleEvent;
 import org.lorainelab.igb.visualization.event.ScrollScaleEvent;
 import org.lorainelab.igb.visualization.event.ScrollScaleEvent.Direction;
 import org.lorainelab.igb.visualization.event.ZoomStripeEvent;
+import org.lorainelab.igb.visualization.util.BoundsUtil;
 import org.lorainelab.igb.visualization.util.CanvasUtils;
 import org.reactfx.EventStream;
 import org.reactfx.EventStreams;
@@ -54,17 +59,22 @@ public class CanvasPane extends Region {
     private EventBusService eventBusService;
     private List<MouseEvent> mouseEvents;
     private SelectionInfoService selectionInfoService;
+    private boolean multiSelectModeActive;
+    private Point2D clickStartPosition;
 
     public CanvasPane() {
     }
 
     @Activate
     public void activate() {
+        clickStartPosition = new Point2D(0, 0);
         eventBus = eventBusService.getEventBus();
         eventBus.register(this);
         mouseEvents = new ArrayList<>();
         this.modelWidth = 1;
         canvas = new Canvas();
+        canvas.setFocusTraversable(true);
+        canvas.addEventFilter(MouseEvent.ANY, (e) -> canvas.requestFocus());
         getChildren().add(canvas);
         canvas.widthProperty().addListener(observable -> {
             clear();
@@ -72,6 +82,7 @@ public class CanvasPane extends Region {
         });
         canvas.heightProperty().addListener(observable -> clear());
         zoomStripeCoordinate = -1;
+        initailizeKeyListener();
         initializeMouseEventHandlers();
         selectionInfoService.getSelectedChromosome().addListener((observable, oldValue, newValue) -> {
             if (newValue.isPresent()) {
@@ -116,9 +127,14 @@ public class CanvasPane extends Region {
             mouseEvents.add(event);
         });
         canvas.setOnMouseExited((MouseEvent event) -> {
+            eventBus.post(new ClickDraggingEvent(
+                    getRangeBoundedDragEventLocation(event),
+                    getScreenPoint2DFromMouseEvent(event))
+            );
             mouseEvents.add(event);
         });
         canvas.setOnMousePressed((MouseEvent event) -> {
+             clickStartPosition = getLocalPoint2DFromMouseEvent(event);
             mouseEvents.add(event);
             eventBus.post(new ClickDragStartEvent(
                     getLocalPoint2DFromMouseEvent(event),
@@ -128,33 +144,23 @@ public class CanvasPane extends Region {
         canvas.setOnMouseReleased((MouseEvent event) -> {
             resetZoomStripe();
             List<EventType<? extends MouseEvent>> types = mouseEvents.stream().map(e -> e.getEventType()).collect(Collectors.toList());
+            Point2D rangeBoundedDragEventLocation = getRangeBoundedDragEventLocation(event);
+            final Point2D screenPoint2DFromMouseEvent = getScreenPoint2DFromMouseEvent(event);
             if (types.contains(MouseEvent.MOUSE_DRAGGED)) {
+                Rectangle2D selectionRectangle = new Rectangle2D(clickStartPosition.getX(), clickStartPosition.getY(), event.getX()-clickStartPosition.getX(), event.getY()-clickStartPosition.getY());
                 if (types.contains(MouseEvent.MOUSE_EXITED)) {
-                    eventBus.post(new ClickDragEndEvent(
-                            getCoordinateBoundedDragEventLocation(event),
-                            getScreenPoint2DFromMouseEvent(event)
-                    )
-                    );
+                    eventBus.post(new ClickDragEndEvent(rangeBoundedDragEventLocation, screenPoint2DFromMouseEvent, selectionRectangle));
                 } else {
-                    eventBus.post(new ClickDragEndEvent(
-                            getLocalPoint2DFromMouseEvent(event),
-                            getScreenPoint2DFromMouseEvent(event))
-                    );
+                    eventBus.post(new ClickDragEndEvent(rangeBoundedDragEventLocation, screenPoint2DFromMouseEvent, selectionRectangle));
                 }
                 drawZoomCoordinateLine();
             } else {
                 eventBus.post(new ClickDragCancelEvent());
                 if (event.getClickCount() >= 2) {
-                    eventBus.post(new MouseDoubleClickEvent(
-                            getLocalPoint2DFromMouseEvent(event),
-                            getScreenPoint2DFromMouseEvent(event))
-                    );
+                    eventBus.post(new MouseDoubleClickEvent(rangeBoundedDragEventLocation, screenPoint2DFromMouseEvent));
                     drawZoomCoordinateLine();
                 } else {
-                    eventBus.post(new MouseClickedEvent(
-                            getLocalPoint2DFromMouseEvent(event),
-                            getScreenPoint2DFromMouseEvent(event))
-                    );
+                    eventBus.post(new MouseClickedEvent(rangeBoundedDragEventLocation, screenPoint2DFromMouseEvent, multiSelectModeActive));
                     drawZoomCoordinateLine(event);
                 }
             }
@@ -194,10 +200,10 @@ public class CanvasPane extends Region {
         });
     }
 
-    private Point2D getCoordinateBoundedDragEventLocation(MouseEvent event) {
-        double boundedEventX = event.getX() < 0 ? 0 : event.getX();
-        boundedEventX = Math.min(modelWidth, boundedEventX);
-        return new Point2D(boundedEventX, 0);
+    private Point2D getRangeBoundedDragEventLocation(MouseEvent event) {
+        double boundedEventX = BoundsUtil.enforceRangeBounds(event.getX(), 0, getWidth());
+        double boundedEventY = BoundsUtil.enforceRangeBounds(event.getY(), 0, getHeight());
+        return new Point2D(boundedEventX, boundedEventY);
     }
 
     public void resetZoomStripe() {
@@ -292,5 +298,31 @@ public class CanvasPane extends Region {
     @Reference
     public void setSelectionInfoService(SelectionInfoService selectionInfoService) {
         this.selectionInfoService = selectionInfoService;
+    }
+
+    private void initailizeKeyListener() {
+        canvas.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                switch (event.getCode()) {
+                    case CONTROL:
+                    case SHIFT:
+                        multiSelectModeActive = true;
+                        break;
+                }
+            }
+        });
+
+        canvas.setOnKeyReleased(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                switch (event.getCode()) {
+                    case CONTROL:
+                    case SHIFT:
+                        multiSelectModeActive = false;
+                        break;
+                }
+            }
+        });
     }
 }

@@ -13,8 +13,15 @@ import javafx.geometry.Point2D;
  */
 public class MouseClickedEvent extends MouseEvent {
 
-    public MouseClickedEvent(Point2D local, Point2D screen) {
+    private final boolean multiSelectModeActive;
+
+    public MouseClickedEvent(Point2D local, Point2D screen, boolean multiSelectModeActive) {
         super(local, screen);
+        this.multiSelectModeActive = multiSelectModeActive;
     }
-    
+
+    public boolean isMultiSelectModeActive() {
+        return multiSelectModeActive;
+    }
+
 }
