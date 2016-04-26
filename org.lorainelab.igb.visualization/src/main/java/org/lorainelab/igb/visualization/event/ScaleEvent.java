@@ -10,6 +10,7 @@ package org.lorainelab.igb.visualization.event;
  * @author jeckstei
  */
 public class ScaleEvent {
+
     private final double scaleX;
     private final double scaleY;
     private final double scrollX;
@@ -37,6 +38,5 @@ public class ScaleEvent {
     public double getScrollY() {
         return scrollY;
     }
-    
-    
+
 }

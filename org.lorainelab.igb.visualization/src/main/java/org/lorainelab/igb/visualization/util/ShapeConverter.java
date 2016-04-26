@@ -61,8 +61,6 @@ import javafx.scene.text.Text;
  * Date: 27.11.12
  * Time: 12:03
  */
-
-
 public class ShapeConverter {
 
     private static final double KAPPA = 0.5522847498307935;

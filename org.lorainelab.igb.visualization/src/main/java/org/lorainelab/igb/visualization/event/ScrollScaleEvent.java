@@ -10,6 +10,7 @@ package org.lorainelab.igb.visualization.event;
  * @author jeckstei
  */
 public class ScrollScaleEvent {
+
     private final Direction direction;
 
     public ScrollScaleEvent(Direction direction) {

@@ -26,7 +26,7 @@ public class GenovizFxFactory {
         return cg;
     }
 
-    public static RectangleGlyph generateRectangleGlyph(org.lorainelab.igb.data.model.shapes.Rectangle rectangle ) {
+    public static RectangleGlyph generateRectangleGlyph(org.lorainelab.igb.data.model.shapes.Rectangle rectangle) {
         int height = 10;
         if (rectangle.getAttributes().contains(org.lorainelab.igb.data.model.shapes.Rectangle.Attribute.thick)) {
             height = 15;

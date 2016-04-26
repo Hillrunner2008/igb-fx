@@ -10,5 +10,5 @@ package org.lorainelab.igb.visualization.event;
  * @author jeckstei
  */
 public class MouseStationaryEndEvent implements MouseStationaryEvent {
-    
+
 }

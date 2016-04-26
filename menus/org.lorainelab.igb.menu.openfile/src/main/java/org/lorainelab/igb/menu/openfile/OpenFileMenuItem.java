@@ -53,6 +53,7 @@ public class OpenFileMenuItem implements MenuBarEntryProvider {
             });
         });
     }
+
     @Override
     public Optional<List<WeightedMenuItem>> getMenuItems() {
         final List<WeightedMenuItem> menuItems = Lists.newArrayList(menuItem);
@@ -82,7 +83,7 @@ public class OpenFileMenuItem implements MenuBarEntryProvider {
     private void addFileExtensionFilters(FileChooser fileChooser) {
         fileTypeHandlerRegistry.getFileTypeHandlers().stream()
                 .map(fileTypeHandler -> {
-            return new FileChooser.ExtensionFilter(fileTypeHandler.getName(), fileTypeHandler.getSupportedExtensions().stream().map(ext -> "*." + ext).collect(Collectors.toList()));
+                    return new FileChooser.ExtensionFilter(fileTypeHandler.getName(), fileTypeHandler.getSupportedExtensions().stream().map(ext -> "*." + ext).collect(Collectors.toList()));
                 })
                 .forEach(extensionFilter -> fileChooser.getExtensionFilters().add(extensionFilter));
     }

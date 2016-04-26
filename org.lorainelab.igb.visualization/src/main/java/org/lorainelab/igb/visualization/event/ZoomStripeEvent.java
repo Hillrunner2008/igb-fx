@@ -10,6 +10,7 @@ package org.lorainelab.igb.visualization.event;
  * @author jeckstei
  */
 public class ZoomStripeEvent {
+
     double zoomStripeCoordinate;
 
     public ZoomStripeEvent(double zoomStripeCoordinate) {
@@ -19,6 +20,5 @@ public class ZoomStripeEvent {
     public double getZoomStripeCoordinate() {
         return zoomStripeCoordinate;
     }
-    
-    
+
 }

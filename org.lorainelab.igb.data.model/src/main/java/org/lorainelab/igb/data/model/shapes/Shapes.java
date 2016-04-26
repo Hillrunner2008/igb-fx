@@ -13,7 +13,9 @@ import java.util.stream.Stream;
  * @author jeckstei
  */
 public interface Shapes {
+
     default Stream<Shape> shapes(Shape... shapes) {
         return Sets.newHashSet(shapes).stream();
-    };
+    }
+;
 }

@@ -87,7 +87,6 @@ public class DemoTrackRendererProvider {
 //        positiveStrandTrack.buildSlots();
 //        negativeStrandTrack.buildSlots();
 //    }
-
 //    private List<Shape> getShapes(Layer layer) {
 //        List<Shape> toReturn = Lists.newArrayList();
 //        layer.getItems().forEach(s -> {

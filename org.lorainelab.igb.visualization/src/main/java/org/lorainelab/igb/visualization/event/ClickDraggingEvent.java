@@ -16,5 +16,5 @@ public class ClickDraggingEvent extends MouseEvent {
     public ClickDraggingEvent(Point2D local, Point2D screen) {
         super(local, screen);
     }
-    
+
 }

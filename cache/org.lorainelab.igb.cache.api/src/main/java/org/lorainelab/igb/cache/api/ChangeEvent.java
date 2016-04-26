@@ -10,5 +10,5 @@ package org.lorainelab.igb.cache.api;
  * @author jeckstei
  */
 public class ChangeEvent {
-    
+
 }

@@ -24,7 +24,7 @@ public class Line<T extends Feature> implements Shape {
     public Line() {
         this.attributes = Lists.newArrayList();
     }
-        
+
     public static Build start(int offset, int width) {
         return new Builder(offset, width);
     }

@@ -25,7 +25,6 @@ public class ZoomSliderMiniMapWidget {
 //        double minScaleX = canvasPane.getModelWidth();
 //        double maxScaleX = MAX_ZOOM_MODEL_COORDINATES_X - 1;
 //        final double scaleRange = maxScaleX - minScaleX;
-
 //        final double current = trackRenderer.getView().getBoundingRect().getWidth();
 //        scaledPercentage[0] = (current - minScaleX) / scaleRange;
 //        double oldWidth = slider.getWidth();

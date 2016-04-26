@@ -18,10 +18,10 @@ import org.slf4j.LoggerFactory;
 
 @Component
 public class Launcher extends Application {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(Launcher.class);
     private StageProviderRegistrationManager stageRegistrationManager;
-    
+
     public void activate() throws InterruptedException {
         Executors.defaultThreadFactory().newThread(() -> {
             Thread.currentThread().setContextClassLoader(
@@ -35,13 +35,13 @@ public class Launcher extends Application {
             }
         }).start();
     }
-    
+
     private void handleRestartEvent() {
         Platform.runLater(() -> {
             stageRegistrationManager.registerStageProvider(new Stage());
         });
     }
-    
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         final BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
@@ -65,11 +65,11 @@ public class Launcher extends Application {
             }
         });
     }
-    
+
     @Deactivate
     public void deactivate() {
     }
-    
+
     @Reference
     public void setStageRegistrationManger(StageProviderRegistrationManager registrationManager) {
         this.stageRegistrationManager = registrationManager;

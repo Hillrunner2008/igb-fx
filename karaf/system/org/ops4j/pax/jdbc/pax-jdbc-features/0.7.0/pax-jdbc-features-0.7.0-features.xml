@@ -29,7 +29,7 @@
         <bundle dependency="true">mvn:org.apache.derby/derby/10.11.1.1</bundle>
         <bundle>mvn:org.ops4j.pax.jdbc/pax-jdbc-derby/0.7.0</bundle>
     </feature>
-     <feature name="pax-jdbc-derbyclient" description="Provides JDBC Derbi Client DataSourceFactory" version="0.7.0"
+    <feature name="pax-jdbc-derbyclient" description="Provides JDBC Derbi Client DataSourceFactory" version="0.7.0"
              resolver="(obr)">
         <feature>pax-jdbc-spec</feature>
 
@@ -84,7 +84,7 @@
         <bundle>mvn:org.ops4j.pax.jdbc/pax-jdbc-sqlite/0.7.0</bundle>
     </feature>
 
-   <feature name="pax-jdbc-mssql" description="Provides JDBC MSSQL DataSourceFactory" version="0.7.0"
+    <feature name="pax-jdbc-mssql" description="Provides JDBC MSSQL DataSourceFactory" version="0.7.0"
              resolver="(obr)">
         <feature>pax-jdbc-spec</feature>
 

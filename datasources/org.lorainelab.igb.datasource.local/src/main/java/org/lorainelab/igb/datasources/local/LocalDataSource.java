@@ -22,7 +22,6 @@ public class LocalDataSource implements DataSource {
     public static final String COMPONENT_NAME = "LocalDataSource";
     private static final Logger LOG = LoggerFactory.getLogger(LocalDataSource.class);
 
-
     @Override
     public Optional<InputStream> getInputStream(String path) {
         FileInputStream fileInputStream = null;

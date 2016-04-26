@@ -134,7 +134,7 @@ public class CanvasPane extends Region {
             mouseEvents.add(event);
         });
         canvas.setOnMousePressed((MouseEvent event) -> {
-             clickStartPosition = getLocalPoint2DFromMouseEvent(event);
+            clickStartPosition = getLocalPoint2DFromMouseEvent(event);
             mouseEvents.add(event);
             eventBus.post(new ClickDragStartEvent(
                     getLocalPoint2DFromMouseEvent(event),
@@ -147,7 +147,7 @@ public class CanvasPane extends Region {
             Point2D rangeBoundedDragEventLocation = getRangeBoundedDragEventLocation(event);
             final Point2D screenPoint2DFromMouseEvent = getScreenPoint2DFromMouseEvent(event);
             if (types.contains(MouseEvent.MOUSE_DRAGGED)) {
-                Rectangle2D selectionRectangle = new Rectangle2D(clickStartPosition.getX(), clickStartPosition.getY(), event.getX()-clickStartPosition.getX(), event.getY()-clickStartPosition.getY());
+                Rectangle2D selectionRectangle = new Rectangle2D(clickStartPosition.getX(), clickStartPosition.getY(), event.getX() - clickStartPosition.getX(), event.getY() - clickStartPosition.getY());
                 if (types.contains(MouseEvent.MOUSE_EXITED)) {
                     eventBus.post(new ClickDragEndEvent(rangeBoundedDragEventLocation, screenPoint2DFromMouseEvent, selectionRectangle));
                 } else {

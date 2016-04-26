@@ -12,7 +12,7 @@ import javafx.geometry.Point2D;
  * @author jeckstei
  */
 public class MouseEvent {
-    
+
     protected Point2D local;
     protected Point2D screen;
 
@@ -28,7 +28,5 @@ public class MouseEvent {
     public Point2D getScreen() {
         return screen;
     }
-    
-    
-    
+
 }

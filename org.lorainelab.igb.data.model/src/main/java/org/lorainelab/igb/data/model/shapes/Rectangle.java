@@ -27,11 +27,11 @@ public class Rectangle<T extends Feature> implements Shape {
         attributes = Lists.newArrayList();
         innerText = "";
     }
-    
+
     public static Build start(int offset, int width) {
         return new Rectangle.Builder(offset, width);
     }
-    
+
     public static Build start(int offset, int width, Feature model) {
         return new Rectangle.Builder(offset, width);
     }

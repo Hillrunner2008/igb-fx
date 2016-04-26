@@ -16,5 +16,5 @@ public class ClickDragStartEvent extends MouseEvent {
     public ClickDragStartEvent(Point2D local, Point2D screen) {
         super(local, screen);
     }
-    
+
 }

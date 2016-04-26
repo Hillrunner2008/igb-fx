@@ -20,6 +20,5 @@ public enum Strand {
     public String getName() {
         return name;
     }
-    
-    
+
 }

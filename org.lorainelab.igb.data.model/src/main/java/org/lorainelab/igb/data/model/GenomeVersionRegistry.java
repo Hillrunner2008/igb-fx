@@ -11,6 +11,8 @@ import javafx.collections.ObservableSet;
 public interface GenomeVersionRegistry {
 
     ObservableSet<GenomeVersion> getRegisteredGenomeVersions();
+
     ObjectProperty<Optional<GenomeVersion>> getSelectedGenomeVersion();
+
     void setSelectedGenomeVersion(GenomeVersion selectedGenomeVersion);
 }

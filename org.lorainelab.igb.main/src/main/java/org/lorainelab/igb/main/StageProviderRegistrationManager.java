@@ -32,7 +32,7 @@ public class StageProviderRegistrationManager {
     public void deactivate() throws IOException {
         Platform.runLater(() -> {
             stage.hide();
-            
+
         });
         registerService.unregister();
     }

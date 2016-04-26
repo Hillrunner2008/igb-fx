@@ -26,6 +26,5 @@ public class ClickDragZoomEvent {
     public double getEndX() {
         return endX;
     }
-    
-    
+
 }

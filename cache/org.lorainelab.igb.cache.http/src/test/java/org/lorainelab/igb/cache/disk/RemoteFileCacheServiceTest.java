@@ -5,7 +5,6 @@
  */
 package org.lorainelab.igb.cache.disk;
 
-import org.lorainelab.igb.cache.api.CacheStatus;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -24,6 +23,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.lorainelab.igb.cache.api.CacheStatus;
 import org.lorainelab.igb.stage.provider.api.StageProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -136,7 +136,7 @@ public class RemoteFileCacheServiceTest {
         remoteFileService.getFilebyUrl(new URL("http://igbquickload.org/A_thaliana_Jan_2004/chr2.bnib"), false);
         Assert.assertTrue(is.isPresent());
     }
-    
+
     @Ignore
     @Test
     public void testPromptCacheInBackground() throws MalformedURLException, InterruptedException {

@@ -18,7 +18,7 @@ import org.lorainelab.igb.data.model.Feature;
 public interface Join<T extends Feature> extends Shape {
 
     default Join[] join(Feature model, Shape[]... shapes) {
-        return new Join[] {new Join() {
+        return new Join[]{new Join() {
             @Override
             public List<Shape> getJoinItems() {
                 return null;

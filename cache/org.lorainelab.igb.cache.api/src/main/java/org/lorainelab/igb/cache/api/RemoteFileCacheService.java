@@ -31,7 +31,7 @@ public interface RemoteFileCacheService {
     public void enforceEvictionPolicies();
 
     public List<CacheStatus> getCacheEntries();
-    
+
     public CacheStatus getCacheStatus(URL url);
 
     public BigInteger getMaxCacheSizeMB();
@@ -39,7 +39,7 @@ public interface RemoteFileCacheService {
     public BigInteger getMinFileSizeBytes();
 
     public BigInteger getCacheExpireMin();
-    
+
     public boolean getCacheEnabled();
 
     public void setMaxCacheSizeMB(BigInteger value);
@@ -47,17 +47,17 @@ public interface RemoteFileCacheService {
     public void setMinFileSizeBytes(BigInteger value);
 
     public void setCacheExpireMin(BigInteger value);
-    
+
     public void setCacheEnabled(boolean value);
-    
+
     public void promptToCacheInBackground(URL url, boolean defaultIsYes);
-    
+
     public boolean isCachingInBackground(URL url);
-    
+
     public Date getLastRequestDate(URL url);
-    
+
     public void registerEventListener(Object listener);
-    
-    public void unregisterEventListener(Object listener); 
+
+    public void unregisterEventListener(Object listener);
 
 }

@@ -14,6 +14,7 @@ import java.util.prefs.Preferences;
  * @author jeckstei
  */
 public class PreferenceUtils {
+
     static String CONFIRM_BEFORE_CACHE_SEQUENCE_IN_BACKGROUND;
     static boolean default_confirm_before_cache_sequence_in_background = false;
 
@@ -28,10 +29,10 @@ public class PreferenceUtils {
     public static Preferences getCacheRequestNode() {
         return Preferences.userRoot().node("org.lorainelab.igb.cache.request");
     }
-    
+
     public static File getDataDir() {
         String dataDir = System.getProperty("karaf.data");
-        if(dataDir == null) {
+        if (dataDir == null) {
             dataDir = System.getProperty("user.home");
         }
         return new File(dataDir);

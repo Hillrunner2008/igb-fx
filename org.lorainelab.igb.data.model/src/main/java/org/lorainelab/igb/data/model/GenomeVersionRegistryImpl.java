@@ -38,5 +38,4 @@ public class GenomeVersionRegistryImpl implements GenomeVersionRegistry {
         return selectedGenomeVersionProperty;
     }
 
-
 }
