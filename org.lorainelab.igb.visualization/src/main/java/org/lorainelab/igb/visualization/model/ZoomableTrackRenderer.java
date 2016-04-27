@@ -137,7 +137,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
 
     private void showToolTip(Point2D local, Point2D screen) {
 
-        Rectangle2D modelCoordinateBoundingBox = mouseEventToViewCoordinates(local);
+        Rectangle2D modelCoordinateBoundingBox = canvasToViewCoordinates(local);
         Optional<CompositionGlyph> intersect = track.getGlyphs().stream().filter(glyph -> glyph.getBoundingRect().intersects(modelCoordinateBoundingBox))
                 .findFirst();
 
@@ -187,13 +187,13 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     private void handleMouseClickEvent(MouseClickedEvent event) {
         if (!canvasContext.getBoundingRect().contains(event.getLocal())) {
             if (!event.isMultiSelectModeActive()) {
-                track.getGlyphs().stream().forEach(glyph -> glyph.setIsSelected(false));
+                clearSelections();
             }
             return;
         }
-        Rectangle2D mouseEventBoundingBox = mouseEventToViewCoordinates(event.getLocal());
+        Rectangle2D mouseEventBoundingBox = canvasToViewCoordinates(event.getLocal());
         if (!event.isMultiSelectModeActive()) {
-            track.getGlyphs().stream().forEach(glyph -> glyph.setIsSelected(false));
+            clearSelections();
         }
         track.getGlyphs().stream()
                 .filter(glyph -> view.getBoundingRect().intersects(glyph.getBoundingRect()))
@@ -227,23 +227,27 @@ public class ZoomableTrackRenderer implements TrackRenderer {
 
     @Subscribe
     public void handleClickDragEndEvent(ClickDragEndEvent event) {
+        clearSelections();
         if (canvasContext.isVisible()) {
             Rectangle2D selectionRectangle = event.getSelectionRectangle();
-            if (!canvasContext.getBoundingRect().intersects(selectionRectangle)) {
-                return;
+            if (canvasContext.getBoundingRect().intersects(selectionRectangle)) {
+                Rectangle2D mouseEventBoundingBox = canvasToViewCoordinates(selectionRectangle);
+                track.getGlyphs().stream()
+                        .filter(glyph -> view.getBoundingRect().intersects(glyph.getBoundingRect()))
+                        .filter(glyph -> glyph.getBoundingRect().intersects(mouseEventBoundingBox))
+                        .forEach(glyph -> {
+                            glyph.setIsSelected(true);
+                        });
             }
-            track.getGlyphs().stream().forEach(glyph -> glyph.setIsSelected(false));
-            Rectangle2D mouseEventBoundingBox = mouseEventToViewCoordinates(selectionRectangle);
-            track.getGlyphs().stream()
-                    .filter(glyph -> view.getBoundingRect().intersects(glyph.getBoundingRect()))
-                    .filter(glyph -> glyph.getBoundingRect().intersects(mouseEventBoundingBox))
-                    .forEach(glyph -> {
-                        glyph.setIsSelected(true);
-                    });
         }
+        render();
     }
 
-    private Rectangle2D mouseEventToViewCoordinates(Point2D clickLocation) {
+    private void clearSelections() {
+        track.getGlyphs().stream().forEach(glyph -> glyph.setIsSelected(false));
+    }
+
+    private Rectangle2D canvasToViewCoordinates(Point2D clickLocation) {
         double x = Math.floor(clickLocation.getX() / view.getXfactor());
         double y = Math.floor((clickLocation.getY() - canvasContext.getBoundingRect().getMinY()) / view.getYfactor());
         double offsetX = view.getBoundingRect().getMinX();
@@ -254,7 +258,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         return mouseEventBoundingBox;
     }
 
-    private Rectangle2D mouseEventToViewCoordinates(Rectangle2D localSelectionRectangle) {
+    private Rectangle2D canvasToViewCoordinates(Rectangle2D localSelectionRectangle) {
         double minX = Math.floor(localSelectionRectangle.getMinX() / view.getXfactor());
         double maxX = Math.floor(localSelectionRectangle.getMaxX() / view.getXfactor());
         double minY = Math.floor((localSelectionRectangle.getMinY() - canvasContext.getBoundingRect().getMinY()) / view.getYfactor());
@@ -318,6 +322,10 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     @Override
     public TrackLabel getTrackLabel() {
         return trackLabel;
+    }
+
+    public Track getTrack() {
+        return track;
     }
 
 }

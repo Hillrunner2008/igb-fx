@@ -35,6 +35,7 @@ import org.lorainelab.igb.visualization.event.RefreshTrackEvent;
 import org.lorainelab.igb.visualization.event.ScaleEvent;
 import org.lorainelab.igb.visualization.event.ScrollScaleEvent;
 import org.lorainelab.igb.visualization.event.ScrollScaleEvent.Direction;
+import org.lorainelab.igb.visualization.event.SelectionChangeEvent;
 import org.lorainelab.igb.visualization.event.ZoomStripeEvent;
 import org.lorainelab.igb.visualization.util.BoundsUtil;
 import org.lorainelab.igb.visualization.util.CanvasUtils;
@@ -67,7 +68,6 @@ public class CanvasPane extends Region {
 
     @Activate
     public void activate() {
-        clickStartPosition = new Point2D(0, 0);
         eventBus = eventBusService.getEventBus();
         eventBus.register(this);
         mouseEvents = new ArrayList<>();
@@ -90,6 +90,7 @@ public class CanvasPane extends Region {
                 xFactor = canvas.getWidth() / modelWidth;
             }
         });
+        clickStartPosition = new Point2D(0, 0);
     }
 
     private Point2D getLocalPoint2DFromMouseEvent(MouseEvent event) {
@@ -117,6 +118,7 @@ public class CanvasPane extends Region {
             mouseEvents.add(event);
         });
         canvas.setOnMouseDragged((MouseEvent event) -> {
+            drawSelectionRectangle(event);
             mouseEvents.add(event);
             eventBus.post(new ClickDraggingEvent(
                     getLocalPoint2DFromMouseEvent(event),
@@ -147,7 +149,7 @@ public class CanvasPane extends Region {
             Point2D rangeBoundedDragEventLocation = getRangeBoundedDragEventLocation(event);
             final Point2D screenPoint2DFromMouseEvent = getScreenPoint2DFromMouseEvent(event);
             if (types.contains(MouseEvent.MOUSE_DRAGGED)) {
-                Rectangle2D selectionRectangle = new Rectangle2D(clickStartPosition.getX(), clickStartPosition.getY(), event.getX() - clickStartPosition.getX(), event.getY() - clickStartPosition.getY());
+                Rectangle2D selectionRectangle = getSelectionRectangle(event);
                 if (types.contains(MouseEvent.MOUSE_EXITED)) {
                     eventBus.post(new ClickDragEndEvent(rangeBoundedDragEventLocation, screenPoint2DFromMouseEvent, selectionRectangle));
                 } else {
@@ -165,7 +167,7 @@ public class CanvasPane extends Region {
                 }
             }
             mouseEvents.clear();
-
+            eventBus.post(new SelectionChangeEvent());
         });
 
         EventStream<MouseEvent> mouseEventsStream = EventStreams.eventsOf(canvas, MouseEvent.ANY);
@@ -198,6 +200,29 @@ public class CanvasPane extends Region {
                 eventBus.post(new ScrollScaleEvent(Direction.DECREMENT));
             }
         });
+    }
+
+    private Rectangle2D getSelectionRectangle(MouseEvent event) {
+        double minX;
+        double maxX;
+        double minY;
+        double maxY;
+        Point2D rangeBoundedEventLocation = getRangeBoundedDragEventLocation(event);
+        if (clickStartPosition.getX() < rangeBoundedEventLocation.getX()) {
+            minX = clickStartPosition.getX();
+            maxX = rangeBoundedEventLocation.getX();
+        } else {
+            minX = rangeBoundedEventLocation.getX();
+            maxX = clickStartPosition.getX();
+        }
+        if (clickStartPosition.getY() < rangeBoundedEventLocation.getY()) {
+            minY = clickStartPosition.getY();
+            maxY = rangeBoundedEventLocation.getY();
+        } else {
+            minY = rangeBoundedEventLocation.getY();
+            maxY = clickStartPosition.getY();
+        }
+        return new Rectangle2D(minX, minY, maxX - minX, maxY - minY);
     }
 
     private Point2D getRangeBoundedDragEventLocation(MouseEvent event) {
@@ -268,6 +293,18 @@ public class CanvasPane extends Region {
             }
             gc.restore();
         }
+    }
+
+    private void drawSelectionRectangle(MouseEvent event) {
+        clear();
+        eventBus.post(new ZoomStripeEvent(zoomStripeCoordinate));
+        eventBus.post(new RefreshTrackEvent());
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        gc.save();
+        gc.setStroke(Color.RED);
+        Rectangle2D selectionRectangle = getSelectionRectangle(event);
+        gc.strokeRect(selectionRectangle.getMinX(), selectionRectangle.getMinY(), selectionRectangle.getWidth(), selectionRectangle.getHeight());
+        gc.restore();
     }
 
     double getXFactor() {

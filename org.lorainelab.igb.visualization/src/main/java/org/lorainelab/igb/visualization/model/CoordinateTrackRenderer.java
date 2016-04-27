@@ -377,10 +377,8 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         double x1 = viewBoundingRectangle.getMinX() + lastMouseClickX;
         double x2 = viewBoundingRectangle.getMinX() + lastMouseDragX;
         if (lastMouseDragX > lastMouseClickX) {
-            LOG.info("isInRange " + currentRange.encloses(Range.closedOpen(x1, x2)));
             event = new ClickDragZoomEvent(x1, x2);
         } else {
-            LOG.info("isInRange " + currentRange.encloses(Range.closedOpen(x2, x1)));
             event = new ClickDragZoomEvent(x2, x1);
         }
         eventBus.post(event);

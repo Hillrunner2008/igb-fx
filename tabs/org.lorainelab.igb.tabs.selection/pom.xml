@@ -33,6 +33,11 @@
             <artifactId>org.lorainelab.igb.visualization</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.lorainelab</groupId>
+            <artifactId>org.lorainelab.igb.selections</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

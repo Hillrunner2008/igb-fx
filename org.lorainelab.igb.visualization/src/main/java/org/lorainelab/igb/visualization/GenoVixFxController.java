@@ -13,6 +13,7 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -58,6 +59,7 @@ import org.lorainelab.igb.visualization.event.ScaleEvent;
 import org.lorainelab.igb.visualization.event.ScrollScaleEvent;
 import org.lorainelab.igb.visualization.event.ScrollScaleEvent.Direction;
 import org.lorainelab.igb.visualization.event.ScrollXUpdate;
+import org.lorainelab.igb.visualization.event.SelectionChangeEvent;
 import org.lorainelab.igb.visualization.menubar.MenuBarManager;
 import org.lorainelab.igb.visualization.model.CoordinateTrackRenderer;
 import org.lorainelab.igb.visualization.model.JumpZoomEvent;
@@ -762,6 +764,22 @@ public class GenoVixFxController {
     @Reference
     public void setSelectionInfoService(SelectionInfoService selectionInfoService) {
         this.selectionInfoService = selectionInfoService;
+    }
+
+    @Subscribe
+    private void updateGlyphSelections(SelectionChangeEvent event) {
+        selectionInfoService.getSelectedGlyphs().clear();
+        trackRenderers.stream()
+                .filter(renderer -> renderer instanceof ZoomableTrackRenderer)
+                .map(renderer -> ZoomableTrackRenderer.class.cast(renderer))
+                .forEach(renderer -> {
+                    selectionInfoService.getSelectedGlyphs().addAll(
+                            renderer.getTrack().getGlyphs()
+                            .stream()
+                            .filter(glyph -> glyph.isSelected())
+                            .collect(Collectors.toList())
+                    );
+                });
     }
 
 //    @Reference
