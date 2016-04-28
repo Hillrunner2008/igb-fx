@@ -138,7 +138,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     private void showToolTip(Point2D local, Point2D screen) {
 
         Rectangle2D modelCoordinateBoundingBox = canvasToViewCoordinates(local);
-        Optional<CompositionGlyph> intersect = track.getGlyphs().stream().filter(glyph -> glyph.getBoundingRect().intersects(modelCoordinateBoundingBox))
+        Optional<CompositionGlyph> intersect = track.getSlotMap().values().stream().filter(glyph -> glyph.getBoundingRect().intersects(modelCoordinateBoundingBox))
                 .findFirst();
 
         if (intersect.isPresent()) {
@@ -195,7 +195,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         if (!event.isMultiSelectModeActive()) {
             clearSelections();
         }
-        track.getGlyphs().stream()
+        track.getSlotMap().values().stream()
                 .filter(glyph -> view.getBoundingRect().intersects(glyph.getBoundingRect()))
                 .filter(glyph -> glyph.getBoundingRect().intersects(mouseEventBoundingBox))
                 .forEach(glyph -> {
@@ -211,7 +211,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
                 return;
             }
             zoomStripeCoordinate = -1;
-            track.getGlyphs().stream()
+            track.getSlotMap().values().stream()
                     .filter(glyph -> glyph.isSelected())
                     .findFirst()
                     .ifPresent(t -> {
@@ -232,7 +232,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
             Rectangle2D selectionRectangle = event.getSelectionRectangle();
             if (canvasContext.getBoundingRect().intersects(selectionRectangle)) {
                 Rectangle2D mouseEventBoundingBox = canvasToViewCoordinates(selectionRectangle);
-                track.getGlyphs().stream()
+                track.getSlotMap().values().stream()
                         .filter(glyph -> view.getBoundingRect().intersects(glyph.getBoundingRect()))
                         .filter(glyph -> glyph.getBoundingRect().intersects(mouseEventBoundingBox))
                         .forEach(glyph -> {
@@ -244,7 +244,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     }
 
     private void clearSelections() {
-        track.getGlyphs().stream().forEach(glyph -> glyph.setIsSelected(false));
+        track.getSlotMap().values().stream().forEach(glyph -> glyph.setIsSelected(false));
     }
 
     private Rectangle2D canvasToViewCoordinates(Point2D clickLocation) {

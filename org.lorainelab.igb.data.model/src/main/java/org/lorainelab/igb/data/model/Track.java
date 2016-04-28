@@ -92,6 +92,10 @@ public class Track {
                 });
     }
 
+    public TreeMultimap<Integer, CompositionGlyph> getSlotMap() {
+        return slotMap;
+    }
+    
     public String getTrackLabel() {
         return trackLabel;
     }
