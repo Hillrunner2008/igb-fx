@@ -102,6 +102,7 @@ public class CanvasPane extends Region {
     }
 
     private void initializeMouseEventHandlers() {
+
         canvas.setOnMouseClicked((MouseEvent event) -> {
             mouseEvents.add(event);
         });

@@ -6,6 +6,7 @@ import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.List;
 import java.util.stream.Collectors;
 import static java.util.stream.Collectors.toList;
@@ -36,6 +37,8 @@ import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
 import org.lorainelab.igb.selections.SelectionInfoService;
 import org.lorainelab.igb.visualization.tabs.api.TabDockingPosition;
 import org.lorainelab.igb.visualization.tabs.api.TabProvider;
+import org.reactfx.AwaitingEventStream;
+import org.reactfx.EventStreams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,6 +46,7 @@ import org.slf4j.LoggerFactory;
 public class SelectionTab implements TabProvider {
 
     private static final Logger LOG = LoggerFactory.getLogger(SelectionTab.class);
+    private final int MAX_SELECTION_SIZE = 10;
     private static final String TAB_TITLE = "Selection Info";
     private final int TAB_WEIGHT = 0;
     private final Tab selectionTab;
@@ -69,13 +73,17 @@ public class SelectionTab implements TabProvider {
 
     @Activate
     public void activate() {
-        selectionInfoService.getSelectedGlyphs().addListener((SetChangeListener.Change<? extends CompositionGlyph> change) -> {
-            rebuildGridData(); //TODO consider incremental changes instead
-        });
+        AwaitingEventStream<SetChangeListener.Change<? extends CompositionGlyph>> rebuildGridEventStream = EventStreams.changesOf(selectionInfoService.getSelectedGlyphs()).successionEnds(Duration.ofMillis(100));
+        rebuildGridEventStream.subscribe(change -> rebuildGridData());
     }
 
     @FXML
     private void initialize() {
+        initializeSpreadSheet();
+        selectionTab.setContent(tabContent);
+    }
+
+    private void initializeSpreadSheet() {
         spreadsheetView.setShowRowHeader(true);
         spreadsheetView.setShowColumnHeader(true);
         spreadsheetView.setRowHeaderWidth(140);
@@ -85,55 +93,46 @@ public class SelectionTab implements TabProvider {
         spreadsheetView.setFixingRowsAllowed(false);
         spreadsheetView.getContextMenu().getItems().clear();
         initializeContextMenu();
+        initializeGrid();
         rebuildGridData();
-        selectionTab.setContent(tabContent);
-        initializeTable();
+    }
+
+    private void initializeGrid() {
+
     }
 
     private void rebuildGridData() {
-        if (spreadsheetView != null) {
-            final List<String> rowHeaders = selectionInfoService.getSelectedGlyphs().stream()
-                    .flatMap(glyph -> glyph.getTooltipData().keySet().stream())
-                    .distinct()
-                    .collect(Collectors.toList());
-            final List<CompositionGlyph> selectedGlyphs = Lists.newArrayList(selectionInfoService.getSelectedGlyphs().stream().limit(MAX_SELECTION_SIZE).collect(toList()));
-            int rowCount = rowHeaders.size();
-            int columnCount = selectedGlyphs.size();
-            GridBase grid = new GridBase(rowCount, columnCount);
-            ObservableList<ObservableList<SpreadsheetCell>> rows = FXCollections.observableArrayList();
-            for (int row = 0; row < grid.getRowCount(); ++row) {
-                final ObservableList<SpreadsheetCell> list = FXCollections.observableArrayList();
-                for (int column = 0; column < grid.getColumnCount(); ++column) {
-                    final String cellValue = selectedGlyphs.get(column).getTooltipData().get(rowHeaders.get(row));
-                    final SpreadsheetCell gridCell = SpreadsheetCellType.STRING.createCell(row, column, 1, 1, cellValue);
-                    gridCell.setWrapText(true);
-                    //cellValue=StringUtils.abbreviate(cellValue,20); //TODO consider if this would be useful
-                    list.add(gridCell);
-                }
-                rows.add(list);
-            }
-            grid.getColumnHeaders().clear();
+        final List<CompositionGlyph> selectedGlyphs = Lists.newArrayList(selectionInfoService.getSelectedGlyphs().stream().limit(MAX_SELECTION_SIZE).collect(toList()));
+        final List<String> rowHeaders = selectedGlyphs.stream()
+                .flatMap(glyph -> glyph.getTooltipData().keySet().stream())
+                .distinct()
+                .collect(Collectors.toList());
+        int rowCount = rowHeaders.size();
+        int columnCount = selectedGlyphs.size();
+        grid = new GridBase(rowCount, columnCount);
+        ObservableList<ObservableList<SpreadsheetCell>> rows = FXCollections.observableArrayList();
+        for (int row = 0; row < grid.getRowCount(); ++row) {
+            final ObservableList<SpreadsheetCell> list = FXCollections.observableArrayList();
             for (int column = 0; column < grid.getColumnCount(); ++column) {
-                grid.getColumnHeaders().add(selectedGlyphs.get(column).getLabel());
+                final String cellValue = selectedGlyphs.get(column).getTooltipData().get(rowHeaders.get(row));
+                final SpreadsheetCell gridCell = SpreadsheetCellType.STRING.createCell(row, column, 1, 1, cellValue);
+                gridCell.setWrapText(true);
+                //cellValue=StringUtils.abbreviate(cellValue,20); //TODO consider if this would be useful
+                list.add(gridCell);
             }
-            grid.getRowHeaders().clear();
-            grid.getRowHeaders().addAll(rowHeaders);
-            grid.setRows(rows);
-            spreadsheetView.setGrid(grid);
-            spreadsheetView.getColumns().forEach(column -> column.fitColumn());
-
+            rows.add(list);
         }
+        grid.getColumnHeaders().clear();
+        for (int column = 0; column < grid.getColumnCount(); ++column) {
+            grid.getColumnHeaders().add(selectedGlyphs.get(column).getLabel());
+        }
+        grid.getRowHeaders().clear();
+        grid.getRowHeaders().addAll(rowHeaders);
+        grid.setRows(rows);
+        spreadsheetView.setGrid(grid);
+        spreadsheetView.getColumns().forEach(column -> column.fitColumn());
     }
-    private final int MAX_SELECTION_SIZE = 10;
-
-    private void initializeTable() {
-//        table.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-//        table.getSelectionModel().setCellSelectionEnabled(false);
-
-//        seqNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-//        seqLengthColumn.setCellValueFactory(new PropertyValueFactory<>("length"));
-//        table.setItems(tableData);
-    }
+    private GridBase grid;
 
     @Reference
     public void setSelectionInfoService(SelectionInfoService selectionInfoService) {
