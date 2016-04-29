@@ -206,10 +206,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
 
     @Subscribe
     private void handleMouseDoubleClickEvent(MouseDoubleClickEvent event) {
-        if (canvasContext.isVisible()) {
-            if (!canvasContext.getBoundingRect().contains(event.getLocal())) {
-                return;
-            }
+        if (canvasContext.isVisible() && canvasContext.getBoundingRect().contains(event.getLocal())) {
             zoomStripeCoordinate = -1;
             track.getSlotMap().values().stream()
                     .filter(glyph -> glyph.isSelected())
@@ -217,6 +214,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
                     .ifPresent(t -> {
                         jumpZoom(t.getBoundingRect());
                     });
+            render();
         }
     }
 

@@ -96,7 +96,7 @@ public class Track {
         return slotMap;
     }
     
-    public String getTrackLabel() {
+        public String getTrackLabel() {
         return trackLabel;
     }
 

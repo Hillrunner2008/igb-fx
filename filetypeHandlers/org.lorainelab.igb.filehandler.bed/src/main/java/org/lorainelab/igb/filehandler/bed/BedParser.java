@@ -30,7 +30,7 @@ import org.lorainelab.igb.data.model.shapes.Composition;
 import org.lorainelab.igb.data.model.shapes.Line;
 import org.lorainelab.igb.data.model.shapes.Rectangle;
 import org.lorainelab.igb.data.model.shapes.Shape;
-import org.lorainelab.igb.data.model.shapes.factory.GenovizFxFactory;
+import org.lorainelab.igb.data.model.shapes.factory.GlyphFactory;
 import org.lorainelab.igb.data.model.view.Layer;
 import org.lorainelab.igb.data.model.view.Renderer;
 import org.slf4j.Logger;
@@ -168,16 +168,16 @@ public class BedParser implements FileTypeHandler {
                         getShapes(layer).forEach(shape -> {
                             if (Rectangle.class
                                     .isAssignableFrom(shape.getClass())) {
-                                children.add(GenovizFxFactory.generateRectangleGlyph((Rectangle) shape));
+                                children.add(GlyphFactory.generateRectangleGlyph((Rectangle) shape));
 
                             }
                             if (Line.class
                                     .isAssignableFrom(shape.getClass())) {
-                                children.add(GenovizFxFactory.generateLine((Line) shape));
+                                children.add(GlyphFactory.generateLine((Line) shape));
                             }
                         });
                     });
-            primaryGlyphs.add(GenovizFxFactory.generateCompositionGlyph(label[0], tooltipData[0], children));
+            primaryGlyphs.add(GlyphFactory.generateCompositionGlyph(label[0], tooltipData[0], children));
         });
         return primaryGlyphs;
     }

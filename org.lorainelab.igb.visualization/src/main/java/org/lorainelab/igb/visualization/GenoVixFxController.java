@@ -14,8 +14,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -45,7 +43,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Transform;
-import javafx.util.Duration;
 import org.controlsfx.control.PlusMinusSlider;
 import org.controlsfx.control.PlusMinusSlider.PlusMinusEvent;
 import org.lorainelab.igb.data.model.Chromosome;
@@ -60,6 +57,7 @@ import org.lorainelab.igb.visualization.event.ScrollScaleEvent;
 import org.lorainelab.igb.visualization.event.ScrollScaleEvent.Direction;
 import org.lorainelab.igb.visualization.event.ScrollXUpdate;
 import org.lorainelab.igb.visualization.event.SelectionChangeEvent;
+import org.lorainelab.igb.visualization.footer.Footer;
 import org.lorainelab.igb.visualization.menubar.MenuBarManager;
 import org.lorainelab.igb.visualization.model.CoordinateTrackRenderer;
 import org.lorainelab.igb.visualization.model.JumpZoomEvent;
@@ -69,6 +67,7 @@ import static org.lorainelab.igb.visualization.model.TrackRenderer.MAX_ZOOM_MODE
 import org.lorainelab.igb.visualization.model.ViewPortManager;
 import org.lorainelab.igb.visualization.model.ZoomableTrackRenderer;
 import org.lorainelab.igb.visualization.tabs.TabPaneManager;
+import org.lorainelab.igb.visualization.toolbar.ToolBarProvider;
 import static org.lorainelab.igb.visualization.util.BoundsUtil.enforceRangeBounds;
 import static org.lorainelab.igb.visualization.util.CanvasUtils.exponentialScaleTransform;
 import static org.lorainelab.igb.visualization.util.CanvasUtils.invertExpScaleTransform;
@@ -125,6 +124,7 @@ public class GenoVixFxController {
     @FXML
     private FontAwesomeIconView gcTrashIcon;
 
+    private ToolBarProvider toolbarProvider;
     private Pane labelPane;
     private Set<TrackRenderer> trackRenderers;
     private DoubleProperty scrollX;
@@ -145,6 +145,7 @@ public class GenoVixFxController {
     private SelectionInfoService selectionInfoService;
     private GenomeVersion selectedGenomeVersion;
     private Chromosome selectedChromosome;
+    private Footer footer;
 
     public GenoVixFxController() {
         trackRenderers = Sets.newHashSet();
@@ -496,10 +497,10 @@ public class GenoVixFxController {
     }
 
     private void initializeGuiComponents() {
-        setupMemoryInfoWidget();
         setupPlusMinusSlider();
-        addZoomSliderMiniMapWidget();
         addMenuBar();
+        addTopToolbar();
+        addFooter();
         addTabPanes();
         labelPane = new Pane();
         HBox.setHgrow(labelPane, Priority.ALWAYS);
@@ -782,17 +783,18 @@ public class GenoVixFxController {
                 });
     }
 
-//    @Reference
-//    public void setZoomSliderMiniMapWidget(ZoomSliderMiniMapWidget zoomSliderMiniMapWidget) {
-//        this.zoomSliderMiniMapWidget = zoomSliderMiniMapWidget;
-//    }
     private void addTabPanes() {
         rightTabPaneContainer.getChildren().add(tabPaneManager.getRightTabPane());
         bottomTabPaneContainer.getChildren().add(tabPaneManager.getBottomTabPane());
     }
 
-    private void addZoomSliderMiniMapWidget() {
-//        zoomSliderMiniMapWidgetContainer.getChildren().add(zoomSliderMiniMapWidget.getContent());
+    @Reference
+    public void setToolbarProvider(ToolBarProvider toolbarProvider) {
+        this.toolbarProvider = toolbarProvider;
+    }
+    @Reference
+    public void setFooter(Footer footer) {
+        this.footer = footer;
     }
 
     @Deactivate
@@ -802,6 +804,14 @@ public class GenoVixFxController {
 
     private void addMenuBar() {
         root.getChildren().add(0, menuBarManager.getMenuBar());
+    }
+
+    private void addTopToolbar() {
+        root.getChildren().add(1, toolbarProvider.getTopToolbar());
+    }
+
+    private void addFooter() {
+        root.getChildren().add(3, footer);
     }
 
     private Range<Integer> getCurrentRange() {
@@ -845,28 +855,6 @@ public class GenoVixFxController {
             return value / 2000;
         }
         return value / 50;
-    }
-
-    private void setupMemoryInfoWidget() {
-        gcTrashIcon.setOnMouseClicked(e -> System.gc());
-        Timeline memoryInfoTimeline = new Timeline(new KeyFrame(Duration.seconds(2), (event) -> {
-            final int freeMemory = (int) (Runtime.getRuntime().freeMemory() / (1024 * 1024));
-            final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / (1024 * 1024));
-            final int totalMemory = (int) (Runtime.getRuntime().totalMemory() / (1024 * 1024));
-            final double usedPercentage = (double) (totalMemory - freeMemory) / (double) maxMemory;
-            final String memoryLabelText = (totalMemory - freeMemory) + "M of " + maxMemory + 'M';
-            if (Platform.isFxApplicationThread()) {
-                memoryProgressBar.setProgress(usedPercentage);
-                memoryLabel.setText(memoryLabelText);
-            } else {
-                Platform.runLater(() -> {
-                    memoryProgressBar.setProgress(usedPercentage);
-                    memoryLabel.setText(memoryLabelText);
-                });
-            }
-        }));
-        memoryInfoTimeline.setCycleCount(Timeline.INDEFINITE);
-        memoryInfoTimeline.play();
     }
 
 }

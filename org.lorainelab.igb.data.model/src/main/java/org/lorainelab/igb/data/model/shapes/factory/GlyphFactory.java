@@ -19,7 +19,7 @@ import static org.lorainelab.igb.data.model.shapes.factory.Palette.PRIMARY_TEXT_
  *
  * @author jeckstei
  */
-public class GenovizFxFactory {
+public class GlyphFactory {
 
     public static CompositionGlyph generateCompositionGlyph(String label, Map<String, String> tooltipData, List<Glyph> children) {
         CompositionGlyph cg = new CompositionGlyph(label, tooltipData, children);

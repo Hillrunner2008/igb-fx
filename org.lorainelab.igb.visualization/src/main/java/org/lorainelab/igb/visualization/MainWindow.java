@@ -45,7 +45,7 @@ public class MainWindow {
         }
 
         initializeFxRuntime();
-        final URL resource = MainWindow.class.getClassLoader().getResource("genoVizFx.fxml");
+        final URL resource = MainWindow.class.getClassLoader().getResource("main.fxml");
         FXMLLoader loader = new FXMLLoader(resource);
         loader.setClassLoader(this.getClass().getClassLoader());
         loader.setController(controller);

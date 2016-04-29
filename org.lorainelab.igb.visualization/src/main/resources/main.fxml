@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.ScrollBar?>
 <?import javafx.scene.control.Slider?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
@@ -18,26 +14,9 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Rectangle?>
 <?import org.controlsfx.control.PlusMinusSlider?>
-<?import org.controlsfx.control.StatusBar?>
 
 <VBox fx:id="root" prefHeight="950" prefWidth="1600" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
     <children>
-        <ToolBar fx:id="topToolBar" prefHeight="40.0" prefWidth="200.0">
-            <items>
-                <FontAwesomeIconView glyphName="FOLDER_OPEN" size="18" />
-                <FontAwesomeIconView glyphName="CONNECTDEVELOP" size="18" />
-                <FontAwesomeIconView glyphName="COG" size="18" />
-                <FontAwesomeIconView glyphName="CAMERA" size="18" />
-                <FontAwesomeIconView glyphName="BOOK" size="18" />
-                <FontAwesomeIconView glyphName="CHEVRON_LEFT" size="18" />
-                <FontAwesomeIconView glyphName="CHEVRON_RIGHT" size="18" />
-                <FontAwesomeIconView glyphName="DROPBOX" size="18" />
-                <FontAwesomeIconView glyphName="GITHUB" size="18" />
-                <FontAwesomeIconView glyphName="HOME" size="18" />
-                <Pane HBox.hgrow="ALWAYS" />
-                <TextField prefHeight="26.0" prefWidth="383.0" promptText="Selection Info: Click the map to select annotation" />
-            </items>
-        </ToolBar>
         <StackPane VBox.vgrow="ALWAYS">
             <children>
                 <SplitPane fx:id="rightPanelSplitPane" dividerPositions="0.85" prefHeight="160.0" prefWidth="200.0">
@@ -157,23 +136,9 @@
                     </items>
                 </SplitPane>
             </children>
+            <VBox.margin>
+                <Insets />
+            </VBox.margin>
         </StackPane>
-        <ToolBar fx:id="bottomToolbar" maxHeight="25.0" prefHeight="25.0" prefWidth="200.0">
-            <items>
-                <StackPane maxHeight="20.0" maxWidth="200.0" prefHeight="20.0" prefWidth="200.0">
-                    <children>
-                        <ProgressBar fx:id="memoryProgressBar" maxHeight="20.0" prefHeight="20.0" prefWidth="200.0" progress="0.27" />
-                        <Label fx:id="memoryLabel" text="0M of 64M" />
-                        <FontAwesomeIconView fx:id="gcTrashIcon" glyphName="TRASH" StackPane.alignment="CENTER_RIGHT">
-                            <StackPane.margin>
-                                <Insets right="7.0" />
-                            </StackPane.margin>
-                        </FontAwesomeIconView>
-                    </children>
-                </StackPane>
-                <Pane HBox.hgrow="ALWAYS" />
-                <StatusBar fx:id="statusBar" prefWidth="373.0" />
-            </items>
-        </ToolBar>
     </children>
 </VBox>
