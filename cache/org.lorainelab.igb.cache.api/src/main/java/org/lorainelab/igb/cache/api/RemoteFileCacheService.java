@@ -5,7 +5,7 @@
  */
 package org.lorainelab.igb.cache.api;
 
-import java.io.InputStream;
+import java.io.File;
 import java.math.BigInteger;
 import java.net.URL;
 import java.util.Date;
@@ -18,7 +18,7 @@ import java.util.Optional;
  */
 public interface RemoteFileCacheService {
 
-    public Optional<InputStream> getFilebyUrl(URL url, boolean asynchronously);
+    public Optional<File> getFilebyUrl(URL url);
 
     public void clearAllCaches();
 

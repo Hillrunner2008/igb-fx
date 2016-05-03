@@ -17,6 +17,7 @@ public class PreferenceUtils {
 
     static String CONFIRM_BEFORE_CACHE_SEQUENCE_IN_BACKGROUND;
     static boolean default_confirm_before_cache_sequence_in_background = false;
+    private static String DATA_HOME_DIR;
 
     public static String getCacheRequestKey(URL url) {
         return "";
@@ -31,10 +32,18 @@ public class PreferenceUtils {
     }
 
     public static File getDataDir() {
-        String dataDir = System.getProperty("karaf.data");
-        if (dataDir == null) {
-            dataDir = System.getProperty("user.home");
+        if (DATA_HOME_DIR == null) {
+            boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("windows");
+            String igbHomeDirName = ".igbfx";
+            if (IS_WINDOWS) {
+                DATA_HOME_DIR = System.getenv("AppData") + File.separator + "IGB_FX";
+            } else {
+                DATA_HOME_DIR = System.getProperty("user.home") + File.separator + igbHomeDirName;
+            }
+            File igbDataHomeFile = new File(DATA_HOME_DIR);
+            igbDataHomeFile.mkdir();
         }
-        return new File(dataDir);
+        return new File(DATA_HOME_DIR + File.separator);
     }
+
 }
