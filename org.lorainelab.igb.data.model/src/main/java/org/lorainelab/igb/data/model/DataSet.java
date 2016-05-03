@@ -35,9 +35,9 @@ public class DataSet {
         this.fileTypeHandler = fileTypeHandler;
         loadedRegions = TreeMultimap.create(Ordering.natural(), Comparator.comparingInt(range -> range.lowerEndpoint()));
         activeLoadRequests = TreeMultimap.create(Ordering.natural(), Comparator.comparingInt(range -> range.lowerEndpoint()));
-        positiveStrandTrack = new Track(true, trackLabel + " (+)", 5);
-        negativeStrandTrack = new Track(true, trackLabel + " (-)", 5);
-        combinedStrandTrack = new Track(true, trackLabel + " (+/-)", 5);
+        positiveStrandTrack = new Track(true, trackLabel + " (+)", 10);
+        negativeStrandTrack = new Track(true, trackLabel + " (-)", 10);
+        combinedStrandTrack = new Track(true, trackLabel + " (+/-)", 10);
     }
 
     public Track getPositiveStrandTrack(String chrId) {

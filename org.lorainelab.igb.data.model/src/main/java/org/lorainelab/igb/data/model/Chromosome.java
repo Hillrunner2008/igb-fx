@@ -1,5 +1,6 @@
 package org.lorainelab.igb.data.model;
 
+import org.lorainelab.igb.data.model.sequence.ReferenceSequenceProvider;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
 import com.google.common.collect.TreeRangeSet;

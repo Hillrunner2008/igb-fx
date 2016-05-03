@@ -22,8 +22,8 @@ import javafx.util.StringConverter;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.GenomeVersion;
 import org.lorainelab.igb.data.model.GenomeVersionRegistry;
-import org.lorainelab.igb.visualization.tabs.api.TabDockingPosition;
-import org.lorainelab.igb.visualization.tabs.api.TabProvider;
+import org.lorainelab.igb.tabs.api.TabDockingPosition;
+import org.lorainelab.igb.tabs.api.TabProvider;
 
 @Component(immediate = true)
 public class GenomeAssemblyTab implements TabProvider {

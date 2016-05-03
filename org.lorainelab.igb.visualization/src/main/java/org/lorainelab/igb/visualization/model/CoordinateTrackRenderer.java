@@ -389,7 +389,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
 
     @Subscribe
     public void handleClickDraggingEvent(ClickDraggingEvent event) {
-        if (!canvasContext.getBoundingRect().contains(new Point2D(event.getLocal().getX(), canvasContext.getBoundingRect().getMinY()))) {
+        if (!canvasContext.getBoundingRect().contains(new Point2D(event.getLocal().getX(), event.getLocal().getY()))) {
             return;
         }
         lastMouseDragX = Math.floor(event.getLocal().getX() / xfactor);

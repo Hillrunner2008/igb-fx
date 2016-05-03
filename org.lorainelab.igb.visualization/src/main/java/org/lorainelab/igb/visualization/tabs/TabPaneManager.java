@@ -7,7 +7,7 @@ import javafx.application.Platform;
 import javafx.geometry.Side;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.AnchorPane;
-import org.lorainelab.igb.visualization.tabs.api.TabProvider;
+import org.lorainelab.igb.tabs.api.TabProvider;
 
 /**
  *

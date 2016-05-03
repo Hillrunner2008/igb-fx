@@ -1,4 +1,4 @@
-package org.lorainelab.igb.visualization.tabs.api;
+package org.lorainelab.igb.tabs.api;
 
 /**
  *

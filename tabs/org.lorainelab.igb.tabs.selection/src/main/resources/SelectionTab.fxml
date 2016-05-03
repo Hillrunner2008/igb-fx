@@ -11,7 +11,7 @@
             <children>
                 <VBox>
                     <children>
-                  <SpreadsheetView fx:id="spreadsheetView" VBox.vgrow="ALWAYS" />
+                        <SpreadsheetView fx:id="spreadsheetView" VBox.vgrow="ALWAYS" />
                     </children>
                 </VBox>
             </children>

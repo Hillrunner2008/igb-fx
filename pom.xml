@@ -129,9 +129,13 @@
 
     <modules>
         <module>org.lorainelab.igb.stage.provider.api</module>
+        <module>menus/org.lorainelab.igb.menu.api</module>
+        <module>tabs/org.lorainelab.igb.tabs.api</module>
+        <module>org.lorainelab.igb.notifications.api</module>
+        <module>cache/org.lorainelab.igb.cache.api</module>
+        
         <module>org.lorainelab.igb.main</module>
         
-        <module>menus/org.lorainelab.igb.menu.api</module>
         <module>menus/org.lorainelab.igb.menu.openfile</module>
         
         <module>org.lorainelab.igb.data.model</module>
@@ -148,7 +152,6 @@
         <module>tabs/org.lorainelab.igb.tabs.genome</module>
         <module>tabs/org.lorainelab.igb.tabs.selection</module>
         
-        <module>cache/org.lorainelab.igb.cache.api</module>
         <module>cache/org.lorainelab.igb.cache.http</module> 
                
         <module>org.lorainelab.igb.demo</module>

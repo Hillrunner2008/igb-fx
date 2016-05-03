@@ -11,7 +11,7 @@ import java.util.concurrent.CompletableFuture;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 import org.lorainelab.igb.data.model.Chromosome;
-import org.lorainelab.igb.data.model.ReferenceSequenceProvider;
+import org.lorainelab.igb.data.model.sequence.ReferenceSequenceProvider;
 import org.slf4j.LoggerFactory;
 
 public class TwoBitParser implements ReferenceSequenceProvider {

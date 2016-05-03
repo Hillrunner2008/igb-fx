@@ -9,7 +9,6 @@ import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -24,8 +23,6 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.Slider;
 import javafx.scene.image.WritableImage;
@@ -86,7 +83,7 @@ public class GenoVixFxController {
     @FXML
     private Slider vSlider;
     @FXML
-    private StackPane stackPane;
+    private StackPane canvasContainer;
     @FXML
     private HBox labelHbox;
     @FXML
@@ -115,14 +112,6 @@ public class GenoVixFxController {
 
     @FXML
     private PlusMinusSlider plusMinusSlider;
-
-    @FXML
-    private ProgressBar memoryProgressBar;
-    @FXML
-    private Label memoryLabel;
-
-    @FXML
-    private FontAwesomeIconView gcTrashIcon;
 
     private ToolBarProvider toolbarProvider;
     private Pane labelPane;
@@ -506,7 +495,7 @@ public class GenoVixFxController {
         HBox.setHgrow(labelPane, Priority.ALWAYS);
         labelHbox.getChildren().add(labelPane);
         canvas = canvasPane.getCanvas();
-        stackPane.getChildren().add(canvasPane);
+        canvasContainer.getChildren().add(canvasPane);
         scrollY.setBlockIncrement(.01);
         hSlider.setValue(0);
         hSlider.setMin(0);
@@ -792,6 +781,7 @@ public class GenoVixFxController {
     public void setToolbarProvider(ToolBarProvider toolbarProvider) {
         this.toolbarProvider = toolbarProvider;
     }
+
     @Reference
     public void setFooter(Footer footer) {
         this.footer = footer;
