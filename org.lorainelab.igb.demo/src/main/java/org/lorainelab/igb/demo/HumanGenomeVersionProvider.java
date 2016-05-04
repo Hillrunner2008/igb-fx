@@ -47,8 +47,9 @@ public class HumanGenomeVersionProvider {
                 LOG.error(ex.getMessage(), ex);
             }
         }).whenComplete((result, ex) -> {
-
-            LOG.error(ex.getMessage(), ex);
+            if (ex != null) {
+                LOG.error(ex.getMessage(), ex);
+            }
         });
         notificationService.submitTask(genomeRegistrationTask);
     }

@@ -72,10 +72,10 @@ import static org.lorainelab.igb.visualization.util.CanvasUtils.linearScaleTrans
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(immediate = true, provide = GenoVixFxController.class)
-public class GenoVixFxController {
+@Component(immediate = true, provide = MainController.class)
+public class MainController {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GenoVixFxController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MainController.class);
     private static final int H_SLIDER_MAX = 100;
 
     @FXML
@@ -136,7 +136,7 @@ public class GenoVixFxController {
     private Chromosome selectedChromosome;
     private Footer footer;
 
-    public GenoVixFxController() {
+    public MainController() {
         trackRenderers = Sets.newHashSet();
         scrollX = new SimpleDoubleProperty(0);
         hSliderWidget = new SimpleDoubleProperty(0);

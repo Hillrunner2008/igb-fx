@@ -4,8 +4,11 @@ import aQute.bnd.annotation.component.Component;
 import com.google.common.collect.Sets;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import javafx.application.Platform;
 import org.controlsfx.control.StatusBar;
 import org.lorainelab.igb.notifications.api.StatusBarNotificationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -14,6 +17,7 @@ import org.lorainelab.igb.notifications.api.StatusBarNotificationService;
 @Component(immediate = true, provide = {StatusBarProvider.class, StatusBarNotificationService.class})
 public class StatusBarNotificationServiceImpl implements StatusBarProvider, StatusBarNotificationService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(StatusBarNotificationServiceImpl.class);
     Set<CompletableFuture<?>> activeTasks;
     private StatusBar statusBar;
 
@@ -37,8 +41,13 @@ public class StatusBarNotificationServiceImpl implements StatusBarProvider, Stat
         statusBar.progressProperty().setValue(20);
         task.whenComplete((result, ex) -> {
             activeTasks.remove(task);
-            statusBar.textProperty().setValue("");
-            statusBar.progressProperty().setValue(0);
+            Platform.runLater(() -> {
+                statusBar.textProperty().setValue("");
+                statusBar.progressProperty().setValue(0);
+            });
+            if (ex != null) {
+                LOG.error(ex.getMessage(), ex);
+            }
         });
     }
 

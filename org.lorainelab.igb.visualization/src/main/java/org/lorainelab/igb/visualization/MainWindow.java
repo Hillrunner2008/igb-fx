@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 public class MainWindow {
 
     private static final Logger LOG = LoggerFactory.getLogger(MainWindow.class);
-    private GenoVixFxController controller;
+    private MainController controller;
     private Stage stage;
     private VBox root;
 
@@ -82,7 +82,7 @@ public class MainWindow {
     }
 
     @Reference
-    public void setController(GenoVixFxController controller) {
+    public void setController(MainController controller) {
         this.controller = controller;
     }
 }

@@ -56,7 +56,7 @@ public class CanvasPane extends Region {
     private double xOffset;
     private double visibleVirtualCoordinatesX;
     private EventBus eventBus;
-    private GenoVixFxController controller;
+    private MainController controller;
     private EventBusService eventBusService;
     private List<MouseEvent> mouseEvents;
     private SelectionInfoService selectionInfoService;
@@ -324,7 +324,7 @@ public class CanvasPane extends Region {
     }
 
     @Reference(optional = true)
-    public void setMainViewController(GenoVixFxController controller) {
+    public void setMainViewController(MainController controller) {
         this.controller = controller;
     }
 

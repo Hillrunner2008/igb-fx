@@ -5,6 +5,7 @@
  */
 package org.lorainelab.igb.stage.provider.api;
 
+import javafx.application.HostServices;
 import javafx.stage.Stage;
 
 /**
@@ -15,4 +16,5 @@ public interface StageProvider {
 
     Stage getStage();
 
+    HostServices getHostServices();
 }

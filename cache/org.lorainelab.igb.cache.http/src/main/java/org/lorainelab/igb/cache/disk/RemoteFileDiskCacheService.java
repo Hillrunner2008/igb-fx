@@ -144,7 +144,9 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
                 backgroundValidating.remove(url.toString());
             }
         }).whenComplete((result, ex) -> {
-            LOG.error(ex.getMessage(), ex);
+            if (ex != null) {
+                LOG.error(ex.getMessage(), ex);
+            }
         });
     }
 
@@ -399,7 +401,7 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
         vbox.setPrefWidth(400);
         popup.getContent().addAll(vbox);
         Platform.runLater(() -> {
-                popup.show(stage);
+            popup.show(stage);
         });
     }
 

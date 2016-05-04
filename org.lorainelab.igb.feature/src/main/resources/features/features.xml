@@ -21,22 +21,24 @@
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.menu.api/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.tabs.api/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.cache.api/${project.version}</bundle>
-        
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.notifications.api/${project.version}</bundle>
+        
         
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.data.model/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.datasource.local/${project.version}</bundle>
+        <bundle>mvn:${project.groupId}/org.lorainelab.igb.menu.about/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.menu.openfile/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.filehandler.registry/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.filehandler.bed/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.visualization/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.selections/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.cache.http/${project.version}</bundle>
-        <bundle>mvn:${project.groupId}/org.lorainelab.igb.demo/${project.version}</bundle>
         
         
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.tabs.genome/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.tabs.selection/${project.version}</bundle>
+        
+        <bundle>mvn:${project.groupId}/org.lorainelab.igb.demo/${project.version}</bundle>
     </feature>
 
 </features>

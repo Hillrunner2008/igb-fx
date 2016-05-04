@@ -4,6 +4,7 @@ import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Deactivate;
 import java.io.IOException;
+import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import org.lorainelab.igb.stage.provider.api.StageProvider;
@@ -23,9 +24,9 @@ public class StageProviderRegistrationManager {
         this.bundleContext = bundleContext;
     }
 
-    public void registerStageProvider(Stage stage) {
+    public void registerStageProvider(Stage stage, HostServices hostServices) {
         this.stage = stage;
-        registerService = bundleContext.registerService(StageProvider.class, new MainStageProvider(stage), null);
+        registerService = bundleContext.registerService(StageProvider.class, new MainStageProvider(stage, hostServices), null);
     }
 
     @Deactivate
