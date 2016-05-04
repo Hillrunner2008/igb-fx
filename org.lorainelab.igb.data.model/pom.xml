@@ -24,18 +24,17 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.github.samtools</groupId>
             <artifactId>htsjdk</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>de.jensd</groupId>
-            <artifactId>fontawesomefx</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
     <properties>

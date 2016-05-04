@@ -46,36 +46,43 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
                 <version>1.7.7</version>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>org.reactfx</groupId>
                 <artifactId>reactfx</artifactId>
                 <version>2.0-M4u1</version>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>com.miglayout</groupId>
                 <artifactId>miglayout-javafx</artifactId>
                 <version>5.0</version>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>19.0</version>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>de.jensd</groupId>
                 <artifactId>fontawesomefx</artifactId>
                 <version>8.9</version>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
                 <version>3.4</version>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>com.github.samtools</groupId>
                 <artifactId>htsjdk</artifactId>
-                <version>2.2.1</version>
+                <version>2.2.2</version>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>junit</groupId>
@@ -87,21 +94,117 @@
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
                 <version>1.10</version>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>2.4</version>
-            </dependency>
-            <dependency>
-                <groupId>org.lorainelab</groupId>
-                <artifactId>org.lorainelab.igb.cache.api</artifactId>
-                <version>${project.version}</version>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>org.controlsfx</groupId>
                 <artifactId>controlsfx</artifactId>
                 <version>8.40.10</version>
+                <scope>provided</scope>
+            </dependency>
+            <!--modules-->
+            
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.cache.api</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.cache.http</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.data.model</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.datasource.api</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.datasource.local</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.filehandler.api</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.filehandler.bed</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.menu.api</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.menu.openfile</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.notifications.api</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.selections</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.stage.provider.api</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.tabs.api</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.tabs.genome</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.tabs.selection</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.visualization</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -158,6 +261,9 @@
         <module>org.lorainelab.igb.feature</module>
         <module>org.lorainelab.igb.kar</module>
     </modules>
-
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
 </project>
 

@@ -57,32 +57,26 @@
         <dependency>
             <groupId>org.lorainelab</groupId>
             <artifactId>org.lorainelab.igb.stage.provider.api</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>org.lorainelab</groupId>
             <artifactId>org.lorainelab.igb.data.model</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>org.lorainelab</groupId>
             <artifactId>org.lorainelab.igb.selections</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>org.lorainelab</groupId>
             <artifactId>org.lorainelab.igb.menu.api</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>org.lorainelab</groupId>
             <artifactId>org.lorainelab.igb.tabs.api</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>org.lorainelab</groupId>
             <artifactId>org.lorainelab.igb.notifications.api</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>org.controlsfx</groupId>
@@ -99,7 +93,6 @@
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Import-Package>*</Import-Package>
-                        <Export-Package>org.lorainelab.igb.visualization.*</Export-Package>
                         <Bundle-ActivationPolicy>lazy</Bundle-ActivationPolicy>
                         <Service-Component>*</Service-Component>
                     </instructions>

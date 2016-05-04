@@ -22,7 +22,6 @@
         <dependency>
             <groupId>org.lorainelab</groupId>
             <artifactId>org.lorainelab.igb.stage.provider.api</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>
     </dependencies>
     <properties>

@@ -32,12 +32,10 @@
         <dependency>
             <groupId>org.lorainelab</groupId>
             <artifactId>org.lorainelab.igb.data.model</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>org.lorainelab</groupId>
             <artifactId>org.lorainelab.igb.tabs.api</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>
     </dependencies>
     <build>
