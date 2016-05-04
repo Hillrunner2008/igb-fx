@@ -30,7 +30,6 @@ import org.lorainelab.igb.menu.api.MenuBarEntryProvider;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
 import org.lorainelab.igb.menu.api.model.WeightedMenuItem;
 import org.lorainelab.igb.stage.provider.api.StageProvider;
-import org.osgi.framework.BundleContext;
 
 /**
  * FXML Controller class
@@ -60,13 +59,14 @@ public final class AboutMenuProvider implements MenuBarEntryProvider {
     private StackPane mainTextContainer;
     @FXML
     private Button okBtn;
-    private BundleContext bundleContext;
     private StageProvider stageProvider;
+    private Image image;
 
     public AboutMenuProvider() {
         menuItem = new WeightedMenuItem(1, "About");
         descriptionText = new HyperlinkLabel();
         citationText = new HyperlinkLabel();
+        image = new Image(getClass().getClassLoader().getResource("igb_128.png").toExternalForm());
     }
 
     private void createScene() {
@@ -74,7 +74,6 @@ public final class AboutMenuProvider implements MenuBarEntryProvider {
             stage = new Stage();
             stage.setResizable(false);
             stage.setAlwaysOnTop(true);
-            Image image = new Image(bundleContext.getBundle().getEntry("igb_128.png").toExternalForm());
             imageView.setImage(image);
             imageView.setFitHeight(80);
             imageView.setFitWidth(80);
@@ -100,8 +99,7 @@ public final class AboutMenuProvider implements MenuBarEntryProvider {
     }
 
     @Activate
-    private void activate(BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
+    private void activate() {
         hostServices = stageProvider.getHostServices();
         Platform.runLater(() -> {
             try {

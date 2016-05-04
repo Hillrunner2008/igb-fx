@@ -789,7 +789,13 @@ public class MainController {
 
     @Deactivate
     private void deactivate() {
-        root.getChildren().clear();
+        try {
+            Platform.runLater(() -> {
+                root.getChildren().clear();
+            });
+        } catch (Exception ex) {
+            //do nothing
+        }
     }
 
     private void addMenuBar() {

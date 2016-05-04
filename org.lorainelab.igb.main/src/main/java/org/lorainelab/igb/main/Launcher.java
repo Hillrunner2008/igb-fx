@@ -19,10 +19,10 @@ import org.slf4j.LoggerFactory;
 
 @Component
 public class Launcher extends Application {
-
+    
     private static final Logger LOG = LoggerFactory.getLogger(Launcher.class);
     private StageProviderRegistrationManager stageRegistrationManager;
-
+    
     public void activate() throws InterruptedException {
         Executors.defaultThreadFactory().newThread(() -> {
             Thread.currentThread().setContextClassLoader(
@@ -36,20 +36,33 @@ public class Launcher extends Application {
             }
         }).start();
     }
-
+    
     private void handleRestartEvent() {
         Platform.runLater(() -> {
             stageRegistrationManager.registerStageProvider(new Stage(), getHostServices());
         });
     }
-
+    
     @Override
     public void start(Stage primaryStage) throws Exception {
         final BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
         ServiceReference<StageProviderRegistrationManager> serviceReference = bundleContext.getServiceReference(StageProviderRegistrationManager.class);
         StageProviderRegistrationManager stageRegistrationManager = bundleContext.getService(serviceReference);
         stageRegistrationManager.registerStageProvider(primaryStage, getHostServices());
+        primaryStage.setOnHiding(event -> {
+            System.out.println("setOnHiding");
+        });
+        primaryStage.setOnHidden(event -> {
+            System.out.println("setOnHidden");
+        });
+        primaryStage.setOnShown(event -> {
+            System.out.println("setOnShown");
+        });
+        primaryStage.setOnShowing(event -> {
+            System.out.println("setOnShowing");
+        });
         primaryStage.setOnCloseRequest((WindowEvent event) -> {
+             System.out.println("setOnCloseRequest");
             if (event.getEventType().equals(WindowEvent.WINDOW_CLOSE_REQUEST)) {
                 LOG.info("Received request to shutdown container");
                 CompletableFuture.runAsync(() -> {
@@ -64,11 +77,11 @@ public class Launcher extends Application {
             }
         });
     }
-
+    
     @Deactivate
     public void deactivate() {
     }
-
+    
     @Reference
     public void setStageRegistrationManger(StageProviderRegistrationManager registrationManager) {
         this.stageRegistrationManager = registrationManager;

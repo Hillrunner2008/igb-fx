@@ -7,11 +7,13 @@ import java.net.URL;
 import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TableColumn;
@@ -19,6 +21,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.util.StringConverter;
+import org.controlsfx.control.MaskerPane;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.GenomeVersion;
 import org.lorainelab.igb.data.model.GenomeVersionRegistry;
@@ -31,6 +34,8 @@ public class GenomeAssemblyTab implements TabProvider {
     private static final String TAB_TITLE = "Current Genome";
     private final int TAB_WEIGHT = 0;
     private final Tab genomeAssemblyTab;
+    @FXML
+    private MaskerPane maskerPane;
     @FXML
     private AnchorPane tabContent;
     @FXML
@@ -65,10 +70,19 @@ public class GenomeAssemblyTab implements TabProvider {
 
     @FXML
     private void initialize() {
+        maskerPane.setText("Waiting for Genome Versions...");
         genomeAssemblyTab.setContent(tabContent);
         initializeSpeciesNameComboBox();
         initializeGenomeVersionComboBox();
         initializeSequenceTable();
+        initializeMaskerPane();
+    }
+
+    private void initializeMaskerPane() {
+        maskerPane.setVisible(genomeVersionComboBox.getItems().isEmpty());
+        genomeVersionComboBox.getItems().addListener((ListChangeListener.Change<? extends GenomeVersion> c) -> {
+            maskerPane.setVisible(genomeVersionComboBox.getItems().isEmpty());
+        });
     }
 
     private void initializeGenomeVersionComboBox() {
@@ -162,6 +176,7 @@ public class GenomeAssemblyTab implements TabProvider {
     }
 
     private void initializeSequenceTable() {
+        sequenceInfoTable.setPlaceholder(new Label(""));
         sequenceInfoTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         sequenceInfoTable.getSelectionModel().setCellSelectionEnabled(false);
         seqNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
