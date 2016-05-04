@@ -9,6 +9,7 @@
         <feature>scr</feature>
         <feature>${project.artifactId}.main</feature>
         <bundle>wrap:mvn:org.reactfx/reactfx/2.0-M4u1</bundle>
+        <bundle>wrap:mvn:com.miglayout/miglayout-core/5.0</bundle>
         <bundle>wrap:mvn:com.miglayout/miglayout-javafx/5.0</bundle>
         <bundle>mvn:com.google.guava/guava/19.0</bundle>
         <bundle>wrap:mvn:de.jensd/fontawesomefx/8.9</bundle>
@@ -28,6 +29,7 @@
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.datasource.local/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.menu.about/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.menu.openfile/${project.version}</bundle>
+        <bundle>mvn:${project.groupId}/org.lorainelab.igb.menu.customgenome/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.filehandler.registry/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.filehandler.bed/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.visualization/${project.version}</bundle>
