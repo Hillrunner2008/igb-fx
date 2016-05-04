@@ -162,22 +162,22 @@ setupNativePath() {
 }
 
 pathCanonical() {
-    local dst="${1}"
-    while [ -h "${dst}" ] ; do
-        ls=`ls -ld "${dst}"`
+    local_dst="${1}"
+    while [ -h "${local_dst}" ] ; do
+        ls=`ls -ld "${local_dst}"`
         link=`expr "$ls" : '.*-> \(.*\)$'`
         if expr "$link" : '/.*' > /dev/null; then
-            dst="$link"
+            local_dst="$link"
         else
-            dst="`dirname "${dst}"`/$link"
+            local_dst="`dirname "${local_dst}"`/$link"
         fi
     done
-    local bas=`basename "${dst}"`
-    local dir=`dirname "${dst}"`
-    if [ "$bas" != "$dir" ]; then
-        dst="`pathCanonical "$dir"`/$bas"
+    local_bas=`basename "${local_dst}"`
+    local_dir=`dirname "${local_dst}"`
+    if [ "$local_bas" != "$local_dir" ]; then
+        local_dst="`pathCanonical "$local_dir"`/$local_bas"
     fi
-    echo "${dst}" | sed -e 's#//#/#g' -e 's#/./#/#g' -e 's#/[^/]*/../#/#g'
+    echo "${local_dst}" | sed -e 's#//#/#g' -e 's#/./#/#g' -e 's#/[^/]*/../#/#g'
 }
 
 locateJava() {
@@ -256,9 +256,9 @@ setupDefaults() {
     fi
 
     # Add the jars in the lib dir
-    CLASSPATH="$KARAF_HOME/system/org/apache/karaf/org.apache.karaf.client/4.0.4/org.apache.karaf.client-4.0.4.jar"
+    CLASSPATH="$KARAF_HOME/system/org/apache/karaf/org.apache.karaf.client/4.0.5/org.apache.karaf.client-4.0.5.jar"
     CLASSPATH="$CLASSPATH:$KARAF_HOME/system/org/apache/sshd/sshd-core/0.14.0/sshd-core-0.14.0.jar"
-    CLASSPATH="$CLASSPATH:$KARAF_HOME/system/jline/jline/2.13/jline-2.13.jar"
+    CLASSPATH="$CLASSPATH:$KARAF_HOME/system/jline/jline/2.14.1/jline-2.14.1.jar"
     CLASSPATH="$CLASSPATH:$KARAF_HOME/system/org/slf4j/slf4j-api/1.7.12/slf4j-api-1.7.12.jar"
 
 }

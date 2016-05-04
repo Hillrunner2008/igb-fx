@@ -211,6 +211,24 @@ if not "%JAVA%" == "" goto :Check_JAVA_END
     set JAVA=%JAVA_HOME%\bin\java
 :Check_JAVA_END
 
+:CheckRootInstance
+    set ROOT_INSTANCE_RUNNING=false
+    if exist "%KARAF_HOME%\instances\instance.properties" (
+        for /f "delims=" %%x in ( 'findstr "item.0.pid" "%KARAF_HOME%\instances\instance.properties" ' ) do @set pid=%%x
+        for /f "delims=" %%i in ( 'findstr "item.0.name" "%KARAF_HOME%\instances\instance.properties" ' ) do @set name=%%i
+    )
+    set ROOT_INSTANCE_PID=%pid:~13%
+
+    set ROOT_INSTANCE_NAME=%name:~14%
+    SET CHECK_RUNNING_CONDITION=true
+    if "%ROOT_INSTANCE_PID%" == "~13" SET CHECK_RUNNING_CONDITION=false
+    if "%ROOT_INSTANCE_PID%" == "0" SET CHECK_RUNNING_CONDITION=false
+    if "%CHECK_RUNNING_CONDITION%" == "true" (
+        tasklist /fi "PID eq %ROOT_INSTANCE_PID%" /fi "STATUS eq running" /fo 2>NUL
+        if "%ERRORLEVEL%"=="0" set ROOT_INSTANCE_RUNNING=true
+    )
+
+
 if not exist "%JAVA_HOME%\bin\server\jvm.dll" (
     if not exist "%JAVA_HOME%\jre\bin\server\jvm.dll" (
         echo WARNING: Running Karaf on a Java HotSpot Client VM because server-mode is not available.
@@ -219,7 +237,7 @@ if not exist "%JAVA_HOME%\bin\server\jvm.dll" (
         set JAVA_MODE=-client
     )
 )
-set DEFAULT_JAVA_OPTS=%JAVA_MODE% -Xms%JAVA_MIN_MEM% -Xmx%JAVA_MAX_MEM% -Dderby.system.home="%KARAF_DATA%\derby" -Dderby.storage.fileSyncTransactionLog=true -Dcom.sun.management.jmxremote  -XX:+UnlockDiagnosticVMOptions -XX:+UnsyncloadClass
+set DEFAULT_JAVA_OPTS=%JAVA_MODE% -Xms%JAVA_MIN_MEM% -Xmx%JAVA_MAX_MEM% -Dcom.sun.management.jmxremote  -XX:+UnlockDiagnosticVMOptions -XX:+UnsyncloadClass
 
 rem Check some easily accessible MIN/MAX params for JVM mem usage
 if not "%JAVA_PERM_MEM%" == "" (
@@ -268,6 +286,8 @@ goto :EOF
 
 :CLASSPATH_END
 
+SET CHECK_ROOT_INSTANCE_RUNNING=true
+
 rem Execute the JVM or the load the profiler
 if "%KARAF_PROFILER%" == "" goto :RUN
     rem Execute the profiler if it has been configured
@@ -284,6 +304,7 @@ if "%KARAF_PROFILER%" == "" goto :RUN
     if "%1" == "status" goto :EXECUTE_STATUS
     if "%1" == "console" goto :EXECUTE_CONSOLE
     if "%1" == "server" goto :EXECUTE_SERVER
+    if "%1" == "daemon" goto :EXECUTE_DAEMON
     if "%1" == "client" goto :EXECUTE_CLIENT
     if "%1" == "clean" goto :EXECUTE_CLEAN
     if "%1" == "debug" goto :EXECUTE_DEBUG
@@ -291,15 +312,18 @@ if "%KARAF_PROFILER%" == "" goto :RUN
 
 :EXECUTE_STOP
     SET MAIN=org.apache.karaf.main.Stop
+    SET CHECK_ROOT_INSTANCE_RUNNING=false
     shift
     goto :RUN_LOOP
 
 :EXECUTE_STATUS
     SET MAIN=org.apache.karaf.main.Status
+    SET CHECK_ROOT_INSTANCE_RUNNING=false
     shift
     goto :RUN_LOOP
 
 :EXECUTE_CONSOLE
+    SET CHECK_ROOT_INSTANCE_RUNNING=false
     shift
     goto :RUN_LOOP
 
@@ -308,8 +332,15 @@ if "%KARAF_PROFILER%" == "" goto :RUN
     shift
     goto :RUN_LOOP
 
+:EXECUTE_DAEMON
+    SET OPTS=-Dkaraf.startLocalConsole=false -Dkaraf.startRemoteShell=true
+    SET KARAF_DAEMON=true
+    shift
+    goto :RUN_LOOP
+
 :EXECUTE_CLIENT
     SET OPTS=-Dkaraf.startLocalConsole=true -Dkaraf.startRemoteShell=false
+    SET CHECK_ROOT_INSTANCE_RUNNING=false
     shift
     goto :RUN_LOOP
 
@@ -337,6 +368,10 @@ if "%KARAF_PROFILER%" == "" goto :RUN
         MOVE /Y "%KARAF_HOME%\lib.next" "%KARAF_HOME%\lib"
     )
 
+    SET IS_RUNNABLE=false
+    if "%ROOT_INSTANCE_RUNNING%" == "false" SET IS_RUNNABLE=true
+    if "%CHECK_ROOT_INSTANCE_RUNNING%" == "false" SET IS_RUNNABLE=true
+    if "%IS_RUNNABLE%" == "true" (
     "%JAVA%" %JAVA_OPTS% %OPTS% ^
         -classpath "%CLASSPATH%" ^
         -Djava.endorsed.dirs="%JAVA_HOME%\jre\lib\endorsed;%JAVA_HOME%\lib\endorsed;%KARAF_HOME%\lib\endorsed" ^
@@ -350,10 +385,28 @@ if "%KARAF_PROFILER%" == "" goto :RUN
         -Dkaraf.data="%KARAF_DATA%" ^
         -Djava.util.logging.config.file="%KARAF_BASE%\etc\java.util.logging.properties" ^
         %KARAF_OPTS% %MAIN% %ARGS%
+    ) else (
+        echo There is a Root instance already running with name %ROOT_INSTANCE_NAME% and pid %ROOT_INSTANCE_PID%
+        goto :END
+    )
 
-    if ERRORLEVEL 10 (
-        echo Restarting JVM...
-        goto EXECUTE
+    rem If KARAF_DAEMON is defined, auto-restart is bypassed and control given
+    rem back to the operating system
+    if defined "%KARAF_DAEMON%" (
+        rem If Karaf has been started by winsw, the process can be restarted
+        rem by executing KARAF_DAEMON% restart!
+        rem   https://github.com/kohsuke/winsw#restarting-service-from-itself
+        if defined "%WINSW_EXECUTABLE%" (
+            if ERRORLEVEL 10 (
+                echo Restarting ...
+                %KARAF_DAEMON% restart!
+            )
+        ) else (
+            if ERRORLEVEL 10 (
+                echo Restarting JVM...
+                goto EXECUTE
+            )
+        )
     )
 
 rem # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #

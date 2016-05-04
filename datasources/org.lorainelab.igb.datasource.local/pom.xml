@@ -50,9 +50,6 @@
                             !${project.artifactId}.*,
                             *
                         </Import-Package>
-                        <Export-Package>
-                            ${project.artifactId}.*
-                        </Export-Package>
                         <Service-Component>*</Service-Component>
                     </instructions>
                 </configuration>

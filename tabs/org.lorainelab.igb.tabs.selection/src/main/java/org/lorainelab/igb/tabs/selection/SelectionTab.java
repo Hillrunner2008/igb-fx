@@ -37,6 +37,7 @@ import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
 import org.lorainelab.igb.selections.SelectionInfoService;
 import org.lorainelab.igb.tabs.api.TabDockingPosition;
 import org.lorainelab.igb.tabs.api.TabProvider;
+import org.osgi.framework.BundleContext;
 import org.reactfx.AwaitingEventStream;
 import org.reactfx.EventStreams;
 import org.slf4j.Logger;
@@ -58,9 +59,13 @@ public class SelectionTab implements TabProvider {
 
     public SelectionTab() {
         selectionTab = new Tab(TAB_TITLE);
+    }
+
+    @Activate
+    public void activate(BundleContext bundleContext) {
         final URL resource = SelectionTab.class.getClassLoader().getResource("SelectionTab.fxml");
         FXMLLoader fxmlLoader = new FXMLLoader(resource);
-        fxmlLoader.setClassLoader(this.getClass().getClassLoader());
+        FXMLLoader.setDefaultClassLoader(this.getClass().getClassLoader());
         fxmlLoader.setController(this);
         Platform.runLater(() -> {
             try {
@@ -69,10 +74,6 @@ public class SelectionTab implements TabProvider {
                 throw new RuntimeException(exception);
             }
         });
-    }
-
-    @Activate
-    public void activate() {
         AwaitingEventStream<SetChangeListener.Change<? extends CompositionGlyph>> rebuildGridEventStream = EventStreams.changesOf(selectionInfoService.getSelectedGlyphs()).successionEnds(Duration.ofMillis(100));
         rebuildGridEventStream.subscribe(change -> rebuildGridData());
     }
