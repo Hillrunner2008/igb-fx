@@ -1,6 +1,5 @@
 package org.lorainelab.igb.visualization.footer;
 
-import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import javafx.geometry.Insets;
@@ -32,18 +31,14 @@ public class Footer extends HBox {
         getChildren().addAll(memoryTracker, spacer);
     }
 
-    @Activate
-    public void activate() {
+    @Reference(optional = true)
+    public void setStatusBarProvider(StatusBarProvider statusBarProvider) {
+        this.statusBarProvider = statusBarProvider;
         final StatusBar statusBar = statusBarProvider.getStatusBar();
         statusBar.setMaxWidth(500);
         statusBar.setPrefWidth(500);
         HBox.setMargin(statusBar, new Insets(2, 2, 2, 2));
         getChildren().addAll(statusBar);
-    }
-
-    @Reference
-    public void setStatusBarProvider(StatusBarProvider statusBarProvider) {
-        this.statusBarProvider = statusBarProvider;
     }
 
 }

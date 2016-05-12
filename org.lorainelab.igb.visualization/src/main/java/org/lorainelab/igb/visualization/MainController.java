@@ -201,7 +201,7 @@ public class MainController {
             coordinateTrackRenderer.setWeight(getMinWeight());
             trackRenderers.add(coordinateTrackRenderer);
             loadDataSets(gv, chromosome);
-        } else {
+        } else if (!trackRenderers.stream().anyMatch(renderer -> renderer instanceof CoordinateTrackRenderer)) {
             gv.getReferenceSequenceProvider().getChromosomes().stream().findFirst().ifPresent(chr -> {
                 final CoordinateTrackRenderer coordinateTrackRenderer = new CoordinateTrackRenderer(canvasPane, chr);
                 coordinateTrackRenderer.setWeight(getMinWeight());
@@ -746,9 +746,17 @@ public class MainController {
         this.tabPaneManager = tabPaneManager;
     }
 
-    @Reference
+    @Reference(unbind = "removeMenuBarManager")
     public void setMenuBarManager(MenuBarManager menuBarManager) {
         this.menuBarManager = menuBarManager;
+    }
+
+    public void removeMenuBarManager(MenuBarManager menuBarManager) {
+        try {
+            root.getChildren().remove(menuBarManager.getMenuBar());
+        } catch (Exception ex) {
+            //do nothing
+        }
     }
 
     @Reference
@@ -782,9 +790,17 @@ public class MainController {
         this.toolbarProvider = toolbarProvider;
     }
 
-    @Reference
+    @Reference(unbind = "removeFooter")
     public void setFooter(Footer footer) {
         this.footer = footer;
+    }
+
+    public void removeFooter(Footer footer) {
+        try {
+            root.getChildren().remove(footer);
+        } catch (Exception ex) {
+            //do nothing
+        }
     }
 
     @Deactivate
