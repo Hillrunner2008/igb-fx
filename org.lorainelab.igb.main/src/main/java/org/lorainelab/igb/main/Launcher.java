@@ -22,7 +22,6 @@ public class Launcher extends Application {
     
     private static final Logger LOG = LoggerFactory.getLogger(Launcher.class);
     private StageProviderRegistrationManager stageRegistrationManager;
-    
     public void activate() throws InterruptedException {
         Executors.defaultThreadFactory().newThread(() -> {
             Thread.currentThread().setContextClassLoader(

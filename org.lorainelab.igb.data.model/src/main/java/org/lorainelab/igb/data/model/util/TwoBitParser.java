@@ -374,4 +374,9 @@ public class TwoBitParser implements ReferenceSequenceProvider {
         }
     }
 
+    @Override
+    public String getPath() {
+        return path;
+    }
+
 }

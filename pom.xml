@@ -114,8 +114,26 @@
                 <version>8.40.10</version>
                 <scope>provided</scope>
             </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-core</artifactId>
+                <version>1.1.2</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>1.1.2</version>
+                <scope>test</scope>
+            </dependency>
             <!--modules-->
             
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.preferences</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>org.lorainelab.igb.cache.api</artifactId>
@@ -277,6 +295,7 @@
         
         <module>cache/org.lorainelab.igb.cache.http</module> 
                
+        <module>org.lorainelab.igb.preferences</module>
         <module>org.lorainelab.igb.demo</module>
         <module>org.lorainelab.igb.feature</module>
         <module>org.lorainelab.igb.kar</module>

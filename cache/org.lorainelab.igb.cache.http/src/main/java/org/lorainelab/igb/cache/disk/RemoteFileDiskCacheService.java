@@ -56,6 +56,7 @@ import org.apache.commons.io.IOUtils;
 import org.lorainelab.igb.cache.api.CacheStatus;
 import org.lorainelab.igb.cache.api.ChangeEvent;
 import org.lorainelab.igb.cache.api.RemoteFileCacheService;
+import org.lorainelab.igb.preferences.PreferenceUtils;
 import org.lorainelab.igb.stage.provider.api.StageProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,8 +92,8 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
     private Stage stage;
 
     public RemoteFileDiskCacheService() {
-        cachePrefsNode = PreferenceUtils.getCachePrefsNode();
-        cacheRequestNode = PreferenceUtils.getCacheRequestNode();
+        cachePrefsNode = PreferencesManager.getCachePrefsNode();
+        cacheRequestNode = PreferencesManager.getCacheRequestNode();
         backgroundCaching = Sets.newConcurrentHashSet();
         backgroundValidating = Sets.newConcurrentHashSet();
         isPromptingUser = false;
@@ -111,7 +112,7 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
 
     @Activate
     public void activate() {
-        DATA_DIR = PreferenceUtils.getDataDir().getAbsolutePath() + File.separator + "igbCache" + File.separator;
+        DATA_DIR = PreferenceUtils.getApplicationDataDirectory().getAbsolutePath() + File.separator + "igbCache" + File.separator;
         try {
             FileUtils.forceMkdir(new File(DATA_DIR));
         } catch (IOException ex) {
@@ -377,7 +378,7 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
             Platform.runLater(() -> {
                 popup.hide();
             });
-            cachePrefsNode.putBoolean(PreferenceUtils.CONFIRM_BEFORE_CACHE_SEQUENCE_IN_BACKGROUND, false);
+            cachePrefsNode.putBoolean(PreferencesManager.CONFIRM_BEFORE_CACHE_SEQUENCE_IN_BACKGROUND, false);
         });
 
         Button notRightNow = new Button("Not right now");
@@ -483,12 +484,12 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
     }
 
     private void updateLastRequestDate(URL url) {
-        cacheRequestNode.putLong(PreferenceUtils.getCacheRequestKey(url), new Date().getTime());
+        cacheRequestNode.putLong(PreferencesManager.getCacheRequestKey(url), new Date().getTime());
     }
 
     @Override
     public Date getLastRequestDate(URL url) {
-        return new Date(cacheRequestNode.getLong(PreferenceUtils.getCacheRequestKey(url), new Date().getTime()));
+        return new Date(cacheRequestNode.getLong(PreferencesManager.getCacheRequestKey(url), new Date().getTime()));
     }
 
     private boolean tryDownload(URL url, String path) {

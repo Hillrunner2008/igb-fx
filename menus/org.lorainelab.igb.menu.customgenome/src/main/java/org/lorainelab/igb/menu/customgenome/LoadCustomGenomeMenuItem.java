@@ -54,6 +54,7 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
     private MigPane migPane;
     private static int CUSTOM_GENOME_COUNTER = 1;
     private SelectionInfoService selectionInfoService;
+    private CustomGenomePersistenceManager customGenomePersistenceManager;
 
     public LoadCustomGenomeMenuItem() {
         menuItem = new WeightedMenuItem(1, "Load Custom Genome");
@@ -122,6 +123,7 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
                             || !Strings.isNullOrEmpty(sequenceFileUrl)) {
                         ReferenceSequenceProvider twoBitProvider = (ReferenceSequenceProvider) new TwoBitParser(sequenceFileUrl);
                         GenomeVersion customGenome = new GenomeVersion(versionName, speciesName, twoBitProvider, versionName);
+                        customGenomePersistenceManager.persistCustomGenome(customGenome);
                         customGenomeAdded[0] = genomeVersionRegistry.getRegisteredGenomeVersions().add(customGenome);
                         genomeVersionRegistry.setSelectedGenomeVersion(customGenome);
                     }
@@ -183,6 +185,11 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
     @Reference
     public void setGenomeVersionRegistry(GenomeVersionRegistry genomeVersionRegistry) {
         this.genomeVersionRegistry = genomeVersionRegistry;
+    }
+
+    @Reference
+    public void setCustomGenomePersistenceManager(CustomGenomePersistenceManager customGenomePersistenceManager) {
+        this.customGenomePersistenceManager = customGenomePersistenceManager;
     }
 
     @Reference
