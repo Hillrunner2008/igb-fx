@@ -26,6 +26,7 @@ import org.lorainelab.igb.data.model.util.TwoBitParser;
 import org.lorainelab.igb.menu.api.MenuBarEntryProvider;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
 import org.lorainelab.igb.menu.api.model.WeightedMenuItem;
+import org.lorainelab.igb.selections.SelectionInfoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tbee.javafx.scene.layout.MigPane;
@@ -52,6 +53,7 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
     private TextField versionTextField;
     private MigPane migPane;
     private static int CUSTOM_GENOME_COUNTER = 1;
+    private SelectionInfoService selectionInfoService;
 
     public LoadCustomGenomeMenuItem() {
         menuItem = new WeightedMenuItem(1, "Load Custom Genome");
@@ -121,6 +123,7 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
                         ReferenceSequenceProvider twoBitProvider = (ReferenceSequenceProvider) new TwoBitParser(sequenceFileUrl);
                         GenomeVersion customGenome = new GenomeVersion(versionName, speciesName, twoBitProvider, versionName);
                         customGenomeAdded[0] = genomeVersionRegistry.getRegisteredGenomeVersions().add(customGenome);
+                        genomeVersionRegistry.setSelectedGenomeVersion(customGenome);
                     }
                 } catch (Exception ex) {
                     LOG.error(ex.getMessage(), ex);
@@ -180,6 +183,11 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
     @Reference
     public void setGenomeVersionRegistry(GenomeVersionRegistry genomeVersionRegistry) {
         this.genomeVersionRegistry = genomeVersionRegistry;
+    }
+
+    @Reference
+    public void setSelectionInfoService(SelectionInfoService selectionInfoService) {
+        this.selectionInfoService = selectionInfoService;
     }
 
     private void addFileExtensionFilters(FileChooser fileChooser) {

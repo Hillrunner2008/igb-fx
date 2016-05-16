@@ -4,8 +4,10 @@ import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -39,7 +41,7 @@ public class GenomeAssemblyTab implements TabProvider {
     @FXML
     private AnchorPane tabContent;
     @FXML
-    private ComboBox speciesComboBox;
+    private ComboBox<String> speciesComboBox;
     @FXML
     private ComboBox<GenomeVersion> genomeVersionComboBox;
     @FXML
@@ -107,29 +109,45 @@ public class GenomeAssemblyTab implements TabProvider {
         });
         genomeVersionComboBox.setDisable(true);
         genomeVersionComboBox.valueProperty().addListener((observable, oldValue, selectedGenomeVersion) -> {
-            Platform.runLater(() -> {
-                tableData.clear();
-                tableData.addAll(selectedGenomeVersion.getReferenceSequenceProvider().getChromosomes());
-            });
-            selectedGenomeVersion.getReferenceSequenceProvider().getChromosomes().addListener((SetChangeListener.Change<? extends Chromosome> change) -> {
-                Platform.runLater(() -> {
-                    if (change.wasAdded()) {
-                        tableData.add(change.getElementAdded());
-                    } else {
-                        tableData.remove(change.getElementRemoved());
-                    }
-                });
-            });
-            sequenceInfoTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, selectedChromosome) -> {
-                selectedGenomeVersion.setSelectedChromosome(selectedChromosome);
-            });
-            selectedGenomeVersion.getReferenceSequenceProvider().getChromosomes().stream()
-                    .findFirst()
-                    .ifPresent(chromosome -> {
-                        sequenceInfoTable.getSelectionModel().select(chromosome);
-                    });
             genomeVersionRegistry.setSelectedGenomeVersion(selectedGenomeVersion);
         });
+        selectedGenomeVersionChangeListener = (observable, oldValue, newValue) -> {
+            newValue.ifPresent(selectedGenomeVersion -> {
+                loadSelectedGenomeVersion(selectedGenomeVersion);
+            });
+        };
+        genomeVersionRegistry.getSelectedGenomeVersion().addListener(selectedGenomeVersionChangeListener);
+    }
+    private ChangeListener<Optional<GenomeVersion>> selectedGenomeVersionChangeListener;
+
+    private void loadSelectedGenomeVersion(GenomeVersion selectedGenomeVersion) {
+        Platform.runLater(() -> {
+            genomeVersionRegistry.getSelectedGenomeVersion().removeListener(selectedGenomeVersionChangeListener);
+            genomeVersionComboBox.setValue(selectedGenomeVersion);
+            genomeVersionRegistry.getSelectedGenomeVersion().addListener(selectedGenomeVersionChangeListener);
+            speciesComboBox.setValue(selectedGenomeVersion.getSpeciesName());
+            tableData.clear();
+            tableData.addAll(selectedGenomeVersion.getReferenceSequenceProvider().getChromosomes());
+        });
+        selectedGenomeVersion.getReferenceSequenceProvider().getChromosomes().addListener((SetChangeListener.Change<? extends Chromosome> change) -> {
+            Platform.runLater(() -> {
+                if (change.wasAdded()) {
+                    tableData.add(change.getElementAdded());
+                } else {
+                    tableData.remove(change.getElementRemoved());
+                }
+            });
+        });
+        sequenceInfoTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, selectedChromosome) -> {
+            selectedGenomeVersion.setSelectedChromosome(selectedChromosome);
+        });
+        selectedGenomeVersion.getReferenceSequenceProvider().getChromosomes().stream()
+                .findFirst()
+                .ifPresent(chromosome -> {
+                    Platform.runLater(() -> {
+                        sequenceInfoTable.getSelectionModel().select(chromosome);
+                    });
+                });
     }
 
     private void initializeSpeciesNameComboBox() {

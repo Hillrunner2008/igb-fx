@@ -38,12 +38,10 @@ public class MainWindow {
     }
 
     private void initiailize() throws IOException {
-
         SplashScreen splashScreen = SplashScreen.getSplashScreen();
         if (splashScreen != null) {
             splashScreen.close();
         }
-
         initializeFxRuntime();
         final URL resource = MainWindow.class.getClassLoader().getResource("main.fxml");
         FXMLLoader loader = new FXMLLoader(resource);

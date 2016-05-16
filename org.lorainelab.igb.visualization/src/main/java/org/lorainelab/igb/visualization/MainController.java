@@ -159,13 +159,13 @@ public class MainController {
                     selectedChromosome = newChromosomeSelection;
                     selectionInfoService.getSelectedGenomeVersion().get().ifPresent(gv -> {
                         if (selectedGenomeVersion == gv) {
-                            trackRenderers.clear();
-                            labelPane.getChildren().clear();
-                            hSlider.setValue(0);
-                            vSlider.setValue(0);
-                            scrollY.setValue(0);
-                            scrollY.setVisibleAmount(100);
                             Platform.runLater(() -> {
+                                trackRenderers.clear();
+                                labelPane.getChildren().clear();
+                                hSlider.setValue(0);
+                                vSlider.setValue(0);
+                                scrollY.setValue(0);
+                                scrollY.setVisibleAmount(100);
                                 updateTrackRenderers(gv);
                             });
                         }
@@ -177,19 +177,19 @@ public class MainController {
 
     private void initializeGenomeVersionSelectionListener() {
         selectionInfoService.getSelectedGenomeVersion().addListener((observable, oldValue, newValue) -> {
-            trackRenderers.clear();
-            labelPane.getChildren().clear();
-            hSlider.setValue(0);
-            vSlider.setValue(0);
-            scrollY.setValue(0);
-            scrollY.setVisibleAmount(100);
-            newValue.ifPresent(genomeVersion -> {
-                if (selectedGenomeVersion != genomeVersion) {
-                    selectedGenomeVersion = genomeVersion;
-                    Platform.runLater(() -> {
+            Platform.runLater(() -> {
+                trackRenderers.clear();
+                labelPane.getChildren().clear();
+                hSlider.setValue(0);
+                vSlider.setValue(0);
+                scrollY.setValue(0);
+                scrollY.setVisibleAmount(100);
+                newValue.ifPresent(genomeVersion -> {
+                    if (selectedGenomeVersion != genomeVersion) {
+                        selectedGenomeVersion = genomeVersion;
                         updateTrackRenderers(genomeVersion);
-                    });
-                }
+                    }
+                });
             });
         });
     }
