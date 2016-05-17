@@ -33,7 +33,7 @@ public class SelectionInfoServiceImpl implements SelectionInfoService {
                     .compare(glyph1.getLabel(), glyph2.getLabel())
                     .compare(glyph1.getBoundingRect().getMinX(), glyph2.getBoundingRect().getMinX())
                     .compare(glyph1.getBoundingRect().getWidth(), glyph2.getBoundingRect().getWidth())
-                    .compare(glyph1.getBoundingRect().getMinY(), glyph2.getBoundingRect().getMinY())
+                    .compare(glyph1.getRenderBoundingRect().getMinY(), glyph2.getRenderBoundingRect().getMinY())
                     .result();
         }));
     }

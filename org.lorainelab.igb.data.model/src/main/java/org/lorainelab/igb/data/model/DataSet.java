@@ -3,8 +3,10 @@ package org.lorainelab.igb.data.model;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Range;
+import com.google.common.collect.RangeSet;
 import com.google.common.collect.TreeMultimap;
-import java.util.Comparator;
+import com.google.common.collect.TreeRangeSet;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.lorainelab.igb.data.model.datasource.DataSourceReference;
 import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandler;
@@ -19,9 +21,8 @@ public class DataSet {
 
     private final Multimap<String, CompositionGlyph> loadedAnnoations;
     private final String trackLabel;
-    private final Multimap<String, Range<Integer>> loadedRegions;
+    private RangeSet<Integer> loadedRegions;
     //tracked to prevent duplicate requests
-    private final Multimap<String, Range<Integer>> activeLoadRequests;
     private final FileTypeHandler fileTypeHandler;
     private final DataSourceReference dataSourceReference;
     private Track positiveStrandTrack;
@@ -33,11 +34,10 @@ public class DataSet {
         this.dataSourceReference = dataSourceReference;
         this.trackLabel = trackLabel;
         this.fileTypeHandler = fileTypeHandler;
-        loadedRegions = TreeMultimap.create(Ordering.natural(), Comparator.comparingInt(range -> range.lowerEndpoint()));
-        activeLoadRequests = TreeMultimap.create(Ordering.natural(), Comparator.comparingInt(range -> range.lowerEndpoint()));
-        positiveStrandTrack = new Track(true, trackLabel + " (+)", 10);
-        negativeStrandTrack = new Track(true, trackLabel + " (-)", 10);
-        combinedStrandTrack = new Track(true, trackLabel + " (+/-)", 10);
+        loadedRegions = TreeRangeSet.create();
+        positiveStrandTrack = new Track(false, trackLabel + " (+)", 5);
+        negativeStrandTrack = new Track(true, trackLabel + " (-)", 5);
+        combinedStrandTrack = new Track(true, trackLabel + " (+/-)", 5);
     }
 
     public Track getPositiveStrandTrack(String chrId) {
@@ -46,6 +46,7 @@ public class DataSet {
     }
 
     private void refreshPositiveStrandTrack(String chrId) {
+        positiveStrandTrack.clearGlyphs();
         positiveStrandTrack.getGlyphs().addAll(
                 loadedAnnoations.get(chrId).stream()
                 .filter(g -> g.getTooltipData().get("forward").equals("true"))
@@ -60,6 +61,7 @@ public class DataSet {
     }
 
     private void refreshNegativeStrandTrack(String chrId) {
+        negativeStrandTrack.clearGlyphs();
         negativeStrandTrack.getGlyphs().addAll(
                 loadedAnnoations.get(chrId).stream()
                 .filter(g -> g.getTooltipData().get("forward").equals("false"))
@@ -77,12 +79,50 @@ public class DataSet {
 //        combinedStrandTrack.buildSlots();
     }
 
-    public void loadRegion(String chrId, Range<Integer> range) {
-        activeLoadRequests.put(chrId, range);
-        loadedAnnoations.putAll(chrId, fileTypeHandler.getRegion(dataSourceReference, range, chrId));
-        refreshPositiveStrandTrack(chrId);
-        refreshNegativeStrandTrack(chrId);
-        refreshCombinedTrack(chrId);
+    public void loadRegion(String chrId, Range<Integer> requestRange) {
+        if (!loadedRegions.encloses(requestRange)) {
+            RangeSet<Integer> connectedRanges = loadedRegions.subRangeSet(requestRange);
+            TreeRangeSet<Integer> updatedRequestRange = TreeRangeSet.create(connectedRanges);
+            updatedRequestRange.add(requestRange);
+            loadedRegions.add(updatedRequestRange.span());
+            loadedAnnoations.putAll(chrId, fileTypeHandler.getRegion(dataSourceReference, updatedRequestRange.span(), chrId));
+            refreshPositiveStrandTrack(chrId);
+            refreshNegativeStrandTrack(chrId);
+            refreshCombinedTrack(chrId);
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 37 * hash + Objects.hashCode(this.trackLabel);
+        hash = 37 * hash + Objects.hashCode(this.fileTypeHandler);
+        hash = 37 * hash + Objects.hashCode(this.dataSourceReference);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final DataSet other = (DataSet) obj;
+        if (!Objects.equals(this.trackLabel, other.trackLabel)) {
+            return false;
+        }
+        if (!Objects.equals(this.fileTypeHandler, other.fileTypeHandler)) {
+            return false;
+        }
+        if (!Objects.equals(this.dataSourceReference, other.dataSourceReference)) {
+            return false;
+        }
+        return true;
     }
 
 }

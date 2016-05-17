@@ -24,6 +24,7 @@ public class LineGlyph implements Glyph {
     private Paint strokeColor = Color.BLACK;
     private Rectangle2D boundingRect;
     private double y;
+    private Rectangle2D renderBoundingRect;
 
     public LineGlyph(int start, int width, double y) {
         this.start = start;
@@ -58,10 +59,11 @@ public class LineGlyph implements Glyph {
     @Override
     public void draw(GraphicsContext gc, View view, double additionalYoffset) {
         Rectangle2D viewRect = view.getBoundingRect();
-        double x = boundingRect.getMinX();
-        double y = boundingRect.getMinY();
-        double width = boundingRect.getWidth();
-        double height = boundingRect.getHeight();
+        Rectangle2D drawRect = getRenderBoundingRect();
+        double x = drawRect.getMinX();
+        double y = drawRect.getMinY();
+        double width = drawRect.getWidth();
+        double height = drawRect.getHeight();
         if (x < viewRect.getMinX()) {
             int offSet = (int) (viewRect.getMinX() - x);
             width = width - offSet;
@@ -80,11 +82,6 @@ public class LineGlyph implements Glyph {
         gc.setFill(fill);
         gc.setStroke(strokeColor);
         gc.strokeLine(x, y + additionalYoffset, x + width, y + additionalYoffset);
-    }
-
-    @Override
-    public void setBoundingRect(Rectangle2D boundingRect) {
-        this.boundingRect = boundingRect;
     }
 
     @Override
@@ -122,6 +119,19 @@ public class LineGlyph implements Glyph {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public Rectangle2D getRenderBoundingRect() {
+        if (renderBoundingRect == null) {
+            return boundingRect;
+        }
+        return renderBoundingRect;
+    }
+
+    @Override
+    public void setRenderBoundingRect(Rectangle2D renderBoundingRect) {
+        this.renderBoundingRect = renderBoundingRect;
     }
 
 }

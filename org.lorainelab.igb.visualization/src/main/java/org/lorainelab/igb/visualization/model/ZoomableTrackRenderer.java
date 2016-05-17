@@ -138,7 +138,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     private void showToolTip(Point2D local, Point2D screen) {
 
         Rectangle2D modelCoordinateBoundingBox = canvasToViewCoordinates(local);
-        Optional<CompositionGlyph> intersect = track.getSlotMap().values().stream().filter(glyph -> glyph.getBoundingRect().intersects(modelCoordinateBoundingBox))
+        Optional<CompositionGlyph> intersect = track.getSlotMap().values().stream().filter(glyph -> glyph.getRenderBoundingRect().intersects(modelCoordinateBoundingBox))
                 .findFirst();
 
         if (intersect.isPresent()) {
@@ -196,8 +196,8 @@ public class ZoomableTrackRenderer implements TrackRenderer {
             clearSelections();
         }
         track.getSlotMap().values().stream()
-                .filter(glyph -> view.getBoundingRect().intersects(glyph.getBoundingRect()))
-                .filter(glyph -> glyph.getBoundingRect().intersects(mouseEventBoundingBox))
+                .filter(glyph -> view.getBoundingRect().intersects(glyph.getRenderBoundingRect()))
+                .filter(glyph -> glyph.getRenderBoundingRect().intersects(mouseEventBoundingBox))
                 .forEach(glyph -> {
                     glyph.setIsSelected(true);
                 });
@@ -212,7 +212,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
                     .filter(glyph -> glyph.isSelected())
                     .findFirst()
                     .ifPresent(t -> {
-                        jumpZoom(t.getBoundingRect());
+                        jumpZoom(t.getRenderBoundingRect());
                     });
             render();
         }
@@ -231,8 +231,8 @@ public class ZoomableTrackRenderer implements TrackRenderer {
             if (canvasContext.getBoundingRect().intersects(selectionRectangle)) {
                 Rectangle2D mouseEventBoundingBox = canvasToViewCoordinates(selectionRectangle);
                 track.getSlotMap().values().stream()
-                        .filter(glyph -> view.getBoundingRect().intersects(glyph.getBoundingRect()))
-                        .filter(glyph -> glyph.getBoundingRect().intersects(mouseEventBoundingBox))
+                        .filter(glyph -> view.getBoundingRect().intersects(glyph.getRenderBoundingRect()))
+                        .filter(glyph -> glyph.getRenderBoundingRect().intersects(mouseEventBoundingBox))
                         .forEach(glyph -> {
                             glyph.setIsSelected(true);
                         });

@@ -28,7 +28,9 @@ public interface Glyph {
 
     Rectangle2D getBoundingRect();
 
-    void setBoundingRect(Rectangle2D boundingRect);
+    Rectangle2D getRenderBoundingRect();
+
+    void setRenderBoundingRect(Rectangle2D rectangle2D);
 
     default boolean isSelectable() {
         return false;
@@ -45,7 +47,7 @@ public interface Glyph {
     void draw(GraphicsContext gc, View view, double additionalYoffset);
 
     default Optional<Rectangle2D> getViewBoundingRect(Rectangle2D view, double additionalYoffset) {
-        Rectangle2D boundingRect = getBoundingRect();
+        Rectangle2D boundingRect = getRenderBoundingRect();
         double x = boundingRect.getMinX();
         double maxX = boundingRect.getMaxX();
         double y = boundingRect.getMinY();
