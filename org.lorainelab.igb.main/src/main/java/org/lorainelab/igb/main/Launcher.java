@@ -1,7 +1,6 @@
 package org.lorainelab.igb.main;
 
 import aQute.bnd.annotation.component.Component;
-import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
@@ -9,7 +8,6 @@ import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
-import javafx.event.EventType;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.osgi.framework.Bundle;
@@ -69,23 +67,8 @@ public class Launcher extends Application {
         StageProviderRegistrationManager stageRegistrationManager = bundleContext.getService(serviceReference);
         stageRegistrationManager.registerStageProvider(primaryStage, getHostServices());
         primaryStage.setOnCloseRequest(onClose);
-//        primaryStage.setOnHiding(event -> {
-//            System.out.println("setOnHiding");
-//        });
-//        primaryStage.setOnHidden(event -> {
-//            System.out.println("setOnHidden");
-//        });
-//        primaryStage.setOnShown(event -> {
-//            System.out.println("setOnShown");
-//        });
-//        primaryStage.setOnShowing(event -> {
-//            System.out.println("setOnShowing");
-//        });
     }
 
-    @Deactivate
-    public void deactivate() {
-    }
 
     @Reference
     public void setStageRegistrationManger(StageProviderRegistrationManager registrationManager) {
