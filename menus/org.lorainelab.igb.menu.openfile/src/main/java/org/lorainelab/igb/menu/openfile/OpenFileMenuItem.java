@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
  */
 @Component(immediate = true)
 public class OpenFileMenuItem implements MenuBarEntryProvider {
+
     private static final Logger LOG = LoggerFactory.getLogger(OpenFileMenuItem.class);
     private DataSource dataSource;
     private WeightedMenuItem menuItem;
