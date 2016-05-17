@@ -19,6 +19,7 @@
         
            
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.menu.api/${project.version}</bundle>
+        <bundle>mvn:${project.groupId}/org.lorainelab.igb.toolbar.api/${project.version}</bundle>
      
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.tabs.api/${project.version}</bundle>
 

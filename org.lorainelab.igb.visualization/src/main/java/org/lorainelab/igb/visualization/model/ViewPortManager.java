@@ -15,7 +15,7 @@ import static org.lorainelab.igb.visualization.model.TrackRenderer.SORT_BY_WEIGH
  */
 public class ViewPortManager {
 
-    private static double MIN_TRACK_HEIGHT = 100;
+    private static double MIN_TRACK_HEIGHT = 50;
     private static final int MAX_TRACK_HEIGHT = 1000;
     private static final int COORDINATE_TRACK_HEIGHT = 50;
     private final Set<TrackRenderer> unsortedTrackRenderers;

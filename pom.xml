@@ -184,6 +184,12 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.toolbar.api</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>org.lorainelab.igb.menu.openfile</artifactId>
                 <version>${project.version}</version>
                 <scope>provided</scope>
@@ -269,6 +275,7 @@
     <modules>
         <module>org.lorainelab.igb.stage.provider.api</module>
         <module>menus/org.lorainelab.igb.menu.api</module>
+        <module>toolbar/org.lorainelab.igb.toolbar.api</module>
         <module>tabs/org.lorainelab.igb.tabs.api</module>
         <module>org.lorainelab.igb.notifications.api</module>
         <module>cache/org.lorainelab.igb.cache.api</module>
