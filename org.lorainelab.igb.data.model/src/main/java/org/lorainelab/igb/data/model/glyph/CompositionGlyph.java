@@ -56,7 +56,7 @@ public class CompositionGlyph implements Glyph {
         double minY = Double.MAX_VALUE;
         double maxY = Double.MIN_VALUE;
         for (Glyph g : children) {
-            Rectangle2D rect = g.getBoundingRect();
+            Rectangle2D rect = g.getRenderBoundingRect();
             minX = Math.min(minX, rect.getMinX());
             maxX = Math.max(maxX, rect.getMaxX());
             minY = Math.min(minY, rect.getMinY());
@@ -74,7 +74,7 @@ public class CompositionGlyph implements Glyph {
         double minY = Double.MAX_VALUE;
         double maxY = Double.MIN_VALUE;
         for (Glyph g : children) {
-            if (g.getBoundingRect().intersects(view)) {
+            if (g.getRenderBoundingRect().intersects(view)) {
                 Optional<Rectangle2D> rect = g.getViewBoundingRect(view, additionalYoffset);
                 if (rect.isPresent()) {
                     minX = Math.min(minX, rect.get().getMinX());
@@ -103,7 +103,7 @@ public class CompositionGlyph implements Glyph {
         Rectangle2D glyphViewIntersectionBounds = glyphViewIntersectionBoundsWrapper.get();
         if (viewBoundingRect.getWidth() < 25_000_000) {
             children.stream()
-                    .filter(glyph -> viewBoundingRect.intersects(glyph.getBoundingRect()))
+                    .filter(glyph -> viewBoundingRect.intersects(glyph.getRenderBoundingRect()))
                     .forEach(child -> child.draw(gc, view, additionalYoffset));
         } else {
             gc.save();
@@ -114,7 +114,7 @@ public class CompositionGlyph implements Glyph {
         }
         if (!Strings.isNullOrEmpty(label)) {
             final double fontSize = Math.min((SLOT_HEIGHT * view.getYfactor()) * .35, 14.5);
-            if (viewBoundingRect.getWidth() < 100_000 && fontSize > 8) {
+            if (viewBoundingRect.getWidth() < 300_000 && fontSize > 8) {
                 gc.save();
                 gc.scale(1 / view.getXfactor(), 1 / view.getYfactor());
                 double textScale = .8;
@@ -172,11 +172,6 @@ public class CompositionGlyph implements Glyph {
         return isSelected;
     }
 
-    @Override
-    public void setBoundingRect(Rectangle2D boundingRect) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
     public List<Glyph> getChildren() {
         return children;
     }
@@ -208,6 +203,16 @@ public class CompositionGlyph implements Glyph {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public Rectangle2D getRenderBoundingRect() {
+       return getBoundingRect();
+    }
+
+    @Override
+    public void setRenderBoundingRect(Rectangle2D rectangle2D) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

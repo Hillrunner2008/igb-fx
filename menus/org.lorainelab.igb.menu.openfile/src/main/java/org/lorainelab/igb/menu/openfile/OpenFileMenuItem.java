@@ -17,6 +17,8 @@ import org.lorainelab.igb.menu.api.MenuBarEntryProvider;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
 import org.lorainelab.igb.menu.api.model.WeightedMenuItem;
 import org.lorainelab.igb.selections.SelectionInfoService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -25,6 +27,7 @@ import org.lorainelab.igb.selections.SelectionInfoService;
 @Component(immediate = true)
 public class OpenFileMenuItem implements MenuBarEntryProvider {
 
+    private static final Logger LOG = LoggerFactory.getLogger(OpenFileMenuItem.class);
     private DataSource dataSource;
     private WeightedMenuItem menuItem;
     private FileTypeHandlerRegistry fileTypeHandlerRegistry;
@@ -47,7 +50,7 @@ public class OpenFileMenuItem implements MenuBarEntryProvider {
                 selectedFiles.forEach(file -> {
                     selectionInfoService.getSelectedGenomeVersion().get().ifPresent(gv -> {
                         DataSourceReference dataSourceReference = new DataSourceReference(file.getPath(), dataSource);
-                        gv.getLoadedDataSets().add(new DataSet("test", dataSourceReference, fileTypeHandlerRegistry.getFileTypeHandlers().stream().findFirst().get()));
+                        gv.getLoadedDataSets().add(new DataSet(file.getName(), dataSourceReference, fileTypeHandlerRegistry.getFileTypeHandlers().stream().findFirst().get()));
                     });
                 });
             });

@@ -24,6 +24,7 @@ public class RectangleGlyph implements Glyph {
     private Paint strokeColor = Color.BLACK;
 
     private Rectangle2D boundingRect;
+    private Rectangle2D renderBoundingRect;
 
     public RectangleGlyph(double x, double y, int width, int height) {
         boundingRect = new Rectangle2D(x, y, width, height);
@@ -55,20 +56,13 @@ public class RectangleGlyph implements Glyph {
     @Override
     public void draw(GraphicsContext gc, View view, double additionalYoffset) {
         Rectangle2D viewRect = view.getBoundingRect();
-        //System.out.println("++++++++++miny: " + viewRect.getMinY() + " maxy: " + viewRect.getMaxY());
         Optional<Rectangle2D> viewBoundingRect = getViewBoundingRect(viewRect, additionalYoffset);
         if (viewBoundingRect.isPresent()) {
             gc.setFill(fill);
             gc.setStroke(strokeColor);
             final double y = viewBoundingRect.get().getMinY();
-            //System.out.println("---------miny: " + viewBoundingRect.getMinY() + " height: " + height + " offset: " + additionalYoffset);
             gc.fillRect(viewBoundingRect.get().getMinX(), y, viewBoundingRect.get().getWidth(), viewBoundingRect.get().getHeight());
         }
-    }
-
-    @Override
-    public void setBoundingRect(Rectangle2D boundingRect) {
-        this.boundingRect = boundingRect;
     }
 
     @Override
@@ -102,6 +96,19 @@ public class RectangleGlyph implements Glyph {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public Rectangle2D getRenderBoundingRect() {
+        if (renderBoundingRect == null) {
+            return boundingRect;
+        }
+        return renderBoundingRect;
+    }
+
+    @Override
+    public void setRenderBoundingRect(Rectangle2D renderBoundingRect) {
+        this.renderBoundingRect = renderBoundingRect;
     }
 
 }

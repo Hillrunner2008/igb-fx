@@ -116,6 +116,7 @@ public class MainController {
     private ToolBarProvider toolbarProvider;
     private Pane labelPane;
     private Set<TrackRenderer> trackRenderers;
+    private Set<DataSet> loadedDataSets;
     private DoubleProperty scrollX;
     private DoubleProperty hSliderWidget;
     private double lastDragX;
@@ -138,6 +139,7 @@ public class MainController {
 
     public MainController() {
         trackRenderers = Sets.newHashSet();
+        loadedDataSets = Sets.newHashSet();
         scrollX = new SimpleDoubleProperty(0);
         hSliderWidget = new SimpleDoubleProperty(0);
         ignoreScrollXEvent = false;
@@ -224,17 +226,21 @@ public class MainController {
             updateTrackRenderers();
         });
         gv.getLoadedDataSets().addListener((SetChangeListener.Change<? extends DataSet> change) -> {
-            Platform.runLater(() -> {
+            Platform.runLater(() -> { // there is a bug causing this event to fire multiple times for a single addition to the observable collection
                 if (change.wasAdded()) {
-                    Track positiveStrandTrack = change.getElementAdded().getPositiveStrandTrack(chromosome.getName());
-                    Track negativeStrandTrack = change.getElementAdded().getNegativeStrandTrack(gv.getSelectedChromosomeProperty().get().get().getName());
-                    final ZoomableTrackRenderer positiveStrandTrackRenderer = new ZoomableTrackRenderer(canvasPane, positiveStrandTrack, chromosome.getLength());
-                    positiveStrandTrackRenderer.setWeight(getMinWeight());
-                    final ZoomableTrackRenderer negativeStrandTrackRenderer = new ZoomableTrackRenderer(canvasPane, negativeStrandTrack, chromosome.getLength());
-                    negativeStrandTrackRenderer.setWeight(getMaxWeight());
-                    trackRenderers.add(positiveStrandTrackRenderer);
-                    trackRenderers.add(negativeStrandTrackRenderer);
-                    updateTrackRenderers();
+                    final DataSet loadedDataSet = change.getElementAdded();
+                    if (!loadedDataSets.contains(loadedDataSet)) {
+                        loadedDataSets.add(loadedDataSet);
+                        Track positiveStrandTrack = loadedDataSet.getPositiveStrandTrack(chromosome.getName());
+                        Track negativeStrandTrack = change.getElementAdded().getNegativeStrandTrack(gv.getSelectedChromosomeProperty().get().get().getName());
+                        final ZoomableTrackRenderer positiveStrandTrackRenderer = new ZoomableTrackRenderer(canvasPane, positiveStrandTrack, chromosome.getLength());
+                        positiveStrandTrackRenderer.setWeight(getMinWeight());
+                        final ZoomableTrackRenderer negativeStrandTrackRenderer = new ZoomableTrackRenderer(canvasPane, negativeStrandTrack, chromosome.getLength());
+                        negativeStrandTrackRenderer.setWeight(getMaxWeight());
+                        trackRenderers.add(positiveStrandTrackRenderer);
+                        trackRenderers.add(negativeStrandTrackRenderer);
+                        updateTrackRenderers();
+                    }
                 } else {
                     //todo implement remove
                 }
