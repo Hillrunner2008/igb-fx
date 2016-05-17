@@ -63,7 +63,8 @@ featuresBoot = \
     wrap, \
     bundle, \
     config, \
-    kar
+    kar, \
+    scr
 
 
 #
