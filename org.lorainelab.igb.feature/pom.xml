@@ -5,7 +5,7 @@
     
     <groupId>org.lorainelab</groupId>
     <artifactId>org.lorainelab.igb.feature</artifactId>
-    <packaging>pom</packaging>
+    <packaging>kar</packaging>
     <parent>
         <groupId>org.lorainelab</groupId>
         <artifactId>org.lorainelab.igb</artifactId>
@@ -67,6 +67,16 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                    <groupId>org.apache.karaf.tooling</groupId>
+                    <artifactId>karaf-maven-plugin</artifactId>
+                    <version>4.0.5</version>
+                    <extensions>true</extensions>
+                    <configuration>
+                            <includeTransitiveDependency>false</includeTransitiveDependency>
+                            <featuresFile>target/features/features.xml</featuresFile>
+                    </configuration>
             </plugin>
         </plugins>
     </build>

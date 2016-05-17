@@ -8,6 +8,8 @@ import java.util.concurrent.Executors;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.application.Platform;
+import javafx.event.EventHandler;
+import javafx.event.EventType;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.osgi.framework.Bundle;
@@ -19,9 +21,10 @@ import org.slf4j.LoggerFactory;
 
 @Component
 public class Launcher extends Application {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(Launcher.class);
     private StageProviderRegistrationManager stageRegistrationManager;
+
     public void activate() throws InterruptedException {
         Executors.defaultThreadFactory().newThread(() -> {
             Thread.currentThread().setContextClassLoader(
@@ -35,52 +38,55 @@ public class Launcher extends Application {
             }
         }).start();
     }
-    
+
+    private final EventHandler<WindowEvent> onClose = (WindowEvent event) -> {
+        if (event.getEventType().equals(WindowEvent.WINDOW_CLOSE_REQUEST)) {
+            LOG.info("Received request to shutdown container");
+            CompletableFuture.runAsync(() -> {
+                try {
+                    BundleContext bc = FrameworkUtil.getBundle(Launcher.class).getBundleContext();
+                    Bundle bundle = bc.getBundle(0);
+                    bundle.stop();
+                } catch (Exception e) {
+                    System.err.println("Error when shutting down Apache Karaf");
+                }
+            });
+        }
+    };
+
     private void handleRestartEvent() {
         Platform.runLater(() -> {
-            stageRegistrationManager.registerStageProvider(new Stage(), getHostServices());
+            Stage newStage = new Stage();
+            newStage.setOnCloseRequest(onClose);
+            stageRegistrationManager.registerStageProvider(newStage, getHostServices());
         });
     }
-    
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         final BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
         ServiceReference<StageProviderRegistrationManager> serviceReference = bundleContext.getServiceReference(StageProviderRegistrationManager.class);
         StageProviderRegistrationManager stageRegistrationManager = bundleContext.getService(serviceReference);
         stageRegistrationManager.registerStageProvider(primaryStage, getHostServices());
-        primaryStage.setOnHiding(event -> {
-            System.out.println("setOnHiding");
-        });
-        primaryStage.setOnHidden(event -> {
-            System.out.println("setOnHidden");
-        });
-        primaryStage.setOnShown(event -> {
-            System.out.println("setOnShown");
-        });
-        primaryStage.setOnShowing(event -> {
-            System.out.println("setOnShowing");
-        });
-        primaryStage.setOnCloseRequest((WindowEvent event) -> {
-             System.out.println("setOnCloseRequest");
-            if (event.getEventType().equals(WindowEvent.WINDOW_CLOSE_REQUEST)) {
-                LOG.info("Received request to shutdown container");
-                CompletableFuture.runAsync(() -> {
-                    try {
-                        BundleContext bc = FrameworkUtil.getBundle(Launcher.class).getBundleContext();
-                        Bundle bundle = bc.getBundle(0);
-                        bundle.stop();
-                    } catch (Exception e) {
-                        System.err.println("Error when shutting down Apache Karaf");
-                    }
-                });
-            }
-        });
+        primaryStage.setOnCloseRequest(onClose);
+//        primaryStage.setOnHiding(event -> {
+//            System.out.println("setOnHiding");
+//        });
+//        primaryStage.setOnHidden(event -> {
+//            System.out.println("setOnHidden");
+//        });
+//        primaryStage.setOnShown(event -> {
+//            System.out.println("setOnShown");
+//        });
+//        primaryStage.setOnShowing(event -> {
+//            System.out.println("setOnShowing");
+//        });
     }
-    
+
     @Deactivate
     public void deactivate() {
     }
-    
+
     @Reference
     public void setStageRegistrationManger(StageProviderRegistrationManager registrationManager) {
         this.stageRegistrationManager = registrationManager;

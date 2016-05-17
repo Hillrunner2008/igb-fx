@@ -25,12 +25,10 @@
         <dependency>
             <groupId>org.lorainelab</groupId>
             <artifactId>org.lorainelab.igb.data.model</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-             <scope>provided</scope>
         </dependency>
     </dependencies>
 
@@ -51,11 +49,11 @@
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Import-Package>
-                            !${project.artifactId}.*,
+                            !${project.artifactId},
                             *
                         </Import-Package>
                         <Export-Package>
-                            ${project.artifactId}.*
+                            ${project.artifactId}
                         </Export-Package>
                         <Service-Component>*</Service-Component>
                     </instructions>

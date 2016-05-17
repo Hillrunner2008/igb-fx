@@ -23,7 +23,6 @@
         <dependency>
             <groupId>biz.aQute.bnd</groupId>
             <artifactId>bndlib</artifactId>
-             <scope>compile</scope>
         </dependency>
     </dependencies>
     <build>
@@ -35,8 +34,12 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-                        <Import-Package>*</Import-Package>
-                        <Export-Package>*</Export-Package>
+                        <Import-Package>
+                               *
+                        </Import-Package>
+                        <Export-Package>
+                            ${project.artifactId}
+                        </Export-Package>
                         <Bundle-ActivationPolicy>lazy</Bundle-ActivationPolicy>
                     </instructions>
                 </configuration>

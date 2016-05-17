@@ -65,8 +65,7 @@ featuresBoot = \
     bundle, \
     config, \
     kar, \
-    org.lorainelab.igb.feature.main
-
+    scr
 
 #
 # Resource repositories (OBR) that the features resolver can use

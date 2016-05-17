@@ -61,11 +61,11 @@
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Import-Package>
-                            !${project.artifactId}.*,
+                            !${project.artifactId},
                             *
                         </Import-Package>
                         <Export-Package>
-                            ${project.artifactId}.*
+                            ${project.artifactId}
                         </Export-Package>
                         <Service-Component>*</Service-Component>
                     </instructions>
