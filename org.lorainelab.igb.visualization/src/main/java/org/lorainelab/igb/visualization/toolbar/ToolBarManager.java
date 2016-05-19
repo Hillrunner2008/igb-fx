@@ -3,11 +3,12 @@ package org.lorainelab.igb.visualization.toolbar;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import com.google.common.collect.Sets;
 import java.time.Duration;
+import java.util.Comparator;
+import java.util.Set;
+import javafx.application.Platform;
 import javafx.collections.SetChangeListener;
-import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.HBox;
@@ -15,6 +16,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
 import org.lorainelab.igb.selections.SelectionInfoService;
+import org.lorainelab.igb.toolbar.api.ToolbarButtonProvider;
+import org.lorainelab.igb.toolbar.api.WeightedButton;
 import org.reactfx.AwaitingEventStream;
 import org.reactfx.EventStreams;
 import org.slf4j.Logger;
@@ -24,20 +27,19 @@ import org.slf4j.LoggerFactory;
  *
  * @author dcnorris
  */
-@Component(immediate = true, provide = ToolBarProvider.class)
-public class ToolBarProvider {
+@Component(immediate = true, provide = ToolBarManager.class)
+public class ToolBarManager {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ToolBarProvider.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ToolBarManager.class);
+    private final Set<WeightedButton> toolbarEntries;
     private ToolBar topToolbar;
     private Pane pane;
     private TextField selectionInfoTextField;
 
-    private Button homeButton;
-    private Button closeButton;
-    private Button openFolderButton;
     private SelectionInfoService selectionInfoService;
 
-    public ToolBarProvider() {
+    public ToolBarManager() {
+        toolbarEntries = Sets.newTreeSet(Comparator.comparingInt(button -> button.getWeight()));
         topToolbar = new ToolBar();
         pane = new Pane();
         HBox.setHgrow(pane, Priority.ALWAYS);
@@ -45,18 +47,7 @@ public class ToolBarProvider {
         selectionInfoTextField.setPrefWidth(400);
         selectionInfoTextField.setMaxWidth(400);
         selectionInfoTextField.setPromptText("Selection Info: Click the map to select annotation");
-        openFolderButton = new Button("", new FontAwesomeIconView(FontAwesomeIcon.FOLDER_OPEN));
-        openFolderButton.setOnAction(event -> {
-            LOG.info("open file action");
-        });
-        closeButton = new Button("", new FontAwesomeIconView(FontAwesomeIcon.CLOSE));
-        homeButton = new Button("", new FontAwesomeIconView(FontAwesomeIcon.HOME));
-        topToolbar.getItems().addAll(
-                openFolderButton,
-                closeButton,
-                homeButton,
-                pane,
-                selectionInfoTextField);
+        topToolbar.getItems().addAll(pane, selectionInfoTextField);
     }
 
     @Activate
@@ -67,6 +58,21 @@ public class ToolBarProvider {
 
     public ToolBar getTopToolbar() {
         return topToolbar;
+    }
+
+    @Reference(optional = true, multiple = true, unbind = "removeToolbarButtonProvider", dynamic = true)
+    public void addToolbarButtonProvider(ToolbarButtonProvider buttonProvider) {
+        Platform.runLater(() -> {
+            topToolbar.getItems().clear();
+            toolbarEntries.add(buttonProvider.getToolbarButton());
+            toolbarEntries.forEach(entry -> topToolbar.getItems().add(entry));
+            topToolbar.getItems().addAll(pane, selectionInfoTextField);
+        });
+    }
+
+    public void removeToolbarButtonProvider(ToolbarButtonProvider buttonProvider) {
+        toolbarEntries.remove(buttonProvider.getToolbarButton());
+        topToolbar.getItems().remove(buttonProvider.getToolbarButton());
     }
 
     @Reference

@@ -4,6 +4,8 @@ import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Lists;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +19,8 @@ import org.lorainelab.igb.menu.api.MenuBarEntryProvider;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
 import org.lorainelab.igb.menu.api.model.WeightedMenuItem;
 import org.lorainelab.igb.selections.SelectionInfoService;
+import org.lorainelab.igb.toolbar.api.ToolbarButtonProvider;
+import org.lorainelab.igb.toolbar.api.WeightedButton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,33 +29,38 @@ import org.slf4j.LoggerFactory;
  * @author dcnorris
  */
 @Component(immediate = true)
-public class OpenFileMenuItem implements MenuBarEntryProvider {
+public class OpenFileMenuItem implements MenuBarEntryProvider, ToolbarButtonProvider {
 
     private static final Logger LOG = LoggerFactory.getLogger(OpenFileMenuItem.class);
     private DataSource dataSource;
     private WeightedMenuItem menuItem;
+    private WeightedButton openFileButton;
     private FileTypeHandlerRegistry fileTypeHandlerRegistry;
     private SelectionInfoService selectionInfoService;
 
     @Activate
     public void activate() {
         menuItem = new WeightedMenuItem(1, "Load File");
+        openFileButton = new WeightedButton(0, "", new FontAwesomeIconView(FontAwesomeIcon.FOLDER_OPEN));
+        openFileButton.setOnAction(action -> openFileAction());
         menuItem.setDisable(!selectionInfoService.getSelectedGenomeVersion().get().isPresent());
         selectionInfoService.getSelectedGenomeVersion().addListener((observable, oldValue, newValue) -> {
             menuItem.setDisable(!selectionInfoService.getSelectedGenomeVersion().get().isPresent());
         });
-        menuItem.setOnAction(action -> {
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Load File");
-            File homeDirectory = new File(System.getProperty("user.home"));
-            fileChooser.setInitialDirectory(homeDirectory);
-            addFileExtensionFilters(fileChooser);
-            Optional.ofNullable(fileChooser.showOpenMultipleDialog(null)).ifPresent(selectedFiles -> {
-                selectedFiles.forEach(file -> {
-                    selectionInfoService.getSelectedGenomeVersion().get().ifPresent(gv -> {
-                        DataSourceReference dataSourceReference = new DataSourceReference(file.getPath(), dataSource);
-                        gv.getLoadedDataSets().add(new DataSet(file.getName(), dataSourceReference, fileTypeHandlerRegistry.getFileTypeHandlers().stream().findFirst().get()));
-                    });
+        menuItem.setOnAction(action -> openFileAction());
+    }
+
+    private void openFileAction() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Load File");
+        File homeDirectory = new File(System.getProperty("user.home"));
+        fileChooser.setInitialDirectory(homeDirectory);
+        addFileExtensionFilters(fileChooser);
+        Optional.ofNullable(fileChooser.showOpenMultipleDialog(null)).ifPresent(selectedFiles -> {
+            selectedFiles.forEach(file -> {
+                selectionInfoService.getSelectedGenomeVersion().get().ifPresent(gv -> {
+                    DataSourceReference dataSourceReference = new DataSourceReference(file.getPath(), dataSource);
+                    gv.getLoadedDataSets().add(new DataSet(file.getName(), dataSourceReference, fileTypeHandlerRegistry.getFileTypeHandlers().stream().findFirst().get()));
                 });
             });
         });
@@ -89,6 +98,11 @@ public class OpenFileMenuItem implements MenuBarEntryProvider {
                     return new FileChooser.ExtensionFilter(fileTypeHandler.getName(), fileTypeHandler.getSupportedExtensions().stream().map(ext -> "*." + ext).collect(Collectors.toList()));
                 })
                 .forEach(extensionFilter -> fileChooser.getExtensionFilters().add(extensionFilter));
+    }
+
+    @Override
+    public WeightedButton getToolbarButton() {
+        return openFileButton;
     }
 
 }

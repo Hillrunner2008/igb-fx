@@ -64,7 +64,7 @@ import static org.lorainelab.igb.visualization.model.TrackRenderer.MAX_ZOOM_MODE
 import org.lorainelab.igb.visualization.model.ViewPortManager;
 import org.lorainelab.igb.visualization.model.ZoomableTrackRenderer;
 import org.lorainelab.igb.visualization.tabs.TabPaneManager;
-import org.lorainelab.igb.visualization.toolbar.ToolBarProvider;
+import org.lorainelab.igb.visualization.toolbar.ToolBarManager;
 import static org.lorainelab.igb.visualization.util.BoundsUtil.enforceRangeBounds;
 import static org.lorainelab.igb.visualization.util.CanvasUtils.exponentialScaleTransform;
 import static org.lorainelab.igb.visualization.util.CanvasUtils.invertExpScaleTransform;
@@ -113,7 +113,7 @@ public class MainController {
     @FXML
     private PlusMinusSlider plusMinusSlider;
 
-    private ToolBarProvider toolbarProvider;
+    private ToolBarManager toolbarProvider;
     private Pane labelPane;
     private Set<TrackRenderer> trackRenderers;
     private Set<DataSet> loadedDataSets;
@@ -792,7 +792,7 @@ public class MainController {
     }
 
     @Reference
-    public void setToolbarProvider(ToolBarProvider toolbarProvider) {
+    public void setToolbarProvider(ToolBarManager toolbarProvider) {
         this.toolbarProvider = toolbarProvider;
     }
 
