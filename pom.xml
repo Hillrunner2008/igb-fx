@@ -248,6 +248,11 @@
                 <version>${project.version}</version>
                 <scope>provided</scope>
             </dependency>
+            <dependency>
+                <groupId>org.lorainelab</groupId>
+                <artifactId>org.lorainelab.igb.search.api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>
@@ -306,6 +311,8 @@
         <module>org.lorainelab.igb.demo</module>
         <module>org.lorainelab.igb.feature</module>
         <module>org.lorainelab.igb.kar</module>
+        <module>org.lorainelab.igb.search.lucene</module>
+        <module>org.lorainelab.igb.search.api</module>
     </modules>
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
