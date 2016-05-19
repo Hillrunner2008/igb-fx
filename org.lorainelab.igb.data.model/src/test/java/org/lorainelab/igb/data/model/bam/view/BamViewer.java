@@ -46,7 +46,6 @@ public class BamViewer extends Application {
 //        controller = loader.getController();
 //        final Track track = controller.getPositiveStrandTrack();
 //        Scene scene = new Scene(root);
-//        scene.getStylesheets().add("/styles/Styles.css");
 //        stage.setTitle("GenoViz Fx");
 //        stage.setScene(scene);
 //        stage.show();

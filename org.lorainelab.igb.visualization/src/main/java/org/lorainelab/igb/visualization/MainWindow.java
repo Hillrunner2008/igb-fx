@@ -49,7 +49,6 @@ public class MainWindow {
         loader.setController(controller);
         root = loader.load();
         Scene scene = new Scene(root);
-        //scene.getStylesheets().add("/styles/Styles.css");
         stage.setTitle("JavaFx IGB");
         Platform.runLater(() -> {
             stage.setScene(scene);
