@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
 
-    <feature name="${project.artifactId}" version="${project.version}">	
+    <feature name="${project.artifactId}-bootstrap" version="${project.version}">	
         <bundle start-level="70">mvn:${project.groupId}/org.lorainelab.igb.stage.provider.api/${project.version}</bundle>
         <bundle start-level="70">mvn:${project.groupId}/org.lorainelab.igb.main/${project.version}</bundle>
+    </feature>
+    <feature name="${project.artifactId}" version="${project.version}">	
         <bundle>wrap:mvn:org.reactfx/reactfx/2.0-M4u1</bundle>
         <bundle>wrap:mvn:com.miglayout/miglayout-core/5.0</bundle>
         <bundle>wrap:mvn:com.miglayout/miglayout-javafx/5.0</bundle>

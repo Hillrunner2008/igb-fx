@@ -11,3 +11,4 @@ karaf/lock
 karaf/deploy
 
 distribution/build/
+karaf/local

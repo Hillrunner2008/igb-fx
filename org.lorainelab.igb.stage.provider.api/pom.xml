@@ -46,4 +46,38 @@
             </plugin>
         </plugins>
     </build>
+    
+    <profiles>
+        <profile>
+            <id>distribute</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.7</version>
+                        <executions>
+                            <execution>
+                                <phase>install</phase>
+                                <configuration>
+                                    <tasks>
+                                        <echo message="Preparing Karaf for distribution"/>
+                                        <mkdir dir="../karaf/local/org/lorainelab/${project.artifactId}/${project.version}"/>
+                                        <delete includeemptydirs="true">
+                                            <fileset dir="../karaf/local/org/lorainelab/${project.artifactId}" includes="**/*"/>
+                                        </delete>
+                                        <copy todir="../karaf/local/org/lorainelab/${project.artifactId}/${project.version}" overwrite="true">
+                                            <fileset dir="target" includes="**/*.jar"/>
+                                        </copy>
+                                    </tasks>
+                                </configuration>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
