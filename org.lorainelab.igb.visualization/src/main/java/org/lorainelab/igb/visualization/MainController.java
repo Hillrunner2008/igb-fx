@@ -48,6 +48,7 @@ import org.lorainelab.igb.data.model.GenomeVersion;
 import org.lorainelab.igb.data.model.Track;
 import org.lorainelab.igb.data.model.View;
 import org.lorainelab.igb.selections.SelectionInfoService;
+import org.lorainelab.igb.visualization.event.ClickDragEndEvent;
 import org.lorainelab.igb.visualization.event.ClickDragZoomEvent;
 import org.lorainelab.igb.visualization.event.ScaleEvent;
 import org.lorainelab.igb.visualization.event.ScrollScaleEvent;
@@ -205,7 +206,7 @@ public class MainController {
                 trackRenderers.add(coordinateTrackRenderer);
                 loadDataSets(gv, chromosome);
             }
-        } 
+        }
     }
 
     private void loadDataSets(GenomeVersion gv, final Chromosome chromosome) {
@@ -268,6 +269,14 @@ public class MainController {
             hSlider.increment();
         } else {
             hSlider.decrement();
+        }
+    }
+
+    @Subscribe
+    public void handleClickDragEndEvent(ClickDragEndEvent event) {
+        if (canvasPane.getHeight() > viewPortManager.getTotalTrackSize()) {
+            canvasPane.clear();
+            updateTrackRenderers();
         }
     }
 
