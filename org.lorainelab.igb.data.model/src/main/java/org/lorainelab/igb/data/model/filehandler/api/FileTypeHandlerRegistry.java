@@ -6,7 +6,6 @@
 package org.lorainelab.igb.data.model.filehandler.api;
 
 import java.util.Set;
-import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandler;
 
 /**
  *

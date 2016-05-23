@@ -45,12 +45,12 @@ public class Example {
 
         IndexWriterConfig config = new IndexWriterConfig(analyzer);
 
-//        IndexWriter w = new IndexWriter(index, config);
-//        addDoc(w, "Lucene in Action", "193398817");
-//        addDoc(w, "Lucene for Dummies", "55320055Z");
-//        addDoc(w, "Managing Gigabytes", "55063554A");
-//        addDoc(w, "The Art of Computer Science", "9900333X");
-//        w.close();
+        IndexWriter w = new IndexWriter(index, config);
+        addDoc(w, "Lucene in Action", "193398817");
+        addDoc(w, "Lucene for Dummies", "55320055Z");
+        addDoc(w, "Managing Gigabytes", "55063554A");
+        addDoc(w, "The Art of Computer Science", "9900333X");
+        w.close();
 
         // 2. query
         String querystr = args.length > 0 ? args[0] : "l*";

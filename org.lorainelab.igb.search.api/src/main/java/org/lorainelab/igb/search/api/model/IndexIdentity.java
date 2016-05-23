@@ -5,24 +5,26 @@
  */
 package org.lorainelab.igb.search.api.model;
 
-import com.google.common.collect.Maps;
-import java.util.Map;
-
 /**
  *
  * @author jeckstei
  */
-public class Document {
-    Map<String, String> fields;
+public class IndexIdentity {
+    private String id;
 
-    public Document() {
-        this.fields = Maps.newHashMap();
+    public IndexIdentity(String id) {
+        this.id = id;
+    }
+    
+    
+
+    public String getId() {
+        return id;
     }
 
-    public Map<String, String> getFields() {
-        return fields;
+    public void setId(String id) {
+        this.id = id;
     }
-
     
     
 }

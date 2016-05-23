@@ -68,7 +68,10 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Import-Package>*</Import-Package>
+                        <Import-Package>
+                            !${project.artifactId}*,
+                            *
+                        </Import-Package>
                         <Export-Package />
                         <Service-Component>*</Service-Component>
                     </instructions>

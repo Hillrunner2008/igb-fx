@@ -4,6 +4,7 @@ import com.google.common.collect.Range;
 import java.util.Set;
 import org.lorainelab.igb.data.model.datasource.DataSourceReference;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
+import org.lorainelab.igb.search.api.model.IndexIdentity;
 
 /**
  *
@@ -42,4 +43,10 @@ public interface FileTypeHandler {
      * @return Set of features in the requested range
      */
     Set<CompositionGlyph> getChromosome(DataSourceReference dataSourceReference, String chromosomeId);
+    
+    
+    Set<String> getSearchIndexKeys();
+    
+    void createIndex(IndexIdentity indexIdentity, DataSourceReference dataSourceReference);
+    
 }

@@ -19,7 +19,9 @@ import java.util.Optional;
 public interface RemoteFileCacheService {
 
     public Optional<File> getFilebyUrl(URL url);
-
+    
+    public void indexFile(URL url);
+    
     public void clearAllCaches();
 
     public void clearCacheByUrl(URL url);
@@ -59,5 +61,5 @@ public interface RemoteFileCacheService {
     public void registerEventListener(Object listener);
 
     public void unregisterEventListener(Object listener);
-
+    
 }

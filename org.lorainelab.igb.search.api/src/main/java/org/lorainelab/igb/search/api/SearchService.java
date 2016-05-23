@@ -7,12 +7,16 @@ package org.lorainelab.igb.search.api;
 
 import java.util.List;
 import org.lorainelab.igb.search.api.model.Document;
+import org.lorainelab.igb.search.api.model.IndexIdentity;
 
 /**
  *
  * @author jeckstei
  */
 public interface SearchService {
-    public List<Document> search(String query);
-    public void index(Document document);
+    public List<Document> search(String query, IndexIdentity index);
+    public void index(List<Document> document, IndexIdentity index);
+    public void clearIndex(IndexIdentity index);
+    public void deleteAll();
+    public IndexIdentity generateIndexIndentity();
 }

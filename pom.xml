@@ -37,6 +37,11 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>1.3.2</version>
+            </dependency>
+            <dependency>
                 <groupId>biz.aQute.bnd</groupId>
                 <artifactId>bndlib</artifactId>
                 <version>2.4.0</version>
@@ -251,6 +256,11 @@
             <dependency>
                 <groupId>org.lorainelab</groupId>
                 <artifactId>org.lorainelab.igb.search.api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.lorainelab</groupId>
+                <artifactId>org.lorainelab.igb.filehandler.registry</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

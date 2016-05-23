@@ -9,15 +9,19 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import javafx.stage.FileChooser;
 import org.lorainelab.igb.data.model.DataSet;
 import org.lorainelab.igb.data.model.datasource.DataSource;
 import org.lorainelab.igb.data.model.datasource.DataSourceReference;
+import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandler;
 import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandlerRegistry;
 import org.lorainelab.igb.menu.api.MenuBarEntryProvider;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
 import org.lorainelab.igb.menu.api.model.WeightedMenuItem;
+import org.lorainelab.igb.search.api.SearchService;
+import org.lorainelab.igb.search.api.model.IndexIdentity;
 import org.lorainelab.igb.selections.SelectionInfoService;
 import org.lorainelab.igb.toolbar.api.ToolbarButtonProvider;
 import org.lorainelab.igb.toolbar.api.WeightedButton;
@@ -37,6 +41,7 @@ public class OpenFileMenuItem implements MenuBarEntryProvider, ToolbarButtonProv
     private WeightedButton openFileButton;
     private FileTypeHandlerRegistry fileTypeHandlerRegistry;
     private SelectionInfoService selectionInfoService;
+    private SearchService searchService;
 
     @Activate
     public void activate() {
@@ -58,9 +63,26 @@ public class OpenFileMenuItem implements MenuBarEntryProvider, ToolbarButtonProv
         addFileExtensionFilters(fileChooser);
         Optional.ofNullable(fileChooser.showOpenMultipleDialog(null)).ifPresent(selectedFiles -> {
             selectedFiles.forEach(file -> {
+                FileTypeHandler fileTypeHandler = fileTypeHandlerRegistry.getFileTypeHandlers().stream().findFirst().get();
                 selectionInfoService.getSelectedGenomeVersion().get().ifPresent(gv -> {
                     DataSourceReference dataSourceReference = new DataSourceReference(file.getPath(), dataSource);
-                    gv.getLoadedDataSets().add(new DataSet(file.getName(), dataSourceReference, fileTypeHandlerRegistry.getFileTypeHandlers().stream().findFirst().get()));
+
+                    gv.getLoadedDataSets().add(new DataSet(file.getName(), dataSourceReference, fileTypeHandler));
+
+                    CompletableFuture<Void> indexTask = CompletableFuture.runAsync(() -> {
+                        try {
+                            LOG.info("Creating index...");
+                            IndexIdentity indexIdentity = searchService.generateIndexIndentity();
+                            fileTypeHandler.createIndex(indexIdentity, dataSourceReference);
+                        } catch (Exception ex) {
+                            LOG.error(ex.getMessage(), ex);
+                        }
+                    }).whenComplete((result, ex) -> {
+                        if (ex != null) {
+                            LOG.error(ex.getMessage(), ex);
+                        }
+                    });
+
                 });
             });
         });
@@ -90,6 +112,11 @@ public class OpenFileMenuItem implements MenuBarEntryProvider, ToolbarButtonProv
     @Reference
     public void setSelectionInfoService(SelectionInfoService selectionInfoService) {
         this.selectionInfoService = selectionInfoService;
+    }
+
+    @Reference
+    public void setSearchService(SearchService searchService) {
+        this.searchService = searchService;
     }
 
     private void addFileExtensionFilters(FileChooser fileChooser) {

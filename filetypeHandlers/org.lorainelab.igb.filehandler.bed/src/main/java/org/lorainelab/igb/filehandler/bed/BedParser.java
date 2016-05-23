@@ -6,6 +6,7 @@ package org.lorainelab.igb.filehandler.bed;
  * and open the template in the editor.
  */
 import aQute.bnd.annotation.component.Component;
+import aQute.bnd.annotation.component.Reference;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
@@ -33,6 +34,9 @@ import org.lorainelab.igb.data.model.shapes.Shape;
 import org.lorainelab.igb.data.model.shapes.factory.GlyphFactory;
 import org.lorainelab.igb.data.model.view.Layer;
 import org.lorainelab.igb.data.model.view.Renderer;
+import org.lorainelab.igb.search.api.SearchService;
+import org.lorainelab.igb.search.api.model.Document;
+import org.lorainelab.igb.search.api.model.IndexIdentity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +49,7 @@ public class BedParser implements FileTypeHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(BedParser.class);
     private Renderer<BedFeature> renderer;
+    private SearchService searchService;
 
     public BedParser() {
         renderer = new BedRenderer();//TODO make it possible to swap this for alternative renderers
@@ -167,12 +172,12 @@ public class BedParser implements FileTypeHandler {
                     .stream().forEach((Layer layer) -> {
                         getShapes(layer).forEach(shape -> {
                             if (Rectangle.class
-                                    .isAssignableFrom(shape.getClass())) {
+                            .isAssignableFrom(shape.getClass())) {
                                 children.add(GlyphFactory.generateRectangleGlyph((Rectangle) shape));
 
                             }
                             if (Line.class
-                                    .isAssignableFrom(shape.getClass())) {
+                            .isAssignableFrom(shape.getClass())) {
                                 children.add(GlyphFactory.generateLine((Line) shape));
                             }
                         });
@@ -254,6 +259,42 @@ public class BedParser implements FileTypeHandler {
             }
         });
         return convertBedFeaturesToCompositionGlyphs(annotations);
+    }
+
+    @Override
+    public Set<String> getSearchIndexKeys() {
+        return Sets.newHashSet("id");
+    }
+
+    @Override
+    public void createIndex(IndexIdentity indexIdentity, DataSourceReference dataSourceReference) {
+        final DataSource dataSource = dataSourceReference.getDataSource();
+        final String path = dataSourceReference.getPath();
+        List<Document> documents = Lists.newArrayList();
+        dataSource.getInputStream(path).ifPresent(inputStream -> {
+            try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+                Iterator<String> iterator = bufferedReader.lines().iterator();
+                while (iterator.hasNext()) {
+                    String line = iterator.next().trim();
+                    List<String> fields = Splitter.on("\t").splitToList(line);
+                    final BedFeature bedFeature = createAnnotation(fields);
+                    if (bedFeature.getId().isPresent()) {
+                        Document document = new Document();
+                        document.getFields().put("id", bedFeature.getId().get());
+                        documents.add(document);
+                    }
+                }
+            } catch (Exception ex) {
+                LOG.error(ex.getMessage(), ex);
+            }
+        });
+        
+        searchService.index(documents, indexIdentity);
+    }
+
+    @Reference
+    public void setSearchService(SearchService searchService) {
+        this.searchService = searchService;
     }
 
 }

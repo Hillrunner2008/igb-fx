@@ -46,7 +46,7 @@
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Import-Package>
-                            !${project.artifactId}.*,
+                            !${project.artifactId}*,
                             *
                         </Import-Package>
                         <Service-Component>*</Service-Component>

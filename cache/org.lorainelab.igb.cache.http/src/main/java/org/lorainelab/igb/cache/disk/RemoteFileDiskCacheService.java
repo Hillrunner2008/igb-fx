@@ -162,6 +162,35 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
         }
     }
 
+    @Override
+    public void indexFile(URL url) {
+//        CompletableFuture<Void> indexTask = CompletableFuture.runAsync(() -> {
+//            try {
+//                getFilebyUrl(url).ifPresent(cachedFile -> {
+//                    try {
+//                        String ext = Files.getFileExtension(url.toExternalForm());
+//                        Optional<FileTypeHandler> filetypeHandler = fileTypeHandlerRegistry.getFileTypeHandlers().stream().filter(f -> f.getSupportedExtensions().contains(ext)).findFirst();
+//                        if(filetypeHandler.isPresent()) {
+//                            filetypeHandler.get().getSearchIndexKeys();
+//                            
+//                            DataSourceReference dataSourceReference = new DataSourceReference(cachedFile.getPath(), dataSource);
+//                            filetypeHandler.get().
+//                        }
+//                    } catch (Exception ex) {
+//                        LOG.error(ex.getMessage(), ex);
+//                    }
+//                });
+//            } catch (Exception ex) {
+//                LOG.error(ex.getMessage(), ex);
+//            }
+//        }).whenComplete((result, ex) -> {
+//            if (ex != null) {
+//                LOG.error(ex.getMessage(), ex);
+//            }
+//        });
+    }
+    
+
     private enum CacheConfig {
 
         MAX_CACHE_SIZE_MB("max.cache.size.mb"),
@@ -959,4 +988,6 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
         this.stage = stageProvider.getStage();
     }
 
+
+    
 }

@@ -35,7 +35,8 @@
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Import-Package>
-                               *
+                            !${project.artifactId}*,
+                            *
                         </Import-Package>
                         <Export-Package>
                             ${project.artifactId}
