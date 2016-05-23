@@ -4,6 +4,8 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import java.util.Optional;
 import javafx.application.Platform;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
@@ -35,7 +37,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     private static final Logger LOG = LoggerFactory.getLogger(ZoomableTrackRenderer.class);
     private TrackLabel trackLabel;
     final int modelWidth;
-    final double modelHeight;
+    DoubleProperty modelHeight;
     final Track track;
     double zoomStripeCoordinate = -1;
     protected EventBus eventBus;
@@ -44,6 +46,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     private final CanvasContext canvasContext;
     private final GraphicsContext gc;
     private int weight;
+    private double scrollY;
 
     public ZoomableTrackRenderer(CanvasPane canvasPane, Track track, int modelCoordinatesGridSize) {
         this.weight = 0;
@@ -51,11 +54,16 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         this.eventBus.register(this);
         this.track = track;
         this.modelWidth = modelCoordinatesGridSize;
-        this.modelHeight = track.getModelHeight();
-        view = new View(new Rectangle2D(0, 0, modelWidth, modelHeight));
+        modelHeight = new SimpleDoubleProperty();
+        modelHeight.bind(track.getModelHeight());
+        view = new View(new Rectangle2D(0, 0, modelWidth, modelHeight.doubleValue()));
+        modelHeight.addListener((observable, oldValue, newValue) -> {
+            scaleCanvas(view.getXfactor(), view.getYfactor(), scrollY);
+        });
         canvasContext = new CanvasContext(canvasPane.getCanvas(), Rectangle2D.EMPTY, 0, 0);
         trackLabel = new TrackLabel(this, track.getTrackLabel());
         gc = canvasPane.getCanvas().getGraphicsContext2D();
+
     }
 
     @Override
@@ -85,8 +93,9 @@ public class ZoomableTrackRenderer implements TrackRenderer {
 
     @Override
     public void scaleCanvas(double xFactor, double scrollX, double scrollY) {
+        this.scrollY = scrollY;
         if (canvasContext.isVisible()) {
-            double scaleToY = canvasContext.getTrackHeight() / modelHeight;
+            double scaleToY = canvasContext.getTrackHeight() / modelHeight.doubleValue();
             gc.save();
             gc.scale(xFactor, scaleToY);
             view.setXfactor(xFactor);
@@ -304,7 +313,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
 
     @Override
     public double getModelHeight() {
-        return modelHeight;
+        return modelHeight.doubleValue();
     }
 
     @Override

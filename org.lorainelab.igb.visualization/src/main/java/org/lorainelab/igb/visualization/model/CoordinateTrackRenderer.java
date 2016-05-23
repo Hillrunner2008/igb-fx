@@ -65,7 +65,6 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         this.modelHeight = 50;
         validViewRange = Range.closedOpen(0, modelWidth);
         viewBoundingRectangle = new Rectangle2D(0, 0, modelWidth, modelHeight);
-        LOG.info("NEW CanvasContext");
         canvasContext = new CanvasContext(canvasPane.getCanvas(), Rectangle2D.EMPTY, 0, 0);
         trackLabel = new TrackLabel(this, COORDINATES_TRACK_LABEL);
         gc = canvasPane.getCanvas().getGraphicsContext2D();
@@ -169,7 +168,6 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     }
     
     private void drawCoordinateLine() {
-        LOG.info("drawCoordinateLine bounding rect info: " + canvasContext.getBoundingRect().getMinY());
         gc.save();
         gc.scale(1 / xfactor, 1);
         gc.setFill(Color.BLACK);
@@ -322,11 +320,6 @@ public class CoordinateTrackRenderer implements TrackRenderer {
             }
             xOffset = enforceRangeBounds(xOffset, 0, modelWidth);
             Range<Integer> currentRange = Range.closedOpen((int) xOffset, (int) xOffset + (int) visibleVirtualCoordinatesX);
-            if (!validViewRange.encloses(currentRange)) {
-                LOG.error("this should not happen");
-                LOG.error("scrollX " + scrollX);
-                LOG.error("scrollY " + scrollY);
-            }
             viewBoundingRectangle = new Rectangle2D(xOffset, canvasContext.getBoundingRect().getMinY(), visibleVirtualCoordinatesX, canvasContext.getBoundingRect().getHeight());
             viewYcoordinateRange = Range.<Double>closed(viewBoundingRectangle.getMinY(), viewBoundingRectangle.getMaxY());
             render();
