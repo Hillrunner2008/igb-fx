@@ -48,6 +48,7 @@ import org.lorainelab.igb.data.model.GenomeVersion;
 import org.lorainelab.igb.data.model.Track;
 import org.lorainelab.igb.data.model.View;
 import org.lorainelab.igb.selections.SelectionInfoService;
+import org.lorainelab.igb.visualization.event.ClickDragEndEvent;
 import org.lorainelab.igb.visualization.event.ClickDragZoomEvent;
 import org.lorainelab.igb.visualization.event.ScaleEvent;
 import org.lorainelab.igb.visualization.event.ScrollScaleEvent;
@@ -138,8 +139,8 @@ public class MainController {
     private Footer footer;
 
     public MainController() {
-        trackRenderers = Sets.newHashSet();
-        loadedDataSets = Sets.newHashSet();
+        trackRenderers = Sets.newConcurrentHashSet();
+        loadedDataSets = Sets.newConcurrentHashSet();
         scrollX = new SimpleDoubleProperty(0);
         hSliderWidget = new SimpleDoubleProperty(0);
         ignoreScrollXEvent = false;
@@ -198,18 +199,13 @@ public class MainController {
 
     private void updateTrackRenderers(GenomeVersion gv) {
         if (gv.getSelectedChromosomeProperty().get().isPresent()) {
-            final Chromosome chromosome = gv.getSelectedChromosomeProperty().get().get();
-            final CoordinateTrackRenderer coordinateTrackRenderer = new CoordinateTrackRenderer(canvasPane, chromosome);
-            coordinateTrackRenderer.setWeight(getMinWeight());
-            trackRenderers.add(coordinateTrackRenderer);
-            loadDataSets(gv, chromosome);
-        } else if (!trackRenderers.stream().anyMatch(renderer -> renderer instanceof CoordinateTrackRenderer)) {
-            gv.getReferenceSequenceProvider().getChromosomes().stream().findFirst().ifPresent(chr -> {
-                final CoordinateTrackRenderer coordinateTrackRenderer = new CoordinateTrackRenderer(canvasPane, chr);
+            if (!trackRenderers.stream().anyMatch(renderer -> renderer instanceof CoordinateTrackRenderer)) {
+                final Chromosome chromosome = gv.getSelectedChromosomeProperty().get().get();
+                final CoordinateTrackRenderer coordinateTrackRenderer = new CoordinateTrackRenderer(canvasPane, chromosome);
                 coordinateTrackRenderer.setWeight(getMinWeight());
                 trackRenderers.add(coordinateTrackRenderer);
-                loadDataSets(gv, chr);
-            });
+                loadDataSets(gv, chromosome);
+            }
         }
     }
 
@@ -273,6 +269,14 @@ public class MainController {
             hSlider.increment();
         } else {
             hSlider.decrement();
+        }
+    }
+
+    @Subscribe
+    public void handleClickDragEndEvent(ClickDragEndEvent event) {
+        if (canvasPane.getHeight() > viewPortManager.getTotalTrackSize()) {
+            canvasPane.clear();
+            updateTrackRenderers();
         }
     }
 

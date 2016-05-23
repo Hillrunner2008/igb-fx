@@ -12,7 +12,7 @@
 <?import javafx.scene.shape.Circle?>
 <?import javafx.scene.shape.Rectangle?>
 
-<StackPane fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="25.0" prefHeight="200.0" prefWidth="150.0" style="-fx-border-width: .5 0 .5 0; -fx-border-color: BLACK;" xmlns="http://javafx.com/javafx/8.0.74" xmlns:fx="http://javafx.com/fxml/1">
+<StackPane fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="25.0" prefHeight="200.0" prefWidth="150.0" xmlns="http://javafx.com/javafx/8.0.74" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <GridPane>
             <columnConstraints>

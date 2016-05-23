@@ -1,21 +1,31 @@
 package org.lorainelab.igb.visualization.model;
 
+import com.google.common.base.CharMatcher;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import java.io.IOException;
 import java.net.URL;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Cursor;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.ColorPicker;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextField;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.Stage;
+import net.miginfocom.layout.CC;
 import static org.lorainelab.igb.visualization.util.ColorUtils.colorToWebStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tbee.javafx.scene.layout.MigPane;
 
 /**
  *
@@ -77,6 +87,8 @@ public class TrackLabel {
         trackLabel.setWrapText(true);
         dragGrip.setOnMouseEntered(event -> root.getScene().setCursor(Cursor.HAND));
         dragGrip.setOnMouseExited(event -> root.getScene().setCursor(Cursor.DEFAULT));
+        addContextMenu();
+        root.setStyle("-fx-border-width: .5 0 .5 0; -fx-border-color: BLACK;");
     }
 
     public StackPane getContent() {
@@ -106,5 +118,57 @@ public class TrackLabel {
         colorChooserRect.setVisible(true);
         GridPane.setRowIndex(dragGrip, 0);
         GridPane.setRowSpan(dragGrip, 1);
+    }
+
+    private void addContextMenu() {
+        if (trackRenderer instanceof ZoomableTrackRenderer) {
+            ZoomableTrackRenderer zoomableTrackRenderer = (ZoomableTrackRenderer) trackRenderer;
+            final ContextMenu contextMenu = new ContextMenu();
+            MenuItem adjustStackHeightMenuItem = new MenuItem("Set Stack Height...");
+            MigPane migPane = new MigPane("fillx", "[][]", "[][][]");
+            Stage stage = new Stage();
+            Label label = new Label("Enter new maximum track height, 0 for unlimited.");
+            TextField stackHeightEntryField = new TextField();
+            stackHeightEntryField.textProperty().addListener((observable, oldValue, newValue) -> {
+                stackHeightEntryField.setText(CharMatcher.inRange('0', '9').retainFrom(newValue));
+            });
+            Button okBtn = new Button("Ok");
+            okBtn.setOnAction(event -> {
+                zoomableTrackRenderer.getTrack().setMaxStackHeight(Integer.parseInt(stackHeightEntryField.getText()));
+                zoomableTrackRenderer.render();
+                stage.hide();
+            });
+            Button cancelBtn = new Button("Cancel");
+            cancelBtn.setOnAction(event -> {
+                stage.hide();
+            });
+            stage.setMinWidth(575);
+            stage.setMaxWidth(575);
+            stage.setMinHeight(175);
+            stage.setMaxHeight(175);
+            stage.setTitle("Set Track Stack Height");
+            migPane.add(label, "growx, wrap");
+            migPane.add(stackHeightEntryField, "growx, wrap");
+            migPane.add(okBtn, new CC().gap("rel").tag("ok").span(3).split());
+            migPane.add(cancelBtn, new CC().tag("ok"));
+            stage.setResizable(false);
+            Scene scene = new Scene(migPane);
+            stage.setScene(scene);
+            adjustStackHeightMenuItem.setOnAction(action -> {
+                stackHeightEntryField.setText("" + zoomableTrackRenderer.getTrack().getStackHeight());
+                stage.show();
+            });
+            contextMenu.getItems().add(adjustStackHeightMenuItem);
+            root.setOnMouseClicked(event -> {
+                if (event.getButton() == MouseButton.SECONDARY) {
+                    root.setStyle("-fx-border-color: red;-fx-border-width:2.0;");
+                    contextMenu.show(root.getScene().getWindow(), event.getScreenX(), event.getScreenY());
+                    contextMenu.setOnHiding(windowEvent -> {
+                        root.setStyle("-fx-border-width: .5 0 .5 0; -fx-border-color: BLACK;");
+                    });
+                }
+
+            });
+        }
     }
 }
