@@ -138,8 +138,8 @@ public class MainController {
     private Footer footer;
 
     public MainController() {
-        trackRenderers = Sets.newHashSet();
-        loadedDataSets = Sets.newHashSet();
+        trackRenderers = Sets.newConcurrentHashSet();
+        loadedDataSets = Sets.newConcurrentHashSet();
         scrollX = new SimpleDoubleProperty(0);
         hSliderWidget = new SimpleDoubleProperty(0);
         ignoreScrollXEvent = false;
@@ -198,19 +198,14 @@ public class MainController {
 
     private void updateTrackRenderers(GenomeVersion gv) {
         if (gv.getSelectedChromosomeProperty().get().isPresent()) {
-            final Chromosome chromosome = gv.getSelectedChromosomeProperty().get().get();
-            final CoordinateTrackRenderer coordinateTrackRenderer = new CoordinateTrackRenderer(canvasPane, chromosome);
-            coordinateTrackRenderer.setWeight(getMinWeight());
-            trackRenderers.add(coordinateTrackRenderer);
-            loadDataSets(gv, chromosome);
-        } else if (!trackRenderers.stream().anyMatch(renderer -> renderer instanceof CoordinateTrackRenderer)) {
-            gv.getReferenceSequenceProvider().getChromosomes().stream().findFirst().ifPresent(chr -> {
-                final CoordinateTrackRenderer coordinateTrackRenderer = new CoordinateTrackRenderer(canvasPane, chr);
+            if (!trackRenderers.stream().anyMatch(renderer -> renderer instanceof CoordinateTrackRenderer)) {
+                final Chromosome chromosome = gv.getSelectedChromosomeProperty().get().get();
+                final CoordinateTrackRenderer coordinateTrackRenderer = new CoordinateTrackRenderer(canvasPane, chromosome);
                 coordinateTrackRenderer.setWeight(getMinWeight());
                 trackRenderers.add(coordinateTrackRenderer);
-                loadDataSets(gv, chr);
-            });
-        }
+                loadDataSets(gv, chromosome);
+            }
+        } 
     }
 
     private void loadDataSets(GenomeVersion gv, final Chromosome chromosome) {

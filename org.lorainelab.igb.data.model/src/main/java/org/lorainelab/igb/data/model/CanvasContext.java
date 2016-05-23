@@ -8,6 +8,8 @@ package org.lorainelab.igb.data.model;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -15,8 +17,9 @@ import javafx.scene.canvas.GraphicsContext;
  */
 public class CanvasContext {
 
+    private static final Logger LOG = LoggerFactory.getLogger(CanvasContext.class);
     private final Canvas canvas;
-    private Rectangle2D boundingRectangle;
+    private volatile Rectangle2D boundingRectangle;
     private double trackHeight;
     private double relativeTrackOffset;
     private boolean isVisible;
