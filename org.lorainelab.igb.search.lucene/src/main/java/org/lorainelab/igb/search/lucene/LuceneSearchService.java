@@ -155,12 +155,12 @@ public class LuceneSearchService implements SearchService {
 
     @Override
     public IndexIdentity getResourceIndexIdentity(String resource) {
-        
+        return generateIndexIndentity();
     }
 
     @Override
     public void setResourceIndexIdentity(String resource, IndexIdentity indexIdentity) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        //
     }
 
 }

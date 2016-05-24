@@ -320,9 +320,9 @@
         <module>org.lorainelab.igb.preferences</module>
         <module>org.lorainelab.igb.demo</module>
         <module>org.lorainelab.igb.feature</module>
-        <module>org.lorainelab.igb.kar</module>
         <module>org.lorainelab.igb.search.lucene</module>
         <module>org.lorainelab.igb.search.api</module>
+        <module>org.lorainelab.igb.kar</module>
     </modules>
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
