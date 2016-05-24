@@ -12,7 +12,6 @@ import javafx.scene.canvas.GraphicsContext;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
 import org.lorainelab.igb.data.model.glyph.Glyph;
 import static org.lorainelab.igb.data.model.glyph.Glyph.MIN_X_COMPARATOR;
-import static org.lorainelab.igb.data.model.glyph.Glyph.MODEL_HEIGHT_PADDING;
 import static org.lorainelab.igb.data.model.glyph.Glyph.SLOT_HEIGHT;
 
 /**
@@ -33,7 +32,7 @@ public class Track {
         this.isNegative = isNegative;
         this.trackLabel = trackLabel;
         this.stackHeight = stackHeight;
-        this.modelHeight = new SimpleDoubleProperty((SLOT_HEIGHT * stackHeight) + MODEL_HEIGHT_PADDING);
+        this.modelHeight = new SimpleDoubleProperty((SLOT_HEIGHT * stackHeight));
         slotMap = TreeMultimap.create(Ordering.natural(), MIN_X_COMPARATOR);
         glyphs = Lists.newArrayList();
     }
@@ -52,23 +51,17 @@ public class Track {
     private void setGlyphPosition(CompositionGlyph compositionGlyph, int slot, int maxStackHeight) {
         for (Glyph glyph : compositionGlyph.getChildren()) {
             Rectangle2D boundingRect = glyph.getBoundingRect();
-            double slotHeight = modelHeight.doubleValue() / maxStackHeight;
+            final int modelHeight = SLOT_HEIGHT * maxStackHeight;
+            double yOffset = modelHeight / maxStackHeight;
+            final double x = boundingRect.getMinX();
+            final double width = boundingRect.getWidth();
+            final double height = boundingRect.getHeight();
             if (isNegative) {
-                glyph.setRenderBoundingRect(
-                        new Rectangle2D(
-                                boundingRect.getMinX(),
-                                boundingRect.getMinY() + (slot * slotHeight),
-                                boundingRect.getWidth(),
-                                boundingRect.getHeight())
-                );
+                final double y = boundingRect.getMinY() + (slot * yOffset);
+                glyph.setRenderBoundingRect(new Rectangle2D(x, y, width, height));
             } else {
-                glyph.setRenderBoundingRect(
-                        new Rectangle2D(
-                                boundingRect.getMinX(),
-                                (boundingRect.getMinY() + ((maxStackHeight - 1) - slot) * slotHeight),
-                                boundingRect.getWidth(),
-                                boundingRect.getHeight())
-                );
+                final double y = boundingRect.getMinY() + ((maxStackHeight - 1) - slot) * yOffset;
+                glyph.setRenderBoundingRect(new Rectangle2D(x, y, width, height));
             }
         }
     }
@@ -84,7 +77,7 @@ public class Track {
                             break;
                         } else {
                             slotToadd++;
-                            if (slotToadd > stackHeight && stackHeight != 0) {
+                            if (slotToadd >= stackHeight && stackHeight != 0) {
                                 break;
                             }
                         }
@@ -96,13 +89,15 @@ public class Track {
         final Iterator<Integer> descendingIterator = slotMap.keySet().descendingIterator();
         if (descendingIterator.hasNext()) {
             Integer maxStackHeight = descendingIterator.next();
-            modelHeight.set((SLOT_HEIGHT * maxStackHeight) + MODEL_HEIGHT_PADDING);
             slotMap.entries().forEach(entry -> {
                 int slotToadd = entry.getKey();
-                if (slotToadd <= stackHeight || stackHeight == 0) {
+                if (slotToadd < stackHeight || stackHeight == 0) {
                     setGlyphPosition(entry.getValue(), slotToadd, stackHeight > 0 ? stackHeight : maxStackHeight);
+                } else {
+                    setGlyphPosition(entry.getValue(), stackHeight - 1, stackHeight > 0 ? stackHeight : maxStackHeight);
                 }
             });
+            modelHeight.set((SLOT_HEIGHT * maxStackHeight));
         }
     }
 
