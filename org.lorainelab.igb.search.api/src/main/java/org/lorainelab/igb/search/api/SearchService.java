@@ -5,8 +5,8 @@
  */
 package org.lorainelab.igb.search.api;
 
-import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 import org.lorainelab.igb.search.api.model.Document;
 import org.lorainelab.igb.search.api.model.IndexIdentity;
 
@@ -20,6 +20,6 @@ public interface SearchService {
     public void clearIndex(IndexIdentity index);
     public void deleteAll();
     public IndexIdentity generateIndexIndentity();
-    public IndexIdentity getResourceIndexIdentity(String resource);
+    public Optional<IndexIdentity> getResourceIndexIdentity(String resource);
     public void setResourceIndexIdentity(String resource, IndexIdentity indexIdentity);
 }

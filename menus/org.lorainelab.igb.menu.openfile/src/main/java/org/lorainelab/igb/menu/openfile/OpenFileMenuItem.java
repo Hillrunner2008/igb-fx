@@ -72,6 +72,7 @@ public class OpenFileMenuItem implements MenuBarEntryProvider, ToolbarButtonProv
                     CompletableFuture<Void> indexTask = CompletableFuture.runAsync(() -> {
                         try {
                             IndexIdentity indexIdentity = searchService.generateIndexIndentity();
+                            searchService.setResourceIndexIdentity(file.getAbsolutePath(), indexIdentity);
                             fileTypeHandler.createIndex(indexIdentity, dataSourceReference);
                         } catch (Exception ex) {
                             LOG.error(ex.getMessage(), ex);

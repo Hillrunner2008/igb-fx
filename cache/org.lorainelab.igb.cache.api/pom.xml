@@ -52,9 +52,5 @@
             <artifactId>bndlib</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.lorainelab</groupId>
-            <artifactId>org.lorainelab.igb.search.api</artifactId>
-        </dependency>
     </dependencies>
 </project>

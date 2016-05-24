@@ -42,7 +42,7 @@
                                                                                                 <Insets />
                                                                                             </VBox.margin>
                                                                                             <children>
-                                                                                                <TextField prefHeight="26.0" prefWidth="203.0" promptText="chr1:0-30,427,671">
+                                                                                                <TextField fx:id="search" prefHeight="26.0" prefWidth="203.0" promptText="chr1:0-30,427,671">
                                                                                                     <HBox.margin>
                                                                                                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                                                                                                     </HBox.margin>

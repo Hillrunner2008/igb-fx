@@ -9,8 +9,11 @@ import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import javafx.application.Platform;
@@ -18,13 +21,19 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.SetChangeListener;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Rectangle2D;
+import javafx.geometry.Side;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.CustomMenuItem;
+import javafx.scene.control.Label;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.Slider;
+import javafx.scene.control.TextField;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
@@ -47,6 +56,9 @@ import org.lorainelab.igb.data.model.DataSet;
 import org.lorainelab.igb.data.model.GenomeVersion;
 import org.lorainelab.igb.data.model.Track;
 import org.lorainelab.igb.data.model.View;
+import org.lorainelab.igb.search.api.SearchService;
+import org.lorainelab.igb.search.api.model.Document;
+import org.lorainelab.igb.search.api.model.IndexIdentity;
 import org.lorainelab.igb.selections.SelectionInfoService;
 import org.lorainelab.igb.visualization.event.ClickDragEndEvent;
 import org.lorainelab.igb.visualization.event.ClickDragZoomEvent;
@@ -103,6 +115,11 @@ public class MainController {
     private Button loadSequenceButton;
 
     @FXML
+    private TextField search;
+    private ContextMenu searchAutocomplete;
+    private final SortedSet<String> autocompleteEntries;
+
+    @FXML
     private VBox root;
 
     @FXML
@@ -137,6 +154,7 @@ public class MainController {
     private GenomeVersion selectedGenomeVersion;
     private Chromosome selectedChromosome;
     private Footer footer;
+    private SearchService searchService;
 
     public MainController() {
         trackRenderers = Sets.newConcurrentHashSet();
@@ -147,6 +165,9 @@ public class MainController {
         ignoreHSliderEvent = false;
         zoomStripeCoordinate = -1;
         lastDragX = 0;
+        autocompleteEntries = Sets.newTreeSet();
+        searchAutocomplete = new ContextMenu();
+        searchAutocomplete.hide();
     }
 
     @Activate
@@ -195,6 +216,59 @@ public class MainController {
                 });
             });
         });
+    }
+
+    @Reference
+    public void setSearchService(SearchService searchService) {
+        this.searchService = searchService;
+    }
+
+    private void initializeSearch() {
+        Platform.runLater(() -> {
+            search.setOnKeyReleased(e -> {
+
+                if (search.getText().length() == 0) {
+                    searchAutocomplete.hide();
+                } else {
+                    LinkedList<String> searchResult = new LinkedList<>();
+                    Optional<IndexIdentity> resourceIndexIdentity = searchService.getResourceIndexIdentity(null);
+                    if (resourceIndexIdentity.isPresent()) {
+                        searchService.search(search.getText() + "*",
+                                resourceIndexIdentity.get()).stream()
+                                .forEach(doc -> searchResult.add(doc.getFields().get("id")));
+                    }
+                    if (searchResult.size() > 0) {
+                        populatePopup(searchResult);
+                        if (!searchAutocomplete.isShowing()) {
+                            searchAutocomplete.show(search, Side.BOTTOM, 0, 0);
+                        }
+                    } else {
+                        searchAutocomplete.hide();
+                    }
+                }
+
+            });
+        });
+    }
+
+    private void populatePopup(List<String> searchResult) {
+        List<CustomMenuItem> menuItems = new LinkedList<>();
+        // If you'd like more entries, modify this line.
+        int maxEntries = 10;
+        int count = Math.min(searchResult.size(), maxEntries);
+        for (int i = 0; i < count; i++) {
+            final String result = searchResult.get(i);
+            Label entryLabel = new Label(result);
+            CustomMenuItem item = new CustomMenuItem(entryLabel, true);
+            item.setOnAction((ActionEvent actionEvent) -> {
+                search.setText(result);
+                searchAutocomplete.hide();
+            });
+            menuItems.add(item);
+        }
+        searchAutocomplete.getItems().clear();
+        searchAutocomplete.getItems().addAll(menuItems);
+
     }
 
     private void updateTrackRenderers(GenomeVersion gv) {
@@ -288,6 +362,7 @@ public class MainController {
         initializeChromosomeSelectionListener();
         initializeGenomeVersionSelectionListener();
         initializeZoomScrollBar();
+        initializeSearch();
         viewPortManager = new ViewPortManager(canvas, trackRenderers, 0, 0);
 
         vSlider.valueProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
@@ -605,27 +680,27 @@ public class MainController {
                                     double eventTriggerMinY = (Double) dragboardContent;
                                     if (dropLocationMinY != eventTriggerMinY) {
                                         Lists.newArrayList(trackRenderers).stream()
-                                                .filter(trackRenderer -> trackRenderer.getCanvasContext().isVisible())
-                                                .filter(draggedTrackRenderer -> draggedTrackRenderer.getTrackLabel().getContent().getBoundsInParent().getMinY() == eventTriggerMinY)
-                                                .findFirst()
-                                                .ifPresent(draggedTrackRenderer -> {
-                                                    Lists.newArrayList(trackRenderers).stream()
-                                                            .filter(trackRenderer -> trackRenderer.getTrackLabel().getContent() == dropLocationLabelNode)
-                                                            .findFirst()
-                                                            .ifPresent(droppedTrackRenderer -> {
-                                                                int droppedIndex = droppedTrackRenderer.getWeight();
-                                                                if (droppedAbove) {
-                                                                    trackRenderers.remove(draggedTrackRenderer);
-                                                                    draggedTrackRenderer.setWeight(droppedIndex - 1);
-                                                                    trackRenderers.add(draggedTrackRenderer);
-                                                                } else {
-                                                                    trackRenderers.remove(draggedTrackRenderer);
-                                                                    draggedTrackRenderer.setWeight(droppedIndex + 1);
-                                                                    trackRenderers.add(draggedTrackRenderer);
-                                                                }
-                                                                updateTrackRenderers();
-                                                            });
-                                                });
+                                        .filter(trackRenderer -> trackRenderer.getCanvasContext().isVisible())
+                                        .filter(draggedTrackRenderer -> draggedTrackRenderer.getTrackLabel().getContent().getBoundsInParent().getMinY() == eventTriggerMinY)
+                                        .findFirst()
+                                        .ifPresent(draggedTrackRenderer -> {
+                                            Lists.newArrayList(trackRenderers).stream()
+                                            .filter(trackRenderer -> trackRenderer.getTrackLabel().getContent() == dropLocationLabelNode)
+                                            .findFirst()
+                                            .ifPresent(droppedTrackRenderer -> {
+                                                int droppedIndex = droppedTrackRenderer.getWeight();
+                                                if (droppedAbove) {
+                                                    trackRenderers.remove(draggedTrackRenderer);
+                                                    draggedTrackRenderer.setWeight(droppedIndex - 1);
+                                                    trackRenderers.add(draggedTrackRenderer);
+                                                } else {
+                                                    trackRenderers.remove(draggedTrackRenderer);
+                                                    draggedTrackRenderer.setWeight(droppedIndex + 1);
+                                                    trackRenderers.add(draggedTrackRenderer);
+                                                }
+                                                updateTrackRenderers();
+                                            });
+                                        });
                                     }
                                 }
 

@@ -58,7 +58,6 @@ import org.lorainelab.igb.cache.api.CacheStatus;
 import org.lorainelab.igb.cache.api.ChangeEvent;
 import org.lorainelab.igb.cache.api.RemoteFileCacheService;
 import org.lorainelab.igb.preferences.PreferenceUtils;
-import org.lorainelab.igb.search.api.model.IndexIdentity;
 import org.lorainelab.igb.stage.provider.api.StageProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -160,19 +159,6 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
                 FileUtils.deleteQuietly(lockFile.toFile());
             });
         } catch (IOException ex) {
-            LOG.error(ex.getMessage(), ex);
-        }
-    }
-
-    @Override
-    public void setIndexIdentityOnCacheEntry(URL url, IndexIdentity indexIdentity) {
-        try {
-            String path = getCacheFolderPath(generateKeyFromUrl(url));
-            String pathToDataFile = path + FILENAME;
-            File indexIdentityFile = new File(pathToDataFile + ".index");
-            FileUtils.deleteQuietly(indexIdentityFile);
-            FileUtils.writeStringToFile(indexIdentityFile, indexIdentity.getId());
-        } catch (Exception ex) {
             LOG.error(ex.getMessage(), ex);
         }
     }

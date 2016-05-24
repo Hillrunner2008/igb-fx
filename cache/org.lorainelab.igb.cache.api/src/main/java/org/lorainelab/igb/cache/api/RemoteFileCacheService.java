@@ -11,7 +11,6 @@ import java.net.URL;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import org.lorainelab.igb.search.api.model.IndexIdentity;
 
 /**
  *
@@ -20,8 +19,6 @@ import org.lorainelab.igb.search.api.model.IndexIdentity;
 public interface RemoteFileCacheService {
 
     public Optional<File> getFilebyUrl(URL url);
-    
-    public void setIndexIdentityOnCacheEntry(URL url, IndexIdentity indexIdentity);
     
     public void clearAllCaches();
 
