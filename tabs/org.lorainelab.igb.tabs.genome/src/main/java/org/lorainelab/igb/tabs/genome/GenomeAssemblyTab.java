@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
 import javafx.fxml.FXML;
@@ -23,7 +22,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.util.StringConverter;
-import org.controlsfx.control.MaskerPane;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.GenomeVersion;
 import org.lorainelab.igb.data.model.GenomeVersionRegistry;
@@ -36,8 +34,6 @@ public class GenomeAssemblyTab implements TabProvider {
     private static final String TAB_TITLE = "Current Genome";
     private final int TAB_WEIGHT = 0;
     private final Tab genomeAssemblyTab;
-    @FXML
-    private MaskerPane maskerPane;
     @FXML
     private AnchorPane tabContent;
     @FXML
@@ -72,19 +68,10 @@ public class GenomeAssemblyTab implements TabProvider {
 
     @FXML
     private void initialize() {
-        maskerPane.setText("Waiting for Genome Versions...");
         genomeAssemblyTab.setContent(tabContent);
         initializeSpeciesNameComboBox();
         initializeGenomeVersionComboBox();
         initializeSequenceTable();
-        initializeMaskerPane();
-    }
-
-    private void initializeMaskerPane() {
-        maskerPane.setVisible(genomeVersionComboBox.getItems().isEmpty());
-        genomeVersionComboBox.getItems().addListener((ListChangeListener.Change<? extends GenomeVersion> c) -> {
-            maskerPane.setVisible(genomeVersionComboBox.getItems().isEmpty());
-        });
     }
 
     private void initializeGenomeVersionComboBox() {
