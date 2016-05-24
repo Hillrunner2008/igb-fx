@@ -59,6 +59,10 @@
             <groupId>org.lorainelab</groupId>
             <artifactId>org.lorainelab.igb.preferences</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.lorainelab</groupId>
+            <artifactId>org.lorainelab.igb.search.api</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

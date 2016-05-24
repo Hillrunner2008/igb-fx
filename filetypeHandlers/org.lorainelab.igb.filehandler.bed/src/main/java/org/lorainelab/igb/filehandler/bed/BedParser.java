@@ -288,7 +288,7 @@ public class BedParser implements FileTypeHandler {
                 LOG.error(ex.getMessage(), ex);
             }
         });
-        
+        searchService.clearIndex(indexIdentity);
         searchService.index(documents, indexIdentity);
     }
 

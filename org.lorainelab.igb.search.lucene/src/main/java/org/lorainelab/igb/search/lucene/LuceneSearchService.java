@@ -70,10 +70,10 @@ public class LuceneSearchService implements SearchService {
                 documents.stream().forEach((document) -> {
                     try {
                         org.apache.lucene.document.Document doc = new org.apache.lucene.document.Document();
-                        LOG.info("indexing {}", doc.get("id"));
                         document.getFields().keySet().stream().forEach(key -> {
                             doc.add(new TextField(key, document.getFields().get(key), Field.Store.YES));
                         });
+                        LOG.debug("indexing {}", doc.get("id"));
                         writer.addDocument(doc);
                     } catch (Exception ex) {
                         LOG.error(ex.getMessage(), ex);
@@ -151,6 +151,16 @@ public class LuceneSearchService implements SearchService {
         } catch (Exception ex) {
             LOG.error(ex.getMessage(), ex);
         }
+    }
+
+    @Override
+    public IndexIdentity getResourceIndexIdentity(String resource) {
+        
+    }
+
+    @Override
+    public void setResourceIndexIdentity(String resource, IndexIdentity indexIdentity) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

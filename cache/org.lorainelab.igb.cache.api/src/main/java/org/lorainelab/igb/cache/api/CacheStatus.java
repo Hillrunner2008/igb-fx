@@ -2,6 +2,7 @@ package org.lorainelab.igb.cache.api;
 
 import java.io.File;
 import java.math.BigInteger;
+import org.lorainelab.igb.search.api.model.IndexIdentity;
 
 public class CacheStatus {
 
@@ -14,6 +15,7 @@ public class CacheStatus {
     private File data;
     private BigInteger size;
     private boolean isCorrupt = false;
+    private IndexIdentity indexIdentity;
 
     public BigInteger getSize() {
         return size;
@@ -87,4 +89,13 @@ public class CacheStatus {
         this.isCorrupt = isCorrupt;
     }
 
+    public IndexIdentity getIndexIdentity() {
+        return indexIdentity;
+    }
+
+    public void setIndexIdentity(IndexIdentity indexIdentity) {
+        this.indexIdentity = indexIdentity;
+    }
+
+    
 }

@@ -14,15 +14,20 @@ import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
+import com.google.common.io.Files;
+import com.sun.corba.se.spi.copyobject.CopierManager;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.CopyOption;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -57,6 +62,7 @@ import org.lorainelab.igb.cache.api.CacheStatus;
 import org.lorainelab.igb.cache.api.ChangeEvent;
 import org.lorainelab.igb.cache.api.RemoteFileCacheService;
 import org.lorainelab.igb.preferences.PreferenceUtils;
+import org.lorainelab.igb.search.api.model.IndexIdentity;
 import org.lorainelab.igb.stage.provider.api.StageProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +73,7 @@ import org.slf4j.LoggerFactory;
  */
 @Component(provide = RemoteFileCacheService.class)
 public class RemoteFileDiskCacheService implements RemoteFileCacheService {
-
+    
     private static final Logger LOG = LoggerFactory.getLogger(RemoteFileDiskCacheService.class);
     private static HashFunction MD5_HASH_FUNCTION = Hashing.md5();
     //TODO: Move to properties
@@ -90,7 +96,7 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
     private volatile Date lastPrompt;
     private EventBus eventBus;
     private Stage stage;
-
+    
     public RemoteFileDiskCacheService() {
         cachePrefsNode = PreferencesManager.getCachePrefsNode();
         cacheRequestNode = PreferencesManager.getCacheRequestNode();
@@ -99,17 +105,17 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
         isPromptingUser = false;
         eventBus = new EventBus();
     }
-
+    
     @Override
     public void registerEventListener(Object listener) {
         eventBus.register(listener);
     }
-
+    
     @Override
     public void unregisterEventListener(Object listener) {
         eventBus.unregister(listener);
     }
-
+    
     @Activate
     public void activate() {
         DATA_DIR = PreferenceUtils.getApplicationDataDirectory().getAbsolutePath() + File.separator + "igbCache" + File.separator;
@@ -122,7 +128,7 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
         setCurrentCacheSize(getCacheSizeInMB());
         enforceEvictionPolicies();
     }
-
+    
     private void validateCacheInBackground(URL url) {
         synchronized (this) {
             if (backgroundValidating.contains(url.toString())) {
@@ -150,7 +156,7 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
             }
         });
     }
-
+    
     private void cleanUpLockFiles() {
         try {
             java.nio.file.Files.walk(java.nio.file.Paths.get(DATA_DIR)).collect(Collectors.toSet()).stream().filter(file -> file.endsWith(".lock")).forEach(lockFile -> {
@@ -161,49 +167,33 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
             LOG.error(ex.getMessage(), ex);
         }
     }
-
+    
     @Override
-    public void indexFile(URL url) {
-//        CompletableFuture<Void> indexTask = CompletableFuture.runAsync(() -> {
-//            try {
-//                getFilebyUrl(url).ifPresent(cachedFile -> {
-//                    try {
-//                        String ext = Files.getFileExtension(url.toExternalForm());
-//                        Optional<FileTypeHandler> filetypeHandler = fileTypeHandlerRegistry.getFileTypeHandlers().stream().filter(f -> f.getSupportedExtensions().contains(ext)).findFirst();
-//                        if(filetypeHandler.isPresent()) {
-//                            filetypeHandler.get().getSearchIndexKeys();
-//                            
-//                            DataSourceReference dataSourceReference = new DataSourceReference(cachedFile.getPath(), dataSource);
-//                            filetypeHandler.get().
-//                        }
-//                    } catch (Exception ex) {
-//                        LOG.error(ex.getMessage(), ex);
-//                    }
-//                });
-//            } catch (Exception ex) {
-//                LOG.error(ex.getMessage(), ex);
-//            }
-//        }).whenComplete((result, ex) -> {
-//            if (ex != null) {
-//                LOG.error(ex.getMessage(), ex);
-//            }
-//        });
+    public void setIndexIdentityOnCacheEntry(URL url, IndexIdentity indexIdentity) {
+        try {
+            String path = getCacheFolderPath(generateKeyFromUrl(url));
+            String pathToDataFile = path + FILENAME;
+            File indexIdentityFile = new File(pathToDataFile + ".index");
+            FileUtils.deleteQuietly(indexIdentityFile);
+            FileUtils.writeStringToFile(indexIdentityFile, indexIdentity.getId());
+        } catch (Exception ex) {
+            LOG.error(ex.getMessage(), ex);
+        }
     }
     
-
     private enum CacheConfig {
-
+        
         MAX_CACHE_SIZE_MB("max.cache.size.mb"),
         FILESIZE_MIN_BYTES("min.filesize.bytes"),
         CACHE_EXPIRE_MINUTES("cache.expire.min"),
         CACHE_ENABLED("cache.enabled");
-
+        
         private String key;
-
+        
         private CacheConfig(String key) {
             this.key = key;
         }
-
+        
     }
 
     //TODO: rework this to void
@@ -219,19 +209,19 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
         Integer value = incrementSizeInMB.intValue();
         Integer min = incrementSizeInMB.intValue();
         Integer step = 1;
-
+        
         final Popup popup = new Popup();
         popup.centerOnScreen();
-
+        
         final Spinner spinner = new Spinner();
-
+        
         spinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(min, 1024 * 100, incrementSizeInMB.intValue(), step));
         spinner.setEditable(true);
         //TODO: default options
         Text text = new Text("Would you like to increase the max cache size?  Alternatively, you can manage the cache manually.");
-
+        
         Button yes = new Button("Yes");
-
+        
         final BigInteger yesDefaultIncrementSize = incrementSizeInMB;
         yes.setOnAction((ActionEvent event) -> {
             Platform.runLater(() -> {
@@ -245,14 +235,14 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
             }
             eventBus.post(new ChangeEvent());
         });
-
+        
         Button no = new Button("No");
         no.setOnAction((ActionEvent event) -> {
             Platform.runLater(() -> {
                 popup.hide();
             });
         });
-
+        
         Button disableAllCaching = new Button("Disable All Caching");
         disableAllCaching.setOnAction((ActionEvent event) -> {
             Platform.runLater(() -> {
@@ -261,7 +251,7 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
             setCacheEnabled(false);
             eventBus.post(new ChangeEvent());
         });
-
+        
         Button manageCache = new Button("Manage Cache");
         manageCache.setOnAction((ActionEvent event) -> {
             Platform.runLater(() -> {
@@ -329,7 +319,7 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
 //                return false;
 //        }
     }
-
+    
     private Optional<File> cacheSynchronously(URL url, String path) {
         if (!getCacheEnabled()) {
             return Optional.empty();
@@ -342,7 +332,9 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
                 if (httpHeader.getSize() < getMinFileSizeBytes().longValue()) {
                     try {
                         File temp = File.createTempFile(MD5_HASH_FUNCTION.newHasher().putString(url.toExternalForm(), Charsets.UTF_8).hash().toString(), ".tmp");
-                        FileUtils.copyInputStreamToFile(url.openStream(), temp);
+                        try(InputStream is = url.openStream()) {
+                            FileUtils.copyInputStreamToFile(is, temp);
+                        }
                         return Optional.ofNullable(temp);
                     } catch (IOException ex) {
                         LOG.debug(ex.getMessage(), ex);
@@ -350,7 +342,7 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
                     }
                 }
                 if ((getCurrentCacheSize().add(requestSizeInMB)).compareTo(getMaxCacheSizeMB()) >= 0) {
-
+                    
                     synchronized (RemoteFileDiskCacheService.this) {
                         Date now = new Date();
                         if (isPromptingUser) {
@@ -385,7 +377,7 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
         }
         return Optional.empty();
     }
-
+    
     private void cacheInBackground(URL url, String path) {
         CompletableFuture.runAsync(() -> {
             cacheSynchronously(url, path);
@@ -393,7 +385,7 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
             LOG.error(ex.getMessage(), ex);
         });
     }
-
+    
     @Override
     public void promptToCacheInBackground(URL url, boolean defaultIsYes) {
         final Popup popup = new Popup();
@@ -401,7 +393,7 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
 
         //TODO: default options
         Text text = new Text("Would you like to download a local copy of this genome sequence for faster access in the future?");
-
+        
         Button dontAskMeAgain = new Button("Don't ask me again");
         dontAskMeAgain.setOnAction((ActionEvent event) -> {
             Platform.runLater(() -> {
@@ -409,14 +401,14 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
             });
             cachePrefsNode.putBoolean(PreferencesManager.CONFIRM_BEFORE_CACHE_SEQUENCE_IN_BACKGROUND, false);
         });
-
+        
         Button notRightNow = new Button("Not right now");
         notRightNow.setOnAction((ActionEvent event) -> {
             Platform.runLater(() -> {
                 popup.hide();
             });
         });
-
+        
         Button yes = new Button("Yes");
         yes.setOnAction((ActionEvent event) -> {
             Platform.runLater(() -> {
@@ -434,12 +426,12 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
             popup.show(stage);
         });
     }
-
+    
     @Override
     public boolean isCachingInBackground(URL url) {
         return backgroundCaching.contains(url.toString());
     }
-
+    
     private void setCurrentCacheSize(BigInteger currentCacheSize) {
         if (currentCacheSize.compareTo(BigInteger.ZERO) == 1) {
             this.currentCacheSize = currentCacheSize;
@@ -447,51 +439,51 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
             this.currentCacheSize = BigInteger.ZERO;
         }
     }
-
+    
     private BigInteger getCurrentCacheSize() {
         return currentCacheSize;
     }
-
+    
     @Override
     public BigInteger getMaxCacheSizeMB() {
         return new BigInteger(cachePrefsNode.get(CacheConfig.MAX_CACHE_SIZE_MB.key, DEFAULT_MAX_CACHE_SIZE_MB.toString()));
     }
-
+    
     @Override
     public void setMaxCacheSizeMB(BigInteger value) {
         cachePrefsNode.put(CacheConfig.MAX_CACHE_SIZE_MB.key, value.toString());
     }
-
+    
     @Override
     public BigInteger getMinFileSizeBytes() {
         return new BigInteger(cachePrefsNode.get(CacheConfig.FILESIZE_MIN_BYTES.key, DEFAULT_FILESIZE_MIN_BYTES.toString()));
     }
-
+    
     @Override
     public BigInteger getCacheExpireMin() {
         return new BigInteger(cachePrefsNode.get(CacheConfig.CACHE_EXPIRE_MINUTES.key, DEFAULT_CACHE_EXPIRE_MINUTES.toString()));
     }
-
+    
     @Override
     public void setMinFileSizeBytes(BigInteger value) {
         cachePrefsNode.put(CacheConfig.FILESIZE_MIN_BYTES.key, value.toString());
     }
-
+    
     @Override
     public void setCacheExpireMin(BigInteger value) {
         cachePrefsNode.put(CacheConfig.CACHE_EXPIRE_MINUTES.key, value.toString());
     }
-
+    
     @Override
     public boolean getCacheEnabled() {
         return cachePrefsNode.getBoolean(CacheConfig.CACHE_ENABLED.key, CACHE_ENABLED);
     }
-
+    
     @Override
     public void setCacheEnabled(boolean value) {
         cachePrefsNode.putBoolean(CacheConfig.CACHE_ENABLED.key, value);
     }
-
+    
     @Override
     public Optional<File> getFilebyUrl(URL url) {
         if (!getCacheEnabled()) {
@@ -511,16 +503,16 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
         }
         return cacheSynchronously(url, path);
     }
-
+    
     private void updateLastRequestDate(URL url) {
         cacheRequestNode.putLong(PreferencesManager.getCacheRequestKey(url), new Date().getTime());
     }
-
+    
     @Override
     public Date getLastRequestDate(URL url) {
         return new Date(cacheRequestNode.getLong(PreferencesManager.getCacheRequestKey(url), new Date().getTime()));
     }
-
+    
     private boolean tryDownload(URL url, String path) {
         String basePathToDataFile = path + FILENAME;
         String pathToDataFile = basePathToDataFile + "." + FILENAME_EXT;
@@ -533,7 +525,7 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
         File cacheLastUpdateFile = new File(basePathToDataFile + ".cacheLastUpdate");
         File etagFile = new File(basePathToDataFile + ".etag");
         File urlFile = new File(basePathToDataFile + ".url");
-
+        
         try {
             FileUtils.forceMkdir(new File(path));
         } catch (IOException ex) {
@@ -551,11 +543,11 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
                 return false;
             }
         }
-
+        
         try (
                 BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(tmpFile));
                 BufferedInputStream bis = new BufferedInputStream(url.openStream());) {
-
+            
             String md5 = url.openConnection().getHeaderField("Content-MD5");
             if (!Strings.isNullOrEmpty(md5)) {
                 md5 = md5.replaceAll("\"", "");
@@ -571,13 +563,12 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
             FileUtils.writeStringToFile(cacheLastUpdateFile, Long.toString(now.getTime()));
             FileUtils.writeStringToFile(etagFile, etag);
             FileUtils.writeStringToFile(urlFile, url.toString());
-
             IOUtils.copy(bis, bos);
             bos.flush();
             bos.close();
-
+            
             if (!Strings.isNullOrEmpty(md5) && verifyFile(md5, tmpFile)) {
-
+                
                 FileUtils.moveFile(tmpFile, finalFile);
                 FileUtils.deleteQuietly(lockFile);
                 synchronized (this) {
@@ -585,7 +576,7 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
                 }
                 return true;
             } else if (Strings.isNullOrEmpty(md5)) {
-
+                
                 FileUtils.moveFile(tmpFile, finalFile);
                 FileUtils.deleteQuietly(lockFile);
                 synchronized (this) {
@@ -603,7 +594,7 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
         }
         return false;
     }
-
+    
     private boolean verifyFile(String md5fromHeader, File file) {
         try {
             String md5Calculated = convertByteArrayToHexString(DigestUtils.md5(new FileInputStream(file)));
@@ -619,7 +610,7 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
             return false;
         }
     }
-
+    
     private static String convertByteArrayToHexString(byte[] arrayBytes) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < arrayBytes.length; i++) {
@@ -627,7 +618,7 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
         }
         return sb.toString();
     }
-
+    
     private void cleanupCache(String path) {
         CacheStatus cacheStatus = getCacheStatus(path);
         if (cacheStatus.isDataExists()) {
@@ -637,11 +628,11 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
         }
         FileUtils.deleteQuietly(new File(path));
     }
-
+    
     private String generateKeyFromUrl(URL url) {
         return url.getHost() + url.getFile();
     }
-
+    
     private String getCacheFolderPath(String key) {
         //TODO: Possible hash instead
         //byte[] sha256 = DigestUtils.sha256(key);
@@ -659,7 +650,7 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
         path.append("cache").append(File.separator);
         return path.toString();
     }
-
+    
     private boolean validateCacheRemotely(CacheStatus cacheStatus, HttpHeader httpHeader, URL url) {
         if (cacheStatus.isDataExists()) {
             if (httpHeader.responseCode >= 400) {
@@ -696,7 +687,7 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
         }
         return false;
     }
-
+    
     private CacheStatus getCacheStatus(String path) {
         CacheStatus cacheStatus = new CacheStatus();
         String pathToDataFile = path + FILENAME;
@@ -706,7 +697,7 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
         File cacheLastUpdate = new File(pathToDataFile + ".cacheLastUpdate");
         File etag = new File(pathToDataFile + ".etag");
         File url = new File(pathToDataFile + ".url");
-
+        
         if (data.exists() && (md5.exists() || lastModified.exists() || etag.exists())) {
             try {
                 cacheStatus.setMd5(removeLineEndings(FileUtils.readFileToString(md5)));
@@ -727,15 +718,15 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
             //Data file exists but missing metadata.  It is corrupted.
             cacheStatus.setIsCorrupt(true);
         }
-
+        
         cacheStatus.setDataExists(false);
         return cacheStatus;
     }
-
+    
     private String removeLineEndings(String in) {
         return in.replace("\n", "").replace("\r", "");
     }
-
+    
     private HttpHeader getHttpHeadersOnly(String url) {
         try {
             HttpURLConnection con
@@ -753,7 +744,7 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
             return new HttpHeader(500);
         }
     }
-
+    
     @Override
     public void clearAllCaches() {
         cleanupCache(DATA_DIR);
@@ -764,32 +755,32 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
         }
         setCurrentCacheSize(BigInteger.ZERO);
     }
-
+    
     @Override
     public void clearCacheByUrl(URL url) {
         String path = getCacheFolderPath(generateKeyFromUrl(url));
         cleanupCache(path);
     }
-
+    
     @Override
     public boolean cacheExists(URL url) {
         CacheStatus cacheStatus = getCacheStatus(getCacheFolderPath(generateKeyFromUrl(url)));
         return cacheStatus.isDataExists();
     }
-
+    
     @Override
     public BigInteger getCacheSizeInMB() {
         return FileUtils.sizeOfDirectoryAsBigInteger(new File(DATA_DIR)).divide(new BigInteger("1000000"));
     }
-
+    
     private String getCacheBaseDirFromDat(String datPath) {
         return datPath.replaceAll(FILENAME + "." + FILENAME_EXT, "");
     }
-
+    
     private BigInteger getCacheEntrySizeInMB(File file) {
         return FileUtils.sizeOfAsBigInteger(file).divide(new BigInteger("1000000"));
     }
-
+    
     private void cleanUpTempFiles() {
         //TODO: remove temp files on startup
         Collection<File> listFiles = FileUtils.listFiles(new File(DATA_DIR), new String[]{FILENAME_TEMP_EXT}, true);
@@ -799,10 +790,10 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
             FileUtils.deleteQuietly(file);
         }
     }
-
+    
     private void enforceCacheSize() {
         BigInteger size = getCacheSizeInMB();
-
+        
         if (size.compareTo(getMaxCacheSizeMB()) > 0) {
             BigInteger diff = size.subtract(getMaxCacheSizeMB());
             Map<String, BigInteger> files = new LinkedHashMap<>();
@@ -850,7 +841,7 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
         }
         return sortedMap;
     }
-
+    
     @Override
     public void enforceEvictionPolicies() {
         cleanUpTempFiles();
@@ -858,7 +849,7 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
         //enforceCacheSize();
         //enforceCacheExpireEvictionPolicy();
     }
-
+    
     private void enforceCacheExpireEvictionPolicy() {
         Collection<File> listFiles = FileUtils.listFiles(new File(DATA_DIR), new String[]{FILENAME_EXT}, true);
         Iterator<File> it = listFiles.iterator();
@@ -872,7 +863,7 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
             }
         }
     }
-
+    
     private void enforceNoCorruptCachePolicy() {
         Collection<File> listFiles = FileUtils.listFiles(new File(DATA_DIR), new String[]{FILENAME_EXT}, true);
         Iterator<File> it = listFiles.iterator();
@@ -885,7 +876,7 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
             }
         }
     }
-
+    
     private boolean deleteCorruptCacheEntry(String path) {
         try {
             FileUtils.deleteDirectory(new File(path));
@@ -895,7 +886,7 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
         }
         return true;
     }
-
+    
     @Override
     public List<CacheStatus> getCacheEntries() {
         List<CacheStatus> cacheStatuses = Lists.newArrayList();
@@ -911,7 +902,7 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
         }
         return cacheStatuses;
     }
-
+    
     @Override
     public CacheStatus getCacheStatus(URL url) {
         String path = getCacheFolderPath(generateKeyFromUrl(url));
@@ -924,70 +915,68 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
         }
         return cacheStatus;
     }
-
+    
     private class HttpHeader {
-
+        
         private long lastModified;
         private int responseCode;
         private String eTag;
         private String md5;
         private long size;
-
+        
         public HttpHeader() {
-
+            
         }
-
+        
         public HttpHeader(int responseCode) {
             this.responseCode = responseCode;
         }
-
+        
         public long getSize() {
             return size;
         }
-
+        
         public void setSize(long size) {
             this.size = size;
         }
-
+        
         public long getLastModified() {
             return lastModified;
         }
-
+        
         public void setLastModified(long lastModified) {
             this.lastModified = lastModified;
         }
-
+        
         public int getResponseCode() {
             return responseCode;
         }
-
+        
         public void setResponseCode(int responseCode) {
             this.responseCode = responseCode;
         }
-
+        
         public String geteTag() {
             return eTag;
         }
-
+        
         public void seteTag(String eTag) {
             this.eTag = eTag;
         }
-
+        
         public String getMd5() {
             return md5;
         }
-
+        
         public void setMd5(String md5) {
             this.md5 = md5;
         }
-
+        
     }
-
+    
     @Reference
     public void setStageProvider(StageProvider stageProvider) {
         this.stage = stageProvider.getStage();
     }
-
-
     
 }
