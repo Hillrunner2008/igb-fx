@@ -1,11 +1,13 @@
-# Integrated Genome Browser - JavaFX edition
+# Integrated Genome Browser JavaFX edition - IGB-FX
 
 The Integrated Genome Browser (IGB) is a fast, free, and flexible desktop genome browser
 implemented in Java.
 
-Here, we are re-writing IGB using JavaFX and 100% modular, services based programming using OSGi.
+Here, we are re-writing IGB using JavaFX and 100% modular, services based programming with OSGi.
 
-For IGB Classic (uses Java Swing) go to: https://bitbucket.org/lorainelab/integrated-genome-browser
+IGB-FX replaces IGB Classic, which uses Swing and was first developed
+at Affymetrix in the early 2000s. The last version of IGB Classic is
+IGB version 9, released in June 2016.
 
 # Quick Start 
 
