@@ -26,10 +26,10 @@ Ex)
 ```
 clone git@bitbucket.org:lorainelab/igb-fx.git
 mvn clean install
-start-shell
+start-shell.sh
 ```
 
-Then view some data. Select human genome from the Current Genome tab.
+View some data. Select human genome from the Current Genome tab.
 
 ***
 
