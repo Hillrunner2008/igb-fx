@@ -19,9 +19,11 @@ To build and run IGB-FX:
 
 Ex)
 
-`clone git@bitbucket.org:lorainelab/igb-fx.git`
-`mvn clean install`
-`start-shell`
+```
+clone git@bitbucket.org:lorainelab/igb-fx.git
+mvn clean install
+start-shell
+```
 
 Then view some data. Select human genome from the Current Genome tab.
 
