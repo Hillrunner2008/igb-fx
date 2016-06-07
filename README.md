@@ -20,6 +20,7 @@ To build and run IGB-FX:
 1. Clone this repository
 2. Build IGB using mvn
 3. Launch IGB using start-shell.sh
+4. View some data - open human genome.
 
 Ex)
 
@@ -28,8 +29,6 @@ clone git@bitbucket.org:lorainelab/igb-fx.git
 mvn clean install
 start-shell.sh
 ```
-
-View some data. Select human genome from the Current Genome tab.
 
 ***
 
