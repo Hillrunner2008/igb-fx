@@ -1,4 +1,4 @@
-# Integrated Genome Browser JavaFX edition - IGB-FX
+# IGB-FX - Integrated Genome Browser JavaFX edition
 
 The Integrated Genome Browser (IGB) is a fast, free, and flexible desktop genome browser
 implemented in Java.
@@ -6,8 +6,10 @@ implemented in Java.
 Here, we are re-writing IGB using JavaFX and 100% modular, services based programming with OSGi.
 
 IGB-FX replaces IGB Classic, which uses Swing and was first developed
-at Affymetrix in the early 2000s. The last version of IGB Classic is
+at Affymetrix in the early 2000s. The last version of [IGB Classic](https://bitbucket.org/lorainelab/integrated-genome-browser) is
 IGB version 9, released in June 2016.
+
+***
 
 # Quick Start 
 
@@ -29,12 +31,16 @@ start-shell
 
 Then view some data. Select human genome from the Current Genome tab.
 
+***
+
 # About IGB-FX
 
 Like IGB classic, IGB-FX IGB runs in an OSGi container, which supports adding and removing pluggable Apps while IGB is running. 
 For a tutorial on OSGi written by IGB Developers, see: 
 
 * Stackleader.com [blog posts on OSGI](https://blog.stackleader.com/tags/osgi/)
+
+*** 
 
 # To contribute
 
@@ -48,4 +54,3 @@ See:
 
 * Forking Workflow [tutorial](https://www.atlassian.com/git/tutorials/comparing-workflows/forking-workflow) by Atlassian
 * Blog post titled [Using the Fork-and-Branch Git Workflow](http://blog.scottlowe.org/2015/01/27/using-fork-branch-git-workflow/)
-
