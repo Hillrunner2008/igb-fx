@@ -3,8 +3,9 @@
 The Integrated Genome Browser (IGB) is a fast, free, and flexible desktop genome browser
 implemented in Java.
 
-Here, we are re-writing IGB using JavaFX and 100% modular, services based programming
-using OSGi.
+Here, we are re-writing IGB using JavaFX and 100% modular, services based programming using OSGi.
+
+For IGB Classic (uses Java Swing) go to: https://bitbucket.org/lorainelab/integrated-genome-browser
 
 # Quick Start 
 
@@ -13,13 +14,16 @@ Install maven build tool and Apache karaf OSGi container.
 To build and run IGB-FX:
 
 1. Clone this repository
-2. Build IGB maven 
+2. Build IGB using mvn
 3. Launch IGB using start-shell.sh
 
+Ex)
 
-`mvn clean install -DskipTests=true
-start-shell`
+`clone git@bitbucket.org:lorainelab/igb-fx.git`
+`mvn clean install`
+`start-shell`
 
+Then view some data. Select human genome from the Current Genome tab.
 
 # About IGB-FX
 
