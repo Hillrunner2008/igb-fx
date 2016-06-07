@@ -358,9 +358,7 @@ public class MainController {
 
     @FXML
     private void initialize() {
-        Platform.runLater(() -> {
-            initializeGuiComponents();
-        });
+        initializeGuiComponents();
         initializeChromosomeSelectionListener();
         initializeGenomeVersionSelectionListener();
         initializeZoomScrollBar();
