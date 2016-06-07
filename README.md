@@ -36,7 +36,14 @@ For a tutorial on OSGi written by IGB Developers, see:
 
 # To contribute
 
-IGB development uses the Fork-and-Branch workflow. See:
+Use fork-and-branch workflow:
+
+1. Fork the [team repository](http://www.bitbucket.org/lorainelab/igb-fx).
+2. Create branches specific to the changes you want to make, push to your fork.
+3. Issue pull requests to the team repository's master branch.
+
+See:
 
 * Forking Workflow [tutorial](https://www.atlassian.com/git/tutorials/comparing-workflows/forking-workflow) by Atlassian
 * Blog post titled [Using the Fork-and-Branch Git Workflow](http://blog.scottlowe.org/2015/01/27/using-fork-branch-git-workflow/)
+
