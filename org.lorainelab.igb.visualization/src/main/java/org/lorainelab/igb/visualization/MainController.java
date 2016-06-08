@@ -761,9 +761,7 @@ public class MainController {
             hSlider.setValue(invertExpScaleTransform(canvasPane, scaleXalt));
             double scrollPosition = (minX / (modelWidth - width)) * 100;
             final double scrollXValue = enforceRangeBounds(scrollPosition, 0, 100);
-            Platform.runLater(() -> {
-                scrollX.setValue(scrollXValue);
-            });
+            scrollX.setValue(scrollXValue);
         }
     }
 
