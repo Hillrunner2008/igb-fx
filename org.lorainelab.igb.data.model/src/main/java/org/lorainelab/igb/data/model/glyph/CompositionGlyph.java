@@ -166,10 +166,14 @@ public class CompositionGlyph implements Glyph {
             if (width > 1500 && height > 150) {
                 rectWidth = 2;
             }
-            gc.fillRect(glyphViewIntersectionBounds.getMinX(), glyphViewIntersectionBounds.getMinY(), glyphViewIntersectionBounds.getWidth(), rectWidth);
-            gc.fillRect(glyphViewIntersectionBounds.getMinX(), glyphViewIntersectionBounds.getMinY(), rectWidth / xToYRatio, glyphViewIntersectionBounds.getHeight());
-            gc.fillRect(glyphViewIntersectionBounds.getMaxX(), glyphViewIntersectionBounds.getMinY(), rectWidth / xToYRatio, glyphViewIntersectionBounds.getHeight() + 1);
-            gc.fillRect(glyphViewIntersectionBounds.getMinX(), glyphViewIntersectionBounds.getMaxY(), glyphViewIntersectionBounds.getWidth(), rectWidth);
+            double minY = glyphViewIntersectionBounds.getMinY();
+            double minX = glyphViewIntersectionBounds.getMinX();
+            double maxX = glyphViewIntersectionBounds.getMaxX();
+            double maxY = glyphViewIntersectionBounds.getMaxY();
+            gc.fillRect(minX, minY, glyphViewIntersectionBounds.getWidth(), rectWidth); //top
+            gc.fillRect(minX, minY, rectWidth / xToYRatio, glyphViewIntersectionBounds.getHeight()); //left
+            gc.fillRect(maxX, minY, rectWidth / xToYRatio, glyphViewIntersectionBounds.getHeight() + 1);//right
+            gc.fillRect(minX, maxY, glyphViewIntersectionBounds.getWidth(), rectWidth);//bottom
             gc.restore();
         }
     }

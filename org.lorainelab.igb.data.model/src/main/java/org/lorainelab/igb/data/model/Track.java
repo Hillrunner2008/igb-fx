@@ -20,7 +20,6 @@ import static org.lorainelab.igb.data.model.glyph.Glyph.SLOT_HEIGHT;
  */
 public class Track {
 
-    private static final int TRACK_BORDER_PADDING = 5;
     private final String trackLabel;
     private List<CompositionGlyph> glyphs;
     private TreeMultimap<Integer, CompositionGlyph> slotMap;
@@ -28,6 +27,7 @@ public class Track {
     private final boolean isNegative;
     private DoubleProperty modelHeight;
     private int stackHeight;
+    private static final int PADDING = 5;
 
     public Track(boolean isNegative, String trackLabel, int stackHeight) {
         this.isNegative = isNegative;
@@ -53,14 +53,16 @@ public class Track {
     private void setGlyphPosition(CompositionGlyph compositionGlyph, int slot, int maxStackHeight) {
         for (Glyph glyph : compositionGlyph.getChildren()) {
             Rectangle2D boundingRect = glyph.getBoundingRect();
+            final int modelHeight = SLOT_HEIGHT * maxStackHeight;
+            double yOffset = modelHeight / maxStackHeight;
             final double x = boundingRect.getMinX();
             final double width = boundingRect.getWidth();
             final double height = boundingRect.getHeight();
             if (isNegative) {
-                final double y = boundingRect.getMinY() + (slot * SLOT_HEIGHT) - TRACK_BORDER_PADDING;
+                final double y = boundingRect.getMinY() + (slot * SLOT_HEIGHT) - PADDING;
                 glyph.setRenderBoundingRect(new Rectangle2D(x, y, width, height));
             } else {
-                final double y = (boundingRect.getMinY() + ((maxStackHeight - 1) - slot) * SLOT_HEIGHT) - TRACK_BORDER_PADDING;
+                final double y = (boundingRect.getMinY() + ((maxStackHeight - 1) - slot) * SLOT_HEIGHT) - PADDING;
                 glyph.setRenderBoundingRect(new Rectangle2D(x, y, width, height));
             }
         }
