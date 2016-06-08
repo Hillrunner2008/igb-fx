@@ -10,7 +10,6 @@ import java.util.Map;
 import javafx.scene.paint.Color;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
 import org.lorainelab.igb.data.model.glyph.Glyph;
-import static org.lorainelab.igb.data.model.glyph.Glyph.MODEL_HEIGHT_PADDING;
 import org.lorainelab.igb.data.model.glyph.LineGlyph;
 import org.lorainelab.igb.data.model.glyph.RectangleGlyph;
 import static org.lorainelab.igb.data.model.shapes.factory.Palette.PRIMARY_TEXT_COLOR;
@@ -31,7 +30,7 @@ public class GlyphFactory {
         if (rectangle.getAttributes().contains(org.lorainelab.igb.data.model.shapes.Rectangle.Attribute.thick)) {
             height = 15;
         }
-        double y = height == 15 ? MODEL_HEIGHT_PADDING : 20;
+        double y = height == 15 ? 17.5 : 20;
         RectangleGlyph toReturn = new RectangleGlyph(rectangle.getOffset(), y, rectangle.getWidth(), height);
         toReturn.setFill(Color.BLUE);
         toReturn.setStrokeColor(Color.web(PRIMARY_TEXT_COLOR));
