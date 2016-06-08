@@ -57,7 +57,7 @@ public class Track {
             final double width = boundingRect.getWidth();
             final double height = boundingRect.getHeight();
             if (isNegative) {
-                final double y = boundingRect.getMinY() + (slot * SLOT_HEIGHT);
+                final double y = boundingRect.getMinY() + (slot * SLOT_HEIGHT) - TRACK_BORDER_PADDING;
                 glyph.setRenderBoundingRect(new Rectangle2D(x, y, width, height));
             } else {
                 final double y = (boundingRect.getMinY() + ((maxStackHeight - 1) - slot) * SLOT_HEIGHT) - TRACK_BORDER_PADDING;
