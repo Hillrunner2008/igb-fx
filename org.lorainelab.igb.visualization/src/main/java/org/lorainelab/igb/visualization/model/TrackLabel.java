@@ -160,7 +160,7 @@ public class TrackLabel {
             });
             contextMenu.getItems().add(adjustStackHeightMenuItem);
             root.setOnMouseClicked(event -> {
-                if (event.getButton() == MouseButton.SECONDARY) {
+                if ((event.getButton() == MouseButton.SECONDARY) || (event.getButton() == MouseButton.PRIMARY && event.isControlDown())) {
                     root.setStyle("-fx-border-color: red;-fx-border-width:2.0;");
                     contextMenu.show(root.getScene().getWindow(), event.getScreenX(), event.getScreenY());
                     contextMenu.setOnHiding(windowEvent -> {
