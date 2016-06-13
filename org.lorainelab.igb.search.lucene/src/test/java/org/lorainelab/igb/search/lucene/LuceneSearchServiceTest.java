@@ -47,7 +47,7 @@ public class LuceneSearchServiceTest {
         luceneSearchService.deactivate();
     }
 
-    @Test
+    //@Test
     public void testSearch() {
         Document document1 = new Document();
         document1.getFields().put("id","foo123");

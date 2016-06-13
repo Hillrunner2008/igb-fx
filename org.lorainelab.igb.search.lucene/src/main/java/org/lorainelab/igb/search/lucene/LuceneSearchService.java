@@ -9,26 +9,32 @@ import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.ConfigurationPolicy;
 import aQute.bnd.annotation.component.Deactivate;
-import com.google.common.base.Strings;
+import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Lists;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.UUID;
-import java.util.prefs.BackingStoreException;
-import java.util.prefs.Preferences;
+import javax.sql.DataSource;
 import org.apache.commons.io.FileUtils;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexNotFoundException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
@@ -36,10 +42,10 @@ import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.SimpleFSDirectory;
 import org.apache.lucene.util.Version;
-import org.lorainelab.igb.preferences.PreferenceUtils;
 import org.lorainelab.igb.search.api.SearchService;
 import org.lorainelab.igb.search.api.model.Document;
 import org.lorainelab.igb.search.api.model.IndexIdentity;
+import org.osgi.service.jdbc.DataSourceFactory;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -52,22 +58,45 @@ public class LuceneSearchService implements SearchService {
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(LuceneSearchService.class);
     private StandardAnalyzer analyzer;
     private String indexRoot;
-    private Preferences preferences;
-    private String demoOnly; //TODO: remove
-    
+    private DataSourceFactory dataSourceFactory;
+    private DataSource ds;
 
     @Activate
     public void activate(Map<String, Object> properties) throws IOException {
         analyzer = new StandardAnalyzer();
         analyzer.setVersion(Version.LUCENE_6_0_0);
         indexRoot = (String) properties.get("index.path.root") + File.separator + "lucene" + File.separator;
-        LOG.info("prop: {}", indexRoot);
-        preferences = PreferenceUtils.getDefaultPrefsNode().node("org.lorainelab.igb.search.lucene.root");
+        initDb();
+    }
+
+    private void initDb() {
+        try {
+            Properties props = new Properties();
+            props.put("databaseName", "data/search.sqlite");
+            ds = dataSourceFactory.createDataSource(props);
+            try (Connection dsConnection = ds.getConnection()) {
+                try (Statement stmt = dsConnection.createStatement()) {
+                    String sql = "CREATE TABLE SEARCH "
+                            + "(ID TEXT PRIMARY KEY NOT NULL,"
+                            + " RESOURCE TEXT NOT NULL)";
+                    stmt.executeUpdate(sql);
+                } catch (SQLException ex) {
+                    LOG.debug(ex.getMessage(), ex);
+                }
+            }
+        } catch (SQLException ex) {
+            LOG.error(ex.getMessage(), ex);
+        }
     }
 
     @Deactivate
     public void deactivate() throws IOException {
         analyzer.close();
+    }
+
+    @Reference(target = "(osgi.jdbc.driver.name=sqlite)")
+    public void setDatasourceFactory(DataSourceFactory dataSourceFactory) {
+        this.dataSourceFactory = dataSourceFactory;
     }
 
     @Override
@@ -104,7 +133,8 @@ public class LuceneSearchService implements SearchService {
         try (Directory index = new SimpleFSDirectory(Paths.get(indexRoot + indexIdentity.getId()))) {
             Query queryParser;
             try {
-                queryParser = new QueryParser("id", analyzer).parse(query);
+                //queryParser = new QueryParser("id", analyzer).parse(query);
+                queryParser = new MultiFieldQueryParser(new String[]{"id", "chromosomeId"}, analyzer).parse(query);
             } catch (Exception ex) {
                 LOG.error(ex.getMessage(), ex);
                 return results;
@@ -126,10 +156,11 @@ public class LuceneSearchService implements SearchService {
                     results.add(result);
                 }
                 reader.close();
-            } catch (Exception ex) {
-                LOG.error(ex.getMessage(), ex);
+            } catch (IndexNotFoundException ex) {
+                LOG.error("clearing index since it could not be found");
+                clearIndex(indexIdentity);
             }
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             LOG.error(ex.getMessage(), ex);
         }
         return results;
@@ -138,8 +169,15 @@ public class LuceneSearchService implements SearchService {
 
     @Override
     public void clearIndex(IndexIdentity indexIdentity) {
+        try (Connection dsConnection = ds.getConnection()) {
+            try (Statement stmt = dsConnection.createStatement()) {
+                String sql = "DELETE FROM SEARCH WHERE ID='"+indexIdentity.getId()+"'";
+                stmt.execute(sql);
+            }
+        } catch (SQLException ex) {
+            LOG.error(ex.getMessage(), ex);
+        }
         try (Directory index = new SimpleFSDirectory(Paths.get(indexRoot + indexIdentity.getId()))) {
-            preferences.remove(indexIdentity.getId());
             IndexWriterConfig config = new IndexWriterConfig(analyzer);
             try (IndexWriter writer = new IndexWriter(index, config)) {
                 writer.deleteAll();
@@ -158,32 +196,62 @@ public class LuceneSearchService implements SearchService {
 
     @Override
     public void deleteAll() {
+
+        try (Connection dsConnection = ds.getConnection()) {
+            try (Statement stmt = dsConnection.createStatement()) {
+                String sql = "DROP TABLE SEARCH";
+                stmt.execute(sql);
+            }
+        } catch (SQLException ex) {
+            LOG.error(ex.getMessage(), ex);
+        }
         try {
-            preferences.clear();
             FileUtils.deleteDirectory(new File(indexRoot));
-        } catch (BackingStoreException | IOException ex) {
+        } catch (IOException ex) {
             LOG.error(ex.getMessage(), ex);
         }
     }
 
     @Override
     public Optional<IndexIdentity> getResourceIndexIdentity(String resource) {
-        if(resource == null && demoOnly != null) {
-            resource = demoOnly;
-        } else if(resource == null && demoOnly == null) {
+        String id;
+        try (Connection dsConnection = ds.getConnection()) {
+            try (Statement stmt = dsConnection.createStatement()) {
+                String sql = "SELECT * FROM SEARCH WHERE RESOURCE='" + resource + "'";
+                ResultSet result = stmt.executeQuery(sql);
+                id = result.getString("ID");
+            }
+        } catch (SQLException ex) {
+            LOG.debug(ex.getMessage(), ex);
             return Optional.empty();
         }
-        String value = preferences.get(resource, "");
-        if(Strings.isNullOrEmpty(value)) {
-            return Optional.empty();
-        }
-        return Optional.of(new IndexIdentity(value));
+        return Optional.of(new IndexIdentity(id));
     }
 
     @Override
     public void setResourceIndexIdentity(String resource, IndexIdentity indexIdentity) {
-        demoOnly = resource;
-        preferences.put(resource, indexIdentity.getId());
+        try (Connection dsConnection = ds.getConnection()) {
+            dsConnection.setAutoCommit(false);
+            String sql = "INSERT INTO SEARCH (ID,RESOURCE) VALUES (?,?)";
+            try (PreparedStatement stmt = dsConnection.prepareStatement(sql)) {
+                stmt.setString(1, indexIdentity.getId());
+                stmt.setString(2, resource);
+                stmt.executeUpdate();
+            } 
+            dsConnection.commit();
+        } catch (SQLException ex) {
+            LOG.error(ex.getMessage(), ex);
+        }
+        
+         try (Connection dsConnection = ds.getConnection()) {
+            try (Statement stmt = dsConnection.createStatement()) {
+                String sql = "SELECT * FROM SEARCH WHERE RESOURCE='" + resource + "'";
+                ResultSet result = stmt.executeQuery(sql);
+                LOG.info(result.getString("ID"));
+            }
+        } catch (SQLException ex) {
+            LOG.error(ex.getMessage(), ex);
+        }
     }
 
 }

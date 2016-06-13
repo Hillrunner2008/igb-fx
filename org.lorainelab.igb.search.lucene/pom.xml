@@ -82,6 +82,10 @@
             <groupId>org.lorainelab</groupId>
             <artifactId>org.lorainelab.igb.preferences</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.service.jdbc</artifactId>
+        </dependency>
     </dependencies>
     
     <build>
@@ -95,8 +99,12 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Import-Package>
                             !${project.artifactId}*,
+                            
                             *
                         </Import-Package>
+                        <DynamicImport-Package>
+                            org.sqlite.*
+                        </DynamicImport-Package>
                         <Export-Package/>
                         <Bundle-ActivationPolicy>lazy</Bundle-ActivationPolicy>
                         <Service-Component>*</Service-Component>

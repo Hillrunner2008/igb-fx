@@ -223,19 +223,22 @@ public class MainController {
         this.searchService = searchService;
     }
 
+
     private void initializeSearch() {
         Platform.runLater(() -> {
             search.setOnKeyReleased(e -> {
-
                 if (search.getText().length() == 0) {
                     searchAutocomplete.hide();
                 } else {
-                    LinkedList<String> searchResult = new LinkedList<>();
-                    Optional<IndexIdentity> resourceIndexIdentity = searchService.getResourceIndexIdentity(null);
+                    LinkedList<Document> searchResult = new LinkedList<>();
+                    Optional<IndexIdentity> resourceIndexIdentity = 
+                            searchService.getResourceIndexIdentity(
+                                    selectedGenomeVersion.getSpeciesName());
                     if (resourceIndexIdentity.isPresent()) {
-                        searchService.search(search.getText() + "*",
+                        //TODO: refactor to boolean queries in search module
+                        searchService.search("(chromosomeId:"+selectedChromosome.getName()+") AND (id:"+search.getText()+"*)",
                                 resourceIndexIdentity.get()).stream()
-                                .forEach(doc -> searchResult.add(doc.getFields().get("id")));
+                                .forEach(doc -> searchResult.add(doc));
                     }
                     if (searchResult.size() > 0) {
                         populatePopup(searchResult);
@@ -251,18 +254,24 @@ public class MainController {
         });
     }
 
-    private void populatePopup(List<String> searchResult) {
+    private void populatePopup(List<Document> searchResult) {
         List<CustomMenuItem> menuItems = new LinkedList<>();
-        // If you'd like more entries, modify this line.
         int maxEntries = 10;
         int count = Math.min(searchResult.size(), maxEntries);
         for (int i = 0; i < count; i++) {
-            final String result = searchResult.get(i);
-            Label entryLabel = new Label(result);
+            final Document result = searchResult.get(i);
+            Label entryLabel = new Label(result.getFields().get("id"));
             CustomMenuItem item = new CustomMenuItem(entryLabel, true);
             item.setOnAction((ActionEvent actionEvent) -> {
-                search.setText(result);
+                search.setText(result.getFields().get("id"));
                 searchAutocomplete.hide();
+                int start = Integer.parseInt(result.getFields().get("start"));
+                int end = Integer.parseInt(result.getFields().get("end"));
+                LOG.info("jump zoom to: {} {}", start, end);
+                TrackRenderer trackRender = trackRenderers.stream().findFirst().get();
+                Rectangle2D oldRect = trackRender.getCanvasContext().getBoundingRect();
+                Rectangle2D rect = new Rectangle2D(start, oldRect.getMinY(), end-start, oldRect.getHeight());
+                eventBus.post(new JumpZoomEvent(rect, trackRender));
             });
             menuItems.add(item);
         }

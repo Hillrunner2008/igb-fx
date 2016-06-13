@@ -13,6 +13,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import javafx.stage.FileChooser;
 import org.lorainelab.igb.data.model.DataSet;
+import org.lorainelab.igb.data.model.GenomeVersion;
 import org.lorainelab.igb.data.model.datasource.DataSource;
 import org.lorainelab.igb.data.model.datasource.DataSourceReference;
 import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandler;
@@ -71,9 +72,21 @@ public class OpenFileMenuItem implements MenuBarEntryProvider, ToolbarButtonProv
 
                     CompletableFuture<Void> indexTask = CompletableFuture.runAsync(() -> {
                         try {
-                            IndexIdentity indexIdentity = searchService.generateIndexIndentity();
-                            searchService.setResourceIndexIdentity(file.getAbsolutePath(), indexIdentity);
-                            fileTypeHandler.createIndex(indexIdentity, dataSourceReference);
+                            Optional<GenomeVersion> genomeVersion = selectionInfoService.getSelectedGenomeVersion().getValue();
+                            if (genomeVersion.isPresent()) {
+                                String speciesName = genomeVersion.get().getSpeciesName();
+                                Optional<IndexIdentity> resourceIndexIdentity = searchService.getResourceIndexIdentity(speciesName);
+                                IndexIdentity indexIdentity;
+                                if (!resourceIndexIdentity.isPresent()) {
+                                    LOG.info("index doesnt exist, so create it");
+                                    indexIdentity = searchService.generateIndexIndentity();
+                                    searchService.setResourceIndexIdentity(speciesName, indexIdentity);
+                                    //searchService.setResourceIndexIdentity(file.getAbsolutePath(), indexIdentity);
+                                    fileTypeHandler.createIndex(indexIdentity, dataSourceReference);
+                                }
+
+                            }
+
                         } catch (Exception ex) {
                             LOG.error(ex.getMessage(), ex);
                         }
