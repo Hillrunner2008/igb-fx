@@ -57,6 +57,7 @@ import org.lorainelab.igb.data.model.GenomeVersion;
 import org.lorainelab.igb.data.model.Track;
 import org.lorainelab.igb.data.model.View;
 import org.lorainelab.igb.search.api.SearchService;
+import org.lorainelab.igb.search.api.model.Document;
 import org.lorainelab.igb.search.api.model.IndexIdentity;
 import org.lorainelab.igb.selections.SelectionInfoService;
 import org.lorainelab.igb.visualization.event.ClickDragEndEvent;
