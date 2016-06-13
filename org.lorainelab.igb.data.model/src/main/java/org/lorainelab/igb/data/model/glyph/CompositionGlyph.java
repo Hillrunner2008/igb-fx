@@ -73,6 +73,8 @@ public class CompositionGlyph implements Glyph {
         double maxX = Double.MIN_VALUE;
         double minY = Double.MAX_VALUE;
         double maxY = Double.MIN_VALUE;
+        double glyphMinY = Double.MIN_VALUE;
+        double maxGlyphheight = Double.MIN_VALUE;
         for (Glyph g : children) {
             if (g.getRenderBoundingRect().intersects(view)) {
                 Optional<Rectangle2D> rect = g.getViewBoundingRect(view, additionalYoffset);
@@ -83,13 +85,28 @@ public class CompositionGlyph implements Glyph {
                     minY = Math.min(minY, rect.get().getMinY());
                 }
             }
+            //even if part of composition glyph is out of view, we will consider its minY and height
+            Rectangle2D boundingRect = getRenderBoundingRect();
+            double y = boundingRect.getMinY();
+            double height = boundingRect.getHeight();
+            if (y < view.getMinY()) {
+                double offSet = (view.getMinY() - y);
+                height = height - offSet;
+                y = 0;
+            } else {
+                y = y - view.getMinY();
+            }
+            glyphMinY = Math.max(glyphMinY, y);
+            maxGlyphheight = Math.max(maxGlyphheight, height);
+
         }
         double width = maxX - minX;
         double height = maxY - minY;
         if (width <= 0 || height <= 0) {
             return Optional.empty();
         }
-        return Optional.of(new Rectangle2D(minX, minY - height, width, height * LABEL_SPACE_SCALER));
+        double y = (glyphMinY - maxGlyphheight) + additionalYoffset;
+        return Optional.of(new Rectangle2D(minX, y, width, maxGlyphheight * LABEL_SPACE_SCALER));
     }
     private static final double LABEL_SPACE_SCALER = 2;
 
@@ -149,10 +166,14 @@ public class CompositionGlyph implements Glyph {
             if (width > 1500 && height > 150) {
                 rectWidth = 2;
             }
-            gc.fillRect(glyphViewIntersectionBounds.getMinX(), glyphViewIntersectionBounds.getMinY(), glyphViewIntersectionBounds.getWidth(), rectWidth);
-            gc.fillRect(glyphViewIntersectionBounds.getMinX(), glyphViewIntersectionBounds.getMinY(), rectWidth / xToYRatio, glyphViewIntersectionBounds.getHeight());
-            gc.fillRect(glyphViewIntersectionBounds.getMaxX(), glyphViewIntersectionBounds.getMinY(), rectWidth / xToYRatio, glyphViewIntersectionBounds.getHeight() + 1);
-            gc.fillRect(glyphViewIntersectionBounds.getMinX(), glyphViewIntersectionBounds.getMaxY(), glyphViewIntersectionBounds.getWidth(), rectWidth);
+            double minY = glyphViewIntersectionBounds.getMinY();
+            double minX = glyphViewIntersectionBounds.getMinX();
+            double maxX = glyphViewIntersectionBounds.getMaxX();
+            double maxY = glyphViewIntersectionBounds.getMaxY();
+            gc.fillRect(minX, minY, glyphViewIntersectionBounds.getWidth(), rectWidth); //top
+            gc.fillRect(minX, minY, rectWidth / xToYRatio, glyphViewIntersectionBounds.getHeight()); //left
+            gc.fillRect(maxX, minY, rectWidth / xToYRatio, glyphViewIntersectionBounds.getHeight() + 1);//right
+            gc.fillRect(minX, maxY, glyphViewIntersectionBounds.getWidth(), rectWidth);//bottom
             gc.restore();
         }
     }
@@ -207,7 +228,7 @@ public class CompositionGlyph implements Glyph {
 
     @Override
     public Rectangle2D getRenderBoundingRect() {
-       return getBoundingRect();
+        return getBoundingRect();
     }
 
     @Override

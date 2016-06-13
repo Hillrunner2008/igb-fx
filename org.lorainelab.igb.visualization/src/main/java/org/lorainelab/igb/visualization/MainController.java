@@ -57,7 +57,6 @@ import org.lorainelab.igb.data.model.GenomeVersion;
 import org.lorainelab.igb.data.model.Track;
 import org.lorainelab.igb.data.model.View;
 import org.lorainelab.igb.search.api.SearchService;
-import org.lorainelab.igb.search.api.model.Document;
 import org.lorainelab.igb.search.api.model.IndexIdentity;
 import org.lorainelab.igb.selections.SelectionInfoService;
 import org.lorainelab.igb.visualization.event.ClickDragEndEvent;
@@ -689,27 +688,27 @@ public class MainController {
                                     double eventTriggerMinY = (Double) dragboardContent;
                                     if (dropLocationMinY != eventTriggerMinY) {
                                         Lists.newArrayList(trackRenderers).stream()
-                                        .filter(trackRenderer -> trackRenderer.getCanvasContext().isVisible())
-                                        .filter(draggedTrackRenderer -> draggedTrackRenderer.getTrackLabel().getContent().getBoundsInParent().getMinY() == eventTriggerMinY)
-                                        .findFirst()
-                                        .ifPresent(draggedTrackRenderer -> {
-                                            Lists.newArrayList(trackRenderers).stream()
-                                            .filter(trackRenderer -> trackRenderer.getTrackLabel().getContent() == dropLocationLabelNode)
-                                            .findFirst()
-                                            .ifPresent(droppedTrackRenderer -> {
-                                                int droppedIndex = droppedTrackRenderer.getWeight();
-                                                if (droppedAbove) {
-                                                    trackRenderers.remove(draggedTrackRenderer);
-                                                    draggedTrackRenderer.setWeight(droppedIndex - 1);
-                                                    trackRenderers.add(draggedTrackRenderer);
-                                                } else {
-                                                    trackRenderers.remove(draggedTrackRenderer);
-                                                    draggedTrackRenderer.setWeight(droppedIndex + 1);
-                                                    trackRenderers.add(draggedTrackRenderer);
-                                                }
-                                                updateTrackRenderers();
-                                            });
-                                        });
+                                                .filter(trackRenderer -> trackRenderer.getCanvasContext().isVisible())
+                                                .filter(draggedTrackRenderer -> draggedTrackRenderer.getTrackLabel().getContent().getBoundsInParent().getMinY() == eventTriggerMinY)
+                                                .findFirst()
+                                                .ifPresent(draggedTrackRenderer -> {
+                                                    Lists.newArrayList(trackRenderers).stream()
+                                                            .filter(trackRenderer -> trackRenderer.getTrackLabel().getContent() == dropLocationLabelNode)
+                                                            .findFirst()
+                                                            .ifPresent(droppedTrackRenderer -> {
+                                                                int droppedIndex = droppedTrackRenderer.getWeight();
+                                                                if (droppedAbove) {
+                                                                    trackRenderers.remove(draggedTrackRenderer);
+                                                                    draggedTrackRenderer.setWeight(droppedIndex - 1);
+                                                                    trackRenderers.add(draggedTrackRenderer);
+                                                                } else {
+                                                                    trackRenderers.remove(draggedTrackRenderer);
+                                                                    draggedTrackRenderer.setWeight(droppedIndex + 1);
+                                                                    trackRenderers.add(draggedTrackRenderer);
+                                                                }
+                                                                updateTrackRenderers();
+                                                            });
+                                                });
                                     }
                                 }
 
@@ -769,8 +768,8 @@ public class MainController {
             final double scaleXalt = eventLocationReference.getCanvasContext().getBoundingRect().getWidth() / width;
             resetZoomStripe();
             hSlider.setValue(invertExpScaleTransform(canvasPane, scaleXalt));
-            double scrollXValue = (minX / (modelWidth - width)) * 100;
-            scrollXValue = enforceRangeBounds(scrollXValue, 0, 100);
+            double scrollPosition = (minX / (modelWidth - width)) * 100;
+            final double scrollXValue = enforceRangeBounds(scrollPosition, 0, 100);
             scrollX.setValue(scrollXValue);
         }
     }

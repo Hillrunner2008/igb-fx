@@ -20,7 +20,6 @@ import org.lorainelab.igb.data.model.View;
 public interface Glyph {
 
     final int SLOT_HEIGHT = 30;
-    final double MODEL_HEIGHT_PADDING = 17.5;
 
     Paint getFill();
 

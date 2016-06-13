@@ -76,13 +76,6 @@ public class GenomeAssemblyTab implements TabProvider {
 
     private void initializeGenomeVersionComboBox() {
         genomeVersionComboBox.getItems().addAll(genomeVersionRegistry.getRegisteredGenomeVersions());
-        genomeVersionRegistry.getRegisteredGenomeVersions().addListener((SetChangeListener.Change<? extends GenomeVersion> change) -> {
-            if (change.wasAdded()) {
-                genomeVersionComboBox.getItems().add(change.getElementAdded());
-            } else {
-                genomeVersionComboBox.getItems().remove(change.getElementAdded());
-            }
-        });
         genomeVersionComboBox.setConverter(new StringConverter<GenomeVersion>() {
             @Override
             public String toString(GenomeVersion genomeVersion) {
@@ -155,7 +148,14 @@ public class GenomeAssemblyTab implements TabProvider {
         });
         speciesComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
             Platform.runLater(() -> {
-                genomeVersionComboBox.setDisable(newValue.equals(speciesComboBox.getPromptText()));
+                boolean disableGenomeVersionSelection = newValue.equals(speciesComboBox.getPromptText());
+                if (!disableGenomeVersionSelection) {
+                    genomeVersionComboBox.getItems().clear();
+                    genomeVersionRegistry.getRegisteredGenomeVersions().stream()
+                            .filter(genomeVersion -> genomeVersion.getSpeciesName().equalsIgnoreCase(newValue))
+                            .forEach(genomeVersion -> genomeVersionComboBox.getItems().add(genomeVersion));
+                }
+                genomeVersionComboBox.setDisable(disableGenomeVersionSelection);
             });
         });
     }
