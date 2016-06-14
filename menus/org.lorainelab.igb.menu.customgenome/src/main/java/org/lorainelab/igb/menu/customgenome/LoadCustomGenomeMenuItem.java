@@ -201,7 +201,7 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
 
     @Override
     public ParentMenu getParentMenu() {
-        return ParentMenu.FILE;
+        return ParentMenu.GENOME;
     }
 
     @Reference
