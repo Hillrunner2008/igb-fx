@@ -10,12 +10,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import net.miginfocom.layout.CC;
@@ -153,6 +156,25 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
         cancelBtn.setOnAction(event -> {
             stage.hide();
         });
+    
+        refSeqTextField.setOnKeyPressed(this::handleKeyEvent);
+        speciesTextField.setOnKeyPressed(this::handleKeyEvent);
+        versionTextField.setOnKeyPressed(this::handleKeyEvent);
+    }
+    
+    
+    private void handleKeyEvent(KeyEvent event){
+        switch (event.getCode()) {
+                case ENTER:
+                    okBtn.fire();
+                    break;
+                case ESCAPE:
+                    cancelBtn.fire();
+                    break;
+                default:
+                    ((TextField)event.getSource()).appendText(event.getCharacter());
+                    break;
+            }
     }
 
     private void layoutComponents() {
