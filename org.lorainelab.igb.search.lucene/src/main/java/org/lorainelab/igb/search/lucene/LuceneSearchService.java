@@ -28,6 +28,8 @@ import javax.sql.DataSource;
 import org.apache.commons.io.FileUtils;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.StoredField;
+import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexNotFoundException;
@@ -37,6 +39,8 @@ import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
@@ -57,13 +61,13 @@ import org.slf4j.LoggerFactory;
  */
 @Component(configurationPolicy = ConfigurationPolicy.require)
 public class LuceneSearchService implements SearchService {
-    
+
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(LuceneSearchService.class);
     private StandardAnalyzer analyzer;
     private String indexRoot;
     private DataSourceFactory dataSourceFactory;
     private DataSource ds;
-    
+
     @Activate
     public void activate(Map<String, Object> properties) throws IOException {
         analyzer = new StandardAnalyzer();
@@ -71,7 +75,7 @@ public class LuceneSearchService implements SearchService {
         indexRoot = (String) properties.get("index.path.root") + File.separator + "lucene" + File.separator;
         initDb();
     }
-    
+
     private void initDb() {
         try {
             Properties props = new Properties();
@@ -91,38 +95,47 @@ public class LuceneSearchService implements SearchService {
             LOG.error(ex.getMessage(), ex);
         }
     }
-    
+
     @Deactivate
     public void deactivate() throws IOException {
         analyzer.close();
     }
-    
+
     @Reference(target = "(osgi.jdbc.driver.name=sqlite)")
     public void setDatasourceFactory(DataSourceFactory dataSourceFactory) {
         this.dataSourceFactory = dataSourceFactory;
     }
-    
+
     @Override
     public void index(List<Document> documents, IndexIdentity indexIdentity) {
-        LOG.info("Creating index for {}", indexIdentity.getId());
+        LOG.debug("Creating index for {}", indexIdentity.getId());
         try (Directory index = new SimpleFSDirectory(Paths.get(indexRoot + indexIdentity.getId()))) {
             IndexWriterConfig config = new IndexWriterConfig(analyzer);
-            
+
             try (IndexWriter writer = new IndexWriter(index, config)) {
-                Optional<Document> exampleDoc = documents.stream().findFirst();
-                if (exampleDoc.isPresent()) {
-                    String deleteQuery = "source:"+exampleDoc.get().getFields().get("source");
-                    LOG.info("deleting: {}", deleteQuery);
-                    Query query = new QueryParser("source", analyzer).Query(deleteQuery);
-                    writer.deleteDocuments(query);
-                }
-                
+
                 documents.stream().forEach((document) -> {
                     try {
                         org.apache.lucene.document.Document doc = new org.apache.lucene.document.Document();
                         document.getFields().keySet().stream().forEach(key -> {
-                            doc.add(new TextField(key, document.getFields().get(key), Field.Store.YES));
+                            switch (key) {
+                                case "id":
+                                    doc.add(new TextField(key, document.getFields().get(key), Field.Store.YES));
+                                    break;
+                                case "chromosomeId":
+                                    doc.add(new TextField(key, document.getFields().get(key), Field.Store.YES));
+                                    break;
+                                case "source":
+                                    doc.add(new TextField(key, document.getFields().get(key), Field.Store.NO));
+                                    break;
+                                default:
+                                    doc.add(new StoredField(key, document.getFields().get(key)));
+                                    break;
+
+                            }
+
                         });
+
                         LOG.debug("indexing {}", doc.get("id"));
                         writer.addDocument(doc);
                     } catch (Exception ex) {
@@ -130,13 +143,13 @@ public class LuceneSearchService implements SearchService {
                     }
                 });
             }
-            
+
         } catch (Exception ex) {
             LOG.error(ex.getMessage(), ex);
         }
-        LOG.info("Finished index for {}", indexIdentity.getId());
+        LOG.debug("Finished index for {}", indexIdentity.getId());
     }
-    
+
     @Override
     public List<Document> search(String query, IndexIdentity indexIdentity) {
         LOG.info("searching for: {}", query);
@@ -144,7 +157,6 @@ public class LuceneSearchService implements SearchService {
         try (Directory index = new SimpleFSDirectory(Paths.get(indexRoot + indexIdentity.getId()))) {
             Query queryParser;
             try {
-                //queryParser = new QueryParser("id", analyzer).parse(query);
                 queryParser = new MultiFieldQueryParser(new String[]{"id", "chromosomeId"}, analyzer).parse(query);
             } catch (Exception ex) {
                 LOG.error(ex.getMessage(), ex);
@@ -175,9 +187,9 @@ public class LuceneSearchService implements SearchService {
             LOG.error(ex.getMessage(), ex);
         }
         return results;
-        
+
     }
-    
+
     @Override
     public void clearIndex(IndexIdentity indexIdentity) {
         try (Connection dsConnection = ds.getConnection()) {
@@ -199,15 +211,15 @@ public class LuceneSearchService implements SearchService {
             LOG.error(ex.getMessage(), ex);
         }
     }
-    
+
     @Override
     public IndexIdentity generateIndexIndentity() {
         return new IndexIdentity(UUID.randomUUID().toString());
     }
-    
+
     @Override
     public void deleteAll() {
-        
+
         try (Connection dsConnection = ds.getConnection()) {
             try (Statement stmt = dsConnection.createStatement()) {
                 String sql = "DROP TABLE SEARCH";
@@ -222,7 +234,7 @@ public class LuceneSearchService implements SearchService {
             LOG.error(ex.getMessage(), ex);
         }
     }
-    
+
     @Override
     public Optional<IndexIdentity> getResourceIndexIdentity(String resource) {
         String id;
@@ -238,7 +250,7 @@ public class LuceneSearchService implements SearchService {
         }
         return Optional.of(new IndexIdentity(id));
     }
-    
+
     @Override
     public void setResourceIndexIdentity(String resource, IndexIdentity indexIdentity) {
         try (Connection dsConnection = ds.getConnection()) {
@@ -248,12 +260,12 @@ public class LuceneSearchService implements SearchService {
                 stmt.setString(1, indexIdentity.getId());
                 stmt.setString(2, resource);
                 stmt.executeUpdate();
-            }            
+            }
             dsConnection.commit();
         } catch (SQLException ex) {
             LOG.error(ex.getMessage(), ex);
         }
-        
+
         try (Connection dsConnection = ds.getConnection()) {
             try (Statement stmt = dsConnection.createStatement()) {
                 String sql = "SELECT * FROM SEARCH WHERE RESOURCE='" + resource + "'";
@@ -264,5 +276,22 @@ public class LuceneSearchService implements SearchService {
             LOG.error(ex.getMessage(), ex);
         }
     }
-    
+
+    @Override
+    public void clearByQuery(IndexIdentity indexIdentity, String field, String query) {
+        try (Directory index = new SimpleFSDirectory(Paths.get(indexRoot + indexIdentity.getId()))) {
+            IndexWriterConfig config = new IndexWriterConfig(analyzer);
+
+            try (IndexWriter writer = new IndexWriter(index, config)) {
+                BooleanQuery qry = new BooleanQuery.Builder()
+                        .add(new TermQuery(new Term(field, QueryParser.escape(query))), BooleanClause.Occur.MUST)
+                        .build();
+//                Query queryParser = new QueryParser(field, analyzer).parse(QueryParser.escape(query));
+                writer.deleteDocuments(qry);
+            }
+        } catch (Exception ex) {
+            LOG.error(ex.getMessage(), ex);
+        }
+    }
+
 }
