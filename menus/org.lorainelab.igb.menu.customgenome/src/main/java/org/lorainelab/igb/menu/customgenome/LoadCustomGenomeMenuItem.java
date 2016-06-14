@@ -167,7 +167,6 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
         switch (event.getCode()) {
                 case ENTER:
                     okBtn.fire();
-                    //new Alert(AlertType.INFORMATION, "okay invoked", null).showAndWait();
                     break;
                 case ESCAPE:
                     cancelBtn.fire();
