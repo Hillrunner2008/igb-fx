@@ -284,7 +284,7 @@ public class BedParser implements FileTypeHandler {
                         document.getFields().put("chromosomeId", bedFeature.getChromosomeId());
                         document.getFields().put("start", bedFeature.getRange().lowerEndpoint().toString());
                         document.getFields().put("end", bedFeature.getRange().upperEndpoint().toString());
-                        
+                        document.getFields().put("source", dataSourceReference.getPath());
                         documents.add(document);
                     }
                 }

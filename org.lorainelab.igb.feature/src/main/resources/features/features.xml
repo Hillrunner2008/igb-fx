@@ -5,8 +5,13 @@
         <bundle start-level="70">mvn:${project.groupId}/org.lorainelab.igb.stage.provider.api/${project.version}</bundle>
         <bundle start-level="70">mvn:${project.groupId}/org.lorainelab.igb.main/${project.version}</bundle>
     </feature>
+    <feature name="${project.artifactId}-sqlite" version="${project.version}">
+        <feature>pax-jdbc</feature>
+        <bundle>wrap:mvn:org.xerial/sqlite-jdbc/3.8.11.2</bundle>
+        <bundle>mvn:org.ops4j.pax.jdbc/pax-jdbc-sqlite/0.8.0</bundle>
+    </feature>
     <feature name="${project.artifactId}" version="${project.version}">	
-        <feature>pax-jdbc-sqlite</feature>
+        <feature>${project.artifactId}-sqlite</feature>
         <bundle>wrap:mvn:org.reactfx/reactfx/2.0-M4u1</bundle>
         <bundle>wrap:mvn:com.miglayout/miglayout-core/5.0</bundle>
         <bundle>wrap:mvn:com.miglayout/miglayout-javafx/5.0</bundle>

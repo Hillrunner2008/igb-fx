@@ -76,13 +76,13 @@ public class OpenFileMenuItem implements MenuBarEntryProvider, ToolbarButtonProv
                             if (genomeVersion.isPresent()) {
                                 String speciesName = genomeVersion.get().getSpeciesName();
                                 Optional<IndexIdentity> resourceIndexIdentity = searchService.getResourceIndexIdentity(speciesName);
-                                IndexIdentity indexIdentity;
                                 if (!resourceIndexIdentity.isPresent()) {
                                     LOG.info("index doesnt exist, so create it");
-                                    indexIdentity = searchService.generateIndexIndentity();
+                                    IndexIdentity indexIdentity = searchService.generateIndexIndentity();
                                     searchService.setResourceIndexIdentity(speciesName, indexIdentity);
-                                    //searchService.setResourceIndexIdentity(file.getAbsolutePath(), indexIdentity);
                                     fileTypeHandler.createIndex(indexIdentity, dataSourceReference);
+                                } else {
+                                    fileTypeHandler.createIndex(resourceIndexIdentity.get(), dataSourceReference);
                                 }
 
                             }
