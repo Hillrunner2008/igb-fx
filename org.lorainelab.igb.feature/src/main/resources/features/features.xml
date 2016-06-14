@@ -6,6 +6,7 @@
         <bundle start-level="70">mvn:${project.groupId}/org.lorainelab.igb.main/${project.version}</bundle>
     </feature>
     <feature name="${project.artifactId}" version="${project.version}">	
+        <feature>pax-jdbc-sqlite</feature>
         <bundle>wrap:mvn:org.reactfx/reactfx/2.0-M4u1</bundle>
         <bundle>wrap:mvn:com.miglayout/miglayout-core/5.0</bundle>
         <bundle>wrap:mvn:com.miglayout/miglayout-javafx/5.0</bundle>

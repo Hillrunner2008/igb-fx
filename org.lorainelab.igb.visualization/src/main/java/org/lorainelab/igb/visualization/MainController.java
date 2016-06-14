@@ -223,19 +223,22 @@ public class MainController {
         this.searchService = searchService;
     }
 
+
     private void initializeSearch() {
         Platform.runLater(() -> {
             search.setOnKeyReleased(e -> {
-
                 if (search.getText().length() == 0) {
                     searchAutocomplete.hide();
                 } else {
-                    LinkedList<String> searchResult = new LinkedList<>();
-                    Optional<IndexIdentity> resourceIndexIdentity = searchService.getResourceIndexIdentity(null);
+                    LinkedList<Document> searchResult = new LinkedList<>();
+                    Optional<IndexIdentity> resourceIndexIdentity = 
+                            searchService.getResourceIndexIdentity(
+                                    selectedGenomeVersion.getSpeciesName());
                     if (resourceIndexIdentity.isPresent()) {
-                        searchService.search(search.getText() + "*",
+                        //TODO: refactor to boolean queries in search module
+                        searchService.search("(chromosomeId:"+selectedChromosome.getName()+") AND (id:"+search.getText()+"*)",
                                 resourceIndexIdentity.get()).stream()
-                                .forEach(doc -> searchResult.add(doc.getFields().get("id")));
+                                .forEach(doc -> searchResult.add(doc));
                     }
                     if (searchResult.size() > 0) {
                         populatePopup(searchResult);
@@ -251,18 +254,24 @@ public class MainController {
         });
     }
 
-    private void populatePopup(List<String> searchResult) {
+    private void populatePopup(List<Document> searchResult) {
         List<CustomMenuItem> menuItems = new LinkedList<>();
-        // If you'd like more entries, modify this line.
         int maxEntries = 10;
         int count = Math.min(searchResult.size(), maxEntries);
         for (int i = 0; i < count; i++) {
-            final String result = searchResult.get(i);
-            Label entryLabel = new Label(result);
+            final Document result = searchResult.get(i);
+            Label entryLabel = new Label(result.getFields().get("id"));
             CustomMenuItem item = new CustomMenuItem(entryLabel, true);
             item.setOnAction((ActionEvent actionEvent) -> {
-                search.setText(result);
+                search.setText(result.getFields().get("id"));
                 searchAutocomplete.hide();
+                int start = Integer.parseInt(result.getFields().get("start"));
+                int end = Integer.parseInt(result.getFields().get("end"));
+                LOG.info("jump zoom to: {} {}", start, end);
+                TrackRenderer trackRender = trackRenderers.stream().findFirst().get();
+                Rectangle2D oldRect = trackRender.getCanvasContext().getBoundingRect();
+                Rectangle2D rect = new Rectangle2D(start, oldRect.getMinY(), end-start, oldRect.getHeight());
+                eventBus.post(new JumpZoomEvent(rect, trackRender));
             });
             menuItems.add(item);
         }
@@ -680,27 +689,27 @@ public class MainController {
                                     double eventTriggerMinY = (Double) dragboardContent;
                                     if (dropLocationMinY != eventTriggerMinY) {
                                         Lists.newArrayList(trackRenderers).stream()
-                                        .filter(trackRenderer -> trackRenderer.getCanvasContext().isVisible())
-                                        .filter(draggedTrackRenderer -> draggedTrackRenderer.getTrackLabel().getContent().getBoundsInParent().getMinY() == eventTriggerMinY)
-                                        .findFirst()
-                                        .ifPresent(draggedTrackRenderer -> {
-                                            Lists.newArrayList(trackRenderers).stream()
-                                            .filter(trackRenderer -> trackRenderer.getTrackLabel().getContent() == dropLocationLabelNode)
-                                            .findFirst()
-                                            .ifPresent(droppedTrackRenderer -> {
-                                                int droppedIndex = droppedTrackRenderer.getWeight();
-                                                if (droppedAbove) {
-                                                    trackRenderers.remove(draggedTrackRenderer);
-                                                    draggedTrackRenderer.setWeight(droppedIndex - 1);
-                                                    trackRenderers.add(draggedTrackRenderer);
-                                                } else {
-                                                    trackRenderers.remove(draggedTrackRenderer);
-                                                    draggedTrackRenderer.setWeight(droppedIndex + 1);
-                                                    trackRenderers.add(draggedTrackRenderer);
-                                                }
-                                                updateTrackRenderers();
-                                            });
-                                        });
+                                                .filter(trackRenderer -> trackRenderer.getCanvasContext().isVisible())
+                                                .filter(draggedTrackRenderer -> draggedTrackRenderer.getTrackLabel().getContent().getBoundsInParent().getMinY() == eventTriggerMinY)
+                                                .findFirst()
+                                                .ifPresent(draggedTrackRenderer -> {
+                                                    Lists.newArrayList(trackRenderers).stream()
+                                                            .filter(trackRenderer -> trackRenderer.getTrackLabel().getContent() == dropLocationLabelNode)
+                                                            .findFirst()
+                                                            .ifPresent(droppedTrackRenderer -> {
+                                                                int droppedIndex = droppedTrackRenderer.getWeight();
+                                                                if (droppedAbove) {
+                                                                    trackRenderers.remove(draggedTrackRenderer);
+                                                                    draggedTrackRenderer.setWeight(droppedIndex - 1);
+                                                                    trackRenderers.add(draggedTrackRenderer);
+                                                                } else {
+                                                                    trackRenderers.remove(draggedTrackRenderer);
+                                                                    draggedTrackRenderer.setWeight(droppedIndex + 1);
+                                                                    trackRenderers.add(draggedTrackRenderer);
+                                                                }
+                                                                updateTrackRenderers();
+                                                            });
+                                                });
                                     }
                                 }
 
@@ -760,8 +769,8 @@ public class MainController {
             final double scaleXalt = eventLocationReference.getCanvasContext().getBoundingRect().getWidth() / width;
             resetZoomStripe();
             hSlider.setValue(invertExpScaleTransform(canvasPane, scaleXalt));
-            double scrollXValue = (minX / (modelWidth - width)) * 100;
-            scrollXValue = enforceRangeBounds(scrollXValue, 0, 100);
+            double scrollPosition = (minX / (modelWidth - width)) * 100;
+            final double scrollXValue = enforceRangeBounds(scrollPosition, 0, 100);
             scrollX.setValue(scrollXValue);
         }
     }

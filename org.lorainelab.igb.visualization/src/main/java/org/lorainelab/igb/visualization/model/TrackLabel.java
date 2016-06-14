@@ -4,6 +4,7 @@ import com.google.common.base.CharMatcher;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import java.io.IOException;
 import java.net.URL;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Cursor;
@@ -14,6 +15,8 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
@@ -132,11 +135,22 @@ public class TrackLabel {
             stackHeightEntryField.textProperty().addListener((observable, oldValue, newValue) -> {
                 stackHeightEntryField.setText(CharMatcher.inRange('0', '9').retainFrom(newValue));
             });
+            stackHeightEntryField.setOnKeyPressed((KeyEvent ke) -> {
+                if (ke.getCode().equals(KeyCode.ENTER)) {
+                    Platform.runLater(() -> {
+                        zoomableTrackRenderer.getTrack().setMaxStackHeight(Integer.parseInt(stackHeightEntryField.getText()));
+                        zoomableTrackRenderer.render();
+                        stage.hide();
+                    });
+                }
+            });
             Button okBtn = new Button("Ok");
             okBtn.setOnAction(event -> {
-                zoomableTrackRenderer.getTrack().setMaxStackHeight(Integer.parseInt(stackHeightEntryField.getText()));
-                zoomableTrackRenderer.render();
-                stage.hide();
+                Platform.runLater(() -> {
+                    zoomableTrackRenderer.getTrack().setMaxStackHeight(Integer.parseInt(stackHeightEntryField.getText()));
+                    zoomableTrackRenderer.render();
+                    stage.hide();
+                });
             });
             Button cancelBtn = new Button("Cancel");
             cancelBtn.setOnAction(event -> {
@@ -171,4 +185,5 @@ public class TrackLabel {
             });
         }
     }
+
 }

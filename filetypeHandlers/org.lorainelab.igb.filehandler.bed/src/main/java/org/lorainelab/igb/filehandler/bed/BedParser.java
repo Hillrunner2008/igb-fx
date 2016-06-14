@@ -281,6 +281,10 @@ public class BedParser implements FileTypeHandler {
                     if (bedFeature.getId().isPresent()) {
                         Document document = new Document();
                         document.getFields().put("id", bedFeature.getId().get());
+                        document.getFields().put("chromosomeId", bedFeature.getChromosomeId());
+                        document.getFields().put("start", bedFeature.getRange().lowerEndpoint().toString());
+                        document.getFields().put("end", bedFeature.getRange().upperEndpoint().toString());
+                        
                         documents.add(document);
                     }
                 }
@@ -288,7 +292,6 @@ public class BedParser implements FileTypeHandler {
                 LOG.error(ex.getMessage(), ex);
             }
         });
-        searchService.clearIndex(indexIdentity);
         searchService.index(documents, indexIdentity);
     }
 

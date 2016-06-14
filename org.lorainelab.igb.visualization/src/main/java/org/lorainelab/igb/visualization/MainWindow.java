@@ -42,17 +42,22 @@ public class MainWindow {
         if (splashScreen != null) {
             splashScreen.close();
         }
+
         initializeFxRuntime();
-        final URL resource = MainWindow.class.getClassLoader().getResource("main.fxml");
-        FXMLLoader loader = new FXMLLoader(resource);
-        loader.setClassLoader(this.getClass().getClassLoader());
-        loader.setController(controller);
-        root = loader.load();
-        Scene scene = new Scene(root);
-        stage.setTitle("JavaFx IGB");
         Platform.runLater(() -> {
-            stage.setScene(scene);
-            stage.show();
+            try {
+                final URL resource = MainWindow.class.getClassLoader().getResource("main.fxml");
+                FXMLLoader loader = new FXMLLoader(resource);
+                loader.setClassLoader(this.getClass().getClassLoader());
+                loader.setController(controller);
+                root = loader.load();
+                Scene scene = new Scene(root);
+                stage.setTitle("JavaFx IGB");
+                stage.setScene(scene);
+                stage.show();
+            } catch (IOException ex) {
+                LOG.error(ex.getMessage(), ex);
+            }
         });
     }
 

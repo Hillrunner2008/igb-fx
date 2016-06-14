@@ -319,7 +319,6 @@ public class CoordinateTrackRenderer implements TrackRenderer {
                 xOffset = Math.min(maxXoffset, xOffset);
             }
             xOffset = enforceRangeBounds(xOffset, 0, modelWidth);
-            Range<Integer> currentRange = Range.closedOpen((int) xOffset, (int) xOffset + (int) visibleVirtualCoordinatesX);
             viewBoundingRectangle = new Rectangle2D(xOffset, canvasContext.getBoundingRect().getMinY(), visibleVirtualCoordinatesX, canvasContext.getBoundingRect().getHeight());
             viewYcoordinateRange = Range.<Double>closed(viewBoundingRectangle.getMinY(), viewBoundingRectangle.getMaxY());
             render();
