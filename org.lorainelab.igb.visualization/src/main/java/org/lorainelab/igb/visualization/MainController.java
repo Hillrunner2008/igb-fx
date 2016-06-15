@@ -262,14 +262,16 @@ public class MainController {
             Label entryLabel = new Label(result.getFields().get("id"));
             CustomMenuItem item = new CustomMenuItem(entryLabel, true);
             item.setOnAction((ActionEvent actionEvent) -> {
-                search.setText(result.getFields().get("id"));
-                searchAutocomplete.hide();
-                int start = Integer.parseInt(result.getFields().get("start"));
-                int end = Integer.parseInt(result.getFields().get("end"));
-                trackRenderers.stream().findFirst().ifPresent(trackRender -> {
-                    Rectangle2D oldRect = trackRender.getCanvasContext().getBoundingRect();
-                    Rectangle2D rect = new Rectangle2D(start, oldRect.getMinY(), end - start, oldRect.getHeight());
-                    eventBus.post(new JumpZoomEvent(rect, trackRender));
+                Platform.runLater(() -> {
+                    search.setText(result.getFields().get("id"));
+                    searchAutocomplete.hide();
+                    int start = Integer.parseInt(result.getFields().get("start"));
+                    int end = Integer.parseInt(result.getFields().get("end"));
+                    trackRenderers.stream().findFirst().ifPresent(trackRender -> {
+                        Rectangle2D oldRect = trackRender.getCanvasContext().getBoundingRect();
+                        Rectangle2D rect = new Rectangle2D(start, oldRect.getMinY(), end - start, oldRect.getHeight());
+                        eventBus.post(new JumpZoomEvent(rect, trackRender));
+                    });
                 });
 
             });
