@@ -46,7 +46,7 @@ public class GenomeAssemblyTab implements TabProvider {
     private TableColumn seqNameColumn;
     @FXML
     private TableColumn seqLengthColumn;
-    private ObservableList<Chromosome> tableData;
+    private final ObservableList<Chromosome> tableData;
 
     private GenomeVersionRegistry genomeVersionRegistry;
 
@@ -102,19 +102,23 @@ public class GenomeAssemblyTab implements TabProvider {
 
     private void loadSelectedGenomeVersion(GenomeVersion selectedGenomeVersion) {
         Platform.runLater(() -> {
-            genomeVersionRegistry.getSelectedGenomeVersion().removeListener(selectedGenomeVersionChangeListener);
-            genomeVersionComboBox.setValue(selectedGenomeVersion);
-            genomeVersionRegistry.getSelectedGenomeVersion().addListener(selectedGenomeVersionChangeListener);
-            speciesComboBox.setValue(selectedGenomeVersion.getSpeciesName());
-            tableData.clear();
-            tableData.addAll(selectedGenomeVersion.getReferenceSequenceProvider().getChromosomes());
+            synchronized (tableData) {
+                genomeVersionRegistry.getSelectedGenomeVersion().removeListener(selectedGenomeVersionChangeListener);
+                genomeVersionComboBox.setValue(selectedGenomeVersion);
+                genomeVersionRegistry.getSelectedGenomeVersion().addListener(selectedGenomeVersionChangeListener);
+                speciesComboBox.setValue(selectedGenomeVersion.getSpeciesName());
+                tableData.clear();
+                tableData.addAll(selectedGenomeVersion.getReferenceSequenceProvider().getChromosomes());
+            }
         });
         selectedGenomeVersion.getReferenceSequenceProvider().getChromosomes().addListener((SetChangeListener.Change<? extends Chromosome> change) -> {
             Platform.runLater(() -> {
-                if (change.wasAdded()) {
-                    tableData.add(change.getElementAdded());
-                } else {
-                    tableData.remove(change.getElementRemoved());
+                synchronized (tableData) {
+                    if (change.wasAdded()) {
+                        tableData.add(change.getElementAdded());
+                    } else {
+                        tableData.remove(change.getElementRemoved());
+                    }
                 }
             });
         });
