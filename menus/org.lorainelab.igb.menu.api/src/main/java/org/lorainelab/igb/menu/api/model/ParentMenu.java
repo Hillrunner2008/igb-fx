@@ -16,6 +16,7 @@ package org.lorainelab.igb.menu.api.model;
  *  * VIEW
  *  * TOOLS
  *  * TABS
+ *  * GENOME
  *  * HELP
  *
  * <img src="doc-files/toolbarParentMenus.png" alt="ToolBar Parent Menus"/>
@@ -24,7 +25,7 @@ package org.lorainelab.igb.menu.api.model;
  * @module.info context-menu-api
  */
 public enum ParentMenu {
-    FILE("file"), EDIT("edit"), VIEW("view"), TOOLS("tools"), HELP("help");
+    FILE("file"), EDIT("edit"), VIEW("view"), TOOLS("tools"), HELP("help"), GENOME("Genome");
     private final String name;
 
     private ParentMenu(String name) {
