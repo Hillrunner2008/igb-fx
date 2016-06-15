@@ -223,7 +223,6 @@ public class MainController {
         this.searchService = searchService;
     }
 
-
     private void initializeSearch() {
         Platform.runLater(() -> {
             search.setOnKeyReleased(e -> {
@@ -231,12 +230,12 @@ public class MainController {
                     searchAutocomplete.hide();
                 } else {
                     LinkedList<Document> searchResult = new LinkedList<>();
-                    Optional<IndexIdentity> resourceIndexIdentity = 
-                            searchService.getResourceIndexIdentity(
+                    Optional<IndexIdentity> resourceIndexIdentity
+                            = searchService.getResourceIndexIdentity(
                                     selectedGenomeVersion.getSpeciesName());
                     if (resourceIndexIdentity.isPresent()) {
                         //TODO: refactor to boolean queries in search module
-                        searchService.search("(chromosomeId:"+selectedChromosome.getName()+") AND (id:"+search.getText()+"*)",
+                        searchService.search("(chromosomeId:" + selectedChromosome.getName() + ") AND (id:" + search.getText() + "*)",
                                 resourceIndexIdentity.get()).stream()
                                 .forEach(doc -> searchResult.add(doc));
                     }
@@ -267,11 +266,12 @@ public class MainController {
                 searchAutocomplete.hide();
                 int start = Integer.parseInt(result.getFields().get("start"));
                 int end = Integer.parseInt(result.getFields().get("end"));
-                LOG.info("jump zoom to: {} {}", start, end);
-                TrackRenderer trackRender = trackRenderers.stream().findFirst().get();
-                Rectangle2D oldRect = trackRender.getCanvasContext().getBoundingRect();
-                Rectangle2D rect = new Rectangle2D(start, oldRect.getMinY(), end-start, oldRect.getHeight());
-                eventBus.post(new JumpZoomEvent(rect, trackRender));
+                trackRenderers.stream().findFirst().ifPresent(trackRender -> {
+                    Rectangle2D oldRect = trackRender.getCanvasContext().getBoundingRect();
+                    Rectangle2D rect = new Rectangle2D(start, oldRect.getMinY(), end - start, oldRect.getHeight());
+                    eventBus.post(new JumpZoomEvent(rect, trackRender));
+                });
+
             });
             menuItems.add(item);
         }
