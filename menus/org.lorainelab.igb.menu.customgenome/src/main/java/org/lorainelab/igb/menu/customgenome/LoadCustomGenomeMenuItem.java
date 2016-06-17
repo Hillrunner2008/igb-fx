@@ -10,16 +10,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import javafx.application.Platform;
-import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import net.miginfocom.layout.CC;
 import org.lorainelab.igb.data.model.GenomeVersion;
@@ -46,6 +45,8 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
     private Stage stage;
     private GenomeVersionRegistry genomeVersionRegistry;
     private Button refSeqBrowseBtn;
+
+
     private Button okBtn;
     private Button cancelBtn;
     private Label refSeqLabel;
@@ -71,19 +72,25 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
             menuItem.setOnAction(event -> {
                 Platform.runLater(() -> {
                     stage.centerOnScreen();
+
                     stage.show();
                 });
             });
+            
         });
     }
 
     private void initComponents() {
         migPane = new MigPane("fillx", "[]rel[grow]", "[][][]");
+
         stage = new Stage();
-        stage.setMinWidth(575);
-        stage.setMaxWidth(575);
-        stage.setMinHeight(175);
-        stage.setMaxHeight(175);
+        stage.sizeToScene();
+        stage.setMinWidth(440);
+
+        stage.setMinHeight(165);
+        stage.setHeight(165);
+        stage.setMaxHeight(165);
+        stage.setResizable(true);
         stage.setTitle("Open Genome from File");
         speciesLabel = new Label("Species");
         speciesTextField = new TextField();
@@ -112,9 +119,15 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
                     LOG.error(ex.getMessage(), ex);
                 }
             });
+            versionTextField.requestFocus();
+            
         });
+
         okBtn = new Button("Ok");
+//        okBtn.setDefaultButton(true);
+        
         okBtn.setOnAction(event -> {
+            
             boolean[] customGenomeAdded = {false};
             CompletableFuture.runAsync(() -> {
                 try {
@@ -129,6 +142,7 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
                         customGenomePersistenceManager.persistCustomGenome(customGenome);
                         customGenomeAdded[0] = genomeVersionRegistry.getRegisteredGenomeVersions().add(customGenome);
                         genomeVersionRegistry.setSelectedGenomeVersion(customGenome);
+                        
                     }
                 } catch (Exception ex) {
                     LOG.error(ex.getMessage(), ex);
@@ -151,30 +165,31 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
                     }
                 });
             });
+            
         });
         cancelBtn = new Button("Cancel");
         cancelBtn.setOnAction(event -> {
             stage.hide();
         });
-    
+
         refSeqTextField.setOnKeyPressed(this::handleKeyEvent);
         speciesTextField.setOnKeyPressed(this::handleKeyEvent);
         versionTextField.setOnKeyPressed(this::handleKeyEvent);
     }
-    
-    
-    private void handleKeyEvent(KeyEvent event){
+
+    private void handleKeyEvent(KeyEvent event) {
         switch (event.getCode()) {
-                case ENTER:
-                    okBtn.fire();
-                    break;
-                case ESCAPE:
-                    cancelBtn.fire();
-                    break;
-                default:
-                    ((TextField)event.getSource()).appendText(event.getCharacter());
-                    break;
-            }
+            case ENTER:
+                okBtn.fire();
+                break;
+            case ESCAPE:
+                cancelBtn.fire();
+                break;
+            case K:
+                if (event.isControlDown()) {
+                    ((TextField) event.getSource()).deleteText(((TextField) event.getSource()).getCaretPosition(), ((TextField) event.getSource()).getLength());
+                }
+        }
     }
 
     private void layoutComponents() {
@@ -185,11 +200,15 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
         migPane.add(versionTextField, "growx, wrap");
         migPane.add(speciesLabel, "");
         migPane.add(speciesTextField, "growx, wrap");
-        migPane.add(okBtn, new CC().gap("rel").tag("ok").span(3).split());
-        migPane.add(cancelBtn, new CC().tag("ok"));
-        stage.setResizable(false);
+        migPane.add(okBtn, new CC().gap("rel").x("container.x+150").span(3).tag("ok").split());
+        migPane.add(cancelBtn, new CC().x("container.x+200").tag("ok"));
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setResizable(true);
         Scene scene = new Scene(migPane);
+        
         stage.setScene(scene);
+        
+        
     }
 
     @Override
