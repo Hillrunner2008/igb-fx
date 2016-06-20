@@ -349,11 +349,14 @@ public class MainController {
 
     @Subscribe
     private void handleScrollScaleEvent(ScrollScaleEvent event) {
-        if (event.getDirection().equals(Direction.INCREMENT)) {
-            hSlider.increment();
-        } else {
-            hSlider.decrement();
-        }
+        Platform.runLater(() -> {
+            if (event.getDirection().equals(Direction.INCREMENT)) {
+                hSlider.increment();
+            } else {
+                hSlider.decrement();
+            }
+        });
+
     }
 
     @Subscribe
