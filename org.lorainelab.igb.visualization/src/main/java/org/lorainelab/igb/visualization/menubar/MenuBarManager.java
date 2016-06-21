@@ -190,7 +190,7 @@ public class MenuBarManager {
                         removeMenuEntry(helpMenuEntries, menuItem);
                         break;
                     case GENOME:
-                        removeMenuEntry(helpMenuEntries, menuItem);
+                        removeMenuEntry(genomeMenuEntries, menuItem);
                         break;
                 }
             });
