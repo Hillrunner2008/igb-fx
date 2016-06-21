@@ -4,11 +4,14 @@ import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Lists;
+import java.io.File;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
@@ -16,12 +19,15 @@ import javafx.collections.SetChangeListener;
 import javafx.collections.transformation.SortedList;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.FocusModel;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 import net.miginfocom.layout.CC;
 import org.lorainelab.igb.data.model.GenomeVersion;
 import org.lorainelab.igb.data.model.GenomeVersionRegistry;
@@ -33,7 +39,7 @@ import org.tbee.javafx.scene.layout.MigPane;
 
 /**
  *
- * @author Devdatta
+ * @author Devdatta Kulkarni
  */
 @Component(immediate = true)
 public class EditCustomGenomes implements MenuBarEntryProvider {
@@ -53,9 +59,7 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
     private GenomeVersionRegistry genomeVersionRegistry;
     private ObservableSet<GenomeVersion> genomeVersions;
     private ObservableList<GenomeVersion> genomeVersionList;
-    
-    
-    
+
     public EditCustomGenomes() {
         menuItem = new WeightedMenuItem(2, "Edit genomes");
     }
@@ -85,43 +89,39 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
         });
 
     }
-    
+
     private void initComponents() {
-        
+
         genomeVersions = genomeVersionRegistry.getRegisteredGenomeVersions();
         genomeVersionList = FXCollections.observableArrayList(genomeVersions);
         //Convert to lambda ?? 
         genomeVersions.addListener(new SetChangeListener<GenomeVersion>() {
             @Override
             public void onChanged(SetChangeListener.Change<? extends GenomeVersion> change) {
-                if(change.wasAdded()){
+                if (change.wasAdded()) {
                     genomeVersionList.add(change.getElementAdded());
-                    System.out.println("\n\n\nAdding to list "+change.getElementAdded().getSpeciesName()+"\n\n\n");
-                }
-                else if(change.wasRemoved()){
+                    System.out.println("\n\n\nAdding to list " + change.getElementAdded().getSpeciesName() + "\n\n\n");
+                } else if (change.wasRemoved()) {
                     genomeVersionList.remove(change.getElementRemoved());
                 }
-//                genomeVersionList.clear();
-//                genomeVersionList.addAll(genomeVersions);
-                table.setVisible(false);
-                table.setVisible(true);
-                System.out.println("genome size: "+ genomeVersions.size());
+                System.out.println("genome size: " + genomeVersions.size());
             }
         });
-        
+
         for (Iterator<GenomeVersion> iterator = genomeVersions.iterator(); iterator.hasNext();) {
             GenomeVersion next = iterator.next();
-            System.out.println("genome: "+ next.getSpeciesName());
+            System.out.println("genome: " + next.getSpeciesName());
         }
-        
+
         migPane = new MigPane("fillx", "[]rel[grow]", "[][][]");
         stage = new Stage();
         stage.setTitle("Edit or delete custom genome");
-        stage.setMinWidth(975);
-        stage.setMaxWidth(975);
-        stage.setMinHeight(375);
-        stage.setMaxHeight(375);
+        stage.setMinWidth(1800);
+        stage.setMaxWidth(1800);
+        stage.setMinHeight(500);
+        stage.setMaxHeight(500);
         table = new TableView();
+       
         table.setEditable(true);
         species = new TableColumn("Species");
         version = new TableColumn("Version");
@@ -130,11 +130,38 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
         deleteColumn = new TableColumn("Delete");
         table.getColumns().addAll(species, version, fileName, editColumn, deleteColumn);
         table.setItems(FXCollections.observableArrayList(genomeVersions));
-        //CHANGE THIS to make independent
-        version.setCellValueFactory(new PropertyValueFactory<GenomeVersion,String>("speciesName"));
+
+        version.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<GenomeVersion, String>, ObservableValue<String>>() {
+            @Override
+            public ObservableValue<String> call(TableColumn.CellDataFeatures<GenomeVersion, String> param) {
+                return new SimpleStringProperty(param.getValue().getSpeciesName());
+            }
+        });
+        species.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<GenomeVersion, String>, ObservableValue<String>>() {
+            @Override
+            public ObservableValue<String> call(TableColumn.CellDataFeatures<GenomeVersion, String> param) {
+                return new SimpleStringProperty(param.getValue().getName());
+            }
+        });
+        fileName.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<GenomeVersion, String>, ObservableValue<String>>() {
+            @Override
+            public ObservableValue<String> call(TableColumn.CellDataFeatures<GenomeVersion, String> param) {
+                String[] path = param.getValue().getReferenceSequenceProvider().getPath().split(File.separator);
+                return new SimpleStringProperty(path[path.length - 1]);
+            }
+        }
+        );
         cancelBtn = new Button("Exit");
         cancelBtn.setOnAction(event -> {
             stage.hide();
+        });
+        table.setOnMouseClicked(event -> {
+            TablePosition focusedCell = table.getFocusModel().getFocusedCell();
+            if (focusedCell.getColumn() != 4) {
+                return;
+            }
+            customGenomePersistenceManager.deleteCustomGenome(genomeVersionList.get(focusedCell.getRow()));
+            System.out.println("deleting " + genomeVersionList.get(focusedCell.getRow()).getName());
         });
     }
 
