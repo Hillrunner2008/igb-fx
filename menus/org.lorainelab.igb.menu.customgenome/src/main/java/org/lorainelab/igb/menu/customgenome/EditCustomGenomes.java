@@ -17,13 +17,17 @@ import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
 import javafx.collections.transformation.SortedList;
+import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.FocusModel;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.control.cell.TextFieldTreeCell;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -121,7 +125,7 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
         stage.setMinHeight(500);
         stage.setMaxHeight(500);
         table = new TableView();
-       
+
         table.setEditable(true);
         species = new TableColumn("Species");
         version = new TableColumn("Version");
@@ -157,11 +161,16 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
         });
         table.setOnMouseClicked(event -> {
             TablePosition focusedCell = table.getFocusModel().getFocusedCell();
-            if (focusedCell.getColumn() != 4) {
-                return;
+            //delete genome
+            if (focusedCell.getColumn() == 4) {
+                customGenomePersistenceManager.deleteCustomGenome(genomeVersionList.get(focusedCell.getRow()));
+                System.out.println("deleting " + genomeVersionList.get(focusedCell.getRow()).getName());
+            } //edit genome
+            else if (focusedCell.getColumn() == 3) {
+                GenomeVersion genome = genomeVersionList.get(focusedCell.getRow());
+
             }
-            customGenomePersistenceManager.deleteCustomGenome(genomeVersionList.get(focusedCell.getRow()));
-            System.out.println("deleting " + genomeVersionList.get(focusedCell.getRow()).getName());
+
         });
     }
 
