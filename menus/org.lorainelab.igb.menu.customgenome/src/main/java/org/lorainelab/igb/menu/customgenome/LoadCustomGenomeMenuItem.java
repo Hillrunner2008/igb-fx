@@ -114,7 +114,6 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
             } else {
                 homeDirectory = new File(System.getProperty("user.home"));
             }
-            System.out.println(SessionPreferences.getRecentSelectedFilePath());
             fileChooser.setInitialDirectory(homeDirectory);
             addFileExtensionFilters(fileChooser);
             Optional.ofNullable(fileChooser.showOpenDialog(null)).ifPresent(selectedFile -> {
