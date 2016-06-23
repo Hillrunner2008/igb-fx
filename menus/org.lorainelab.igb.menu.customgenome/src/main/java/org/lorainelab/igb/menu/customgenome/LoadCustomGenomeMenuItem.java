@@ -31,6 +31,7 @@ import org.lorainelab.igb.data.model.util.TwoBitParser;
 import org.lorainelab.igb.menu.api.MenuBarEntryProvider;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
 import org.lorainelab.igb.menu.api.model.WeightedMenuItem;
+import org.lorainelab.igb.preferences.SessionPreferences;
 import org.lorainelab.igb.selections.SelectionInfoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +49,7 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
     private Stage stage;
     private GenomeVersionRegistry genomeVersionRegistry;
     private Button refSeqBrowseBtn;
-
+    private String recentFilePath = null;
     private Button okBtn;
     private Button cancelBtn;
     private Label refSeqLabel;
@@ -105,7 +106,15 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
         refSeqBrowseBtn.setOnAction(event -> {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Choose Sequence File");
-            File homeDirectory = new File(System.getProperty("user.home"));
+            File homeDirectory;
+            if (SessionPreferences.getRecentSelectedFilePath() != null) {
+                File file = new File(SessionPreferences.getRecentSelectedFilePath());
+                String simpleFileName = file.getParent();
+                homeDirectory = new File(simpleFileName);
+            } else {
+                homeDirectory = new File(System.getProperty("user.home"));
+            }
+            System.out.println(SessionPreferences.getRecentSelectedFilePath());
             fileChooser.setInitialDirectory(homeDirectory);
             addFileExtensionFilters(fileChooser);
             Optional.ofNullable(fileChooser.showOpenDialog(null)).ifPresent(selectedFile -> {
@@ -126,7 +135,6 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
         });
 
         okBtn = new Button("Ok");
-
 
         okBtn.setOnAction(event -> {
 
