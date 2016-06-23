@@ -3,6 +3,7 @@ package org.lorainelab.igb.data.model;
 import com.google.common.collect.Sets;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -18,21 +19,34 @@ public class GenomeVersion {
     private String name;
     private String speciesName;
     private String description;
+    private final UUID uuid;
     private final ReferenceSequenceProvider referenceSequenceProvider;
     private ObjectProperty<Optional<Chromosome>> selectedChromosomeProperty;
     private ObservableSet<DataSet> loadedDataSets;
 
     public GenomeVersion(String name, String speciesName, ReferenceSequenceProvider referenceSequenceProvider) {
-        this(name, speciesName, referenceSequenceProvider, null);
+        this(name, speciesName, referenceSequenceProvider, null,null);
     }
 
-    public GenomeVersion(String name, String speciesName, ReferenceSequenceProvider referenceSequenceProvider, String description) {
+    public GenomeVersion(String name, String speciesName, ReferenceSequenceProvider referenceSequenceProvider, UUID uuid) {
+        this(name, speciesName, referenceSequenceProvider, null,uuid);
+    }
+
+    public GenomeVersion(String name, String speciesName, ReferenceSequenceProvider referenceSequenceProvider, String description, UUID uuid) {
         this.name = name;
         this.speciesName = speciesName;
         this.description = description;
         this.referenceSequenceProvider = referenceSequenceProvider;
+        if(uuid == null){
+            uuid = UUID.randomUUID();
+        }
+        this.uuid = uuid;
         selectedChromosomeProperty = new SimpleObjectProperty(Optional.empty());
         loadedDataSets = FXCollections.observableSet(Sets.newHashSet());
+    }
+    
+    public GenomeVersion(String name, String speciesName, ReferenceSequenceProvider referenceSequenceProvider, String description) {
+        this(name, speciesName, referenceSequenceProvider, null,null);
     }
 
     public String getName() {
@@ -43,6 +57,10 @@ public class GenomeVersion {
         this.name = name;
     }
 
+    public UUID getUuid() {
+        return uuid;
+    }
+    
     public String getSpeciesName() {
         return speciesName;
     }

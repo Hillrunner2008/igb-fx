@@ -104,17 +104,14 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
             public void onChanged(SetChangeListener.Change<? extends GenomeVersion> change) {
                 if (change.wasAdded()) {
                     genomeVersionList.add(change.getElementAdded());
-                    System.out.println("\n\n\nAdding to list " + change.getElementAdded().getSpeciesName() + "\n\n\n");
                 } else if (change.wasRemoved()) {
                     genomeVersionList.remove(change.getElementRemoved());
                 }
-                System.out.println("genome size: " + genomeVersions.size());
             }
         });
 
         for (Iterator<GenomeVersion> iterator = genomeVersions.iterator(); iterator.hasNext();) {
             GenomeVersion next = iterator.next();
-            System.out.println("genome: " + next.getSpeciesName());
         }
 
         migPane = new MigPane("fillx", "[]rel[grow]", "[][][]");
@@ -164,7 +161,6 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
             //delete genome
             if (focusedCell.getColumn() == 4) {
                 customGenomePersistenceManager.deleteCustomGenome(genomeVersionList.get(focusedCell.getRow()));
-                System.out.println("deleting " + genomeVersionList.get(focusedCell.getRow()).getName());
             } //edit genome
             else if (focusedCell.getColumn() == 3) {
                 GenomeVersion genome = genomeVersionList.get(focusedCell.getRow());
