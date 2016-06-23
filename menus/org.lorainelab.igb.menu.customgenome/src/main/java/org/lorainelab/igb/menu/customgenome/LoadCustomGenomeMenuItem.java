@@ -9,7 +9,10 @@ import java.io.File;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -46,7 +49,6 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
     private GenomeVersionRegistry genomeVersionRegistry;
     private Button refSeqBrowseBtn;
 
-
     private Button okBtn;
     private Button cancelBtn;
     private Label refSeqLabel;
@@ -76,7 +78,7 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
                     stage.show();
                 });
             });
-            
+
         });
     }
 
@@ -120,14 +122,14 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
                 }
             });
             versionTextField.requestFocus();
-            
+
         });
 
         okBtn = new Button("Ok");
-//        okBtn.setDefaultButton(true);
-        
+
+
         okBtn.setOnAction(event -> {
-            
+
             boolean[] customGenomeAdded = {false};
             CompletableFuture.runAsync(() -> {
                 try {
@@ -142,7 +144,7 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
                         customGenomePersistenceManager.persistCustomGenome(customGenome);
                         customGenomeAdded[0] = genomeVersionRegistry.getRegisteredGenomeVersions().add(customGenome);
                         genomeVersionRegistry.setSelectedGenomeVersion(customGenome);
-                        
+
                     }
                 } catch (Exception ex) {
                     LOG.error(ex.getMessage(), ex);
@@ -165,7 +167,7 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
                     }
                 });
             });
-            
+
         });
         cancelBtn = new Button("Cancel");
         cancelBtn.setOnAction(event -> {
@@ -196,19 +198,18 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
         migPane.add(refSeqLabel);
         migPane.add(refSeqTextField, "growx");
         migPane.add(refSeqBrowseBtn, "wrap");
-        migPane.add(versionLabel, "");
-        migPane.add(versionTextField, "growx, wrap");
         migPane.add(speciesLabel, "");
         migPane.add(speciesTextField, "growx, wrap");
+        migPane.add(versionLabel, "");
+        migPane.add(versionTextField, "growx, wrap");
         migPane.add(okBtn, new CC().gap("rel").x("container.x+150").span(3).tag("ok").split());
         migPane.add(cancelBtn, new CC().x("container.x+200").tag("ok"));
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setResizable(true);
         Scene scene = new Scene(migPane);
-        
+
         stage.setScene(scene);
-        
-        
+
     }
 
     @Override

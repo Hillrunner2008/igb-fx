@@ -59,7 +59,12 @@ public class OpenFileMenuItem implements MenuBarEntryProvider, ToolbarButtonProv
     private void openFileAction() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Load File");
-        File homeDirectory = new File(System.getProperty("user.home"));
+        //=======
+        String homeDirectoryPath = "user.home";
+        File homeDirectory = new File(System.getProperty(homeDirectoryPath));
+        System.out.println("homeDirectory "+homeDirectory.getAbsolutePath());
+        //=======
+//        File homeDirectory = new File(System.getProperty("user.home"));
         fileChooser.setInitialDirectory(homeDirectory);
         addFileExtensionFilters(fileChooser);
         Optional.ofNullable(fileChooser.showOpenMultipleDialog(null)).ifPresent(selectedFiles -> {
