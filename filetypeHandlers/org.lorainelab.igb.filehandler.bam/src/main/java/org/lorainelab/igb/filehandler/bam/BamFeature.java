@@ -1,39 +1,103 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.lorainelab.igb.filehandler.bam;
 
 import com.google.common.collect.Range;
+import com.google.common.collect.Sets;
+import htsjdk.samtools.Cigar;
+import htsjdk.samtools.CigarElement;
+import htsjdk.samtools.SAMRecord;
 import java.util.Optional;
+import java.util.Set;
 import org.lorainelab.igb.data.model.Feature;
 import org.lorainelab.igb.data.model.Strand;
+import org.lorainelab.igb.filehandler.bam.AlignmentBlock.AlignmentType;
 
-/**
- *
- * @author jeckstei
- */
 public class BamFeature implements Feature {
+
+    private final Range<Integer> range;
+    private final Strand strand;
+    private final SAMRecord samRecord;
+    private final int alignmentStart;
+    private final int alignmentEnd;
+
+    public BamFeature(SAMRecord samRecord) {
+        this.samRecord = samRecord;
+        alignmentStart = samRecord.getAlignmentStart() - 1; // convert to interbase
+        alignmentEnd = samRecord.getAlignmentEnd() - 1;
+        if (!samRecord.getReadNegativeStrandFlag()) {
+            strand = Strand.POSITIVE;
+            range = Range.closedOpen(alignmentStart, alignmentEnd);
+        } else {
+            strand = Strand.NEGATIVE;
+            range = Range.closedOpen(alignmentStart, alignmentEnd);
+        }
+    }
 
     @Override
     public Range<Integer> getRange() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return range;
     }
 
     @Override
     public Strand getStrand() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return strand;
     }
 
     @Override
     public Optional<String> getId() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return Optional.ofNullable(samRecord.getReadName());
     }
 
     @Override
     public String getChromosomeId() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return samRecord.getReferenceName();
     }
-    
+
+    public String getReadSequence() {
+        return samRecord.getReadString();
+    }
+
+    public int getMappingQuality() {
+        return samRecord.getMappingQuality();
+    }
+
+    public String getCigarString() {
+        return samRecord.getCigarString();
+    }
+
+    public String getAlignmentBlockSequence(AlignmentBlock alignmentBlock) {
+        Range<Integer> alignmentBlockRange = alignmentBlock.getRange();
+        final int sequenceStartPos = alignmentBlockRange.lowerEndpoint() - alignmentStart;
+        final int sequenceEndPos = sequenceStartPos + alignmentBlockRange.upperEndpoint() - alignmentBlockRange.lowerEndpoint();
+        return samRecord.getReadString().substring(sequenceStartPos, sequenceEndPos);
+    }
+
+    public Set<AlignmentBlock> getAnnotationBlocks() {
+        Set<AlignmentBlock> blocks = Sets.newLinkedHashSet();
+        Cigar cigar = samRecord.getCigar();
+        int start = alignmentStart;
+        for (CigarElement cigarElement : cigar.getCigarElements()) {
+            switch (cigarElement.getOperator()) {
+                case D:
+                    blocks.add(new AlignmentBlock(Range.closedOpen(start, start + cigarElement.getLength()), AlignmentType.DELETION));
+                    start += cigarElement.getLength();
+                    break;
+                case I:
+                    blocks.add(new AlignmentBlock(Range.closedOpen(start, start + cigarElement.getLength()), AlignmentType.INSERTION));
+                    break;
+                case M:
+                    blocks.add(new AlignmentBlock(Range.closedOpen(start, start + cigarElement.getLength()), AlignmentType.MATCH));
+                    start += cigarElement.getLength();
+                    break;
+                case N:
+                    blocks.add(new AlignmentBlock(Range.closedOpen(start, start + cigarElement.getLength()), AlignmentType.GAP));
+                    start += cigarElement.getLength();
+                    break;
+                case P:
+                    //?
+                    break;
+            }
+        }
+        return blocks;
+    }
+
 }
