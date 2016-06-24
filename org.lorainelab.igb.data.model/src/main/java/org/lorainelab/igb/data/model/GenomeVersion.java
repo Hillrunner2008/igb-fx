@@ -91,6 +91,7 @@ public class GenomeVersion {
         hash = 31 * hash + Objects.hashCode(this.name);
         hash = 31 * hash + Objects.hashCode(this.speciesName);
         hash = 31 * hash + Objects.hashCode(this.description);
+        hash = 31 * hash + Objects.hashCode(uuid);
         return hash;
     }
 
