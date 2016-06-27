@@ -23,6 +23,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import net.miginfocom.layout.CC;
 import static org.lorainelab.igb.visualization.util.ColorUtils.colorToWebStyle;
@@ -131,6 +132,7 @@ public class TrackLabel {
             MigPane migPane = new MigPane("fillx", "[][]", "[][][]");
             Stage stage = new Stage();
             Label label = new Label("Enter new maximum track height, 0 for unlimited.");
+            label.setWrapText(true);
             TextField stackHeightEntryField = new TextField();
             stackHeightEntryField.textProperty().addListener((observable, oldValue, newValue) -> {
                 stackHeightEntryField.setText(CharMatcher.inRange('0', '9').retainFrom(newValue));
@@ -156,15 +158,17 @@ public class TrackLabel {
             cancelBtn.setOnAction(event -> {
                 stage.hide();
             });
-            stage.setMinWidth(575);
-            stage.setMaxWidth(575);
-            stage.setMinHeight(175);
-            stage.setMaxHeight(175);
+            stage.setWidth(220);
+            
+            stage.setHeight(150);
+            
             stage.setTitle("Set Track Stack Height");
             migPane.add(label, "growx, wrap");
             migPane.add(stackHeightEntryField, "growx, wrap");
-            migPane.add(okBtn, new CC().gap("rel").tag("ok").span(3).split());
-            migPane.add(cancelBtn, new CC().tag("ok"));
+            migPane.add(okBtn, new CC().gap("rel").x("container.x+55").y("container.y+90").span(3).tag("ok").split());
+            migPane.add(cancelBtn, new CC().x("container.x+105").y("container.y+90").tag("ok"));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            
             stage.setResizable(false);
             Scene scene = new Scene(migPane);
             stage.setScene(scene);

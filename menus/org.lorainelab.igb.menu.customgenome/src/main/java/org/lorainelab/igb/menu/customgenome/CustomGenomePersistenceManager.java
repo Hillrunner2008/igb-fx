@@ -19,6 +19,7 @@ import static org.lorainelab.igb.menu.customgenome.CustomGenomePrefKeys.REFERENC
 import static org.lorainelab.igb.menu.customgenome.CustomGenomePrefKeys.SPECIES_NAME;
 import static org.lorainelab.igb.menu.customgenome.CustomGenomePrefKeys.VERSION_NAME;
 import org.lorainelab.igb.preferences.PreferenceUtils;
+import org.lorainelab.igb.preferences.SessionPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,6 +85,7 @@ public class CustomGenomePersistenceManager {
         String speciesName = customGenome.getSpeciesName();
         String versionName = customGenome.getName();
         String sequenceFileUrl = customGenome.getReferenceSequenceProvider().getPath();
+        SessionPreferences.setRecentSelectedFilePath(sequenceFileUrl);
         String nodeName = md5Hash(sequenceFileUrl);
         Preferences node = modulePreferencesNode.node(nodeName);
         node.put(SPECIES_NAME, speciesName);
