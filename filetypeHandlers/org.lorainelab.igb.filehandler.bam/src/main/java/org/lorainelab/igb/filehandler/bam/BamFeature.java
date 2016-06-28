@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 import htsjdk.samtools.Cigar;
 import htsjdk.samtools.CigarElement;
 import htsjdk.samtools.SAMRecord;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -74,7 +75,9 @@ public class BamFeature implements Feature {
     }
     
     public Map<String, String> getTooltipData() {
-        return Maps.newHashMap();
+        HashMap<String, String> tooltipData = Maps.newHashMap();
+        tooltipData.put("forward", Boolean.TRUE.toString());
+        return tooltipData;
     }
 
     public Set<AlignmentBlock> getAnnotationBlocks() {
