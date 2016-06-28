@@ -8,9 +8,9 @@ package org.lorainelab.igb.filehandler.bam;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
+import htsjdk.samtools.QueryInterval;
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SAMRecordIterator;
 import htsjdk.samtools.SAMSequenceRecord;
@@ -23,19 +23,13 @@ import htsjdk.samtools.seekablestream.SeekableFileStream;
 import htsjdk.samtools.util.CloserUtil;
 import java.io.File;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import org.lorainelab.igb.data.model.datasource.DataSource;
 import org.lorainelab.igb.data.model.datasource.DataSourceReference;
 import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandler;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
-import org.lorainelab.igb.data.model.glyph.Glyph;
-import org.lorainelab.igb.data.model.shapes.Composition;
-import org.lorainelab.igb.data.model.shapes.Line;
-import org.lorainelab.igb.data.model.shapes.Rectangle;
 import org.lorainelab.igb.data.model.shapes.Shape;
-import org.lorainelab.igb.data.model.shapes.factory.GlyphFactory;
 import org.lorainelab.igb.data.model.view.Layer;
 import org.lorainelab.igb.search.api.SearchService;
 import org.lorainelab.igb.search.api.model.IndexIdentity;
@@ -63,8 +57,39 @@ public class BamParser implements FileTypeHandler {
     }
 
     @Override
-    public Set<CompositionGlyph> getRegion(DataSourceReference dataSourceReference, Range range, String chromosomeId) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public Set<CompositionGlyph> getRegion(DataSourceReference dataSourceReference, Range<Integer> range, String chromosomeId) {
+        String path = dataSourceReference.getPath();
+        Set<BamFeature> annotations = Sets.newHashSet();
+        DataSource dataSource = dataSourceReference.getDataSource();
+        try (SeekableBufferedStream bamSeekableStream = new SeekableBufferedStream(
+                new SeekableFileStream(new File(dataSourceReference.getPath())));
+                SeekableBufferedStream indexSeekableStream = new SeekableBufferedStream(
+                        new SeekableFileStream(new File(dataSourceReference.getPath() + ".bai")));) {
+
+            SamReader reader = SamReaderFactory.make()
+                    .validationStringency(ValidationStringency.SILENT)
+                    .open(SamInputResource.of(bamSeekableStream).index(indexSeekableStream));
+
+            final List<SAMSequenceRecord> seqRecords = reader.getFileHeader().getSequenceDictionary().getSequences();
+            getSequenceByName(chromosomeId, seqRecords).ifPresent((SAMSequenceRecord record) -> {
+
+                QueryInterval[] intervals = new QueryInterval[]{
+                    new QueryInterval(record.getSequenceIndex(), range.lowerEndpoint(), range.upperEndpoint())
+                };
+                
+                try (SAMRecordIterator iter = reader.query(intervals, true)) {
+                    while (iter.hasNext()) {
+                        SAMRecord samRecord = iter.next();
+                        annotations.add(new BamFeature(samRecord));
+                    }
+                }
+            });
+
+            CloserUtil.close(reader);
+        } catch (Exception ex) {
+            LOG.error(ex.getMessage(), ex);
+        }
+        return convertBamFeaturesToCompositionGlyphs(annotations);
     }
 
     @Override
@@ -72,65 +97,68 @@ public class BamParser implements FileTypeHandler {
         String path = dataSourceReference.getPath();
         Set<BamFeature> annotations = Sets.newHashSet();
         DataSource dataSource = dataSourceReference.getDataSource();
-        dataSource.getInputStream(path).ifPresent(inputStream -> {
-            try (SeekableBufferedStream bamSeekableStream = new SeekableBufferedStream(
-                    new SeekableFileStream(new File(dataSourceReference.getPath())));
-                    SeekableBufferedStream indexSeekableStream = new SeekableBufferedStream(
-                            new SeekableFileStream(new File(dataSourceReference.getPath() + ".bai")));) {
-                SamReader reader = SamReaderFactory.make()
-                        .validationStringency(ValidationStringency.SILENT).open(SamInputResource.of(bamSeekableStream));
-                final List<SAMSequenceRecord> seqRecords = reader.getFileHeader().getSequenceDictionary().getSequences();
-                Optional<SAMSequenceRecord> sequence = getSequenceByName(chromosomeId, seqRecords);
-                SAMSequenceRecord record = sequence.get();
+        try (SeekableBufferedStream bamSeekableStream = new SeekableBufferedStream(
+                new SeekableFileStream(new File(dataSourceReference.getPath())));
+                SeekableBufferedStream indexSeekableStream = new SeekableBufferedStream(
+                        new SeekableFileStream(new File(dataSourceReference.getPath() + ".bai")));) {
+
+            SamReader reader = SamReaderFactory.make()
+                    .validationStringency(ValidationStringency.SILENT)
+                    .open(SamInputResource.of(bamSeekableStream).index(indexSeekableStream));
+
+            final List<SAMSequenceRecord> seqRecords = reader.getFileHeader().getSequenceDictionary().getSequences();
+            getSequenceByName(chromosomeId, seqRecords).ifPresent((SAMSequenceRecord record) -> {
+
                 int start = record.getSequenceIndex();
                 int end = start + record.getSequenceLength();
-                
+
                 try (SAMRecordIterator iter = reader.query(record.getSequenceName(), start, end, true)) {
                     while (iter.hasNext()) {
                         SAMRecord samRecord = iter.next();
                         annotations.add(new BamFeature(samRecord));
                     }
                 }
-                CloserUtil.close(reader);
-            } catch (Exception ex) {
-                LOG.error(ex.getMessage(), ex);
-            }
-        });
+            });
+
+            CloserUtil.close(reader);
+        } catch (Exception ex) {
+            LOG.error(ex.getMessage(), ex);
+        }
         return convertBamFeaturesToCompositionGlyphs(annotations);
     }
-    
+
     private Optional<SAMSequenceRecord> getSequenceByName(String sequence, List<SAMSequenceRecord> seqRecords) {
         return seqRecords.stream().filter(r -> sequence.equals(r.getSequenceName())).findFirst();
     }
 
     private Set<CompositionGlyph> convertBamFeaturesToCompositionGlyphs(Set<BamFeature> annotations) {
         Set<CompositionGlyph> primaryGlyphs = Sets.newLinkedHashSet();
-        String[] label = {""};
-        Map[] tooltipData = {Maps.newConcurrentMap()};
-        annotations.stream().map((BamFeature annotation) -> {
-            BamRenderer view = new BamRenderer();
-            final Composition composition = view.render(annotation);
-            composition.getLabel().ifPresent(compositionLabel -> label[0] = compositionLabel);
-            tooltipData[0] = composition.getTooltipData();
-            return composition.getLayers();
-        }).forEach(layersList -> {
-            List<Glyph> children = Lists.newArrayList();
-            layersList
-                    .stream().forEach((Layer layer) -> {
-                        getShapes(layer).forEach(shape -> {
-                            if (Rectangle.class
-                            .isAssignableFrom(shape.getClass())) {
-                                children.add(GlyphFactory.generateRectangleGlyph((Rectangle) shape));
-
-                            }
-                            if (Line.class
-                            .isAssignableFrom(shape.getClass())) {
-                                children.add(GlyphFactory.generateLine((Line) shape));
-                            }
-                        });
-                    });
-            primaryGlyphs.add(GlyphFactory.generateCompositionGlyph(label[0], tooltipData[0], children));
-        });
+//        String[] label = {""};
+//        Map[] tooltipData = {Maps.newConcurrentMap()};
+//        annotations.stream().map((BamFeature annotation) -> {
+//            BamRenderer view = new BamRenderer();
+//            final Composition composition = view.render(annotation);
+//            composition.getLabel().ifPresent(compositionLabel -> label[0] = compositionLabel);
+//            tooltipData[0] = composition.getTooltipData();
+//            return composition.getLayers();
+//        }).forEach(layersList -> {
+//            List<Glyph> children = Lists.newArrayList();
+//            layersList
+//                    .stream().forEach((Layer layer) -> {
+//                        getShapes(layer).forEach(shape -> {
+//                            if (Rectangle.class
+//                            .isAssignableFrom(shape.getClass())) {
+//                                children.add(GlyphFactory.generateRectangleGlyph((Rectangle) shape));
+//
+//                            }
+//                            if (Line.class
+//                            .isAssignableFrom(shape.getClass())) {
+//                                children.add(GlyphFactory.generateLine((Line) shape));
+//                            }
+//                        });
+//                    });
+//            primaryGlyphs.add(GlyphFactory.generateCompositionGlyph(label[0], tooltipData[0], children));
+//        });
         return primaryGlyphs;
     }
 
