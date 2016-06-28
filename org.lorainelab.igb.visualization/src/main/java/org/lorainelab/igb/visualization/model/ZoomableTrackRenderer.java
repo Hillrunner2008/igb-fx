@@ -13,6 +13,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.paint.Color;
 import org.apache.commons.lang3.text.WordUtils;
 import org.lorainelab.igb.data.model.CanvasContext;
+import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.Track;
 import org.lorainelab.igb.data.model.View;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
@@ -48,15 +49,15 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     private int weight;
     private double scrollY;
 
-    public ZoomableTrackRenderer(CanvasPane canvasPane, Track track, int modelCoordinatesGridSize) {
+    public ZoomableTrackRenderer(CanvasPane canvasPane, Track track, Chromosome chromosome) {
         this.weight = 0;
         this.eventBus = canvasPane.getEventBus();
         this.eventBus.register(this);
         this.track = track;
-        this.modelWidth = modelCoordinatesGridSize;
+        this.modelWidth = chromosome.getLength();
         modelHeight = new SimpleDoubleProperty();
         modelHeight.bind(track.getModelHeight());
-        view = new View(new Rectangle2D(0, 0, modelWidth, modelHeight.doubleValue()));
+        view = new View(new Rectangle2D(0, 0, modelWidth, modelHeight.doubleValue()), chromosome);
         modelHeight.addListener((observable, oldValue, newValue) -> {
             scaleCanvas(view.getXfactor(), view.getYfactor(), scrollY);
         });
