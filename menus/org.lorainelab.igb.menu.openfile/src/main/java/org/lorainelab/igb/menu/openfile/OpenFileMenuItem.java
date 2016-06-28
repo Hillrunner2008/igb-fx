@@ -21,6 +21,7 @@ import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandlerRegistry;
 import org.lorainelab.igb.menu.api.MenuBarEntryProvider;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
 import org.lorainelab.igb.menu.api.model.WeightedMenuItem;
+import org.lorainelab.igb.preferences.SessionPreferences;
 import org.lorainelab.igb.search.api.SearchService;
 import org.lorainelab.igb.search.api.model.IndexIdentity;
 import org.lorainelab.igb.selections.SelectionInfoService;
@@ -59,7 +60,14 @@ public class OpenFileMenuItem implements MenuBarEntryProvider, ToolbarButtonProv
     private void openFileAction() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Load File");
-        File homeDirectory = new File(System.getProperty("user.home"));
+        File homeDirectory;
+        if (SessionPreferences.getRecentSelectedFilePath() != null) {
+            File file = new File(SessionPreferences.getRecentSelectedFilePath());
+            String simpleFileName = file.getParent();
+            homeDirectory = new File(simpleFileName);
+        } else {
+            homeDirectory = new File(System.getProperty("user.home"));
+        }
         fileChooser.setInitialDirectory(homeDirectory);
         addFileExtensionFilters(fileChooser);
         Optional.ofNullable(fileChooser.showOpenMultipleDialog(null)).ifPresent(selectedFiles -> {
