@@ -29,7 +29,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StoredField;
-import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexNotFoundException;
@@ -83,9 +82,9 @@ public class LuceneSearchService implements SearchService {
             ds = dataSourceFactory.createDataSource(props);
             try (Connection dsConnection = ds.getConnection()) {
                 try (Statement stmt = dsConnection.createStatement()) {
-                    String sql = "CREATE TABLE SEARCH "
-                            + "(ID TEXT PRIMARY KEY NOT NULL,"
-                            + " RESOURCE TEXT NOT NULL)";
+                    String sql = "CREATE TABLE search "
+                            + "(id TEXT PRIMARY KEY NOT NULL,"
+                            + " resource TEXT NOT NULL)";
                     stmt.executeUpdate(sql);
                 } catch (SQLException ex) {
                     LOG.debug(ex.getMessage(), ex);
@@ -194,7 +193,7 @@ public class LuceneSearchService implements SearchService {
     public void clearIndex(IndexIdentity indexIdentity) {
         try (Connection dsConnection = ds.getConnection()) {
             try (Statement stmt = dsConnection.createStatement()) {
-                String sql = "DELETE FROM SEARCH WHERE ID='" + indexIdentity.getId() + "'";
+                String sql = "DELETE FROM search WHERE ID='" + indexIdentity.getId() + "'";
                 stmt.execute(sql);
             }
         } catch (SQLException ex) {
@@ -222,7 +221,7 @@ public class LuceneSearchService implements SearchService {
 
         try (Connection dsConnection = ds.getConnection()) {
             try (Statement stmt = dsConnection.createStatement()) {
-                String sql = "DROP TABLE SEARCH";
+                String sql = "DROP TABLE search";
                 stmt.execute(sql);
             }
         } catch (SQLException ex) {
@@ -240,9 +239,9 @@ public class LuceneSearchService implements SearchService {
         String id;
         try (Connection dsConnection = ds.getConnection()) {
             try (Statement stmt = dsConnection.createStatement()) {
-                String sql = "SELECT * FROM SEARCH WHERE RESOURCE='" + resource + "'";
+                String sql = "SELECT * FROM search WHERE resource='" + resource + "'";
                 ResultSet result = stmt.executeQuery(sql);
-                id = result.getString("ID");
+                id = result.getString("id");
             }
         } catch (SQLException ex) {
             LOG.debug(ex.getMessage(), ex);
@@ -255,7 +254,7 @@ public class LuceneSearchService implements SearchService {
     public void setResourceIndexIdentity(String resource, IndexIdentity indexIdentity) {
         try (Connection dsConnection = ds.getConnection()) {
             dsConnection.setAutoCommit(false);
-            String sql = "INSERT INTO SEARCH (ID,RESOURCE) VALUES (?,?)";
+            String sql = "INSERT INTO search (id,resource) VALUES (?,?)";
             try (PreparedStatement stmt = dsConnection.prepareStatement(sql)) {
                 stmt.setString(1, indexIdentity.getId());
                 stmt.setString(2, resource);
@@ -268,9 +267,9 @@ public class LuceneSearchService implements SearchService {
 
         try (Connection dsConnection = ds.getConnection()) {
             try (Statement stmt = dsConnection.createStatement()) {
-                String sql = "SELECT * FROM SEARCH WHERE RESOURCE='" + resource + "'";
+                String sql = "SELECT * FROM search WHERE resource='" + resource + "'";
                 ResultSet result = stmt.executeQuery(sql);
-                LOG.info(result.getString("ID"));
+                LOG.info(result.getString("id"));
             }
         } catch (SQLException ex) {
             LOG.error(ex.getMessage(), ex);
@@ -286,7 +285,6 @@ public class LuceneSearchService implements SearchService {
                 BooleanQuery qry = new BooleanQuery.Builder()
                         .add(new TermQuery(new Term(field, QueryParser.escape(query))), BooleanClause.Occur.MUST)
                         .build();
-//                Query queryParser = new QueryParser(field, analyzer).parse(QueryParser.escape(query));
                 writer.deleteDocuments(qry);
             }
         } catch (Exception ex) {
