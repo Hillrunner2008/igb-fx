@@ -25,15 +25,15 @@ public class BamRenderer implements Renderer<BamFeature> {
         });
         return composition(name[0],
                 bamFeature.getTooltipData(),
+//                layer(
+//                        0,
+//                        shapes(
+//                                Rectangle.start(bamFeature.getRange().lowerEndpoint(), bamFeature.getRange().upperEndpoint() - bamFeature.getRange().lowerEndpoint())
+//                                .linkToModel(bamFeature).build()
+//                        )
+//                ),
                 layer(
-                        0,
-                        shapes(
-                                Rectangle.start(bamFeature.getRange().lowerEndpoint(), bamFeature.getRange().upperEndpoint() - bamFeature.getRange().lowerEndpoint())
-                                .linkToModel(bamFeature).build()
-                        )
-                ),
-                layer(
-                        0,
+                        bamFeature.getRange().lowerEndpoint(),
                         bamFeature.getAnnotationBlocks().stream().map(alignmentBlock -> convertAlignmentBlockToRect(alignmentBlock))
                 ));
     }

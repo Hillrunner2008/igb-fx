@@ -6,6 +6,10 @@
 package org.lorainelab.igb.filehandler.bam;
 
 import com.google.common.collect.Range;
+import com.google.common.collect.Sets;
+import htsjdk.samtools.Cigar;
+import htsjdk.samtools.CigarElement;
+import htsjdk.samtools.CigarOperator;
 import htsjdk.samtools.QueryInterval;
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SAMRecordIterator;
@@ -21,6 +25,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 
@@ -38,7 +43,10 @@ public class BamParserTest {
         testGetRecordsByRangeInSequence("chr1", range);
     }
 
-    // @Test
+    
+    
+
+   // @Test
     public static void testChromosomeList() {
         try (SeekableBufferedStream bamSeekableStream = new SeekableBufferedStream(
                 new SeekableFileStream(new File("/home/jeckstei/Downloads/cold_control.mm.bam")));
