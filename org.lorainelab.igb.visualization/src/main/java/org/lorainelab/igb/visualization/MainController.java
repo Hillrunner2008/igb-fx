@@ -262,16 +262,15 @@ public class MainController {
             Label entryLabel = new Label(result.getFields().get("id"));
             CustomMenuItem item = new CustomMenuItem(entryLabel, true);
             item.setOnAction((ActionEvent actionEvent) -> {
-                Platform.runLater(() -> {
-                    search.setText(result.getFields().get("id"));
-                    searchAutocomplete.hide();
-                    int start = Integer.parseInt(result.getFields().get("start"));
-                    int end = Integer.parseInt(result.getFields().get("end"));
-                    trackRenderers.stream().findFirst().ifPresent(trackRender -> {
-                        Rectangle2D oldRect = trackRender.getCanvasContext().getBoundingRect();
-                        Rectangle2D rect = new Rectangle2D(start, oldRect.getMinY(), end - start, oldRect.getHeight());
-                        eventBus.post(new JumpZoomEvent(rect, trackRender));
-                    });
+                search.setText(result.getFields().get("id"));
+                searchAutocomplete.hide();
+                int start = Integer.parseInt(result.getFields().get("start"));
+                int end = Integer.parseInt(result.getFields().get("end"));
+                trackRenderers.stream().findFirst().ifPresent(trackRender -> {
+                    Rectangle2D oldRect = trackRender.getCanvasContext().getBoundingRect();
+                    Rectangle2D rect = new Rectangle2D(start, oldRect.getMinY(), end - start, oldRect.getHeight());
+                    LOG.info("start: {} end: {}", start, end);
+                    eventBus.post(new JumpZoomEvent(rect, trackRender));
                 });
 
             });
@@ -350,11 +349,14 @@ public class MainController {
 
     @Subscribe
     private void handleScrollScaleEvent(ScrollScaleEvent event) {
-        if (event.getDirection().equals(Direction.INCREMENT)) {
-            hSlider.increment();
-        } else {
-            hSlider.decrement();
-        }
+        Platform.runLater(() -> {
+            if (event.getDirection().equals(Direction.INCREMENT)) {
+                hSlider.increment();
+            } else {
+                hSlider.decrement();
+            }
+        });
+
     }
 
     @Subscribe
@@ -691,27 +693,27 @@ public class MainController {
                                     double eventTriggerMinY = (Double) dragboardContent;
                                     if (dropLocationMinY != eventTriggerMinY) {
                                         Lists.newArrayList(trackRenderers).stream()
-                                                .filter(trackRenderer -> trackRenderer.getCanvasContext().isVisible())
-                                                .filter(draggedTrackRenderer -> draggedTrackRenderer.getTrackLabel().getContent().getBoundsInParent().getMinY() == eventTriggerMinY)
-                                                .findFirst()
-                                                .ifPresent(draggedTrackRenderer -> {
-                                                    Lists.newArrayList(trackRenderers).stream()
-                                                            .filter(trackRenderer -> trackRenderer.getTrackLabel().getContent() == dropLocationLabelNode)
-                                                            .findFirst()
-                                                            .ifPresent(droppedTrackRenderer -> {
-                                                                int droppedIndex = droppedTrackRenderer.getWeight();
-                                                                if (droppedAbove) {
-                                                                    trackRenderers.remove(draggedTrackRenderer);
-                                                                    draggedTrackRenderer.setWeight(droppedIndex - 1);
-                                                                    trackRenderers.add(draggedTrackRenderer);
-                                                                } else {
-                                                                    trackRenderers.remove(draggedTrackRenderer);
-                                                                    draggedTrackRenderer.setWeight(droppedIndex + 1);
-                                                                    trackRenderers.add(draggedTrackRenderer);
-                                                                }
-                                                                updateTrackRenderers();
-                                                            });
-                                                });
+                                        .filter(trackRenderer -> trackRenderer.getCanvasContext().isVisible())
+                                        .filter(draggedTrackRenderer -> draggedTrackRenderer.getTrackLabel().getContent().getBoundsInParent().getMinY() == eventTriggerMinY)
+                                        .findFirst()
+                                        .ifPresent(draggedTrackRenderer -> {
+                                            Lists.newArrayList(trackRenderers).stream()
+                                            .filter(trackRenderer -> trackRenderer.getTrackLabel().getContent() == dropLocationLabelNode)
+                                            .findFirst()
+                                            .ifPresent(droppedTrackRenderer -> {
+                                                int droppedIndex = droppedTrackRenderer.getWeight();
+                                                if (droppedAbove) {
+                                                    trackRenderers.remove(draggedTrackRenderer);
+                                                    draggedTrackRenderer.setWeight(droppedIndex - 1);
+                                                    trackRenderers.add(draggedTrackRenderer);
+                                                } else {
+                                                    trackRenderers.remove(draggedTrackRenderer);
+                                                    draggedTrackRenderer.setWeight(droppedIndex + 1);
+                                                    trackRenderers.add(draggedTrackRenderer);
+                                                }
+                                                updateTrackRenderers();
+                                            });
+                                        });
                                     }
                                 }
 
@@ -759,22 +761,20 @@ public class MainController {
         Rectangle2D focusRect = jumpZoomEvent.getRect();
         TrackRenderer eventLocationReference = jumpZoomEvent.getTrackRenderer();
         View view = eventLocationReference.getView();
-        if (focusRect.intersects(view.getBoundingRect())) {
-            double modelWidth = canvasPane.getModelWidth();
-            double minX = Math.max(focusRect.getMinX(), view.getBoundingRect().getMinX());
-            double maxX = Math.min(focusRect.getMaxX(), view.getBoundingRect().getMaxX());
-            double width = maxX - minX;
-            if (width < MAX_ZOOM_MODEL_COORDINATES_X) {
-                width = Math.max(width * 1.1, MAX_ZOOM_MODEL_COORDINATES_X);
-                minX = Math.max((minX + focusRect.getWidth() / 2) - (width / 2), 0);
-            }
-            final double scaleXalt = eventLocationReference.getCanvasContext().getBoundingRect().getWidth() / width;
-            resetZoomStripe();
-            hSlider.setValue(invertExpScaleTransform(canvasPane, scaleXalt));
-            double scrollPosition = (minX / (modelWidth - width)) * 100;
-            final double scrollXValue = enforceRangeBounds(scrollPosition, 0, 100);
-            scrollX.setValue(scrollXValue);
+        double modelWidth = canvasPane.getModelWidth();
+        double minX = Math.max(focusRect.getMinX(), view.getBoundingRect().getMinX());
+        double maxX = Math.min(focusRect.getMaxX(), view.getBoundingRect().getMaxX());
+        double width = maxX - minX;
+        if (width < MAX_ZOOM_MODEL_COORDINATES_X) {
+            width = Math.max(width * 1.1, MAX_ZOOM_MODEL_COORDINATES_X);
+            minX = Math.max((minX + focusRect.getWidth() / 2) - (width / 2), 0);
         }
+        final double scaleXalt = eventLocationReference.getCanvasContext().getBoundingRect().getWidth() / width;
+        resetZoomStripe();
+        hSlider.setValue(invertExpScaleTransform(canvasPane, scaleXalt));
+        double scrollPosition = (minX / (modelWidth - width)) * 100;
+        final double scrollXValue = enforceRangeBounds(scrollPosition, 0, 100);
+        scrollX.setValue(scrollXValue);
     }
 
     @Subscribe

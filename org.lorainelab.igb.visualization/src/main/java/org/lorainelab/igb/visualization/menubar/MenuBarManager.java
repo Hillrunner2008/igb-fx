@@ -34,11 +34,13 @@ public class MenuBarManager {
     private final TreeMultimap<Integer, MenuItem> viewMenuEntries;
     private final TreeMultimap<Integer, MenuItem> toolsMenuEntries;
     private final TreeMultimap<Integer, MenuItem> helpMenuEntries;
+    private final TreeMultimap<Integer, MenuItem> genomeMenuEntries;
     private Menu fileMenu;
     private Menu editMenu;
     private Menu viewMenu;
     private Menu toolsMenu;
     private Menu helpMenu;
+    private Menu genomeMenu;
     private boolean componentActivated;
 
     public MenuBarManager() {
@@ -49,12 +51,14 @@ public class MenuBarManager {
         toolsMenuEntries = TreeMultimap.create(Ordering.natural(), Ordering.arbitrary());
         viewMenuEntries = TreeMultimap.create(Ordering.natural(), Ordering.arbitrary());
         helpMenuEntries = TreeMultimap.create(Ordering.natural(), Ordering.arbitrary());
+        genomeMenuEntries = TreeMultimap.create(Ordering.natural(), Ordering.arbitrary());
         parentMenuEntries = TreeMultimap.create(Ordering.natural(), Ordering.arbitrary());
         menuBarMenuContainer = new EnumMap<>(ParentMenu.class);
         menuBarMenuContainer.put(ParentMenu.FILE, fileMenuEntries);
         menuBarMenuContainer.put(ParentMenu.EDIT, editMenuEntries);
         menuBarMenuContainer.put(ParentMenu.TOOLS, toolsMenuEntries);
         menuBarMenuContainer.put(ParentMenu.VIEW, viewMenuEntries);
+        menuBarMenuContainer.put(ParentMenu.GENOME,genomeMenuEntries);
         menuBarMenuContainer.put(ParentMenu.HELP, helpMenuEntries);
         parentMenuReference = new EnumMap<>(ParentMenu.class);
         initializeMenus();
@@ -74,8 +78,14 @@ public class MenuBarManager {
         initViewMenu();
         initToolsMenu();
         initHelpMenu();
+        initGenomeMenu();
     }
 
+    private void initGenomeMenu() {
+        genomeMenu = new Menu("Genome");
+        genomeMenu.setMnemonicParsing(true);
+    }
+    
     private void initFileMenu() {
         fileMenu = new Menu("File");
         fileMenu.setMnemonicParsing(true);
@@ -116,6 +126,7 @@ public class MenuBarManager {
         parentMenuReference.put(ParentMenu.VIEW, viewMenu);
         parentMenuReference.put(ParentMenu.TOOLS, toolsMenu);
         parentMenuReference.put(ParentMenu.HELP, helpMenu);
+        parentMenuReference.put(ParentMenu.GENOME, genomeMenu);
     }
 
     private void initializeParentMenuEntries() {
@@ -123,6 +134,7 @@ public class MenuBarManager {
         parentMenuEntries.put(1, editMenu);
         parentMenuEntries.put(5, viewMenu);
         parentMenuEntries.put(10, toolsMenu);
+        parentMenuEntries.put(20, genomeMenu);
         parentMenuEntries.put(100, helpMenu);
     }
 
@@ -146,6 +158,9 @@ public class MenuBarManager {
                                 break;
                             case HELP:
                                 helpMenuEntries.put(menuItem.getWeight(), menuItem);
+                                break;
+                            case GENOME:
+                                genomeMenuEntries.put(menuItem.getWeight(), menuItem);
                                 break;
                         }
                     });
@@ -174,6 +189,9 @@ public class MenuBarManager {
                     case HELP:
                         removeMenuEntry(helpMenuEntries, menuItem);
                         break;
+                    case GENOME:
+                        removeMenuEntry(helpMenuEntries, menuItem);
+                        break;
                 }
             });
         });
@@ -195,6 +213,7 @@ public class MenuBarManager {
             rebuildViewMenu();
             rebuildToolsMenu();
             rebuildHelpMenu();
+            rebuildGenomeMenu();
             rebuildParentMenus();
         });
     }
@@ -238,6 +257,13 @@ public class MenuBarManager {
         fileMenu.getItems().clear();
         fileMenuEntries.keySet().stream().forEach(key -> {
             fileMenuEntries.get(key).forEach(menuItem -> fileMenu.getItems().add(menuItem));
+        });
+    }
+    
+    private void rebuildGenomeMenu() {
+        genomeMenu.getItems().clear();
+        genomeMenuEntries.keySet().stream().forEach(key -> {
+            genomeMenuEntries.get(key).forEach(menuItem -> genomeMenu.getItems().add(menuItem));
         });
     }
 
