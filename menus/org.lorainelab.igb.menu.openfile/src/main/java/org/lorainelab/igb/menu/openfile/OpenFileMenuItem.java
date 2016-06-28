@@ -4,6 +4,7 @@ import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Lists;
+import com.google.common.io.Files;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import java.io.File;
@@ -70,9 +71,12 @@ public class OpenFileMenuItem implements MenuBarEntryProvider, ToolbarButtonProv
         }
         fileChooser.setInitialDirectory(homeDirectory);
         addFileExtensionFilters(fileChooser);
+        //TODO: error handling for if file extension maps to available filetype handler
         Optional.ofNullable(fileChooser.showOpenMultipleDialog(null)).ifPresent(selectedFiles -> {
             selectedFiles.forEach(file -> {
-                FileTypeHandler fileTypeHandler = fileTypeHandlerRegistry.getFileTypeHandlers().stream().findFirst().get();
+                FileTypeHandler fileTypeHandler = fileTypeHandlerRegistry.getFileTypeHandlers().stream().filter(f -> {
+                    return f.getSupportedExtensions().contains(Files.getFileExtension(file.getPath()));
+                }).findFirst().get();
                 selectionInfoService.getSelectedGenomeVersion().get().ifPresent(gv -> {
                     DataSourceReference dataSourceReference = new DataSourceReference(file.getPath(), dataSource);
 

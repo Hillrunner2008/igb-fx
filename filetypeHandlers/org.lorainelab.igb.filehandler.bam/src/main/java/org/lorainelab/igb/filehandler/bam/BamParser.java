@@ -11,6 +11,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
+import htsjdk.samtools.QueryInterval;
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SAMRecordIterator;
 import htsjdk.samtools.SAMSequenceRecord;
@@ -59,12 +60,43 @@ public class BamParser implements FileTypeHandler {
 
     @Override
     public Set<String> getSupportedExtensions() {
-        return Sets.newHashSet("bed");
+        return Sets.newHashSet("bam");
     }
 
     @Override
-    public Set<CompositionGlyph> getRegion(DataSourceReference dataSourceReference, Range range, String chromosomeId) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public Set<CompositionGlyph> getRegion(DataSourceReference dataSourceReference, Range<Integer> range, String chromosomeId) {
+        String path = dataSourceReference.getPath();
+        Set<BamFeature> annotations = Sets.newHashSet();
+        DataSource dataSource = dataSourceReference.getDataSource();
+        try (SeekableBufferedStream bamSeekableStream = new SeekableBufferedStream(
+                new SeekableFileStream(new File(dataSourceReference.getPath())));
+                SeekableBufferedStream indexSeekableStream = new SeekableBufferedStream(
+                        new SeekableFileStream(new File(dataSourceReference.getPath() + ".bai")));) {
+
+            SamReader reader = SamReaderFactory.make()
+                    .validationStringency(ValidationStringency.SILENT)
+                    .open(SamInputResource.of(bamSeekableStream).index(indexSeekableStream));
+
+            final List<SAMSequenceRecord> seqRecords = reader.getFileHeader().getSequenceDictionary().getSequences();
+            getSequenceByName(chromosomeId, seqRecords).ifPresent((SAMSequenceRecord record) -> {
+
+                QueryInterval[] intervals = new QueryInterval[]{
+                    new QueryInterval(record.getSequenceIndex(), range.lowerEndpoint(), range.upperEndpoint())
+                };
+                
+                try (SAMRecordIterator iter = reader.query(intervals, true)) {
+                    while (iter.hasNext()) {
+                        SAMRecord samRecord = iter.next();
+                        annotations.add(new BamFeature(samRecord));
+                    }
+                }
+            });
+
+            CloserUtil.close(reader);
+        } catch (Exception ex) {
+            LOG.error(ex.getMessage(), ex);
+        }
+        return convertBamFeaturesToCompositionGlyphs(annotations);
     }
 
     @Override
@@ -72,33 +104,36 @@ public class BamParser implements FileTypeHandler {
         String path = dataSourceReference.getPath();
         Set<BamFeature> annotations = Sets.newHashSet();
         DataSource dataSource = dataSourceReference.getDataSource();
-        dataSource.getInputStream(path).ifPresent(inputStream -> {
-            try (SeekableBufferedStream bamSeekableStream = new SeekableBufferedStream(
-                    new SeekableFileStream(new File(dataSourceReference.getPath())));
-                    SeekableBufferedStream indexSeekableStream = new SeekableBufferedStream(
-                            new SeekableFileStream(new File(dataSourceReference.getPath() + ".bai")));) {
-                SamReader reader = SamReaderFactory.make()
-                        .validationStringency(ValidationStringency.SILENT).open(SamInputResource.of(bamSeekableStream));
-                final List<SAMSequenceRecord> seqRecords = reader.getFileHeader().getSequenceDictionary().getSequences();
-                Optional<SAMSequenceRecord> sequence = getSequenceByName(chromosomeId, seqRecords);
-                SAMSequenceRecord record = sequence.get();
+        try (SeekableBufferedStream bamSeekableStream = new SeekableBufferedStream(
+                new SeekableFileStream(new File(dataSourceReference.getPath())));
+                SeekableBufferedStream indexSeekableStream = new SeekableBufferedStream(
+                        new SeekableFileStream(new File(dataSourceReference.getPath() + ".bai")));) {
+
+            SamReader reader = SamReaderFactory.make()
+                    .validationStringency(ValidationStringency.SILENT)
+                    .open(SamInputResource.of(bamSeekableStream).index(indexSeekableStream));
+
+            final List<SAMSequenceRecord> seqRecords = reader.getFileHeader().getSequenceDictionary().getSequences();
+            getSequenceByName(chromosomeId, seqRecords).ifPresent((SAMSequenceRecord record) -> {
+
                 int start = record.getSequenceIndex();
                 int end = start + record.getSequenceLength();
-                
+
                 try (SAMRecordIterator iter = reader.query(record.getSequenceName(), start, end, true)) {
                     while (iter.hasNext()) {
                         SAMRecord samRecord = iter.next();
                         annotations.add(new BamFeature(samRecord));
                     }
                 }
-                CloserUtil.close(reader);
-            } catch (Exception ex) {
-                LOG.error(ex.getMessage(), ex);
-            }
-        });
+            });
+
+            CloserUtil.close(reader);
+        } catch (Exception ex) {
+            LOG.error(ex.getMessage(), ex);
+        }
         return convertBamFeaturesToCompositionGlyphs(annotations);
     }
-    
+
     private Optional<SAMSequenceRecord> getSequenceByName(String sequence, List<SAMSequenceRecord> seqRecords) {
         return seqRecords.stream().filter(r -> sequence.equals(r.getSequenceName())).findFirst();
     }
@@ -153,7 +188,7 @@ public class BamParser implements FileTypeHandler {
 
     @Override
     public void createIndex(IndexIdentity indexIdentity, DataSourceReference dataSourceReference) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        //TODO: create this
     }
 
     @Reference
