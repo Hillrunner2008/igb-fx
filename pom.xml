@@ -329,6 +329,7 @@
         <module>org.lorainelab.igb.search.api</module>
         <module>org.lorainelab.igb.kar</module>
         <module>filetypeHandlers/org.lorainelab.igb.filehandler.bam</module>
+        <module>preferences/org.lorainelab.igb.preferenceManager.api</module>
     </modules>
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
