@@ -4,7 +4,10 @@ import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -139,14 +142,24 @@ public class GenomeAssemblyTab implements TabProvider {
                 genomeVersionRegistry.getRegisteredGenomeVersions()
                 .stream()
                 .map(gv -> gv.getSpeciesName())
-                .collect(Collectors.toList())
+                .collect(Collectors.toSet())
         );
         genomeVersionRegistry.getRegisteredGenomeVersions().addListener((SetChangeListener.Change<? extends GenomeVersion> change) -> {
             Platform.runLater(() -> {
                 if (change.wasAdded()) {
-                    speciesComboBox.getItems().add(change.getElementAdded().getSpeciesName());
+                    if (!speciesComboBox.getItems().contains(change.getElementAdded().getSpeciesName())) {
+                        speciesComboBox.getItems().add(change.getElementAdded().getSpeciesName());
+                    }else{
+                        //upde only version combo box
+                        genomeVersionComboBox.getItems().add(change.getElementAdded());
+                    }
                 } else {
-                    speciesComboBox.getItems().remove(change.getElementAdded().getSpeciesName());
+                    long otherGenomeOfSameSpecies = genomeVersionRegistry.getRegisteredGenomeVersions().stream()
+                            .filter(genomeVersion -> genomeVersion.getSpeciesName().equalsIgnoreCase(change.getElementRemoved().getSpeciesName()))
+                            .count();
+                    if (otherGenomeOfSameSpecies <= 0) {
+                        speciesComboBox.getItems().remove(change.getElementAdded().getSpeciesName());
+                    }
                 }
             });
         });
