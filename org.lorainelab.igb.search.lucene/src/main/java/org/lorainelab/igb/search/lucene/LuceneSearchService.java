@@ -192,9 +192,10 @@ public class LuceneSearchService implements SearchService {
     @Override
     public void clearIndex(IndexIdentity indexIdentity) {
         try (Connection dsConnection = ds.getConnection()) {
-            try (Statement stmt = dsConnection.createStatement()) {
-                String sql = "DELETE FROM search WHERE ID='" + indexIdentity.getId() + "'";
-                stmt.execute(sql);
+            String sql = "DELETE FROM search WHERE ID=?";
+            try (PreparedStatement stmt = dsConnection.prepareStatement(sql)) {
+                stmt.setString(1, indexIdentity.getId());
+                stmt.execute();
             }
         } catch (SQLException ex) {
             LOG.error(ex.getMessage(), ex);
@@ -238,9 +239,10 @@ public class LuceneSearchService implements SearchService {
     public Optional<IndexIdentity> getResourceIndexIdentity(String resource) {
         String id;
         try (Connection dsConnection = ds.getConnection()) {
-            try (Statement stmt = dsConnection.createStatement()) {
-                String sql = "SELECT * FROM search WHERE resource='" + resource + "'";
-                ResultSet result = stmt.executeQuery(sql);
+            String sql = "SELECT * FROM search WHERE resource=?";
+            try (PreparedStatement stmt = dsConnection.prepareStatement(sql)) {
+                stmt.setString(1, resource);
+                ResultSet result = stmt.executeQuery();
                 id = result.getString("id");
             }
         } catch (SQLException ex) {
@@ -266,9 +268,10 @@ public class LuceneSearchService implements SearchService {
         }
 
         try (Connection dsConnection = ds.getConnection()) {
-            try (Statement stmt = dsConnection.createStatement()) {
-                String sql = "SELECT * FROM search WHERE resource='" + resource + "'";
-                ResultSet result = stmt.executeQuery(sql);
+            String sql = "SELECT * FROM search WHERE resource=?";
+            try (PreparedStatement stmt = dsConnection.prepareStatement(sql)) {
+                stmt.setString(1, resource);
+                ResultSet result = stmt.executeQuery();
                 LOG.info(result.getString("id"));
             }
         } catch (SQLException ex) {
