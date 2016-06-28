@@ -6,8 +6,10 @@
 package org.lorainelab.igb.data.model.shapes;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Range;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import org.lorainelab.igb.data.model.Feature;
 
 /**
@@ -22,6 +24,12 @@ public class Rectangle<T extends Feature> implements Shape {
     private final List<Attribute> attributes;
     private int offset;
     private int width;
+    // a function that can be defined to translate (or mirror) reference sequence as the innerText of this shape
+    // the function should expect as input the reference sequence overlapping this shape, or if desired a custom range can be defined using the
+    // innerTextReferenceSequenceRange variable
+    private Function<String, String> innerTextRefSeqTranslator;
+    //enables a larger reference sequence context when defining a function for translation
+    private Range<Integer> innerTextReferenceSequenceRange;
 
     public Rectangle() {
         attributes = Lists.newArrayList();
@@ -32,8 +40,16 @@ public class Rectangle<T extends Feature> implements Shape {
         return new Rectangle.Builder(offset, width);
     }
 
+    public static Build start(int offset, int width, String innerText) {
+        Builder builder = new Rectangle.Builder(offset, width);
+        builder.setInnerText(innerText);
+        return builder;
+    }
+
     public static Build start(int offset, int width, Feature model) {
-        return new Rectangle.Builder(offset, width);
+        Builder builder = new Rectangle.Builder(offset, width);
+        builder.linkToModel(model);
+        return builder;
     }
 
     @Override
@@ -59,6 +75,14 @@ public class Rectangle<T extends Feature> implements Shape {
         return this.innerText;
     }
 
+    public Optional<Function<String, String>> getInnerTextRefSeqTranslator() {
+        return Optional.ofNullable(innerTextRefSeqTranslator);
+    }
+
+    public Optional<Range<Integer>> getInnerTextReferenceSequenceRange() {
+        return Optional.<Range<Integer>>ofNullable(innerTextReferenceSequenceRange);
+    }
+
     @Override
     public void setOffset(int offset) {
         this.offset = offset;
@@ -67,13 +91,18 @@ public class Rectangle<T extends Feature> implements Shape {
     public enum Attribute {
 
         thick,
+        // we should avoid mixing genomic concepts with shapes... for now this is placeholder
         insertion,
         deletion
     }
 
     public interface Build {
 
-        public Build setInnerText(String innerText);
+        Build setInnerText(String innerText);
+
+        Build setInnerTextRefSeqTranslator(Function<String, String> innerTextRefSeqTranslator);
+
+        Build setInnerTextReferenceSequenceRange(Range<Integer> innerTextReferenceSequenceRange);
 
         Build linkToModel(Feature model);
 
@@ -94,6 +123,18 @@ public class Rectangle<T extends Feature> implements Shape {
         @Override
         public Build setInnerText(String innerText) {
             instance.innerText = innerText;
+            return this;
+        }
+
+        @Override
+        public Build setInnerTextRefSeqTranslator(Function<String, String> innerTextRefSeqTranslator) {
+            instance.innerTextRefSeqTranslator = innerTextRefSeqTranslator;
+            return this;
+        }
+
+        @Override
+        public Build setInnerTextReferenceSequenceRange(Range<Integer> innerTextReferenceSequenceRange) {
+            instance.innerTextReferenceSequenceRange = innerTextReferenceSequenceRange;
             return this;
         }
 

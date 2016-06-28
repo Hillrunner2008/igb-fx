@@ -1,7 +1,9 @@
 package org.lorainelab.igb.filehandler.bed;
 
 import com.google.common.collect.Range;
+import java.util.function.Function;
 import java.util.stream.Stream;
+import org.lorainelab.igb.data.model.Strand;
 import org.lorainelab.igb.data.model.shapes.Composition;
 import org.lorainelab.igb.data.model.shapes.Line;
 import org.lorainelab.igb.data.model.shapes.Rectangle;
@@ -26,13 +28,20 @@ public class BedRenderer implements Renderer<BedFeature> {
 
     private Stream<Shape> calculateCds(BedFeature bedFeature) {
         Range<Integer> cdsRange = Range.closed(bedFeature.getCdsStart() - bedFeature.getRange().lowerEndpoint(), bedFeature.getCdsEnd() - bedFeature.getRange().lowerEndpoint());
+        Function<String, String> innerTextRefSeqTranslator = referenceSequence -> {
+            String aminoAcidSequence = AminoAcid.getAminoAcid(referenceSequence, bedFeature.getStrand() == Strand.POSITIVE);
+            return aminoAcidSequence;
+        };
 
         return bedFeature.getExons().asRanges().stream()
                 .map(exon -> Range.closed(exon.lowerEndpoint(), exon.upperEndpoint()))
                 .filter(exonRange -> exonRange.isConnected(cdsRange))
                 .map(eoxnRange -> eoxnRange.intersection(cdsRange))
                 .map(intersectingRange -> Rectangle.start(intersectingRange.lowerEndpoint(), intersectingRange.upperEndpoint() - intersectingRange.lowerEndpoint())
-                        .addAttribute(Rectangle.Attribute.thick).build());
+                        .addAttribute(Rectangle.Attribute.thick)
+                        .setInnerTextReferenceSequenceRange(Range.closed(bedFeature.getCdsStart(),bedFeature.getCdsEnd()))
+                        .setInnerTextRefSeqTranslator(innerTextRefSeqTranslator)
+                        .build());
     }
 
 }

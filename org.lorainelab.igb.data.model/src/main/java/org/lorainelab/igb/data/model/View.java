@@ -8,12 +8,14 @@ import javafx.geometry.Rectangle2D;
  */
 public class View {
 
+    private Chromosome chromosome;
     private Rectangle2D boundingRect;
     private double xfactor = 1;
     private double yfactor = 1;
 
-    public View(Rectangle2D boundingRect) {
+    public View(Rectangle2D boundingRect, Chromosome chromosome) {
         this.boundingRect = boundingRect;
+        this.chromosome = chromosome;
     }
 
     public Rectangle2D getBoundingRect() {
@@ -38,6 +40,10 @@ public class View {
 
     public void setYfactor(double yfactor) {
         this.yfactor = yfactor;
+    }
+
+    public Chromosome getChromosome() {
+        return chromosome;
     }
 
 }
