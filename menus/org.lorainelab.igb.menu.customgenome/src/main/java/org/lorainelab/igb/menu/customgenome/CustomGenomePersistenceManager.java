@@ -22,6 +22,7 @@ import static org.lorainelab.igb.menu.customgenome.CustomGenomePrefKeys.SPECIES_
 import static org.lorainelab.igb.menu.customgenome.CustomGenomePrefKeys.VERSION_NAME;
 import static org.lorainelab.igb.menu.customgenome.CustomGenomePrefKeys.UUID;
 import org.lorainelab.igb.preferences.PreferenceUtils;
+import org.lorainelab.igb.preferences.SessionPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

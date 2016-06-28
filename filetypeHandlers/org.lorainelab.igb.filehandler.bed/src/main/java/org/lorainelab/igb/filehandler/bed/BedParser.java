@@ -229,7 +229,7 @@ public class BedParser implements FileTypeHandler {
     }
 
     @Override
-    public Set<CompositionGlyph> getRegion(DataSourceReference dataSourceReference, Range range, String chromosomeId) {
+    public Set<CompositionGlyph> getRegion(DataSourceReference dataSourceReference, Range<Integer> range, String chromosomeId) {
         final DataSource dataSource = dataSourceReference.getDataSource();
         final String path = dataSourceReference.getPath();
         Set<BedFeature> annotations = Sets.newLinkedHashSet();
