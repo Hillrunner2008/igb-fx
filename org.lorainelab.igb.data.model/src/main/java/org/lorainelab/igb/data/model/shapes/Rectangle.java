@@ -10,6 +10,7 @@ import com.google.common.collect.Range;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import javafx.scene.paint.Color;
 import org.lorainelab.igb.data.model.Feature;
 
 /**
@@ -30,6 +31,7 @@ public class Rectangle<T extends Feature> implements Shape {
     private Function<String, String> innerTextRefSeqTranslator;
     //enables a larger reference sequence context when defining a function for translation
     private Range<Integer> innerTextReferenceSequenceRange;
+    private Color color;
 
     public Rectangle() {
         attributes = Lists.newArrayList();
@@ -80,7 +82,11 @@ public class Rectangle<T extends Feature> implements Shape {
     }
 
     public Optional<Range<Integer>> getInnerTextReferenceSequenceRange() {
-        return Optional.<Range<Integer>>ofNullable(innerTextReferenceSequenceRange);
+        return Optional.ofNullable(innerTextReferenceSequenceRange);
+    }
+
+    public Optional<Color> getColor() {
+        return Optional.ofNullable(color);
     }
 
     @Override
@@ -90,10 +96,8 @@ public class Rectangle<T extends Feature> implements Shape {
 
     public enum Attribute {
 
-        thick,
+        thick
         // we should avoid mixing genomic concepts with shapes... for now this is placeholder
-        insertion,
-        deletion
     }
 
     public interface Build {
@@ -103,6 +107,8 @@ public class Rectangle<T extends Feature> implements Shape {
         Build setInnerTextRefSeqTranslator(Function<String, String> innerTextRefSeqTranslator);
 
         Build setInnerTextReferenceSequenceRange(Range<Integer> innerTextReferenceSequenceRange);
+
+        Build setColor(Color color);
 
         Build linkToModel(Feature model);
 
@@ -152,6 +158,12 @@ public class Rectangle<T extends Feature> implements Shape {
         @Override
         public Build linkToModel(Feature model) {
             instance.model = model;
+            return this;
+        }
+
+        @Override
+        public Build setColor(Color color) {
+            instance.color = color;
             return this;
         }
 

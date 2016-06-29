@@ -77,6 +77,11 @@ public class BamFeature implements Feature {
     public Map<String, String> getTooltipData() {
         HashMap<String, String> tooltipData = Maps.newHashMap();
         tooltipData.put("forward", Boolean.TRUE.toString());
+        tooltipData.put("cigar", getCigarString());
+        tooltipData.put("name", samRecord.getReadName());
+        tooltipData.put("reference name", samRecord.getReferenceName());
+        tooltipData.put("start", samRecord.getAlignmentStart()+"");
+        tooltipData.put("end", samRecord.getAlignmentEnd()+"");
         return tooltipData;
     }
 

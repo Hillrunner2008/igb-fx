@@ -5,6 +5,7 @@
  */
 package org.lorainelab.igb.filehandler.bam;
 
+import javafx.scene.paint.Color;
 import org.lorainelab.igb.data.model.shapes.Composition;
 import org.lorainelab.igb.data.model.shapes.Line;
 import org.lorainelab.igb.data.model.shapes.Rectangle;
@@ -26,14 +27,7 @@ public class BamRenderer implements Renderer<BamFeature> {
         return composition(name[0],
                 bamFeature.getTooltipData(),
                 layer(
-                        0,
-                        shapes(
-                                Rectangle.start(bamFeature.getRange().lowerEndpoint(), bamFeature.getRange().upperEndpoint() - bamFeature.getRange().lowerEndpoint())
-                                .linkToModel(bamFeature).build()
-                        )
-                ),
-                layer(
-                        0,
+                        bamFeature.getRange().lowerEndpoint(),
                         bamFeature.getAnnotationBlocks().stream().map(alignmentBlock -> convertAlignmentBlockToRect(alignmentBlock))
                 ));
     }
@@ -42,15 +36,21 @@ public class BamRenderer implements Renderer<BamFeature> {
         switch (alignmentBlock.getAlignmentType()) {
             case DELETION:
                 return Rectangle.start(alignmentBlock.getRange().lowerEndpoint(), alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint())
-                        .addAttribute(Rectangle.Attribute.deletion).build();
+                        .build();
             case GAP:
-                return Line.start(alignmentBlock.getRange().lowerEndpoint(), alignmentBlock.getRange().lowerEndpoint()
+                return Line.start(alignmentBlock.getRange().lowerEndpoint(), alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint()
                 ).build();
             case INSERTION:
-                return Rectangle.start(alignmentBlock.getRange().lowerEndpoint(), alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint())
-                        .addAttribute(Rectangle.Attribute.insertion).build();
+                return Rectangle.start(
+                        alignmentBlock.getRange().lowerEndpoint(), 
+                        alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint())
+                        .setColor(Color.CHOCOLATE)
+                        .build();
             case MATCH:
-                return Rectangle.start(alignmentBlock.getRange().lowerEndpoint(), alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint()).build();
+                return Rectangle.start(
+                        alignmentBlock.getRange().lowerEndpoint(), 
+                        alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint()
+                ).setInnerTextRefSeqTranslator(seq -> seq).build();
             case PADDING:
                 return Rectangle.start(alignmentBlock.getRange().lowerEndpoint(), alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint()).build();
             default:
