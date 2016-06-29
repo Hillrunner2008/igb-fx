@@ -32,6 +32,7 @@ public class Rectangle<T extends Feature> implements Shape {
     //enables a larger reference sequence context when defining a function for translation
     private Range<Integer> innerTextReferenceSequenceRange;
     private Color color;
+    private boolean colorByBase;
 
     public Rectangle() {
         attributes = Lists.newArrayList();
@@ -94,6 +95,10 @@ public class Rectangle<T extends Feature> implements Shape {
         this.offset = offset;
     }
 
+    public boolean getColorByBase() {
+        return colorByBase;
+    }
+
     public enum Attribute {
 
         thick
@@ -109,6 +114,8 @@ public class Rectangle<T extends Feature> implements Shape {
         Build setInnerTextReferenceSequenceRange(Range<Integer> innerTextReferenceSequenceRange);
 
         Build setColor(Color color);
+
+        Build setColorByBase(boolean colorByBase);
 
         Build linkToModel(Feature model);
 
@@ -164,6 +171,12 @@ public class Rectangle<T extends Feature> implements Shape {
         @Override
         public Build setColor(Color color) {
             instance.color = color;
+            return this;
+        }
+
+        @Override
+        public Build setColorByBase(boolean colorByBase) {
+            instance.colorByBase = colorByBase;
             return this;
         }
 

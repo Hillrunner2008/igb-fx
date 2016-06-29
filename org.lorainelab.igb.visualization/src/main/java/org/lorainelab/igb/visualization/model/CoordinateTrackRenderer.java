@@ -24,6 +24,7 @@ import org.lorainelab.igb.visualization.event.ClickDragZoomEvent;
 import org.lorainelab.igb.visualization.event.ClickDraggingEvent;
 import org.lorainelab.igb.visualization.event.RefreshTrackEvent;
 import org.lorainelab.igb.visualization.event.ZoomStripeEvent;
+import static org.lorainelab.igb.data.model.sequence.BasePairColorReference.getBaseColor;
 import static org.lorainelab.igb.visualization.util.BoundsUtil.enforceRangeBounds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,10 +37,6 @@ public class CoordinateTrackRenderer implements TrackRenderer {
 
     private static final Logger LOG = LoggerFactory.getLogger(CoordinateTrackRenderer.class);
     private static final String COORDINATES_TRACK_LABEL = "Coordinates";
-    private static final Color A_COLOR = Color.rgb(151, 255, 179);
-    private static final Color T_COLOR = Color.rgb(102, 211, 255);
-    private static final Color G_COLOR = Color.rgb(255, 210, 0);
-    private static final Color C_COLOR = Color.rgb(255, 176, 102);
     private static final int COORDINATE_CENTER_LINE = 20;
 
     final int modelWidth;
@@ -288,24 +285,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         gc.restore();
     }
 
-    private Color getBaseColor(char base) {
-        switch (base) {
-            case 'a':
-            case 'A':
-                return A_COLOR;
-            case 't':
-            case 'T':
-                return T_COLOR;
-            case 'g':
-            case 'G':
-                return G_COLOR;
-            case 'c':
-            case 'C':
-                return C_COLOR;
-            default:
-                return Color.GRAY;
-        }
-    }
+  
 
     @Override
     public void updateView(double scrollX, double scrollY) {
