@@ -36,6 +36,8 @@ public class BamRenderer implements Renderer<BamFeature> {
         switch (alignmentBlock.getAlignmentType()) {
             case DELETION:
                 return Rectangle.start(alignmentBlock.getRange().lowerEndpoint(), alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint())
+                        .setColor(Color.RED)
+                        .setInnerTextRefSeqTranslator(seq -> "X")
                         .build();
             case GAP:
                 return Line.start(alignmentBlock.getRange().lowerEndpoint(), alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint()

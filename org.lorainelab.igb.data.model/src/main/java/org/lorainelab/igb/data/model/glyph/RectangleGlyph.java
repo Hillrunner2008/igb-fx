@@ -91,14 +91,26 @@ public class RectangleGlyph implements Glyph {
 
                     String sequence;
                     String innerText;
+                    int startOffset = 0;
+                    int endOffset = 0;
+                    if ((int) boundingRect.getMinX() < (int) viewRect.getMinX()) {
+                        //left side is cut off
+                        startOffset = (int) viewRect.getMinX() - (int) boundingRect.getMinX();
+                    }
+                    if ((int) boundingRect.getMaxX() > (int) viewRect.getMaxX()) {
+                        //right side is cut off
+                        endOffset = (int) boundingRect.getMaxX() - (int) viewRect.getMaxX();
+                    }
+                    Range<Integer> basePairRange = Range.closed((int) boundingRect.getMinX() + startOffset, (int) boundingRect.getMaxX() - endOffset);
                     if (innerTextReferenceSequenceRange.isPresent()) {
+                        //TODO handle offsets
                         sequence = new String(chromosome.getSequence(innerTextReferenceSequenceRange.get().lowerEndpoint(),
                                 innerTextReferenceSequenceRange.get().upperEndpoint() - innerTextReferenceSequenceRange.get().lowerEndpoint()));
                         innerText = translationFunction.apply(sequence);
                         int startPos = (int) boundingRect.getMinX() - innerTextReferenceSequenceRange.get().lowerEndpoint();
                         innerText = innerText.substring(startPos, startPos + (int) boundingRect.getWidth());
                     } else {
-                        sequence = new String(chromosome.getSequence((int) boundingRect.getMinX(), (int) boundingRect.getWidth()));
+                        sequence = new String(chromosome.getSequence(basePairRange.lowerEndpoint(), basePairRange.upperEndpoint() - basePairRange.lowerEndpoint()));
                         innerText = translationFunction.apply(sequence);
                     }
 
