@@ -7,7 +7,6 @@ package org.lorainelab.igb.data.model.shapes.factory;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import javafx.scene.paint.Color;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
 import org.lorainelab.igb.data.model.glyph.Glyph;

@@ -20,9 +20,9 @@ public class BamRenderer implements Renderer<BamFeature> {
 
     @Override
     public Composition render(BamFeature bamFeature) {
-        String[] name = new String[] {"unknown"};
+        String[] name = new String[]{"unknown"};
         bamFeature.getId().ifPresent(id -> {
-           name[0] = id;
+            name[0] = id;
         });
         return composition(name[0],
                 bamFeature.getTooltipData(),
@@ -36,21 +36,26 @@ public class BamRenderer implements Renderer<BamFeature> {
         switch (alignmentBlock.getAlignmentType()) {
             case DELETION:
                 return Rectangle.start(alignmentBlock.getRange().lowerEndpoint(), alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint())
+                        .setColor(Color.RED)
+                        .setInnerTextRefSeqTranslator(seq -> "X")
                         .build();
             case GAP:
                 return Line.start(alignmentBlock.getRange().lowerEndpoint(), alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint()
                 ).build();
             case INSERTION:
                 return Rectangle.start(
-                        alignmentBlock.getRange().lowerEndpoint(), 
+                        alignmentBlock.getRange().lowerEndpoint(),
                         alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint())
                         .setColor(Color.CHOCOLATE)
                         .build();
             case MATCH:
                 return Rectangle.start(
-                        alignmentBlock.getRange().lowerEndpoint(), 
+                        alignmentBlock.getRange().lowerEndpoint(),
                         alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint()
-                ).setInnerTextRefSeqTranslator(seq -> seq).build();
+                )
+                        .setColorByBase(true)
+                        .setInnerTextRefSeqTranslator(seq -> seq)
+                        .build();
             case PADDING:
                 return Rectangle.start(alignmentBlock.getRange().lowerEndpoint(), alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint()).build();
             default:
