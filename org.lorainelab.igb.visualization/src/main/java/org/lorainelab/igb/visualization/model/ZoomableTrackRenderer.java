@@ -18,6 +18,7 @@ import org.lorainelab.igb.data.model.Track;
 import org.lorainelab.igb.data.model.View;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
 import org.lorainelab.igb.visualization.CanvasPane;
+import org.lorainelab.igb.visualization.component.api.Component;
 import org.lorainelab.igb.visualization.event.ClickDragEndEvent;
 import org.lorainelab.igb.visualization.event.MouseClickedEvent;
 import org.lorainelab.igb.visualization.event.MouseDoubleClickEvent;
