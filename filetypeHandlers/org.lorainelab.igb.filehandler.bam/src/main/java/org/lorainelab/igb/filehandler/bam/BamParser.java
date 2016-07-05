@@ -8,6 +8,7 @@ package org.lorainelab.igb.filehandler.bam;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
 import htsjdk.samtools.QueryInterval;
@@ -23,13 +24,19 @@ import htsjdk.samtools.seekablestream.SeekableFileStream;
 import htsjdk.samtools.util.CloserUtil;
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import org.lorainelab.igb.data.model.datasource.DataSource;
 import org.lorainelab.igb.data.model.datasource.DataSourceReference;
 import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandler;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
+import org.lorainelab.igb.data.model.glyph.Glyph;
+import org.lorainelab.igb.data.model.shapes.Composition;
+import org.lorainelab.igb.data.model.shapes.Line;
+import org.lorainelab.igb.data.model.shapes.Rectangle;
 import org.lorainelab.igb.data.model.shapes.Shape;
+import org.lorainelab.igb.data.model.shapes.factory.GlyphFactory;
 import org.lorainelab.igb.data.model.view.Layer;
 import org.lorainelab.igb.search.api.SearchService;
 import org.lorainelab.igb.search.api.model.IndexIdentity;
@@ -53,7 +60,7 @@ public class BamParser implements FileTypeHandler {
 
     @Override
     public Set<String> getSupportedExtensions() {
-        return Sets.newHashSet("bed");
+        return Sets.newHashSet("bam");
     }
 
     @Override
@@ -133,32 +140,32 @@ public class BamParser implements FileTypeHandler {
 
     private Set<CompositionGlyph> convertBamFeaturesToCompositionGlyphs(Set<BamFeature> annotations) {
         Set<CompositionGlyph> primaryGlyphs = Sets.newLinkedHashSet();
-//        String[] label = {""};
-//        Map[] tooltipData = {Maps.newConcurrentMap()};
-//        annotations.stream().map((BamFeature annotation) -> {
-//            BamRenderer view = new BamRenderer();
-//            final Composition composition = view.render(annotation);
-//            composition.getLabel().ifPresent(compositionLabel -> label[0] = compositionLabel);
-//            tooltipData[0] = composition.getTooltipData();
-//            return composition.getLayers();
-//        }).forEach(layersList -> {
-//            List<Glyph> children = Lists.newArrayList();
-//            layersList
-//                    .stream().forEach((Layer layer) -> {
-//                        getShapes(layer).forEach(shape -> {
-//                            if (Rectangle.class
-//                            .isAssignableFrom(shape.getClass())) {
-//                                children.add(GlyphFactory.generateRectangleGlyph((Rectangle) shape));
-//
-//                            }
-//                            if (Line.class
-//                            .isAssignableFrom(shape.getClass())) {
-//                                children.add(GlyphFactory.generateLine((Line) shape));
-//                            }
-//                        });
-//                    });
-//            primaryGlyphs.add(GlyphFactory.generateCompositionGlyph(label[0], tooltipData[0], children));
-//        });
+        String[] label = {""};
+        Map[] tooltipData = {Maps.newConcurrentMap()};
+        annotations.stream().map((BamFeature annotation) -> {
+            BamRenderer view = new BamRenderer();
+            final Composition composition = view.render(annotation);
+            composition.getLabel().ifPresent(compositionLabel -> label[0] = compositionLabel);
+            tooltipData[0] = composition.getTooltipData();
+            return composition.getLayers();
+        }).forEach(layersList -> {
+            List<Glyph> children = Lists.newArrayList();
+            layersList
+                    .stream().forEach((Layer layer) -> {
+                        getShapes(layer).forEach(shape -> {
+                            if (Rectangle.class
+                            .isAssignableFrom(shape.getClass())) {
+                                children.add(GlyphFactory.generateRectangleGlyph((Rectangle) shape));
+
+                            }
+                            if (Line.class
+                            .isAssignableFrom(shape.getClass())) {
+                                children.add(GlyphFactory.generateLine((Line) shape));
+                            }
+                        });
+                    });
+            primaryGlyphs.add(GlyphFactory.generateCompositionGlyph(label[0], tooltipData[0], children));
+        });
         return primaryGlyphs;
     }
 
@@ -181,7 +188,7 @@ public class BamParser implements FileTypeHandler {
 
     @Override
     public void createIndex(IndexIdentity indexIdentity, DataSourceReference dataSourceReference) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        //TODO: create this
     }
 
     @Reference

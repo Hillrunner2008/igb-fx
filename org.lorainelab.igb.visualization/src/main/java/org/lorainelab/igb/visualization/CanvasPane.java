@@ -101,6 +101,7 @@ public class CanvasPane extends Region {
         return new Point2D(event.getScreenX(), event.getScreenY());
     }
 
+    //TODO there are jump zooming bugs that appear to be related to too mouse event selection rectangles not matching coordinate range selected..
     private void initializeMouseEventHandlers() {
 
         canvas.setOnMouseClicked((MouseEvent event) -> {

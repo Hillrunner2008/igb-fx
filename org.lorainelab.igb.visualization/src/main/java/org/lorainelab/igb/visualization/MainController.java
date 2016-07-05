@@ -262,15 +262,17 @@ public class MainController {
             Label entryLabel = new Label(result.getFields().get("id"));
             CustomMenuItem item = new CustomMenuItem(entryLabel, true);
             item.setOnAction((ActionEvent actionEvent) -> {
-                search.setText(result.getFields().get("id"));
-                searchAutocomplete.hide();
-                int start = Integer.parseInt(result.getFields().get("start"));
-                int end = Integer.parseInt(result.getFields().get("end"));
-                trackRenderers.stream().findFirst().ifPresent(trackRender -> {
-                    Rectangle2D oldRect = trackRender.getCanvasContext().getBoundingRect();
-                    Rectangle2D rect = new Rectangle2D(start, oldRect.getMinY(), end - start, oldRect.getHeight());
-                    LOG.info("start: {} end: {}", start, end);
-                    eventBus.post(new JumpZoomEvent(rect, trackRender));
+                Platform.runLater(() -> {
+                    search.setText(result.getFields().get("id"));
+                    searchAutocomplete.hide();
+                    int start = Integer.parseInt(result.getFields().get("start"));
+                    int end = Integer.parseInt(result.getFields().get("end"));
+                    trackRenderers.stream().findFirst().ifPresent(trackRender -> {
+                        Rectangle2D oldRect = trackRender.getCanvasContext().getBoundingRect();
+                        Rectangle2D rect = new Rectangle2D(start, oldRect.getMinY(), end - start, oldRect.getHeight());
+                        LOG.info("start: {} end: {}", start, end);
+                        eventBus.post(new JumpZoomEvent(rect, trackRender));
+                    });
                 });
 
             });
@@ -297,9 +299,9 @@ public class MainController {
         gv.getLoadedDataSets().forEach(dataSet -> {
             Track positiveStrandTrack = dataSet.getPositiveStrandTrack(chromosome.getName());
             Track negativeStrandTrack = dataSet.getNegativeStrandTrack(gv.getSelectedChromosomeProperty().get().get().getName());
-            final ZoomableTrackRenderer positiveStrandTrackRenderer = new ZoomableTrackRenderer(canvasPane, positiveStrandTrack, chromosome.getLength());
+            final ZoomableTrackRenderer positiveStrandTrackRenderer = new ZoomableTrackRenderer(canvasPane, positiveStrandTrack, chromosome);
             positiveStrandTrackRenderer.setWeight(getMinWeight());
-            final ZoomableTrackRenderer negativeStrandTrackRenderer = new ZoomableTrackRenderer(canvasPane, negativeStrandTrack, chromosome.getLength());
+            final ZoomableTrackRenderer negativeStrandTrackRenderer = new ZoomableTrackRenderer(canvasPane, negativeStrandTrack, chromosome);
             negativeStrandTrackRenderer.setWeight(getMaxWeight());
             trackRenderers.add(positiveStrandTrackRenderer);
             trackRenderers.add(negativeStrandTrackRenderer);
@@ -313,9 +315,9 @@ public class MainController {
                         loadedDataSets.add(loadedDataSet);
                         Track positiveStrandTrack = loadedDataSet.getPositiveStrandTrack(chromosome.getName());
                         Track negativeStrandTrack = change.getElementAdded().getNegativeStrandTrack(gv.getSelectedChromosomeProperty().get().get().getName());
-                        final ZoomableTrackRenderer positiveStrandTrackRenderer = new ZoomableTrackRenderer(canvasPane, positiveStrandTrack, chromosome.getLength());
+                        final ZoomableTrackRenderer positiveStrandTrackRenderer = new ZoomableTrackRenderer(canvasPane, positiveStrandTrack, chromosome);
                         positiveStrandTrackRenderer.setWeight(getMinWeight());
-                        final ZoomableTrackRenderer negativeStrandTrackRenderer = new ZoomableTrackRenderer(canvasPane, negativeStrandTrack, chromosome.getLength());
+                        final ZoomableTrackRenderer negativeStrandTrackRenderer = new ZoomableTrackRenderer(canvasPane, negativeStrandTrack, chromosome);
                         negativeStrandTrackRenderer.setWeight(getMaxWeight());
                         trackRenderers.add(positiveStrandTrackRenderer);
                         trackRenderers.add(negativeStrandTrackRenderer);
@@ -693,27 +695,27 @@ public class MainController {
                                     double eventTriggerMinY = (Double) dragboardContent;
                                     if (dropLocationMinY != eventTriggerMinY) {
                                         Lists.newArrayList(trackRenderers).stream()
-                                        .filter(trackRenderer -> trackRenderer.getCanvasContext().isVisible())
-                                        .filter(draggedTrackRenderer -> draggedTrackRenderer.getTrackLabel().getContent().getBoundsInParent().getMinY() == eventTriggerMinY)
-                                        .findFirst()
-                                        .ifPresent(draggedTrackRenderer -> {
-                                            Lists.newArrayList(trackRenderers).stream()
-                                            .filter(trackRenderer -> trackRenderer.getTrackLabel().getContent() == dropLocationLabelNode)
-                                            .findFirst()
-                                            .ifPresent(droppedTrackRenderer -> {
-                                                int droppedIndex = droppedTrackRenderer.getWeight();
-                                                if (droppedAbove) {
-                                                    trackRenderers.remove(draggedTrackRenderer);
-                                                    draggedTrackRenderer.setWeight(droppedIndex - 1);
-                                                    trackRenderers.add(draggedTrackRenderer);
-                                                } else {
-                                                    trackRenderers.remove(draggedTrackRenderer);
-                                                    draggedTrackRenderer.setWeight(droppedIndex + 1);
-                                                    trackRenderers.add(draggedTrackRenderer);
-                                                }
-                                                updateTrackRenderers();
-                                            });
-                                        });
+                                                .filter(trackRenderer -> trackRenderer.getCanvasContext().isVisible())
+                                                .filter(draggedTrackRenderer -> draggedTrackRenderer.getTrackLabel().getContent().getBoundsInParent().getMinY() == eventTriggerMinY)
+                                                .findFirst()
+                                                .ifPresent(draggedTrackRenderer -> {
+                                                    Lists.newArrayList(trackRenderers).stream()
+                                                            .filter(trackRenderer -> trackRenderer.getTrackLabel().getContent() == dropLocationLabelNode)
+                                                            .findFirst()
+                                                            .ifPresent(droppedTrackRenderer -> {
+                                                                int droppedIndex = droppedTrackRenderer.getWeight();
+                                                                if (droppedAbove) {
+                                                                    trackRenderers.remove(draggedTrackRenderer);
+                                                                    draggedTrackRenderer.setWeight(droppedIndex - 1);
+                                                                    trackRenderers.add(draggedTrackRenderer);
+                                                                } else {
+                                                                    trackRenderers.remove(draggedTrackRenderer);
+                                                                    draggedTrackRenderer.setWeight(droppedIndex + 1);
+                                                                    trackRenderers.add(draggedTrackRenderer);
+                                                                }
+                                                                updateTrackRenderers();
+                                                            });
+                                                });
                                     }
                                 }
 

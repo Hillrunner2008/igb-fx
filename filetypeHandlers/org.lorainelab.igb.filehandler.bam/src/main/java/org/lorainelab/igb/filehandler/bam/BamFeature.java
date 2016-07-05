@@ -1,10 +1,13 @@
 package org.lorainelab.igb.filehandler.bam;
 
+import com.google.common.collect.Maps;
 import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
 import htsjdk.samtools.Cigar;
 import htsjdk.samtools.CigarElement;
 import htsjdk.samtools.SAMRecord;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import org.lorainelab.igb.data.model.Feature;
@@ -69,6 +72,17 @@ public class BamFeature implements Feature {
         final int sequenceStartPos = alignmentBlockRange.lowerEndpoint() - alignmentStart;
         final int sequenceEndPos = sequenceStartPos + alignmentBlockRange.upperEndpoint() - alignmentBlockRange.lowerEndpoint();
         return samRecord.getReadString().substring(sequenceStartPos, sequenceEndPos);
+    }
+    
+    public Map<String, String> getTooltipData() {
+        HashMap<String, String> tooltipData = Maps.newHashMap();
+        tooltipData.put("forward", Boolean.TRUE.toString());
+        tooltipData.put("cigar", getCigarString());
+        tooltipData.put("name", samRecord.getReadName());
+        tooltipData.put("reference name", samRecord.getReferenceName());
+        tooltipData.put("start", samRecord.getAlignmentStart()+"");
+        tooltipData.put("end", samRecord.getAlignmentEnd()+"");
+        return tooltipData;
     }
 
     public Set<AlignmentBlock> getAnnotationBlocks() {

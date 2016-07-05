@@ -26,13 +26,10 @@ public class GlyphFactory {
     }
 
     public static RectangleGlyph generateRectangleGlyph(org.lorainelab.igb.data.model.shapes.Rectangle rectangle) {
-        int height = 10;
-        if (rectangle.getAttributes().contains(org.lorainelab.igb.data.model.shapes.Rectangle.Attribute.thick)) {
-            height = 15;
-        }
-        double y = height == 15 ? 17.5 : 20;
-        RectangleGlyph toReturn = new RectangleGlyph(rectangle.getOffset(), y, rectangle.getWidth(), height);
-        toReturn.setFill(Color.BLUE);
+
+        RectangleGlyph toReturn = new RectangleGlyph(rectangle);
+        Color color = (Color)rectangle.getColor().orElse(Color.BLUE);
+        toReturn.setFill(color);
         toReturn.setStrokeColor(Color.web(PRIMARY_TEXT_COLOR));
         return toReturn;
     }

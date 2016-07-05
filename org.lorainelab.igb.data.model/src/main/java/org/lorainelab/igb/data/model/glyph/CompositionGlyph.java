@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
@@ -119,9 +120,10 @@ public class CompositionGlyph implements Glyph {
         }
         Rectangle2D glyphViewIntersectionBounds = glyphViewIntersectionBoundsWrapper.get();
         if (viewBoundingRect.getWidth() < 25_000_000) {
-            children.stream()
-                    .filter(glyph -> viewBoundingRect.intersects(glyph.getRenderBoundingRect()))
-                    .forEach(child -> child.draw(gc, view, additionalYoffset));
+            List<Glyph> childrenToDraw = children.stream()
+                    .filter(glyph -> viewBoundingRect.intersects(glyph.getRenderBoundingRect())).collect(Collectors.toList());
+            childrenToDraw.stream().filter(child -> child instanceof LineGlyph).forEach(child -> child.draw(gc, view, additionalYoffset)); //draw lines first... in the future we will want to repect layers
+            childrenToDraw.stream().filter(child -> !(child instanceof LineGlyph)).forEach(child -> child.draw(gc, view, additionalYoffset));
         } else {
             gc.save();
             gc.setFill(Color.web("#3F51B5"));
@@ -130,7 +132,7 @@ public class CompositionGlyph implements Glyph {
             gc.restore();
         }
         if (!Strings.isNullOrEmpty(label)) {
-            final double fontSize = Math.min((SLOT_HEIGHT * view.getYfactor()) * .35, 14.5);
+            final double fontSize = Math.min((SLOT_HEIGHT * view.getYfactor()) * .35, 10);
             if (viewBoundingRect.getWidth() < 300_000 && fontSize > 8) {
                 gc.save();
                 gc.scale(1 / view.getXfactor(), 1 / view.getYfactor());

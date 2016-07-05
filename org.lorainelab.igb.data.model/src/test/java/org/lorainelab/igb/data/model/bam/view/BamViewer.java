@@ -99,13 +99,13 @@ public class BamViewer extends Application {
             switch (alignmentBlock.getAlignmentType()) {
                 case DELETION:
                     return Rectangle.start(alignmentBlock.getRange().lowerEndpoint(), alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint())
-                            .addAttribute(Rectangle.Attribute.deletion).build();
+                            .build();
                 case GAP:
                     return Line.start(alignmentBlock.getRange().lowerEndpoint(), alignmentBlock.getRange().lowerEndpoint()
                     ).build();
                 case INSERTION:
                     return Rectangle.start(alignmentBlock.getRange().lowerEndpoint(), alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint())
-                            .addAttribute(Rectangle.Attribute.insertion).build();
+                            .build();
                 case MATCH:
                     return Rectangle.start(alignmentBlock.getRange().lowerEndpoint(), alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint()).build();
                 case PADDING:
