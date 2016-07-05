@@ -255,7 +255,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
                     }
                     gc.fillRect(index, y1, 1, 12);
                     if (index < 1 && (i - 1) >= 0) {
-                        char outOfviewChar = chromosome.getSequence(i-1, 1)[0];
+                        char outOfviewChar = chromosome.getSequence(i - 1, 1)[0];
                         gc.setFill(getBaseColor(outOfviewChar));
                         gc.fillRect(0, y1, index, 12);
                     }
@@ -284,8 +284,6 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         }
         gc.restore();
     }
-
-  
 
     @Override
     public void updateView(double scrollX, double scrollY) {
@@ -338,6 +336,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
 
     @Subscribe
     public void handleClickDragEndEvent(ClickDragEndEvent mouseEvent) {
+        LOG.info("handleClickDragEndEvent method called");
         if (lastMouseClickX == -1
                 || !canvasContext.getBoundingRect().contains(new Point2D(mouseEvent.getLocal().getX(), canvasContext.getBoundingRect().getMinY()))) {
             render();
