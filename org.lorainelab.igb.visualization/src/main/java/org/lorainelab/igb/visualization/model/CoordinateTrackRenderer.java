@@ -16,6 +16,7 @@ import javafx.scene.text.FontWeight;
 import org.lorainelab.igb.data.model.CanvasContext;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.View;
+import static org.lorainelab.igb.data.model.sequence.BasePairColorReference.getBaseColor;
 import org.lorainelab.igb.visualization.CanvasPane;
 import org.lorainelab.igb.visualization.event.ClickDragCancelEvent;
 import org.lorainelab.igb.visualization.event.ClickDragEndEvent;
@@ -24,7 +25,6 @@ import org.lorainelab.igb.visualization.event.ClickDragZoomEvent;
 import org.lorainelab.igb.visualization.event.ClickDraggingEvent;
 import org.lorainelab.igb.visualization.event.RefreshTrackEvent;
 import org.lorainelab.igb.visualization.event.ZoomStripeEvent;
-import static org.lorainelab.igb.data.model.sequence.BasePairColorReference.getBaseColor;
 import static org.lorainelab.igb.visualization.util.BoundsUtil.enforceRangeBounds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -255,7 +255,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
                     }
                     gc.fillRect(index, y1, 1, 12);
                     if (index < 1 && (i - 1) >= 0) {
-                        char outOfviewChar = chromosome.getSequence(i, 1)[0];
+                        char outOfviewChar = chromosome.getSequence(i-1, 1)[0];
                         gc.setFill(getBaseColor(outOfviewChar));
                         gc.fillRect(0, y1, index, 12);
                     }
