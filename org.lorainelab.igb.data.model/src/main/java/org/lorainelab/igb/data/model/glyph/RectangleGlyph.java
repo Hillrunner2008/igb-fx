@@ -91,17 +91,17 @@ public class RectangleGlyph implements Glyph {
 
                     String sequence;
                     String innerText;
-                    int startOffset = 0;
-                    int endOffset = 0;
-                    if ((int) boundingRect.getMinX() < (int) viewRect.getMinX()) {
+                    double startOffset = 0;
+                    double endOffset = 0;
+                    if (boundingRect.getMinX() < viewRect.getMinX()) {
                         //left side is cut off
-                        startOffset = (int) viewRect.getMinX() - (int) boundingRect.getMinX();
+                        startOffset = viewRect.getMinX() - boundingRect.getMinX();
                     }
-                    if ((int) boundingRect.getMaxX() > (int) viewRect.getMaxX()) {
+                    if ((int) boundingRect.getMaxX() > viewRect.getMaxX()) {
                         //right side is cut off
-                        endOffset = (int) boundingRect.getMaxX() - (int) viewRect.getMaxX();
+                        endOffset = boundingRect.getMaxX() - viewRect.getMaxX();
                     }
-                    Range<Integer> basePairRange = Range.closed((int) boundingRect.getMinX() + startOffset, (int) boundingRect.getMaxX() - endOffset);
+                    Range<Integer> basePairRange = Range.closed((int) boundingRect.getMinX() + (int) startOffset, (int) boundingRect.getMaxX() - (int) endOffset);
                     if (innerTextReferenceSequenceRange.isPresent()) {
                         //TODO handle offsets
                         sequence = new String(chromosome.getSequence(innerTextReferenceSequenceRange.get().lowerEndpoint(),
@@ -128,13 +128,21 @@ public class RectangleGlyph implements Glyph {
                         textYPosition += textYOffset;
                         gc.scale(1 / textScale, 1 / textScale);
                         if (colorByBase) {
-                            int i = 0;
+                            double i = 0;
+                            double minX = viewBoundingRect.get().getMinX();
+                            int baseWidth = 1;
                             for (char c : innerText.toCharArray()) {
                                 gc.setFill(getBaseColor(c));
-                                gc.fillRect(viewBoundingRect.get().getMinX() + i, y, 1, viewBoundingRect.get().getHeight());
+                                if (startOffset % 1 > 0 && i == 0) {
+                                    gc.fillRect(minX, y, 1-startOffset % 1, viewBoundingRect.get().getHeight());
+                                    i += (1-startOffset % 1);
+                                    continue;
+                                } else {
+                                    gc.fillRect(minX + i, y, 1, viewBoundingRect.get().getHeight());
+                                }
                                 gc.setFill(Color.BLACK);
                                 gc.scale(textScale, textScale);
-                                double x = (viewBoundingRect.get().getMinX() + i) / textScale;
+                                double x = (minX + i) / textScale;
                                 double maxWidth = 1 / textScale;
                                 gc.fillText("" + c, x, textYPosition, maxWidth);
                                 gc.scale(1 / textScale, 1 / textScale);

@@ -53,7 +53,7 @@ public interface Glyph {
         double width = boundingRect.getWidth();
         double height = boundingRect.getHeight();
         if (x < view.getMinX()) {
-            int offSet = (int) (view.getMinX() - x);
+            double offSet = view.getMinX() - x;
             width = width - offSet;
             x = 0;
         } else {
