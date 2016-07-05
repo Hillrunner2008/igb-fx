@@ -27,7 +27,7 @@ public class PreferenceProviderMenuEntry implements MenuBarEntryProvider {
     private Stage stage;
     
     public PreferenceProviderMenuEntry(){
-        menuItem = new WeightedMenuItem(30, "Preferences");
+        menuItem = new WeightedMenuItem(30, "Preferences..");
     }
 
     @Activate
