@@ -27,7 +27,7 @@ public class BamRenderer implements Renderer<BamFeature> {
         return composition(name[0],
                 bamFeature.getTooltipData(),
                 layer(
-                        bamFeature.getRange().lowerEndpoint(),
+                        0,
                         bamFeature.getAnnotationBlocks().stream().map(alignmentBlock -> convertAlignmentBlockToRect(alignmentBlock))
                 ));
     }

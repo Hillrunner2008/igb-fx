@@ -4,12 +4,10 @@ import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Collections;
 import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 import javafx.application.Platform;
+import javafx.beans.Observable;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -50,11 +48,13 @@ public class GenomeAssemblyTab implements TabProvider {
     @FXML
     private TableColumn seqLengthColumn;
     private final ObservableList<Chromosome> tableData;
+    private final ObservableList<GenomeVersion> genomeVersionData;
 
     private GenomeVersionRegistry genomeVersionRegistry;
 
     public GenomeAssemblyTab() {
         tableData = FXCollections.observableArrayList();
+        genomeVersionData = FXCollections.observableArrayList((GenomeVersion gv) -> new Observable[]{gv.getName()});
         genomeAssemblyTab = new Tab(TAB_TITLE);
         final URL resource = GenomeAssemblyTab.class.getClassLoader().getResource("GenomeAssemblyTab.fxml");
         FXMLLoader fxmlLoader = new FXMLLoader(resource);
@@ -78,11 +78,12 @@ public class GenomeAssemblyTab implements TabProvider {
     }
 
     private void initializeGenomeVersionComboBox() {
-        genomeVersionComboBox.getItems().addAll(genomeVersionRegistry.getRegisteredGenomeVersions());
+        genomeVersionData.addAll(genomeVersionRegistry.getRegisteredGenomeVersions());
+        genomeVersionComboBox.setItems(genomeVersionData);
         genomeVersionComboBox.setConverter(new StringConverter<GenomeVersion>() {
             @Override
             public String toString(GenomeVersion genomeVersion) {
-                return genomeVersion.getName();
+                return genomeVersion.getName().get();
             }
 
             @Override
@@ -140,16 +141,16 @@ public class GenomeAssemblyTab implements TabProvider {
     private void initializeSpeciesNameComboBox() {
         speciesComboBox.getItems().addAll(
                 genomeVersionRegistry.getRegisteredGenomeVersions()
-                .stream()
-                .map(gv -> gv.getSpeciesName())
-                .collect(Collectors.toSet())
+                        .stream()
+                        .map(gv -> gv.getSpeciesName())
+                        .collect(Collectors.toSet())
         );
         genomeVersionRegistry.getRegisteredGenomeVersions().addListener((SetChangeListener.Change<? extends GenomeVersion> change) -> {
             Platform.runLater(() -> {
                 if (change.wasAdded()) {
                     if (!speciesComboBox.getItems().contains(change.getElementAdded().getSpeciesName())) {
                         speciesComboBox.getItems().add(change.getElementAdded().getSpeciesName());
-                    }else{
+                    } else {
                         //upde only version combo box
                         genomeVersionComboBox.getItems().add(change.getElementAdded());
                     }

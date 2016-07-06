@@ -56,12 +56,12 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         this.track = track;
         this.modelWidth = chromosome.getLength();
         modelHeight = new SimpleDoubleProperty();
-        modelHeight.bind(track.getModelHeight());
+        modelHeight.bind(track.modelHeightProperty());
         view = new View(new Rectangle2D(0, 0, modelWidth, modelHeight.doubleValue()), chromosome);
         modelHeight.addListener((observable, oldValue, newValue) -> {
             scaleCanvas(view.getXfactor(), view.getYfactor(), scrollY);
         });
-        canvasContext = new CanvasContext(canvasPane.getCanvas(), Rectangle2D.EMPTY, 0, 0);
+        canvasContext = new CanvasContext(canvasPane.getCanvas(), 0, 0);
         trackLabel = new TrackLabel(this, track.getTrackLabel());
         gc = canvasPane.getCanvas().getGraphicsContext2D();
 
@@ -86,7 +86,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
                 }
                 eventBus.post(new ScrollXUpdate(calculatedScrollXPosition));
             }
-            double yOffset = canvasContext.getRelativeTrackOffset() / view.getYfactor();
+            double yOffset = Math.round((scrollY / 100) * (modelHeight.get() - visibleVirtualCoordinatesY));
             view.setBoundingRect(new Rectangle2D(xOffset, yOffset, visibleVirtualCoordinatesX, visibleVirtualCoordinatesY));
             render();
         }
@@ -134,8 +134,15 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     @Override
     public void render() {
         if (canvasContext.isVisible()) {
-            clearCanvas();
-            draw();
+            if (Platform.isFxApplicationThread()) {
+                clearCanvas();
+                draw();
+            } else {
+                Platform.runLater(() -> {
+                    clearCanvas();
+                    draw();
+                });
+            }
         }
     }
 
