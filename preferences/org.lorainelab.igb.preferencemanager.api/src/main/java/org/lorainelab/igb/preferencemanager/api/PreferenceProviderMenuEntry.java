@@ -37,7 +37,7 @@ public class PreferenceProviderMenuEntry implements MenuBarEntryProvider {
     private PreferencesTabManager preferencesTabManager;
 
     public PreferenceProviderMenuEntry() {
-        menuItem = new WeightedMenuItem(30, "Preferences..");
+        menuItem = new WeightedMenuItem(30, "Preferences");
 
     }
 
