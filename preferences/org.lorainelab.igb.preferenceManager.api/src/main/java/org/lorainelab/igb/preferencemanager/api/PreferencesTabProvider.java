@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package lorainelab.igb.preferencemanager.api;
+package org.lorainelab.igb.preferencemanager.api;
 
 import javafx.scene.control.Tab;
 

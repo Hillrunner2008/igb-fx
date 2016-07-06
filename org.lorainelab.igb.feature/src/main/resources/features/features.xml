@@ -66,6 +66,8 @@
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.tabs.genome/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.tabs.selection/${project.version}</bundle>
         
+        <bundle>mvn:${project.groupId}/org.lorainelab.igb.preferenceManager.api/${project.version}</bundle>
+        
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.demo/${project.version}</bundle>
     </feature>
 

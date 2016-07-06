@@ -74,6 +74,7 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
             layoutComponents();
             menuItem.setOnAction(event -> {
                 Platform.runLater(() -> {
+                    System.out.println("asctivate of cust genome");
                     stage.centerOnScreen();
 
                     stage.show();
