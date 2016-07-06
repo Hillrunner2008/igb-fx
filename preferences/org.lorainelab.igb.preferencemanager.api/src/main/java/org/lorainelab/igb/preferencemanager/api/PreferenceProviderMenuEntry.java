@@ -37,19 +37,16 @@ public class PreferenceProviderMenuEntry implements MenuBarEntryProvider {
     private PreferencesTabManager preferencesTabManager;
 
     public PreferenceProviderMenuEntry() {
-        System.out.println("in constructor");
         menuItem = new WeightedMenuItem(30, "Preferences..");
 
     }
 
     @Activate
     public void activate() {
-        System.out.println("in activate");
         Platform.runLater(() -> {
             initComponents();
             layoutComponents();
             menuItem.setOnAction(event -> {
-                System.out.println("in runlater");
                 Platform.runLater(() -> {
                     Platform.runLater(() -> {
                         stage.show();
@@ -63,14 +60,12 @@ public class PreferenceProviderMenuEntry implements MenuBarEntryProvider {
     public Optional<List<WeightedMenuItem>> getMenuItems() {
         List<WeightedMenuItem> menuItems = new ArrayList<WeightedMenuItem>();
         menuItems.add(menuItem);
-        System.out.println("Reurned optional");
         return Optional.of(menuItems);
 
     }
 
     @Override
     public ParentMenu getParentMenu() {
-        System.out.println("return parent");
         return ParentMenu.FILE;
     }
 
@@ -80,22 +75,16 @@ public class PreferenceProviderMenuEntry implements MenuBarEntryProvider {
     }
 
     private void initComponents() {
-        System.out.println(PreferencesTabManager.class + " init comp");
-        pane = new TabPane();
+        pane = preferencesTabManager.getPreferencesTabPane();
         pane.setMinSize(800, 500);
-        Tab t = new Tab("Hello Tab");
-        t.setClosable(false);
-        pane.getTabs().add(t);
         stage = new Stage();
         stage.sizeToScene();
         stage.centerOnScreen();
-
         stage.setResizable(true);
         stage.setTitle("Preferences");
     }
 
     private void layoutComponents() {
-        System.out.println(PreferencesTabManager.class + "layout");
         stage.setScene(new Scene(pane));
     }
     

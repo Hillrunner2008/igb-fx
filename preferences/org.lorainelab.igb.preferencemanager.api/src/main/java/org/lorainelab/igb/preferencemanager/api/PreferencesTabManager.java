@@ -27,25 +27,23 @@ public class PreferencesTabManager {
     private TabPane pane;
 
     public PreferencesTabManager() {
-        System.out.println(PreferencesTabManager.class+" init comp");
         pane = new TabPane();
         setAnchorPaneConstraints(pane);
-        pane.getTabs().add(new Tab("Hello Tab"));
     }
 
 
     @Reference(optional = true, multiple = true, unbind = "removeTab", dynamic = true)
     public void addTab(PreferencesTabProvider tabProvider) {
-        tabProvider.getPreferencesTab().setClosable(false);
-        System.out.println("tab closing set to false");
         pane.getTabs().add(tabProvider.getPreferencesTab());
-        System.out.println("isclosable: "+tabProvider.getPreferencesTab().isClosable());
     }
 
     public void removeTab(PreferencesTabProvider tabProvider) {
         pane.getTabs().remove(tabProvider.getPreferencesTab());
     }
 
+    public TabPane getPreferencesTabPane(){
+        return pane;
+    }
     
     private void setAnchorPaneConstraints(TabPane pane) {
         double anchor = 0;
