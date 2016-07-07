@@ -24,9 +24,9 @@ public class CanvasContext {
     private double relativeTrackOffset;
     private boolean isVisible;
 
-    public CanvasContext(Canvas canvas, Rectangle2D boundingRectangle, double trackHeight, double relativeTrackOffset) {
+    public CanvasContext(Canvas canvas, double trackHeight, double relativeTrackOffset) {
         this.canvas = canvas;
-        this.boundingRectangle = boundingRectangle;
+        this.boundingRectangle = Rectangle2D.EMPTY;
         this.trackHeight = trackHeight;
         this.relativeTrackOffset = relativeTrackOffset;
         isVisible = false;

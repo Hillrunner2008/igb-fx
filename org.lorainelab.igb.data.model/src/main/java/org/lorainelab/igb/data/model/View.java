@@ -1,6 +1,8 @@
 package org.lorainelab.igb.data.model;
 
 import javafx.geometry.Rectangle2D;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -8,6 +10,7 @@ import javafx.geometry.Rectangle2D;
  */
 public class View {
 
+    private static final Logger LOG = LoggerFactory.getLogger(View.class);
     private Chromosome chromosome;
     private Rectangle2D boundingRect;
     private double xfactor = 1;
@@ -39,7 +42,11 @@ public class View {
     }
 
     public void setYfactor(double yfactor) {
-        this.yfactor = yfactor;
+        if (Double.isFinite(yfactor)) {
+            this.yfactor = yfactor;
+        } else {
+            LOG.info("shouldn't happen");
+        }
     }
 
     public Chromosome getChromosome() {

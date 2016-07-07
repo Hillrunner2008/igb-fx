@@ -298,7 +298,6 @@ public class CanvasPane extends Region {
 
     private void drawSelectionRectangle(MouseEvent event) {
         clear();
-        eventBus.post(new ZoomStripeEvent(zoomStripeCoordinate));
         eventBus.post(new RefreshTrackEvent());
         GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.save();

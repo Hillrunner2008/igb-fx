@@ -62,7 +62,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         this.modelHeight = 50;
         validViewRange = Range.closedOpen(0, modelWidth);
         viewBoundingRectangle = new Rectangle2D(0, 0, modelWidth, modelHeight);
-        canvasContext = new CanvasContext(canvasPane.getCanvas(), Rectangle2D.EMPTY, 0, 0);
+        canvasContext = new CanvasContext(canvasPane.getCanvas(), 0, 0);
         trackLabel = new TrackLabel(this, COORDINATES_TRACK_LABEL);
         gc = canvasPane.getCanvas().getGraphicsContext2D();
     }
