@@ -86,7 +86,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
                 }
                 eventBus.post(new ScrollXUpdate(calculatedScrollXPosition));
             }
-            double yOffset = Math.round((scrollY / 100) * (modelHeight.get() - visibleVirtualCoordinatesY));
+            double yOffset = canvasContext.getRelativeTrackOffset() / view.getYfactor();
             view.setBoundingRect(new Rectangle2D(xOffset, yOffset, visibleVirtualCoordinatesX, visibleVirtualCoordinatesY));
             render();
         }
