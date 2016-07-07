@@ -16,6 +16,7 @@ import javafx.scene.text.FontWeight;
 import org.lorainelab.igb.data.model.CanvasContext;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.View;
+import static org.lorainelab.igb.data.model.sequence.BasePairColorReference.getBaseColor;
 import org.lorainelab.igb.visualization.CanvasPane;
 import org.lorainelab.igb.visualization.event.ClickDragCancelEvent;
 import org.lorainelab.igb.visualization.event.ClickDragEndEvent;
@@ -33,15 +34,11 @@ import org.slf4j.LoggerFactory;
  * @author dcnorris
  */
 public class CoordinateTrackRenderer implements TrackRenderer {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(CoordinateTrackRenderer.class);
     private static final String COORDINATES_TRACK_LABEL = "Coordinates";
-    private static final Color A_COLOR = Color.rgb(151, 255, 179);
-    private static final Color T_COLOR = Color.rgb(102, 211, 255);
-    private static final Color G_COLOR = Color.rgb(255, 210, 0);
-    private static final Color C_COLOR = Color.rgb(255, 176, 102);
     private static final int COORDINATE_CENTER_LINE = 20;
-    
+
     final int modelWidth;
     final double modelHeight;
     private Rectangle2D viewBoundingRectangle;
@@ -55,7 +52,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     private TrackLabel trackLabel;
     private final Chromosome chromosome;
     private final Range<Integer> validViewRange;
-    
+
     public CoordinateTrackRenderer(CanvasPane canvasPane, Chromosome chromosome) {
         weight = 0;
         this.eventBus = canvasPane.getEventBus();
@@ -65,11 +62,11 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         this.modelHeight = 50;
         validViewRange = Range.closedOpen(0, modelWidth);
         viewBoundingRectangle = new Rectangle2D(0, 0, modelWidth, modelHeight);
-        canvasContext = new CanvasContext(canvasPane.getCanvas(), Rectangle2D.EMPTY, 0, 0);
+        canvasContext = new CanvasContext(canvasPane.getCanvas(), 0, 0);
         trackLabel = new TrackLabel(this, COORDINATES_TRACK_LABEL);
         gc = canvasPane.getCanvas().getGraphicsContext2D();
     }
-    
+
     void draw() {
         if (canvasContext.isVisible()) {
             gc.save();
@@ -80,7 +77,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
             gc.restore();
         }
     }
-    
+
     private void drawClickDrag() {
         if (lastMouseClickX >= 0 && lastMouseDragX >= 0) {
             gc.save();
@@ -93,27 +90,27 @@ public class CoordinateTrackRenderer implements TrackRenderer {
             gc.restore();
         }
     }
-    
+
     double round(double num, int multipleOf) {
         return Math.floor((num + multipleOf / 2) / multipleOf) * multipleOf;
     }
-    
+
     public double findLarget(double[] numbers) {
-        
+
         double largest = Double.MIN_VALUE;
-        
+
         for (int i = 0; i < numbers.length; i++) {
             if (numbers[i] > largest) {
                 largest = numbers[i];
             }
         }
-        
+
         return largest;
     }
-    
+
     public double findSmallest(double[] numbers) {
         double smallest = Double.MAX_VALUE;
-        
+
         for (int i = 0; i < numbers.length; i++) {
             if (smallest > numbers[i]) {
                 smallest = numbers[i];
@@ -121,7 +118,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         }
         return smallest;
     }
-    
+
     private double getMajorTick(double value) {
         int approxIntervals = 10;
         int incr1 = 10;
@@ -142,12 +139,12 @@ public class CoordinateTrackRenderer implements TrackRenderer {
                 } else {
                     lastSmallestIncr = incr3;
                 }
-                
+
                 incr1 *= 10;
                 incr2 *= 10;
                 incr3 *= 10;
             } else {
-                
+
                 double value1Diff = Math.abs(approxIntervals - value1);
                 double value2Diff = Math.abs(approxIntervals - value2);
                 double value3Diff = Math.abs(approxIntervals - value3);
@@ -166,13 +163,13 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         }
         return 10;
     }
-    
+
     private void drawCoordinateLine() {
         gc.save();
         gc.scale(1 / xfactor, 1);
         gc.setFill(Color.BLACK);
         double majorTickInterval = getMajorTick(viewBoundingRectangle.getWidth());
-        
+
         double minorTickInterval = majorTickInterval / 10;
         DecimalFormat formatter = new DecimalFormat("#,###");
         double textScale = .8;
@@ -201,7 +198,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
                 }
                 gc.strokeLine(x, y1, x, y2);
             }
-            
+
             long startMinor = (long) (viewBoundingRectangle.getMinX() + minorTickInterval - (viewBoundingRectangle.getMinX() % minorTickInterval));
             for (long i = startMinor; i < (viewBoundingRectangle.getMaxX() + 1); i += minorTickInterval) {
                 double x = (i - viewBoundingRectangle.getMinX()) * xfactor;
@@ -224,7 +221,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         }
         gc.restore();
     }
-    
+
     private void drawCoordinateBasePairs() {
         gc.save();
         gc.setFont(Font.font("Monospaced", FontWeight.BOLD, 25));
@@ -244,7 +241,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
                 int startDna = (int) Math.ceil(viewBoundingRectangle.getMinX());
                 int length = (int) Math.ceil(viewBoundingRectangle.getWidth());
                 char[] dna = chromosome.getSequence(startDna, length);
-                
+
                 gc.scale(textScale, textScale);
                 int start = (int) Math.ceil(viewBoundingRectangle.getMinX());
                 for (int i = start; i < (dna.length + viewBoundingRectangle.getMinX()); i++) {
@@ -258,7 +255,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
                     }
                     gc.fillRect(index, y1, 1, 12);
                     if (index < 1 && (i - 1) >= 0) {
-                        char outOfviewChar = chromosome.getSequence(i, 1)[0];
+                        char outOfviewChar = chromosome.getSequence(i - 1, 1)[0];
                         gc.setFill(getBaseColor(outOfviewChar));
                         gc.fillRect(0, y1, index, 12);
                     }
@@ -287,26 +284,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         }
         gc.restore();
     }
-    
-    private Color getBaseColor(char base) {
-        switch (base) {
-            case 'a':
-            case 'A':
-                return A_COLOR;
-            case 't':
-            case 'T':
-                return T_COLOR;
-            case 'g':
-            case 'G':
-                return G_COLOR;
-            case 'c':
-            case 'C':
-                return C_COLOR;
-            default:
-                return Color.GRAY;
-        }
-    }
-    
+
     @Override
     public void updateView(double scrollX, double scrollY) {
         if (canvasContext.isVisible()) {
@@ -324,7 +302,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
             render();
         }
     }
-    
+
     @Override
     public void scaleCanvas(double xFactor, double scrollX, double scrollY) {
         if (canvasContext.isVisible()) {
@@ -335,7 +313,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
             updateView(scrollX, scrollY);
         }
     }
-    
+
     private void clearCanvas() {
         gc.save();
         double y = canvasContext.getBoundingRect().getMinY();
@@ -345,19 +323,20 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         gc.fillRect(0, y, canvasContext.getBoundingRect().getWidth(), height);
         gc.restore();
     }
-    
+
     private double lastMouseClickX = -1;
     private double lastMouseDragX = -1;
-    
+
     @Subscribe
     private void handleClickDragCancelEvent(ClickDragCancelEvent event) {
         lastMouseClickX = -1;
         lastMouseDragX = -1;
         render();
     }
-    
+
     @Subscribe
     public void handleClickDragEndEvent(ClickDragEndEvent mouseEvent) {
+        LOG.info("handleClickDragEndEvent method called");
         if (lastMouseClickX == -1
                 || !canvasContext.getBoundingRect().contains(new Point2D(mouseEvent.getLocal().getX(), canvasContext.getBoundingRect().getMinY()))) {
             render();
@@ -366,7 +345,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         final double visibleVirtualCoordinatesX = viewBoundingRectangle.getWidth();
         double xOffset = viewBoundingRectangle.getMinX();
         Range<Double> currentRange = Range.closedOpen(xOffset, xOffset + visibleVirtualCoordinatesX);
-        
+
         lastMouseDragX = Math.floor(mouseEvent.getLocal().getX() / xfactor);
         ClickDragZoomEvent event;
         double x1 = viewBoundingRectangle.getMinX() + lastMouseClickX;
@@ -381,7 +360,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         lastMouseDragX = -1;
         render();
     }
-    
+
     @Subscribe
     public void handleClickDraggingEvent(ClickDraggingEvent event) {
         if (!canvasContext.getBoundingRect().contains(new Point2D(event.getLocal().getX(), event.getLocal().getY()))) {
@@ -390,7 +369,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         lastMouseDragX = Math.floor(event.getLocal().getX() / xfactor);
         render();
     }
-    
+
     @Subscribe
     public void handleClickDragStartEvent(ClickDragStartEvent event) {
         if (!canvasContext.getBoundingRect().contains(event.getLocal())) {
@@ -398,12 +377,12 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         }
         lastMouseClickX = Math.floor(event.getLocal().getX() / xfactor);
     }
-    
+
     @Subscribe
     private void handleRefreshTrackEvent(RefreshTrackEvent event) {
         render();
     }
-    
+
     @Override
     public void render() {
         if (canvasContext.isVisible()) {
@@ -418,49 +397,49 @@ public class CoordinateTrackRenderer implements TrackRenderer {
             }
         }
     }
-    
+
     @Subscribe
     private void zoomStripeListener(ZoomStripeEvent event) {
         zoomStripeCoordinate = event.getZoomStripeCoordinate();
     }
-    
+
     @Override
     public CanvasContext getCanvasContext() {
         return canvasContext;
     }
-    
+
     @Override
     public View getView() {
-        View toReturn = new View(viewBoundingRectangle);
+        View toReturn = new View(viewBoundingRectangle, chromosome);
         toReturn.setXfactor(xfactor);
         return toReturn;
     }
-    
+
     @Override
     public String getTrackLabelText() {
         return COORDINATES_TRACK_LABEL;
     }
-    
+
     public int getModelWidth() {
         return modelWidth;
     }
-    
+
     public double getModelHeight() {
         return modelHeight;
     }
-    
+
     @Override
     public int getWeight() {
         return weight;
     }
-    
+
     @Override
     public void setWeight(int weight) {
         this.weight = weight;
     }
-    
+
     public TrackLabel getTrackLabel() {
         return trackLabel;
     }
-    
+
 }

@@ -184,6 +184,7 @@ public class MainController {
                     selectionInfoService.getSelectedGenomeVersion().get().ifPresent(gv -> {
                         if (selectedGenomeVersion == gv) {
                             Platform.runLater(() -> {
+                                trackRenderers.forEach(renderer -> eventBus.unregister(renderer));
                                 trackRenderers.clear();
                                 labelPane.getChildren().clear();
                                 hSlider.setValue(0);
@@ -202,6 +203,7 @@ public class MainController {
     private void initializeGenomeVersionSelectionListener() {
         selectionInfoService.getSelectedGenomeVersion().addListener((observable, oldValue, newValue) -> {
             Platform.runLater(() -> {
+                trackRenderers.forEach(renderer -> eventBus.unregister(renderer));
                 trackRenderers.clear();
                 labelPane.getChildren().clear();
                 hSlider.setValue(0);
@@ -223,7 +225,6 @@ public class MainController {
         this.searchService = searchService;
     }
 
-
     private void initializeSearch() {
         Platform.runLater(() -> {
             search.setOnKeyReleased(e -> {
@@ -231,12 +232,12 @@ public class MainController {
                     searchAutocomplete.hide();
                 } else {
                     LinkedList<Document> searchResult = new LinkedList<>();
-                    Optional<IndexIdentity> resourceIndexIdentity = 
-                            searchService.getResourceIndexIdentity(
+                    Optional<IndexIdentity> resourceIndexIdentity
+                            = searchService.getResourceIndexIdentity(
                                     selectedGenomeVersion.getSpeciesName());
                     if (resourceIndexIdentity.isPresent()) {
                         //TODO: refactor to boolean queries in search module
-                        searchService.search("(chromosomeId:"+selectedChromosome.getName()+") AND (id:"+search.getText()+"*)",
+                        searchService.search("(chromosomeId:" + selectedChromosome.getName() + ") AND (id:" + search.getText() + "*)",
                                 resourceIndexIdentity.get()).stream()
                                 .forEach(doc -> searchResult.add(doc));
                     }
@@ -263,15 +264,19 @@ public class MainController {
             Label entryLabel = new Label(result.getFields().get("id"));
             CustomMenuItem item = new CustomMenuItem(entryLabel, true);
             item.setOnAction((ActionEvent actionEvent) -> {
-                search.setText(result.getFields().get("id"));
-                searchAutocomplete.hide();
-                int start = Integer.parseInt(result.getFields().get("start"));
-                int end = Integer.parseInt(result.getFields().get("end"));
-                LOG.info("jump zoom to: {} {}", start, end);
-                TrackRenderer trackRender = trackRenderers.stream().findFirst().get();
-                Rectangle2D oldRect = trackRender.getCanvasContext().getBoundingRect();
-                Rectangle2D rect = new Rectangle2D(start, oldRect.getMinY(), end-start, oldRect.getHeight());
-                eventBus.post(new JumpZoomEvent(rect, trackRender));
+                Platform.runLater(() -> {
+                    search.setText(result.getFields().get("id"));
+                    searchAutocomplete.hide();
+                    int start = Integer.parseInt(result.getFields().get("start"));
+                    int end = Integer.parseInt(result.getFields().get("end"));
+                    trackRenderers.stream().findFirst().ifPresent(trackRender -> {
+                        Rectangle2D oldRect = trackRender.getCanvasContext().getBoundingRect();
+                        Rectangle2D rect = new Rectangle2D(start, oldRect.getMinY(), end - start, oldRect.getHeight());
+                        LOG.info("start: {} end: {}", start, end);
+                        eventBus.post(new JumpZoomEvent(rect, trackRender));
+                    });
+                });
+
             });
             menuItems.add(item);
         }
@@ -296,9 +301,9 @@ public class MainController {
         gv.getLoadedDataSets().forEach(dataSet -> {
             Track positiveStrandTrack = dataSet.getPositiveStrandTrack(chromosome.getName());
             Track negativeStrandTrack = dataSet.getNegativeStrandTrack(gv.getSelectedChromosomeProperty().get().get().getName());
-            final ZoomableTrackRenderer positiveStrandTrackRenderer = new ZoomableTrackRenderer(canvasPane, positiveStrandTrack, chromosome.getLength());
+            final ZoomableTrackRenderer positiveStrandTrackRenderer = new ZoomableTrackRenderer(canvasPane, positiveStrandTrack, chromosome);
             positiveStrandTrackRenderer.setWeight(getMinWeight());
-            final ZoomableTrackRenderer negativeStrandTrackRenderer = new ZoomableTrackRenderer(canvasPane, negativeStrandTrack, chromosome.getLength());
+            final ZoomableTrackRenderer negativeStrandTrackRenderer = new ZoomableTrackRenderer(canvasPane, negativeStrandTrack, chromosome);
             negativeStrandTrackRenderer.setWeight(getMaxWeight());
             trackRenderers.add(positiveStrandTrackRenderer);
             trackRenderers.add(negativeStrandTrackRenderer);
@@ -312,9 +317,9 @@ public class MainController {
                         loadedDataSets.add(loadedDataSet);
                         Track positiveStrandTrack = loadedDataSet.getPositiveStrandTrack(chromosome.getName());
                         Track negativeStrandTrack = change.getElementAdded().getNegativeStrandTrack(gv.getSelectedChromosomeProperty().get().get().getName());
-                        final ZoomableTrackRenderer positiveStrandTrackRenderer = new ZoomableTrackRenderer(canvasPane, positiveStrandTrack, chromosome.getLength());
+                        final ZoomableTrackRenderer positiveStrandTrackRenderer = new ZoomableTrackRenderer(canvasPane, positiveStrandTrack, chromosome);
                         positiveStrandTrackRenderer.setWeight(getMinWeight());
-                        final ZoomableTrackRenderer negativeStrandTrackRenderer = new ZoomableTrackRenderer(canvasPane, negativeStrandTrack, chromosome.getLength());
+                        final ZoomableTrackRenderer negativeStrandTrackRenderer = new ZoomableTrackRenderer(canvasPane, negativeStrandTrack, chromosome);
                         negativeStrandTrackRenderer.setWeight(getMaxWeight());
                         trackRenderers.add(positiveStrandTrackRenderer);
                         trackRenderers.add(negativeStrandTrackRenderer);
@@ -348,11 +353,14 @@ public class MainController {
 
     @Subscribe
     private void handleScrollScaleEvent(ScrollScaleEvent event) {
-        if (event.getDirection().equals(Direction.INCREMENT)) {
-            hSlider.increment();
-        } else {
-            hSlider.decrement();
-        }
+        Platform.runLater(() -> {
+            if (event.getDirection().equals(Direction.INCREMENT)) {
+                hSlider.increment();
+            } else {
+                hSlider.decrement();
+            }
+        });
+
     }
 
     @Subscribe
@@ -757,22 +765,20 @@ public class MainController {
         Rectangle2D focusRect = jumpZoomEvent.getRect();
         TrackRenderer eventLocationReference = jumpZoomEvent.getTrackRenderer();
         View view = eventLocationReference.getView();
-        if (focusRect.intersects(view.getBoundingRect())) {
-            double modelWidth = canvasPane.getModelWidth();
-            double minX = Math.max(focusRect.getMinX(), view.getBoundingRect().getMinX());
-            double maxX = Math.min(focusRect.getMaxX(), view.getBoundingRect().getMaxX());
-            double width = maxX - minX;
-            if (width < MAX_ZOOM_MODEL_COORDINATES_X) {
-                width = Math.max(width * 1.1, MAX_ZOOM_MODEL_COORDINATES_X);
-                minX = Math.max((minX + focusRect.getWidth() / 2) - (width / 2), 0);
-            }
-            final double scaleXalt = eventLocationReference.getCanvasContext().getBoundingRect().getWidth() / width;
-            resetZoomStripe();
-            hSlider.setValue(invertExpScaleTransform(canvasPane, scaleXalt));
-            double scrollPosition = (minX / (modelWidth - width)) * 100;
-            final double scrollXValue = enforceRangeBounds(scrollPosition, 0, 100);
-            scrollX.setValue(scrollXValue);
+        double modelWidth = canvasPane.getModelWidth();
+        double minX = Math.max(focusRect.getMinX(), view.getBoundingRect().getMinX());
+        double maxX = Math.min(focusRect.getMaxX(), view.getBoundingRect().getMaxX());
+        double width = maxX - minX;
+        if (width < MAX_ZOOM_MODEL_COORDINATES_X) {
+            width = Math.max(width * 1.1, MAX_ZOOM_MODEL_COORDINATES_X);
+            minX = Math.max((minX + focusRect.getWidth() / 2) - (width / 2), 0);
         }
+        final double scaleXalt = eventLocationReference.getCanvasContext().getBoundingRect().getWidth() / width;
+        resetZoomStripe();
+        hSlider.setValue(invertExpScaleTransform(canvasPane, scaleXalt));
+        double scrollPosition = (minX / (modelWidth - width)) * 100;
+        final double scrollXValue = enforceRangeBounds(scrollPosition, 0, 100);
+        scrollX.setValue(scrollXValue);
     }
 
     @Subscribe
@@ -867,9 +873,9 @@ public class MainController {
                 .forEach(renderer -> {
                     selectionInfoService.getSelectedGlyphs().addAll(
                             renderer.getTrack().getGlyphs()
-                            .stream()
-                            .filter(glyph -> glyph.isSelected())
-                            .collect(Collectors.toList())
+                                    .stream()
+                                    .filter(glyph -> glyph.isSelected())
+                                    .collect(Collectors.toList())
                     );
                 });
     }

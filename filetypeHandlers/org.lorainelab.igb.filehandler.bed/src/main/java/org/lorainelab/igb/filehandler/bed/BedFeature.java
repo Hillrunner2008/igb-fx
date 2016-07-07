@@ -44,8 +44,8 @@ public class BedFeature implements Feature {
             data.put("end", NUMBER_FORMAT.format(range.upperEndpoint()) + "");
             data.put("length", NUMBER_FORMAT.format(range.upperEndpoint() - range.lowerEndpoint()) + "");
             data.put("strand", strand.getName());
-            data.put("cds start", NUMBER_FORMAT.format(cdsStart) + "");
-            data.put("cds end", NUMBER_FORMAT.format(cdsEnd) + "");
+            data.put(CDS_START, NUMBER_FORMAT.format(cdsStart) + "");
+            data.put(CDS_END, NUMBER_FORMAT.format(cdsEnd) + "");
             data.put("chromosome", chrId);
             data.put("score", score);
             data.put("forward", "true");
@@ -56,14 +56,16 @@ public class BedFeature implements Feature {
             data.put("end", NUMBER_FORMAT.format(range.lowerEndpoint()) + "");
             data.put("length", NUMBER_FORMAT.format(range.upperEndpoint() - range.lowerEndpoint()) + "");
             data.put("strand", strand.getName());
-            data.put("cds start", NUMBER_FORMAT.format(cdsEnd) + "");
-            data.put("cds end", NUMBER_FORMAT.format(cdsStart) + "");
+            data.put(CDS_START, NUMBER_FORMAT.format(cdsEnd) + "");
+            data.put(CDS_END, NUMBER_FORMAT.format(cdsStart) + "");
             data.put("chromosome", chrId);
             data.put("score", score);
             data.put("forward", "false");
         }
         return data;
     }
+    public static final String CDS_END = "cds end";
+    public static final String CDS_START = "cds start";
 
     public String getLabel() {
         return label;

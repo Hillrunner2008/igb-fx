@@ -101,12 +101,14 @@ public class CanvasPane extends Region {
         return new Point2D(event.getScreenX(), event.getScreenY());
     }
 
+    //TODO there are jump zooming bugs that appear to be related to too mouse event selection rectangles not matching coordinate range selected..
     private void initializeMouseEventHandlers() {
 
         canvas.setOnMouseClicked((MouseEvent event) -> {
             mouseEvents.add(event);
         });
         canvas.setOnMouseDragEntered((MouseEvent event) -> {
+            zoomStripeCoordinate = -1;
             mouseEvents.add(event);
         });
         canvas.setOnMouseDragExited((MouseEvent event) -> {
@@ -156,7 +158,6 @@ public class CanvasPane extends Region {
                 } else {
                     eventBus.post(new ClickDragEndEvent(rangeBoundedDragEventLocation, screenPoint2DFromMouseEvent, selectionRectangle));
                 }
-                drawZoomCoordinateLine();
             } else {
                 eventBus.post(new ClickDragCancelEvent());
                 if (event.getClickCount() >= 2) {
@@ -186,7 +187,7 @@ public class CanvasPane extends Region {
 
         EventStream<Either<org.lorainelab.igb.visualization.event.MouseEvent, Void>> stationaryEvents
                 = stationaryPositions.or(stoppers)
-                .distinct();
+                        .distinct();
 
         stationaryEvents.<MouseStationaryEvent>map(either -> either.unify(
                 pos -> new MouseStationaryStartEvent(pos),
@@ -236,7 +237,6 @@ public class CanvasPane extends Region {
         this.zoomStripeCoordinate = -1;
         eventBus.post(new ZoomStripeEvent(zoomStripeCoordinate));
         eventBus.post(new RefreshTrackEvent());
-
     }
 
     @Override
@@ -298,7 +298,6 @@ public class CanvasPane extends Region {
 
     private void drawSelectionRectangle(MouseEvent event) {
         clear();
-        eventBus.post(new ZoomStripeEvent(zoomStripeCoordinate));
         eventBus.post(new RefreshTrackEvent());
         GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.save();

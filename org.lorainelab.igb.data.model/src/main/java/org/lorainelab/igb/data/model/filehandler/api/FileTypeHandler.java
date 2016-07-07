@@ -33,7 +33,7 @@ public interface FileTypeHandler {
      * @param chromosomeId - the id of the chromosome
      * @return Set of features in the requested range
      */
-    Set<CompositionGlyph> getRegion(DataSourceReference dataSourceReference, final Range range, String chromosomeId);
+    Set<CompositionGlyph> getRegion(DataSourceReference dataSourceReference, final Range<Integer> range, String chromosomeId);
 
     /**
      * Get all features in a chromosome

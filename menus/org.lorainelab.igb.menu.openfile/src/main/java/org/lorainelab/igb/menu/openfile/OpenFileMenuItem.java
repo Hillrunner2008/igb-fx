@@ -4,6 +4,7 @@ import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Lists;
+import com.google.common.io.Files;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import java.io.File;
@@ -16,11 +17,11 @@ import org.lorainelab.igb.data.model.DataSet;
 import org.lorainelab.igb.data.model.GenomeVersion;
 import org.lorainelab.igb.data.model.datasource.DataSource;
 import org.lorainelab.igb.data.model.datasource.DataSourceReference;
-import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandler;
 import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandlerRegistry;
 import org.lorainelab.igb.menu.api.MenuBarEntryProvider;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
 import org.lorainelab.igb.menu.api.model.WeightedMenuItem;
+import org.lorainelab.igb.preferences.SessionPreferences;
 import org.lorainelab.igb.search.api.SearchService;
 import org.lorainelab.igb.search.api.model.IndexIdentity;
 import org.lorainelab.igb.selections.SelectionInfoService;
@@ -59,43 +60,49 @@ public class OpenFileMenuItem implements MenuBarEntryProvider, ToolbarButtonProv
     private void openFileAction() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Load File");
-        File homeDirectory = new File(System.getProperty("user.home"));
+        File homeDirectory;
+        if (SessionPreferences.getRecentSelectedFilePath() != null) {
+            File file = new File(SessionPreferences.getRecentSelectedFilePath());
+            String simpleFileName = file.getParent();
+            homeDirectory = new File(simpleFileName);
+        } else {
+            homeDirectory = new File(System.getProperty("user.home"));
+        }
         fileChooser.setInitialDirectory(homeDirectory);
         addFileExtensionFilters(fileChooser);
         Optional.ofNullable(fileChooser.showOpenMultipleDialog(null)).ifPresent(selectedFiles -> {
             selectedFiles.forEach(file -> {
-                FileTypeHandler fileTypeHandler = fileTypeHandlerRegistry.getFileTypeHandlers().stream().findFirst().get();
-                selectionInfoService.getSelectedGenomeVersion().get().ifPresent(gv -> {
-                    DataSourceReference dataSourceReference = new DataSourceReference(file.getPath(), dataSource);
-
-                    gv.getLoadedDataSets().add(new DataSet(file.getName(), dataSourceReference, fileTypeHandler));
-
-                    CompletableFuture<Void> indexTask = CompletableFuture.runAsync(() -> {
-                        try {
-                            Optional<GenomeVersion> genomeVersion = selectionInfoService.getSelectedGenomeVersion().getValue();
-                            if (genomeVersion.isPresent()) {
-                                String speciesName = genomeVersion.get().getSpeciesName();
-                                Optional<IndexIdentity> resourceIndexIdentity = searchService.getResourceIndexIdentity(speciesName);
-                                IndexIdentity indexIdentity;
-                                if (!resourceIndexIdentity.isPresent()) {
-                                    LOG.info("index doesnt exist, so create it");
-                                    indexIdentity = searchService.generateIndexIndentity();
-                                    searchService.setResourceIndexIdentity(speciesName, indexIdentity);
-                                    //searchService.setResourceIndexIdentity(file.getAbsolutePath(), indexIdentity);
-                                    fileTypeHandler.createIndex(indexIdentity, dataSourceReference);
+                fileTypeHandlerRegistry.getFileTypeHandlers().stream().filter(f -> {
+                    return f.getSupportedExtensions().contains(Files.getFileExtension(file.getPath()));
+                }).findFirst().ifPresent(fileTypeHandler -> {
+                    selectionInfoService.getSelectedGenomeVersion().get().ifPresent(gv -> {
+                        DataSourceReference dataSourceReference = new DataSourceReference(file.getPath(), dataSource);
+                        gv.getLoadedDataSets().add(new DataSet(file.getName(), dataSourceReference, fileTypeHandler));
+                        CompletableFuture<Void> indexTask = CompletableFuture.runAsync(() -> {
+                            try {
+                                Optional<GenomeVersion> genomeVersion = selectionInfoService.getSelectedGenomeVersion().getValue();
+                                if (genomeVersion.isPresent()) {
+                                    String speciesName = genomeVersion.get().getSpeciesName();
+                                    Optional<IndexIdentity> resourceIndexIdentity = searchService.getResourceIndexIdentity(speciesName);
+                                    if (!resourceIndexIdentity.isPresent()) {
+                                        LOG.info("index doesnt exist, so create it");
+                                        IndexIdentity indexIdentity = searchService.generateIndexIndentity();
+                                        searchService.setResourceIndexIdentity(speciesName, indexIdentity);
+                                        fileTypeHandler.createIndex(indexIdentity, dataSourceReference);
+                                    } else {
+                                        fileTypeHandler.createIndex(resourceIndexIdentity.get(), dataSourceReference);
+                                    }
                                 }
-
+                            } catch (Exception ex) {
+                                LOG.error(ex.getMessage(), ex);
                             }
+                        }).whenComplete((result, ex) -> {
+                            if (ex != null) {
+                                LOG.error(ex.getMessage(), ex);
+                            }
+                        });
 
-                        } catch (Exception ex) {
-                            LOG.error(ex.getMessage(), ex);
-                        }
-                    }).whenComplete((result, ex) -> {
-                        if (ex != null) {
-                            LOG.error(ex.getMessage(), ex);
-                        }
                     });
-
                 });
             });
         });

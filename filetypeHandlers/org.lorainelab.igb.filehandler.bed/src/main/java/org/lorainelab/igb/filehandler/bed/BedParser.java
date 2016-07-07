@@ -17,6 +17,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.security.MessageDigest;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -228,7 +229,7 @@ public class BedParser implements FileTypeHandler {
     }
 
     @Override
-    public Set<CompositionGlyph> getRegion(DataSourceReference dataSourceReference, Range range, String chromosomeId) {
+    public Set<CompositionGlyph> getRegion(DataSourceReference dataSourceReference, Range<Integer> range, String chromosomeId) {
         final DataSource dataSource = dataSourceReference.getDataSource();
         final String path = dataSourceReference.getPath();
         Set<BedFeature> annotations = Sets.newLinkedHashSet();
@@ -267,11 +268,26 @@ public class BedParser implements FileTypeHandler {
     }
 
     @Override
-    public void createIndex(IndexIdentity indexIdentity, DataSourceReference dataSourceReference) {
+    public synchronized void createIndex(IndexIdentity indexIdentity, DataSourceReference dataSourceReference) {
         final DataSource dataSource = dataSourceReference.getDataSource();
         final String path = dataSourceReference.getPath();
         List<Document> documents = Lists.newArrayList();
         dataSource.getInputStream(path).ifPresent(inputStream -> {
+            String source = null;
+            try {
+                byte[] md5 = MessageDigest.getInstance("MD5").digest(dataSourceReference.getPath().getBytes("UTF-8"));
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < md5.length; i++) {
+                    sb.append(Integer.toString((md5[i] & 0xff) + 0x100, 16).substring(1));
+                }
+                source = sb.toString();
+            } catch (Exception ex) {
+                LOG.error(ex.getMessage(), ex);
+            }
+            LOG.info("Starting index {}", indexIdentity.getId());
+            LOG.info("clearing {}", source);
+
+            searchService.clearByQuery(indexIdentity, "source", source);
             try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
                 Iterator<String> iterator = bufferedReader.lines().iterator();
                 while (iterator.hasNext()) {
@@ -284,15 +300,19 @@ public class BedParser implements FileTypeHandler {
                         document.getFields().put("chromosomeId", bedFeature.getChromosomeId());
                         document.getFields().put("start", bedFeature.getRange().lowerEndpoint().toString());
                         document.getFields().put("end", bedFeature.getRange().upperEndpoint().toString());
-                        
+                        document.getFields().put("source", source);
                         documents.add(document);
+                    }
+                    if (documents.size() > 10000 || !iterator.hasNext()) {
+                        searchService.index(documents, indexIdentity);
+                        documents.clear();
                     }
                 }
             } catch (Exception ex) {
                 LOG.error(ex.getMessage(), ex);
             }
+            LOG.info("Completed index {}", indexIdentity.getId());
         });
-        searchService.index(documents, indexIdentity);
     }
 
     @Reference

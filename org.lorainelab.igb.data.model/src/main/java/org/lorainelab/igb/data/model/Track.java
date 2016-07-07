@@ -1,10 +1,14 @@
 package org.lorainelab.igb.data.model;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimaps;
 import com.google.common.collect.Ordering;
+import com.google.common.collect.SortedSetMultimap;
 import com.google.common.collect.TreeMultimap;
-import java.util.Iterator;
+import com.google.common.primitives.Ints;
 import java.util.List;
+import java.util.Optional;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Rectangle2D;
@@ -22,7 +26,7 @@ public class Track {
 
     private final String trackLabel;
     private List<CompositionGlyph> glyphs;
-    private TreeMultimap<Integer, CompositionGlyph> slotMap;
+    private SortedSetMultimap<Integer, CompositionGlyph> slotMap;
 
     private final boolean isNegative;
     private DoubleProperty modelHeight;
@@ -35,7 +39,7 @@ public class Track {
         this.stackHeight = Math.max(stackHeight, 0);
         //handles case when stackHeight is set to 0 i.e. unlimited
         this.modelHeight = new SimpleDoubleProperty(Math.max(SLOT_HEIGHT * stackHeight, SLOT_HEIGHT));
-        slotMap = TreeMultimap.create(Ordering.natural(), MIN_X_COMPARATOR);
+        slotMap = Multimaps.synchronizedSortedSetMultimap(TreeMultimap.create(Ordering.natural(), MIN_X_COMPARATOR));
         glyphs = Lists.newArrayList();
     }
 
@@ -45,9 +49,11 @@ public class Track {
 
     public void draw(GraphicsContext gc, View view, CanvasContext canvasContext) {
         final double additionalYOffset = canvasContext.getBoundingRect().getMinY() / view.getYfactor();
-        slotMap.asMap().values().stream().flatMap(glyphs -> glyphs.stream())
+        //TODO look into why concurrency issues are possible at this location during zooming
+        ImmutableList.copyOf(slotMap.values()).stream()
                 .filter(glyph -> view.getBoundingRect().intersects(glyph.getRenderBoundingRect()))
                 .forEach(glyph -> glyph.draw(gc, view, additionalYOffset));
+
     }
 
     private void setGlyphPosition(CompositionGlyph compositionGlyph, int slot, int maxStackHeight) {
@@ -62,7 +68,9 @@ public class Track {
                 final double y = boundingRect.getMinY() + (slot * SLOT_HEIGHT) - PADDING;
                 glyph.setRenderBoundingRect(new Rectangle2D(x, y, width, height));
             } else {
-                final double y = (boundingRect.getMinY() + ((maxStackHeight - 1) - slot) * SLOT_HEIGHT) - PADDING;
+                double slotStartingY = (maxStackHeight - slot) * SLOT_HEIGHT;
+                double originalY = boundingRect.getMinY();
+                final double y = originalY + slotStartingY - PADDING;
                 glyph.setRenderBoundingRect(new Rectangle2D(x, y, width, height));
             }
         }
@@ -88,9 +96,10 @@ public class Track {
                         slotMap.put(slotToadd, glyph);
                     }
                 });
-        final Iterator<Integer> descendingIterator = slotMap.keySet().descendingIterator();
-        if (descendingIterator.hasNext()) {
-            Integer optimalStackHeight = descendingIterator.next();
+
+        Optional<Integer> max = slotMap.keys().stream().max((x, y) -> Ints.compare(x, y));
+        if (max.isPresent()) {
+            Integer optimalStackHeight = max.get() + 1;//for slop row
             slotMap.entries().forEach(entry -> {
                 int slotToadd = entry.getKey();
                 if (slotToadd < stackHeight || stackHeight == 0) {
@@ -103,7 +112,7 @@ public class Track {
         }
     }
 
-    public TreeMultimap<Integer, CompositionGlyph> getSlotMap() {
+    public SortedSetMultimap<Integer, CompositionGlyph> getSlotMap() {
         return slotMap;
     }
 
@@ -111,7 +120,7 @@ public class Track {
         return trackLabel;
     }
 
-    public DoubleProperty getModelHeight() {
+    public DoubleProperty modelHeightProperty() {
         return modelHeight;
     }
 
@@ -119,6 +128,7 @@ public class Track {
         final int updatedStackHeight = Math.max(maxStackHeight, 0);
         if (updatedStackHeight != stackHeight) {
             this.stackHeight = updatedStackHeight;
+            this.stackHeight++; //for slop row
             slotMap.clear();
             buildSlots();
         }
