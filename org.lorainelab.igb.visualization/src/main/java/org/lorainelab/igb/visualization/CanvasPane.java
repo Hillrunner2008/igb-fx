@@ -316,8 +316,7 @@ public class CanvasPane extends Region {
         return eventBus;
     }
 
-    @Subscribe
-    private void handleScaleEvent(ScaleEvent scaleEvent) {
+    public void handleScaleEvent(ScaleEvent scaleEvent) {
         xFactor = CanvasUtils.exponentialScaleTransform(this, scaleEvent.getScaleX());
         visibleVirtualCoordinatesX = (canvas.getWidth() / xFactor);
         xOffset = ((scaleEvent.getScrollX() / 100) * (modelWidth - visibleVirtualCoordinatesX));

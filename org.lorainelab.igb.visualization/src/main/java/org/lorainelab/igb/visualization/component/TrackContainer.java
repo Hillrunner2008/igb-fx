@@ -5,8 +5,11 @@
  */
 package org.lorainelab.igb.visualization.component;
 
+import com.google.common.collect.Lists;
 import java.util.List;
 import org.lorainelab.igb.visualization.component.api.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -14,9 +17,17 @@ import org.lorainelab.igb.visualization.component.api.Component;
  */
 public class TrackContainer extends Component {
 
+    private static final Logger LOG = LoggerFactory.getLogger(TrackContainer.class);
+    
     @Override
     public List<Component> render() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        LOG.info("render");
+        return Lists.newArrayList();
+    }
+
+    @Override
+    public Component beforeComponentReady() {
+        return this;
     }
     
 }

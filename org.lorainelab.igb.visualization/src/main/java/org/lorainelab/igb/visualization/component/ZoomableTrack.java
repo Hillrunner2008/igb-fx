@@ -20,4 +20,9 @@ public class ZoomableTrack extends Component {
         return Lists.newArrayList();
     }
 
+    @Override
+    public Component beforeComponentReady() {
+        return this;
+    }
+
 }

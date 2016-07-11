@@ -19,5 +19,10 @@ public class CoordinateTrack extends Component {
     public List<Component> render() {
         return Lists.newArrayList();
     }
+
+    @Override
+    public Component beforeComponentReady() {
+        return this;
+    }
     
 }

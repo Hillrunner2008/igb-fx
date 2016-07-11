@@ -35,7 +35,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import org.controlsfx.control.PlusMinusSlider;
-import org.controlsfx.control.PlusMinusSlider.PlusMinusEvent;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.DataSet;
 import org.lorainelab.igb.data.model.GenomeVersion;
@@ -52,13 +51,11 @@ import org.lorainelab.igb.visualization.event.SelectionChangeEvent;
 import org.lorainelab.igb.visualization.footer.Footer;
 import org.lorainelab.igb.visualization.menubar.MenuBarManager;
 import org.lorainelab.igb.visualization.model.TrackRenderer;
-import static org.lorainelab.igb.visualization.model.TrackRenderer.MAX_ZOOM_MODEL_COORDINATES_X;
 import org.lorainelab.igb.visualization.model.ZoomableTrackRenderer;
 import org.lorainelab.igb.visualization.tabs.TabPaneManager;
 import org.lorainelab.igb.visualization.toolbar.ToolBarManager;
 import static org.lorainelab.igb.visualization.util.BoundsUtil.enforceRangeBounds;
 import static org.lorainelab.igb.visualization.util.CanvasUtils.exponentialScaleTransform;
-import static org.lorainelab.igb.visualization.util.CanvasUtils.invertExpScaleTransform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -118,7 +115,7 @@ public class MainController {
     //private EventBus eventBus;
     private boolean ignoreScrollXEvent;
     private boolean ignoreHSliderEvent;
-    
+
     private double zoomStripeCoordinate;
     private CanvasPane canvasPane;
     private Canvas canvas;
@@ -133,7 +130,7 @@ public class MainController {
     private Footer footer;
     private SearchService searchService;
     //Apps
-    private App app;
+    private Component app;
 
     public MainController() {
         trackRenderers = Sets.newConcurrentHashSet();
@@ -150,22 +147,30 @@ public class MainController {
 
         app = new App();
     }
-    
+
     private void startApp() {
-        AppProps state = new AppProps(
+        AppProps props = new AppProps(
                 hSlider,
                 scrollX,
                 scrollY,
                 zoomStripeCoordinate,
                 canvasPane,
-                selectionInfoService, 
+                selectionInfoService,
                 selectedChromosome,
                 selectedGenomeVersion,
                 vSlider,
-                totalTrackHeight
+                totalTrackHeight,
+                hSliderWidget,
+                slider,
+                xSliderPane,
+                leftSliderThumb,
+                rightSliderThumb,
+                labelPane,
+                loadDataButton,
+                loadSequenceButton
         );
         renderComponents(
-                app.withAttributes(state)
+                app.withAttributes(props).beforeComponentReady()
         );
     }
 
@@ -173,7 +178,7 @@ public class MainController {
     public void activate() {
 //        eventBus = eventBusService.getEventBus();
 //        eventBus.register(this);
-        
+
     }
 
     private void renderComponents(Component<Props, State> component) {
@@ -181,10 +186,6 @@ public class MainController {
             renderComponents(child);
         });
     }
-
-
-
-
 
     @Reference
     public void setSearchService(SearchService searchService) {
@@ -251,11 +252,6 @@ public class MainController {
 
     }
 
-
-
-
-
-
 //    @Subscribe
 //    private void handleScrollScaleEvent(ScrollScaleEvent event) {
 //        Platform.runLater(() -> {
@@ -275,9 +271,6 @@ public class MainController {
 //            updateTrackRenderers();
 //        }
 //    }
-
-    
-
     @FXML
     private void initialize() {
         initializeGuiComponents();
@@ -286,7 +279,6 @@ public class MainController {
         //initializeZoomScrollBar();
         //initializeSearch();
         startApp();
-        
 
     }
 
@@ -414,15 +406,6 @@ public class MainController {
 
 
 
-    private void updateScrollY() {
-        double sum = trackRenderers.stream()
-                .map(trackRenderer -> trackRenderer.getCanvasContext())
-                .filter(canvasContext -> canvasContext.isVisible())
-                .mapToDouble(canvasContext -> canvasContext.getBoundingRect().getHeight())
-                .sum();
-        scrollY.setVisibleAmount((sum / totalTrackHeight) * 100);
-    }
-
     private void initializeGuiComponents() {
         setupPlusMinusSlider();
         addMenuBar();
@@ -448,40 +431,8 @@ public class MainController {
         scrollY.setMin(0);
         scrollY.setMax(100);
         scrollY.setVisibleAmount(100);
-//        loadDataButton.setOnAction(action -> {
-//            Optional.ofNullable(selectedGenomeVersion).ifPresent(genomeVersion -> {
-//                Optional.ofNullable(selectedChromosome).ifPresent(chr -> {
-//                    genomeVersion.getLoadedDataSets().forEach(dataSet -> {
-//                        CompletableFuture.supplyAsync(() -> {
-//                            dataSet.loadRegion(selectedChromosome.getName(), getCurrentRange());
-//                            return null;
-//                        }).thenRun(() -> {
-//                            Platform.runLater(() -> {
-//                                updateTrackRenderers();
-//                            });
-//                        });
-//                    });
-//                });
-//            });
-//        });
-//        loadSequenceButton.setOnAction(action -> {
-//            Optional.ofNullable(selectedChromosome).ifPresent(chr -> {
-//                CompletableFuture.supplyAsync(() -> {
-//                    chr.loadRegion(getCurrentRange());
-//                    return null;
-//                }).thenRun(() -> {
-//                    Platform.runLater(() -> {
-//                        updateTrackRenderers();
-//                    });
-//                }).exceptionally(ex -> {
-//                    LOG.error(ex.getMessage(), ex);
-//                    return null;
-//                });
-//            });
-//        });
+//       
     }
-
- 
 
 //    private void updateTrackLabels() {
 //        Platform.runLater(() -> {
@@ -559,38 +510,6 @@ public class MainController {
 //        });
 //
 //    }
-
-    private void refreshSliderWidget() {
-        if (xSliderPane.getWidth() > 0) {
-            double max = xSliderPane.getWidth() - slider.getWidth();
-            double current = slider.getX();
-            double newXValue = (max * scrollX.getValue() / 100);
-
-            if (newXValue <= 0) {
-                newXValue = 0;
-            }
-            if (slider.getWidth() >= xSliderPane.getWidth()) {
-                double newWidth = xSliderPane.getWidth();
-                if (newWidth < TOTAL_SLIDER_THUMB_WIDTH) {
-                    newWidth = TOTAL_SLIDER_THUMB_WIDTH;
-                }
-                double oldWidth = slider.getWidth();
-                slider.setWidth(newWidth);
-                rightSliderThumb.setX(rightSliderThumb.getX() + newWidth - oldWidth);
-            }
-            if (scrollX.getValue() >= 0 && xSliderPane.getWidth() > TOTAL_SLIDER_THUMB_WIDTH) {
-                slider.setX(newXValue);
-                leftSliderThumb.setX(newXValue);
-                double maxPaneWidth = xSliderPane.getWidth() - TOTAL_SLIDER_THUMB_WIDTH;
-                double newSliderWidth = -maxPaneWidth * ((hSliderWidget.getValue() / 100) - 1) + TOTAL_SLIDER_THUMB_WIDTH;
-                double rightThumbX = rightSliderThumb.getX() + newXValue - current - slider.getWidth() + newSliderWidth;
-                rightSliderThumb.setX(rightThumbX);
-                slider.setWidth(newSliderWidth);
-
-            }
-        }
-    }
-
 //    @Subscribe
 //    private void jumpZoom(JumpZoomEvent jumpZoomEvent) {
 //        Rectangle2D focusRect = jumpZoomEvent.getRect();
@@ -630,38 +549,6 @@ public class MainController {
 //                    jumpZoom(new JumpZoomEvent(zoomFocus, coordinateRenderer));
 //                });
 //    }
-
-    private void syncWidgetSlider() {
-        double minScaleX = canvasPane.getModelWidth();
-        double maxScaleX = MAX_ZOOM_MODEL_COORDINATES_X - 1;
-        final double scaleRange = maxScaleX - minScaleX;
-        final double xFactor = exponentialScaleTransform(canvasPane, hSlider.getValue());
-        final double current = Math.floor(canvasPane.getWidth() / xFactor);
-        double scaledPercentage = (current - minScaleX) / scaleRange;
-
-        double oldWidth = slider.getWidth();
-        double oldX = slider.getX();
-        double width = ((1 - scaledPercentage) * (xSliderPane.getWidth() - TOTAL_SLIDER_THUMB_WIDTH)) + TOTAL_SLIDER_THUMB_WIDTH;
-        double x = ((scrollX.getValue() / 100)) * (xSliderPane.getWidth() - width);
-        slider.setX(x);
-        leftSliderThumb.setX(x);
-        slider.setWidth(width);
-        rightSliderThumb.setX(rightSliderThumb.getX() - (oldWidth + oldX - width - x));
-    }
-
-    private void syncHSlider(double xFactor) {
-        ignoreHSliderEvent = true;
-        hSlider.setValue(invertExpScaleTransform(canvasPane, xFactor));
-    }
-
-    public DoubleProperty getHSliderValue() {
-        return hSlider.valueProperty();
-    }
-
-    public DoubleProperty getXScrollPosition() {
-        return scrollX;
-    }
-
     @Reference
     public void setCanvasPane(CanvasPane canvasPane) {
         this.canvasPane = canvasPane;
@@ -757,30 +644,25 @@ public class MainController {
         root.getChildren().add(3, footer);
     }
 
-    private Range<Integer> getCurrentRange() {
-        final double xFactor = exponentialScaleTransform(canvasPane, hSlider.getValue());
-        final double visibleVirtualCoordinatesX = Math.floor(canvasPane.getWidth() / xFactor);
-        double xOffset = Math.round((scrollX.doubleValue() / 100) * (canvasPane.getModelWidth() - visibleVirtualCoordinatesX));
-        return Range.closedOpen((int) xOffset, (int) xOffset + (int) visibleVirtualCoordinatesX);
-    }
+
 
     private void setupPlusMinusSlider() {
-        plusMinusSlider.setOnValueChanged((PlusMinusEvent event) -> {
-            final double updatedScrollXValue = getUpdatedScrollxValue(event.getValue());
-            if (updatedScrollXValue != scrollX.doubleValue()) {
-                if (Platform.isFxApplicationThread()) {
-                    scrollX.setValue(updatedScrollXValue);
-                    resetZoomStripe();
-                    syncWidgetSlider();
-                } else {
-                    Platform.runLater(() -> {
-                        scrollX.setValue(updatedScrollXValue);
-                        resetZoomStripe();
-                        syncWidgetSlider();
-                    });
-                }
-            }
-        });
+//        plusMinusSlider.setOnValueChanged((PlusMinusEvent event) -> {
+//            final double updatedScrollXValue = getUpdatedScrollxValue(event.getValue());
+//            if (updatedScrollXValue != scrollX.doubleValue()) {
+//                if (Platform.isFxApplicationThread()) {
+//                    scrollX.setValue(updatedScrollXValue);
+//                    resetZoomStripe();
+//                    syncWidgetSlider();
+//                } else {
+//                    Platform.runLater(() -> {
+//                        scrollX.setValue(updatedScrollXValue);
+//                        resetZoomStripe();
+//                        syncWidgetSlider();
+//                    });
+//                }
+//            }
+//        });
     }
 
     private double getUpdatedScrollxValue(double eventValue) {

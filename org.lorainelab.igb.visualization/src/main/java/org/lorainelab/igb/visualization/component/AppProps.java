@@ -6,8 +6,11 @@
 package org.lorainelab.igb.visualization.component;
 
 import javafx.beans.property.DoubleProperty;
+import javafx.scene.control.Button;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.Slider;
+import javafx.scene.layout.Pane;
+import javafx.scene.shape.Rectangle;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.GenomeVersion;
 import org.lorainelab.igb.selections.SelectionInfoService;
@@ -30,11 +33,22 @@ public class AppProps implements Props {
     private GenomeVersion selectedGenomeVersion;
     private Slider vSlider;
     private double totalTrackHeight;
+    private DoubleProperty hSliderWidget;
+    private Rectangle slider;
+    private Pane xSliderPane;
+    private Rectangle leftSliderThumb;
+    private Rectangle rightSliderThumb;
+    private Pane labelPane;
+    private Button loadDataButton;
+    private Button loadSequenceButton;
 
     public AppProps(Slider hslider, DoubleProperty scrollX, ScrollBar scrollY,
             double zoomStripeCoordinate, CanvasPane canvasPane,
             SelectionInfoService selectionInfoService, Chromosome selectedChromosome,
-            GenomeVersion selectedGenomeVersion, Slider vslider, double totalTrackHeight) {
+            GenomeVersion selectedGenomeVersion, Slider vslider, double totalTrackHeight,
+            DoubleProperty hSliderWidget, Rectangle slider, Pane xSliderPane,
+            Rectangle leftSliderThumb, Rectangle rightSliderThumb, Pane labelPane,
+            Button loadDataButton, Button loadSequenceButton) {
         this.hSlider = hslider;
         this.scrollX = scrollX;
         this.scrollY = scrollY;
@@ -45,86 +59,86 @@ public class AppProps implements Props {
         this.selectedGenomeVersion = selectedGenomeVersion;
         this.vSlider = vslider;
         this.totalTrackHeight = totalTrackHeight;
+        this.hSliderWidget = hSliderWidget;
+        this.slider = slider;
+        this.xSliderPane = xSliderPane;
+        this.leftSliderThumb = leftSliderThumb;
+        this.rightSliderThumb = rightSliderThumb;
+        this.labelPane = labelPane;
+        this.loadDataButton = loadDataButton;
+        this.loadSequenceButton = loadSequenceButton;
     }
 
-    public double getTotalTrackHeight() {
-        return totalTrackHeight;
+    public Button getLoadDataButton() {
+        return loadDataButton;
     }
 
-    public void setTotalTrackHeight(double totalTrackHeight) {
-        this.totalTrackHeight = totalTrackHeight;
+    public Button getLoadSequenceButton() {
+        return loadSequenceButton;
     }
 
-    public Slider getvSlider() {
-        return vSlider;
+    public Pane getLabelPane() {
+        return labelPane;
     }
 
-    public void setvSlider(Slider vSlider) {
-        this.vSlider = vSlider;
+    public Pane getxSliderPane() {
+        return xSliderPane;
     }
 
-    public GenomeVersion getSelectedGenomeVersion() {
-        return selectedGenomeVersion;
+    public Rectangle getLeftSliderThumb() {
+        return leftSliderThumb;
     }
 
-    public void setSelectedGenomeVersion(GenomeVersion selectedGenomeVersion) {
-        this.selectedGenomeVersion = selectedGenomeVersion;
+    public Rectangle getRightSliderThumb() {
+        return rightSliderThumb;
     }
 
-    public Chromosome getSelectedChromosome() {
-        return selectedChromosome;
+    public Rectangle getSlider() {
+        return slider;
     }
 
-    public void setSelectedChromosome(Chromosome selectedChromosome) {
-        this.selectedChromosome = selectedChromosome;
-    }
-
-    public SelectionInfoService getSelectionInfoService() {
-        return selectionInfoService;
-    }
-
-    public void setSelectionInfoService(SelectionInfoService selectionInfoService) {
-        this.selectionInfoService = selectionInfoService;
-    }
-
-    public CanvasPane getCanvasPane() {
-        return canvasPane;
-    }
-
-    public void setCanvasPane(CanvasPane canvasPane) {
-        this.canvasPane = canvasPane;
-    }
-
-    public double getZoomStripeCoordinate() {
-        return zoomStripeCoordinate;
-    }
-
-    public void setZoomStripeCoordinate(double zoomStripeCoordinate) {
-        this.zoomStripeCoordinate = zoomStripeCoordinate;
+    public DoubleProperty gethSliderWidget() {
+        return hSliderWidget;
     }
 
     public Slider gethSlider() {
         return hSlider;
     }
 
-    public void sethSlider(Slider hSlider) {
-        this.hSlider = hSlider;
-    }
-
     public DoubleProperty getScrollX() {
         return scrollX;
-    }
-
-    public void setScrollX(DoubleProperty scrollX) {
-        this.scrollX = scrollX;
     }
 
     public ScrollBar getScrollY() {
         return scrollY;
     }
 
-    public void setScrollY(ScrollBar scrollY) {
-        this.scrollY = scrollY;
+    public double getZoomStripeCoordinate() {
+        return zoomStripeCoordinate;
+    }
+
+    public CanvasPane getCanvasPane() {
+        return canvasPane;
+    }
+
+    public SelectionInfoService getSelectionInfoService() {
+        return selectionInfoService;
+    }
+
+    public Chromosome getSelectedChromosome() {
+        return selectedChromosome;
+    }
+
+    public GenomeVersion getSelectedGenomeVersion() {
+        return selectedGenomeVersion;
+    }
+
+    public Slider getvSlider() {
+        return vSlider;
+    }
+
+    public double getTotalTrackHeight() {
+        return totalTrackHeight;
     }
 
 }
