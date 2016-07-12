@@ -26,7 +26,6 @@ public class GlyphFactory {
     }
 
     public static RectangleGlyph generateRectangleGlyph(org.lorainelab.igb.data.model.shapes.Rectangle rectangle) {
-
         RectangleGlyph toReturn = new RectangleGlyph(rectangle);
         Color color = (Color)rectangle.getColor().orElse(Color.BLUE);
         toReturn.setFill(color);

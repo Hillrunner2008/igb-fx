@@ -38,7 +38,7 @@ public class BedRenderer implements Renderer<BedFeature> {
                 .filter(exonRange -> exonRange.isConnected(cdsRange))
                 .map(eoxnRange -> eoxnRange.intersection(cdsRange))
                 .map(intersectingRange -> Rectangle.start(intersectingRange.lowerEndpoint(), intersectingRange.upperEndpoint() - intersectingRange.lowerEndpoint())
-                        .addAttribute(Rectangle.Attribute.thick)
+                        .addAttribute(Rectangle.Attribute.THICK)
                         .setInnerTextReferenceSequenceRange(Range.closed(bedFeature.getCdsStart(),bedFeature.getCdsEnd()))
                         .setInnerTextRefSeqTranslator(innerTextRefSeqTranslator)
                         .build());

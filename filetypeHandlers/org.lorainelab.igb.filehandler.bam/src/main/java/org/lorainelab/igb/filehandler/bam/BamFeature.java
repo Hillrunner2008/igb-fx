@@ -18,12 +18,19 @@ public class BamFeature implements Feature {
 
     private final Range<Integer> range;
     private final Strand strand;
-    private final SAMRecord samRecord;
     private final int alignmentStart;
     private final int alignmentEnd;
+    private final String readName;
+    private final String chromosomeId;
+    private String cigarString;
+    private int mappingQuality;
+    Set<AlignmentBlock> alignMentBlocks;
 
     public BamFeature(SAMRecord samRecord) {
-        this.samRecord = samRecord;
+        this.readName = samRecord.getReadName();
+        this.chromosomeId = samRecord.getReferenceName();
+        this.mappingQuality = samRecord.getMappingQuality();
+        cigarString = samRecord.getCigarString();
         alignmentStart = samRecord.getAlignmentStart() - 1; // convert to interbase
         alignmentEnd = samRecord.getAlignmentEnd() - 1;
         if (!samRecord.getReadNegativeStrandFlag()) {
@@ -33,6 +40,7 @@ public class BamFeature implements Feature {
             strand = Strand.NEGATIVE;
             range = Range.closedOpen(alignmentStart, alignmentEnd);
         }
+        alignMentBlocks = setAnnotationBlocks(samRecord);
     }
 
     @Override
@@ -47,45 +55,48 @@ public class BamFeature implements Feature {
 
     @Override
     public Optional<String> getId() {
-        return Optional.ofNullable(samRecord.getReadName());
+        return Optional.ofNullable(readName);
     }
 
     @Override
     public String getChromosomeId() {
-        return samRecord.getReferenceName();
+        return chromosomeId;
     }
 
-    public String getReadSequence() {
-        return samRecord.getReadString();
+    public Optional<String> getReadSequence() {
+        return Optional.ofNullable("");
     }
 
     public int getMappingQuality() {
-        return samRecord.getMappingQuality();
+        return mappingQuality;
     }
 
     public String getCigarString() {
-        return samRecord.getCigarString();
+        return cigarString;
     }
 
-    public String getAlignmentBlockSequence(AlignmentBlock alignmentBlock) {
-        Range<Integer> alignmentBlockRange = alignmentBlock.getRange();
-        final int sequenceStartPos = alignmentBlockRange.lowerEndpoint() - alignmentStart;
-        final int sequenceEndPos = sequenceStartPos + alignmentBlockRange.upperEndpoint() - alignmentBlockRange.lowerEndpoint();
-        return samRecord.getReadString().substring(sequenceStartPos, sequenceEndPos);
-    }
-    
+//    public String getAlignmentBlockSequence(AlignmentBlock alignmentBlock) {
+//        Range<Integer> alignmentBlockRange = alignmentBlock.getRange();
+//        final int sequenceStartPos = alignmentBlockRange.lowerEndpoint() - alignmentStart;
+//        final int sequenceEndPos = sequenceStartPos + alignmentBlockRange.upperEndpoint() - alignmentBlockRange.lowerEndpoint();
+//        return samRecord.getReadString().substring(sequenceStartPos, sequenceEndPos);
+//    }
     public Map<String, String> getTooltipData() {
         HashMap<String, String> tooltipData = Maps.newHashMap();
         tooltipData.put("forward", Boolean.TRUE.toString());
         tooltipData.put("cigar", getCigarString());
-        tooltipData.put("name", samRecord.getReadName());
-        tooltipData.put("reference name", samRecord.getReferenceName());
-        tooltipData.put("start", samRecord.getAlignmentStart()+"");
-        tooltipData.put("end", samRecord.getAlignmentEnd()+"");
+        tooltipData.put("name", readName);
+        tooltipData.put("reference name", chromosomeId);
+        tooltipData.put("start", alignmentStart + 1 + "");
+        tooltipData.put("end", alignmentEnd + 1 + "");
         return tooltipData;
     }
 
     public Set<AlignmentBlock> getAnnotationBlocks() {
+        return alignMentBlocks;
+    }
+
+    private Set<AlignmentBlock> setAnnotationBlocks(SAMRecord samRecord) {
         Set<AlignmentBlock> blocks = Sets.newLinkedHashSet();
         Cigar cigar = samRecord.getCigar();
         int start = alignmentStart;

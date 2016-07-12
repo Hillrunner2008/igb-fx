@@ -43,10 +43,13 @@ public class RectangleGlyph implements Glyph {
 
     public RectangleGlyph(Rectangle rectShape) {
         int height = 10;
-        if (rectShape.getAttributes().contains(org.lorainelab.igb.data.model.shapes.Rectangle.Attribute.thick)) {
+        double y = 20;
+        if (rectShape.getAttributes().contains(org.lorainelab.igb.data.model.shapes.Rectangle.Attribute.THICK)) {
             height = 15;
+            y = 17.5;
+        } else if (rectShape.getAttributes().contains(org.lorainelab.igb.data.model.shapes.Rectangle.Attribute.INSERTION)) {
+            height =3;
         }
-        double y = height == 15 ? 17.5 : 20;
         boundingRect = new Rectangle2D(rectShape.getOffset(), y, rectShape.getWidth(), height);
         innerTextRefSeqTranslator = rectShape.getInnerTextRefSeqTranslator();
         innerTextReferenceSequenceRange = rectShape.getInnerTextReferenceSequenceRange();
@@ -127,27 +130,29 @@ public class RectangleGlyph implements Glyph {
                         double textYOffset = (viewBoundingRect.get().getHeight() / textScale - fm.getLineHeight()) / 2;
                         textYPosition += textYOffset;
                         gc.scale(1 / textScale, 1 / textScale);
-                        if (colorByBase) {
-                            double i = 0;
-                            double minX = viewBoundingRect.get().getMinX();
-                            int baseWidth = 1;
-                            for (char c : innerText.toCharArray()) {
+                        double i = 0;
+                        double minX = viewBoundingRect.get().getMinX();
+                        int baseWidth = 1;
+                        for (char c : innerText.toCharArray()) {
+                            if (colorByBase) {
                                 gc.setFill(getBaseColor(c));
-                                if (startOffset % 1 > 0 && i == 0) {
-                                    gc.fillRect(minX, y, 1-startOffset % 1, viewBoundingRect.get().getHeight());
-                                    i += (1-startOffset % 1);
-                                    continue;
-                                } else {
-                                    gc.fillRect(minX + i, y, 1, viewBoundingRect.get().getHeight());
-                                }
-                                gc.setFill(Color.BLACK);
-                                gc.scale(textScale, textScale);
-                                double x = (minX + i) / textScale;
-                                double maxWidth = 1 / textScale;
-                                gc.fillText("" + c, x, textYPosition, maxWidth);
-                                gc.scale(1 / textScale, 1 / textScale);
-                                i++;
+                            } else {
+                                gc.setFill(fill);
                             }
+                            if (startOffset % 1 > 0 && i == 0) {
+                                gc.fillRect(minX, y, 1 - startOffset % 1, viewBoundingRect.get().getHeight());
+                                i += (1 - startOffset % 1);
+                                continue;
+                            } else {
+                                gc.fillRect(minX + i, y, 1, viewBoundingRect.get().getHeight());
+                            }
+                            gc.setFill(Color.BLACK);
+                            gc.scale(textScale, textScale);
+                            double x = (minX + i) / textScale;
+                            double maxWidth = 1 / textScale;
+                            gc.fillText("" + c, x, textYPosition, maxWidth);
+                            gc.scale(1 / textScale, 1 / textScale);
+                            i++;
                         }
                         gc.restore();
                     }
