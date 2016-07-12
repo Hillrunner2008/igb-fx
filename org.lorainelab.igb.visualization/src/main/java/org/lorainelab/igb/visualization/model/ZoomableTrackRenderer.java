@@ -1,6 +1,5 @@
 package org.lorainelab.igb.visualization.model;
 
-import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import java.util.Optional;
 import javafx.application.Platform;
@@ -18,14 +17,12 @@ import org.lorainelab.igb.data.model.Track;
 import org.lorainelab.igb.data.model.View;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
 import org.lorainelab.igb.visualization.CanvasPane;
-import org.lorainelab.igb.visualization.component.api.Component;
 import org.lorainelab.igb.visualization.event.ClickDragEndEvent;
 import org.lorainelab.igb.visualization.event.MouseClickedEvent;
 import org.lorainelab.igb.visualization.event.MouseDoubleClickEvent;
 import org.lorainelab.igb.visualization.event.MouseStationaryEndEvent;
 import org.lorainelab.igb.visualization.event.MouseStationaryStartEvent;
 import org.lorainelab.igb.visualization.event.RefreshTrackEvent;
-import org.lorainelab.igb.visualization.event.ScrollXUpdate;
 import org.lorainelab.igb.visualization.event.ZoomStripeEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +39,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     DoubleProperty modelHeight;
     final Track track;
     double zoomStripeCoordinate = -1;
-    protected EventBus eventBus;
+//    protected EventBus eventBus;
     private final View view;
     private final Tooltip tooltip = new Tooltip();
     private final CanvasContext canvasContext;
@@ -52,8 +49,8 @@ public class ZoomableTrackRenderer implements TrackRenderer {
 
     public ZoomableTrackRenderer(CanvasPane canvasPane, Track track, Chromosome chromosome) {
         this.weight = 0;
-        this.eventBus = canvasPane.getEventBus();
-        this.eventBus.register(this);
+//        this.eventBus = canvasPane.getEventBus();
+//        this.eventBus.register(this);
         this.track = track;
         this.modelWidth = chromosome.getLength();
         modelHeight = new SimpleDoubleProperty();
@@ -85,7 +82,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
                 } else {
                     calculatedScrollXPosition = 0;
                 }
-                eventBus.post(new ScrollXUpdate(calculatedScrollXPosition));
+//                eventBus.post(new ScrollXUpdate(calculatedScrollXPosition));
             }
             double yOffset = canvasContext.getRelativeTrackOffset() / view.getYfactor();
             view.setBoundingRect(new Rectangle2D(xOffset, yOffset, visibleVirtualCoordinatesX, visibleVirtualCoordinatesY));
@@ -107,7 +104,8 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         }
     }
 
-    private void clearCanvas() {
+    @Override
+    public void clearCanvas() {
         gc.save();
         gc.clearRect(
                 0,
@@ -284,13 +282,12 @@ public class ZoomableTrackRenderer implements TrackRenderer {
 
     private void jumpZoom(Rectangle2D rect) {
         if (canvasContext.getBoundingRect() != null) {
-            eventBus.post(new JumpZoomEvent(rect, this));
+//            eventBus.post(new JumpZoomEvent(rect, this));
         }
     }
 
-    @Subscribe
-    private void zoomStripeListener(ZoomStripeEvent event) {
-        zoomStripeCoordinate = event.getZoomStripeCoordinate();// / view.getXfactor();
+    public void setZoomStripeCoordinate(double zoomStripeCoordinate) {
+        this.zoomStripeCoordinate = zoomStripeCoordinate;
     }
 
     @Override

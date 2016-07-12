@@ -45,7 +45,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     private Range<Double> viewYcoordinateRange;
     private double xfactor = 1;
     double zoomStripeCoordinate = -1;
-    protected EventBus eventBus;
+    //protected EventBus eventBus;
     private final CanvasContext canvasContext;
     private final GraphicsContext gc;
     private int weight;
@@ -55,8 +55,8 @@ public class CoordinateTrackRenderer implements TrackRenderer {
 
     public CoordinateTrackRenderer(CanvasPane canvasPane, Chromosome chromosome) {
         weight = 0;
-        this.eventBus = canvasPane.getEventBus();
-        eventBus.register(this);
+//        this.eventBus = canvasPane.getEventBus();
+        //eventBus.register(this);
         this.chromosome = chromosome;
         this.modelWidth = chromosome.getLength();
         this.modelHeight = 50;
@@ -314,7 +314,8 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         }
     }
 
-    private void clearCanvas() {
+    @Override
+    public void clearCanvas() {
         gc.save();
         double y = canvasContext.getBoundingRect().getMinY();
         final double height = canvasContext.getBoundingRect().getHeight();
@@ -355,7 +356,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         } else {
             event = new ClickDragZoomEvent(x2, x1);
         }
-        eventBus.post(event);
+//        eventBus.post(event);
         lastMouseClickX = -1;
         lastMouseDragX = -1;
         render();
@@ -398,9 +399,8 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         }
     }
 
-    @Subscribe
-    private void zoomStripeListener(ZoomStripeEvent event) {
-        zoomStripeCoordinate = event.getZoomStripeCoordinate();
+    public void setZoomStripeCoordinate(double zoomStripeCoordinate) {
+        this.zoomStripeCoordinate = zoomStripeCoordinate;
     }
 
     @Override

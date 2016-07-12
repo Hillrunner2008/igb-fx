@@ -6,7 +6,6 @@
 package org.lorainelab.igb.visualization.component.api;
 
 import java.util.List;
-import org.lorainelab.igb.visualization.component.App;
 
 /**
  *
@@ -21,31 +20,30 @@ public abstract class Component<P extends Props, S extends State> {
     public P getProps() {
         return props;
     }
-    
+
     public abstract Component beforeComponentReady();
-    
+
     public abstract List<Component> render();
-    
+
     public Component withAttributes(P props) {
         this.props = props;
         return this;
     }
-    
+
     public void setState(S state) {
         //fire rerender
         this.state = state;
-        renderComponents((Component<Props, State>)this);
+        renderComponents((Component<Props, State>) this);
     }
 
     public S getState() {
         return state;
     }
-    
+
     private void renderComponents(Component<Props, State> component) {
         component.render().forEach(child -> {
             renderComponents(child);
         });
     }
-    
-    
+
 }

@@ -19,120 +19,129 @@ import org.lorainelab.igb.visualization.model.TrackRenderer;
  */
 public class AppState implements State {
 
-        private double totalTrackHeight;
-        private Set<TrackRenderer> trackRenderers;
-        private double scrollX;
-        private double scrollY;
-        private double scrollYVisibleAmount;
-        private double hSlider;
-        private double vSlider;
-        private GenomeVersion selectedGenomeVersion;
-        private Set<DataSet> loadedDataSets;
-        private Chromosome selectedChromosome;
-        private static AppState instance;
+    private double totalTrackHeight;
+    private Set<TrackRenderer> trackRenderers;
+    private double scrollX;
+    private double scrollY;
+    private double scrollYVisibleAmount;
+    private double hSlider;
+    private double vSlider;
+    private GenomeVersion selectedGenomeVersion;
+    private Set<DataSet> loadedDataSets;
+    private Chromosome selectedChromosome;
+    private double zoomStripeCoordinates;
 
-        public AppState() {
-            this.trackRenderers = Sets.newConcurrentHashSet();
-            this.loadedDataSets = Sets.newConcurrentHashSet();
-        }
+    private static AppState instance;
 
-        public static AppState factory() {
-            if (instance == null) {
-                instance = new AppState();
-            }
-            return instance;
-        }
-
-        public Chromosome getSelectedChromosome() {
-            return selectedChromosome;
-        }
-
-        public AppState setSelectedChromosome(Chromosome selectedChromosome) {
-            this.selectedChromosome = selectedChromosome;
-            return this;
-        }
-
-        public Set<DataSet> getLoadedDataSets() {
-            return loadedDataSets;
-        }
-
-        public AppState setLoadedDataSets(Set<DataSet> loadedDataSets) {
-            this.loadedDataSets.clear();
-            this.loadedDataSets.addAll(loadedDataSets);
-            return this;
-        }
-
-        public GenomeVersion getSelectedGenomeVersion() {
-            return selectedGenomeVersion;
-        }
-
-        public AppState setSelectedGenomeVersion(GenomeVersion selectedGenomeVersion) {
-            this.selectedGenomeVersion = selectedGenomeVersion;
-            return this;
-        }
-
-        public double getScrollX() {
-            return scrollX;
-        }
-
-        public AppState setScrollX(double scrollX) {
-            this.scrollX = scrollX;
-            return this;
-        }
-
-        public double getScrollY() {
-            return scrollY;
-        }
-
-        public AppState setScrollY(double scrollY) {
-            this.scrollY = scrollY;
-            return this;
-        }
-
-        public double getScrollYVisibleAmount() {
-            return scrollYVisibleAmount;
-        }
-
-        public AppState setScrollYVisibleAmount(double scrollYVisibleAmount) {
-            this.scrollYVisibleAmount = scrollYVisibleAmount;
-            return this;
-        }
-
-        public double gethSlider() {
-            return hSlider;
-        }
-
-        public AppState sethSlider(double hSlider) {
-            this.hSlider = hSlider;
-            return this;
-        }
-
-        public double getvSlider() {
-            return vSlider;
-        }
-
-        public AppState setvSlider(double vSlider) {
-            this.vSlider = vSlider;
-            return this;
-        }
-
-        public double getTotalTrackHeight() {
-            return totalTrackHeight;
-        }
-
-        public AppState setTotalTrackHeight(double totalTrackHeight) {
-            this.totalTrackHeight = totalTrackHeight;
-            return this;
-        }
-
-        public Set<TrackRenderer> getTrackRenderers() {
-            return trackRenderers;
-        }
-
-        public AppState setTrackRenderers(Set<TrackRenderer> trackRenderers) {
-            this.trackRenderers.clear();
-            this.trackRenderers.addAll(trackRenderers);
-            return this;
-        }
-
+    public AppState() {
+        this.trackRenderers = Sets.newConcurrentHashSet();
+        this.loadedDataSets = Sets.newConcurrentHashSet();
+        zoomStripeCoordinates = -1;
     }
+
+    public static AppState factory() {
+        return new AppState();
+    }
+
+    public double getZoomStripeCoordinates() {
+        return zoomStripeCoordinates;
+    }
+
+    public AppState setZoomStripeCoordinates(double zoomStripeCoordinates) {
+        this.zoomStripeCoordinates = zoomStripeCoordinates;
+        return this;
+    }
+
+    public Chromosome getSelectedChromosome() {
+        return selectedChromosome;
+    }
+
+    public AppState setSelectedChromosome(Chromosome selectedChromosome) {
+        this.selectedChromosome = selectedChromosome;
+        return this;
+    }
+
+    public Set<DataSet> getLoadedDataSets() {
+        return loadedDataSets;
+    }
+
+    public AppState setLoadedDataSets(Set<DataSet> loadedDataSets) {
+        this.loadedDataSets.clear();
+        this.loadedDataSets.addAll(loadedDataSets);
+        return this;
+    }
+
+    public GenomeVersion getSelectedGenomeVersion() {
+        return selectedGenomeVersion;
+    }
+
+    public AppState setSelectedGenomeVersion(GenomeVersion selectedGenomeVersion) {
+        this.selectedGenomeVersion = selectedGenomeVersion;
+        return this;
+    }
+
+    public double getScrollX() {
+        return scrollX;
+    }
+
+    public AppState setScrollX(double scrollX) {
+        this.scrollX = scrollX;
+        return this;
+    }
+
+    public double getScrollY() {
+        return scrollY;
+    }
+
+    public AppState setScrollY(double scrollY) {
+        this.scrollY = scrollY;
+        return this;
+    }
+
+    public double getScrollYVisibleAmount() {
+        return scrollYVisibleAmount;
+    }
+
+    public AppState setScrollYVisibleAmount(double scrollYVisibleAmount) {
+        this.scrollYVisibleAmount = scrollYVisibleAmount;
+        return this;
+    }
+
+    public double gethSlider() {
+        return hSlider;
+    }
+
+    public AppState sethSlider(double hSlider) {
+        this.hSlider = hSlider;
+        return this;
+    }
+
+    public double getvSlider() {
+        return vSlider;
+    }
+
+    public AppState setvSlider(double vSlider) {
+        this.vSlider = vSlider;
+        return this;
+    }
+
+    public double getTotalTrackHeight() {
+        return totalTrackHeight;
+    }
+
+    public AppState setTotalTrackHeight(double totalTrackHeight) {
+        this.totalTrackHeight = totalTrackHeight;
+        return this;
+    }
+
+    public Set<TrackRenderer> getTrackRenderers() {
+        return trackRenderers;
+    }
+
+    public AppState setTrackRenderers(Set<TrackRenderer> trackRenderers) {
+        this.trackRenderers.clear();
+        this.trackRenderers.addAll(trackRenderers);
+        return this;
+    }
+
+}

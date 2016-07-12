@@ -8,6 +8,8 @@ package org.lorainelab.igb.visualization.store;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.DataSet;
@@ -30,8 +32,10 @@ public class AppStore {
     private final Set<DataSet> loadedDataSets;
     private GenomeVersion selectedGenomeVersion;
     private Chromosome selectedChromosome;
+    private double zoomStripeCoordinate;
 
     public AppStore() {
+        zoomStripeCoordinate = -1;
         trackRenderers = Sets.newConcurrentHashSet();
         loadedDataSets = Sets.newConcurrentHashSet();
         bus = new EventBus();
@@ -41,6 +45,10 @@ public class AppStore {
     
     public void subscribe(Object object) {
         this.bus.register(object);
+    }
+    
+    public void unsubscribe(Object object) {
+        this.bus.unregister(object);
     }
     
     public void emit() {
@@ -83,8 +91,17 @@ public class AppStore {
         this.trackRenderers.addAll(Arrays.asList(trackRenderers));
         emit();
     }
+    
+    public void updateTrackRenderer(List<DataSet> dataSets, List<TrackRenderer> trackRenderers) {
+        this.loadedDataSets.addAll(dataSets);
+        this.trackRenderers.addAll(trackRenderers);
+        emit();
+    }
 
-    public void update(double scrollX, double scrollY, double hSlider, double vSlider, double scrollYVisibleAmount, boolean clearTrackRenderers) {
+    public void update(double scrollX, double scrollY, double hSlider, 
+            double vSlider, double scrollYVisibleAmount, 
+            boolean clearTrackRenderers, GenomeVersion selectedGenomeVersion,
+            Chromosome selectedChromosome, Optional<TrackRenderer> trackRenderer) {
         if (clearTrackRenderers) {
             trackRenderers.clear();
         }
@@ -93,11 +110,21 @@ public class AppStore {
         this.hSlider = hSlider;
         this.vSlider = vSlider;
         this.scrollYVisibleAmount = scrollYVisibleAmount;
+        this.selectedGenomeVersion = selectedGenomeVersion;
+        this.selectedChromosome = selectedChromosome;
+        trackRenderer.ifPresent(tr ->{
+            this.trackRenderers.add(tr);
+        });
         emit();
     }
     
     public void updateHSlider(double hSlider) {
         this.hSlider = hSlider;
+        emit();
+    }
+    
+    //TODO: This is bad practice
+    public void noop() {
         emit();
     }
 
@@ -106,8 +133,21 @@ public class AppStore {
         emit();
     }
     
+    public void updateZoomStripe(double zoomStripeCoordinate) {
+        this.zoomStripeCoordinate = zoomStripeCoordinate;
+        emit();
+    }
+    
     // Getters
 
+    public double getZoomStripeCoordinate() {
+        return zoomStripeCoordinate;
+    }
+
+    public void setZoomStripeCoordinate(double zoomStripeCoordinate) {
+        this.zoomStripeCoordinate = zoomStripeCoordinate;
+    }
+    
     public EventBus getBus() {
         return bus;
     }

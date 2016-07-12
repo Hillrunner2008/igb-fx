@@ -52,6 +52,7 @@ import org.lorainelab.igb.visualization.footer.Footer;
 import org.lorainelab.igb.visualization.menubar.MenuBarManager;
 import org.lorainelab.igb.visualization.model.TrackRenderer;
 import org.lorainelab.igb.visualization.model.ZoomableTrackRenderer;
+import org.lorainelab.igb.visualization.store.AppStore;
 import org.lorainelab.igb.visualization.tabs.TabPaneManager;
 import org.lorainelab.igb.visualization.toolbar.ToolBarManager;
 import static org.lorainelab.igb.visualization.util.BoundsUtil.enforceRangeBounds;
@@ -144,8 +145,8 @@ public class MainController {
         autocompleteEntries = Sets.newTreeSet();
         searchAutocomplete = new ContextMenu();
         searchAutocomplete.hide();
-
         app = new App();
+
     }
 
     private void startApp() {
@@ -176,9 +177,9 @@ public class MainController {
 
     @Activate
     public void activate() {
+
 //        eventBus = eventBusService.getEventBus();
 //        eventBus.register(this);
-
     }
 
     private void renderComponents(Component<Props, State> component) {
@@ -396,15 +397,13 @@ public class MainController {
 //    }
     private static final int TOTAL_SLIDER_THUMB_WIDTH = 30;
 
-    public void drawZoomCoordinateLine() {
-        canvasPane.drawZoomCoordinateLine();
-    }
+//    public void drawZoomCoordinateLine() {
+//        canvasPane.drawZoomCoordinateLine();
+//    }
 
     public void resetZoomStripe() {
         canvasPane.resetZoomStripe();
     }
-
-
 
     private void initializeGuiComponents() {
         setupPlusMinusSlider();
@@ -623,6 +622,7 @@ public class MainController {
 
     @Deactivate
     private void deactivate() {
+        AppStore.getStore().unsubscribe(app);
         try {
             Platform.runLater(() -> {
                 root.getChildren().clear();
@@ -643,8 +643,6 @@ public class MainController {
     private void addFooter() {
         root.getChildren().add(3, footer);
     }
-
-
 
     private void setupPlusMinusSlider() {
 //        plusMinusSlider.setOnValueChanged((PlusMinusEvent event) -> {

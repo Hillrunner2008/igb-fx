@@ -44,5 +44,9 @@ public interface TrackRenderer {
     int getWeight();
 
     void setWeight(int weight);
+    
+    void clearCanvas();
+    
+    void setZoomStripeCoordinate(double zoomStripeCoordinate);
 
 }
