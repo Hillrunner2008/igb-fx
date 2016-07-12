@@ -19,8 +19,11 @@ public class BedRenderer implements Renderer<BedFeature> {
                 bedFeature.getTooltipData(),
                 layer(
                         bedFeature.getRange().lowerEndpoint(),
+                        bedFeature.getIntrons().stream().map(intron -> Line.start(intron.lowerEndpoint(), intron.upperEndpoint() - intron.lowerEndpoint()).build())
+                ),
+                layer(
+                        bedFeature.getRange().lowerEndpoint(),
                         bedFeature.getExons().asRanges().stream().map(exon -> Rectangle.start(exon.lowerEndpoint(), exon.upperEndpoint() - exon.lowerEndpoint()).build()),
-                        bedFeature.getIntrons().stream().map(intron -> Line.start(intron.lowerEndpoint(), intron.upperEndpoint() - intron.lowerEndpoint()).build()),
                         calculateCds(bedFeature)
                 )
         );
@@ -38,10 +41,10 @@ public class BedRenderer implements Renderer<BedFeature> {
                 .filter(exonRange -> exonRange.isConnected(cdsRange))
                 .map(eoxnRange -> eoxnRange.intersection(cdsRange))
                 .map(intersectingRange -> Rectangle.start(intersectingRange.lowerEndpoint(), intersectingRange.upperEndpoint() - intersectingRange.lowerEndpoint())
-                        .addAttribute(Rectangle.Attribute.THICK)
-                        .setInnerTextReferenceSequenceRange(Range.closed(bedFeature.getCdsStart(),bedFeature.getCdsEnd()))
-                        .setInnerTextRefSeqTranslator(innerTextRefSeqTranslator)
-                        .build());
+                .addAttribute(Rectangle.Attribute.THICK)
+                .setInnerTextReferenceSequenceRange(Range.closed(bedFeature.getCdsStart(), bedFeature.getCdsEnd()))
+                .setInnerTextRefSeqTranslator(innerTextRefSeqTranslator)
+                .build());
     }
 
 }

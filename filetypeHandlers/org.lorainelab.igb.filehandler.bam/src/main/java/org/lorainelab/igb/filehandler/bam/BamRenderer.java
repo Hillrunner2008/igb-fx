@@ -51,9 +51,6 @@ public class BamRenderer implements Renderer<BamFeature> {
                         .setColor(Color.RED)
                         .setInnerTextRefSeqTranslator(seq -> "X")
                         .build());
-            case GAP:
-                return Optional.of(Line.start(alignmentBlock.getRange().lowerEndpoint(), alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint()
-                ).build());
             case MATCH:
                 return Optional.of(Rectangle.start(
                         alignmentBlock.getRange().lowerEndpoint(),
@@ -71,6 +68,9 @@ public class BamRenderer implements Renderer<BamFeature> {
 
     private Optional<Shape> convertInsertions(AlignmentBlock alignmentBlock) {
         switch (alignmentBlock.getAlignmentType()) {
+            case GAP:
+                return Optional.of(Line.start(alignmentBlock.getRange().lowerEndpoint(), alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint()
+                ).build());
             case INSERTION:
                 return Optional.of(Rectangle.start(
                         alignmentBlock.getRange().lowerEndpoint(),

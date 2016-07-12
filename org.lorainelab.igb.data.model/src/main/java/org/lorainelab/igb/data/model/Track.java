@@ -1,6 +1,5 @@
 package org.lorainelab.igb.data.model;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Ordering;
@@ -51,7 +50,7 @@ public class Track {
     public void draw(GraphicsContext gc, View view, CanvasContext canvasContext) {
         final double additionalYOffset = canvasContext.getBoundingRect().getMinY() / view.getYfactor();
         //TODO look into why concurrency issues are possible at this location during zooming
-        ImmutableList.copyOf(slotMap.values()).stream()
+        slotMap.values().stream()
                 .filter(glyph -> view.getBoundingRect().intersects(glyph.getRenderBoundingRect()))
                 .forEach(glyph -> glyph.draw(gc, view, additionalYOffset));
 
@@ -74,6 +73,7 @@ public class Track {
                 glyph.setRenderBoundingRect(new Rectangle2D(x, y, width, height));
             }
         }
+        compositionGlyph.refreshBounds();
     }
 
     public void buildSlots() {

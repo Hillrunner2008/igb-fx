@@ -9,7 +9,6 @@ import java.util.Objects;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import org.lorainelab.igb.data.model.View;
 
 /**
@@ -20,8 +19,6 @@ public class LineGlyph implements Glyph {
 
     int start;
     int width;
-    private Paint fill = Color.BLACK;
-    private Paint strokeColor = Color.BLACK;
     private Rectangle2D boundingRect;
     private double y;
     private Rectangle2D renderBoundingRect;
@@ -34,21 +31,13 @@ public class LineGlyph implements Glyph {
     }
 
     @Override
-    public Paint getFill() {
-        return fill;
+    public Color getFill() {
+        return Color.BLACK;
     }
 
     @Override
-    public Paint getStrokeColor() {
-        return strokeColor;
-    }
-
-    public void setFill(Paint fill) {
-        this.fill = fill;
-    }
-
-    public void setStrokeColor(Paint strokeColor) {
-        this.strokeColor = strokeColor;
+    public Color getStrokeColor() {
+        return Color.BLACK;
     }
 
     @Override
@@ -79,8 +68,8 @@ public class LineGlyph implements Glyph {
             y = y - viewRect.getMinY();
         }
 
-        gc.setFill(fill);
-        gc.setStroke(strokeColor);
+        gc.setFill(Color.BLACK);
+        gc.setStroke(Color.BLACK);
         gc.strokeLine(x, y + additionalYoffset, x + width, y + additionalYoffset);
     }
 

@@ -14,7 +14,6 @@ import java.util.function.Function;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import org.lorainelab.igb.data.model.Chromosome;
@@ -31,9 +30,9 @@ import org.slf4j.LoggerFactory;
 public class RectangleGlyph implements Glyph {
 
     private static final Logger LOG = LoggerFactory.getLogger(RectangleGlyph.class);
-    private Paint fill = Color.BLACK;
+    private Color fill = Color.BLACK;
 
-    private Paint strokeColor = Color.BLACK;
+    private Color strokeColor = Color.BLACK;
 
     private Rectangle2D boundingRect;
     private Rectangle2D renderBoundingRect;
@@ -57,20 +56,20 @@ public class RectangleGlyph implements Glyph {
     }
 
     @Override
-    public Paint getFill() {
+    public Color getFill() {
         return fill;
     }
 
     @Override
-    public Paint getStrokeColor() {
+    public Color getStrokeColor() {
         return strokeColor;
     }
 
-    public void setFill(Paint fill) {
+    public void setFill(Color fill) {
         this.fill = fill;
     }
 
-    public void setStrokeColor(Paint strokeColor) {
+    public void setStrokeColor(Color strokeColor) {
         this.strokeColor = strokeColor;
     }
 
