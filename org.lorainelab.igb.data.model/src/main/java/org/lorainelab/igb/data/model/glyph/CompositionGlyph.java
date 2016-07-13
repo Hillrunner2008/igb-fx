@@ -126,9 +126,9 @@ public class CompositionGlyph implements Glyph {
             return;
         }
         Rectangle2D glyphViewIntersectionBounds = glyphViewIntersectionBoundsWrapper.get();
-        if (viewBoundingRect.getWidth() < 25_000_000) {
+        if (viewBoundingRect.getWidth() < 15_000_000) {
             drawChildren(viewBoundingRect, gc, view, additionalYoffset);
-             drawLabel(view, viewBoundingRect, gc, glyphViewIntersectionBounds);
+            drawLabel(view, viewBoundingRect, gc, glyphViewIntersectionBounds);
         } else {
             drawSummaryRectangle(gc, glyphViewIntersectionBounds);
         }
