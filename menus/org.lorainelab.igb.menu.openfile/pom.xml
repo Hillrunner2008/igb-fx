@@ -56,6 +56,16 @@
             <artifactId>org.lorainelab.igb.preferences</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.lorainelab.igb.menu.customgenome</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.lorainelab.igb.menu.recentfilemenu</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

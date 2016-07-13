@@ -87,9 +87,12 @@ public class MenuBarManager {
     }
     
     private void initFileMenu() {
+//        Menu recentFilesMenu = new Menu("Open Recent Files");
+//        recentFilesMenu.getItems().add(new MenuItem("Open Recent File"));
         fileMenu = new Menu("File");
         fileMenu.setMnemonicParsing(true);
         fileMenuEntries.put(5, new MenuItem("Load Url"));
+//        fileMenuEntries.put(6, recentFilesMenu);
         fileMenuEntries.put(10, new SeparatorMenuItem());
         fileMenuEntries.put(70, getExitMenuItem());
     }

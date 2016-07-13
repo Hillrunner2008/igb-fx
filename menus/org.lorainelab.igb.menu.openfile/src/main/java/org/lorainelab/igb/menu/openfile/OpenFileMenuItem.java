@@ -3,7 +3,10 @@ package org.lorainelab.igb.menu.openfile;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
+import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
+import com.google.common.hash.HashCode;
+import com.google.common.hash.HashFunction;
 import com.google.common.io.Files;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
@@ -11,6 +14,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import javafx.stage.FileChooser;
 import org.lorainelab.igb.data.model.DataSet;
@@ -22,6 +26,8 @@ import org.lorainelab.igb.menu.api.MenuBarEntryProvider;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
 import org.lorainelab.igb.menu.api.model.WeightedMenuEntry;
 import org.lorainelab.igb.menu.api.model.WeightedMenuItem;
+import static org.lorainelab.igb.menu.customgenome.CustomGenomePrefKeys.SPECIES_NAME;
+import org.lorainelab.igb.menu.recentfilemenu.OpenRecentFiles;
 import org.lorainelab.igb.preferences.SessionPreferences;
 import org.lorainelab.igb.search.api.SearchService;
 import org.lorainelab.igb.search.api.model.IndexIdentity;
@@ -45,7 +51,7 @@ public class OpenFileMenuItem implements MenuBarEntryProvider, ToolbarButtonProv
     private FileTypeHandlerRegistry fileTypeHandlerRegistry;
     private SelectionInfoService selectionInfoService;
     private SearchService searchService;
-
+    
     @Activate
     public void activate() {
         menuItem = new WeightedMenuItem(1, "Load File");
@@ -58,7 +64,7 @@ public class OpenFileMenuItem implements MenuBarEntryProvider, ToolbarButtonProv
         menuItem.setOnAction(action -> openFileAction());
     }
 
-    private void openFileAction() {
+        private void openFileAction() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Load File");
         File homeDirectory;
@@ -76,6 +82,7 @@ public class OpenFileMenuItem implements MenuBarEntryProvider, ToolbarButtonProv
                 fileTypeHandlerRegistry.getFileTypeHandlers().stream().filter(f -> {
                     return f.getSupportedExtensions().contains(Files.getFileExtension(file.getPath()));
                 }).findFirst().ifPresent(fileTypeHandler -> {
+                    OpenRecentFiles.OpenRecentFiles(file.getPath());
                     selectionInfoService.getSelectedGenomeVersion().get().ifPresent(gv -> {
                         DataSourceReference dataSourceReference = new DataSourceReference(file.getPath(), dataSource);
                         gv.getLoadedDataSets().add(new DataSet(file.getName(), dataSourceReference, fileTypeHandler));

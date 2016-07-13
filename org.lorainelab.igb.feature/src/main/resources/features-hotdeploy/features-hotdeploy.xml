@@ -47,6 +47,7 @@
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.menu.about/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.menu.openfile/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.menu.customgenome/${project.version}</bundle>
+        <bundle>mvn:${project.groupId}/org.lorainelab.igb.menu.recentfilemenu/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.filehandler.registry/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.filehandler.bed/${project.version}</bundle>
 
