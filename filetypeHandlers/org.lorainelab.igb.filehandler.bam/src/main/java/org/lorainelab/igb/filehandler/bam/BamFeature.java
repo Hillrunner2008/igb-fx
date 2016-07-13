@@ -83,7 +83,7 @@ public class BamFeature implements Feature {
 //    }
     public Map<String, String> getTooltipData() {
         HashMap<String, String> tooltipData = Maps.newHashMap();
-        tooltipData.put("forward", Boolean.TRUE.toString());
+        tooltipData.put("forward", strand == Strand.POSITIVE ? "true" : "false");
         tooltipData.put("cigar", getCigarString());
         tooltipData.put("name", readName);
         tooltipData.put("reference name", chromosomeId);
