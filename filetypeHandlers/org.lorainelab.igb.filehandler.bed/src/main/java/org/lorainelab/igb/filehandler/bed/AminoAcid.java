@@ -156,31 +156,6 @@ public enum AminoAcid {
         code1aminoAcid.put('V', Valine);
         code1aminoAcid.put('-', STOP);
     }
-    private static final Map<String, AminoAcid> code3aminoAcid = new HashMap<>();
-
-    static {
-        code3aminoAcid.put("Ala", Alanine);
-        code3aminoAcid.put("Arg", Arginine);
-        code3aminoAcid.put("Asn", Asparagine);
-        code3aminoAcid.put("Asp", AsparticAcid);
-        code3aminoAcid.put("Cys", Cysteine);
-        code3aminoAcid.put("Glu", GlutamicAcid);
-        code3aminoAcid.put("Gln", Glutamine);
-        code3aminoAcid.put("Gly", Glycine);
-        code3aminoAcid.put("His", Histidine);
-        code3aminoAcid.put("Ile", Isoleucine);
-        code3aminoAcid.put("Leu", Leucine);
-        code3aminoAcid.put("Lys", Lysine);
-        code3aminoAcid.put("Met", Methionine);
-        code3aminoAcid.put("Phe", Phenylalanine);
-        code3aminoAcid.put("Pro", Proline);
-        code3aminoAcid.put("Ser", Serine);
-        code3aminoAcid.put("Thr", Threonine);
-        code3aminoAcid.put("Trp", Tryptophan);
-        code3aminoAcid.put("Tyr", Tyrosine);
-        code3aminoAcid.put("Val", Valine);
-        code3aminoAcid.put("---", STOP);
-    }
     private final String code;
     private final char letter;
 
@@ -197,9 +172,6 @@ public enum AminoAcid {
         return letter;
     }
 
-    public static AminoAcid getByCode(String code) {
-        return code3aminoAcid.get(code.substring(0, 1).toUpperCase() + code.substring(1, 3).toLowerCase());
-    }
     private static final Logger LOG = LoggerFactory.getLogger(AminoAcid.class);
 
     public static String getAminoAcid(String residue, boolean forward) {

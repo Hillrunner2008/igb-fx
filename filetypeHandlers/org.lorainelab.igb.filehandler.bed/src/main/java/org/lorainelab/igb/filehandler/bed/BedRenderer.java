@@ -30,9 +30,10 @@ public class BedRenderer implements Renderer<BedFeature> {
     }
 
     private Stream<Shape> calculateCds(BedFeature bedFeature) {
+        final Strand strand = bedFeature.getStrand();
         Range<Integer> cdsRange = Range.closed(bedFeature.getCdsStart() - bedFeature.getRange().lowerEndpoint(), bedFeature.getCdsEnd() - bedFeature.getRange().lowerEndpoint());
         Function<String, String> innerTextRefSeqTranslator = referenceSequence -> {
-            String aminoAcidSequence = AminoAcid.getAminoAcid(referenceSequence, bedFeature.getStrand() == Strand.POSITIVE);
+            String aminoAcidSequence = AminoAcid.getAminoAcid(referenceSequence, strand == Strand.POSITIVE);
             return aminoAcidSequence;
         };
 

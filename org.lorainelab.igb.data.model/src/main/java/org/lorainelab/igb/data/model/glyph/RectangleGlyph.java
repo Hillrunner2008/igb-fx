@@ -47,7 +47,7 @@ public class RectangleGlyph implements Glyph {
             height = 15;
             y = 17.5;
         } else if (rectShape.getAttributes().contains(org.lorainelab.igb.data.model.shapes.Rectangle.Attribute.INSERTION)) {
-            height =3;
+            height = 3;
         }
         boundingRect = new Rectangle2D(rectShape.getOffset(), y, rectShape.getWidth(), height);
         innerTextRefSeqTranslator = rectShape.getInnerTextRefSeqTranslator();
@@ -116,13 +116,13 @@ public class RectangleGlyph implements Glyph {
                         innerText = translationFunction.apply(sequence);
                     }
 
+                    int size = 15;
                     synchronized (gc) {// should not be needed, but I am currently seeing rendering issues that appear directly related to race conditions on this function
                         gc.save();
 
-                        int size = 14;
                         double textScale = .5;
                         gc.scale(textScale, textScale);
-                        gc.setFont(Font.font("Monospaced", FontWeight.BOLD, size));
+                        gc.setFont(Font.font("Monospaced", FontWeight.MEDIUM, size));
                         FontMetrics fm = Toolkit.getToolkit().getFontLoader().getFontMetrics(gc.getFont());
                         double textHeight = fm.getAscent();
                         double textYPosition = (y / textScale) + textHeight;
@@ -132,7 +132,7 @@ public class RectangleGlyph implements Glyph {
                         double i = 0;
                         double minX = viewBoundingRect.get().getMinX();
                         int baseWidth = 1;
-                        for (char c : innerText.toCharArray()) {
+                        for (char c : innerText.toUpperCase().toCharArray()) {
                             if (colorByBase) {
                                 gc.setFill(getBaseColor(c));
                             } else {
@@ -147,8 +147,8 @@ public class RectangleGlyph implements Glyph {
                             }
                             gc.setFill(Color.BLACK);
                             gc.scale(textScale, textScale);
-                            double x = (minX + i) / textScale;
-                            double maxWidth = 1 / textScale;
+                            double x = ((minX + i) / textScale) + (1 / textScale) * .1;
+                            double maxWidth = (1 / textScale) * .8;
                             gc.fillText("" + c, x, textYPosition, maxWidth);
                             gc.scale(1 / textScale, 1 / textScale);
                             i++;

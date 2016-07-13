@@ -224,7 +224,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
 
     private void drawCoordinateBasePairs() {
         gc.save();
-        gc.setFont(Font.font("Monospaced", FontWeight.BOLD, 25));
+        gc.setFont(Font.font("Monospaced", FontWeight.MEDIUM, 25));
         final int basePairPadding = 50;
         if (viewBoundingRectangle.getWidth() < 1500) {
             double textScale = .5;

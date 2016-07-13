@@ -83,7 +83,7 @@ public class CanvasPane extends Region {
         canvas.heightProperty().addListener(observable -> clear());
         zoomStripeCoordinate = -1;
         initailizeKeyListener();
-//        initializeMouseEventHandlers();
+        initializeMouseEventHandlers();
         selectionInfoService.getSelectedChromosome().addListener((observable, oldValue, newValue) -> {
             if (newValue.isPresent()) {
                 modelWidth = newValue.get().getLength();
