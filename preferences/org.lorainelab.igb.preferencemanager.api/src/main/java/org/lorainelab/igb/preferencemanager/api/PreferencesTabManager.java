@@ -7,17 +7,12 @@ package org.lorainelab.igb.preferencemanager.api;
 
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import javafx.application.Platform;
-import javafx.scene.Scene;
-import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.AnchorPane;
-import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,20 +29,18 @@ public class PreferencesTabManager {
 
     public PreferencesTabManager() {
         pane = new TabPane();
-        tabs = new TreeSet<PreferencesTabProvider>((x,y)-> y.getTabWeight() - x.getTabWeight());
+        tabs = new TreeSet<PreferencesTabProvider>((x,y)-> x.getTabWeight() - y.getTabWeight());
         setAnchorPaneConstraints(pane);
     }
 
 
     @Reference(optional = true, multiple = true, unbind = "removeTab", dynamic = true)
     public void addTab(PreferencesTabProvider tabProvider) {
-        //pane.getTabs().add(tabProvider.getPreferencesTab());
-        tabs.add(tabProvider);
+        Platform.runLater(()->tabs.add(tabProvider));
     }
 
     public void removeTab(PreferencesTabProvider tabProvider) {
-        //pane.getTabs().remove(tabProvider.getPreferencesTab());
-        tabs.remove(tabProvider);
+        Platform.runLater(()->tabs.remove(tabProvider));
     }
 
     public TabPane getPreferencesTabPane(){

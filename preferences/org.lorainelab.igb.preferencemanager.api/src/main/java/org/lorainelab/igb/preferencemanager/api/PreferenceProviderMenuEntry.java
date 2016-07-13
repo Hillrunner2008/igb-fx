@@ -38,19 +38,16 @@ public class PreferenceProviderMenuEntry implements MenuBarEntryProvider {
 
     public PreferenceProviderMenuEntry() {
         menuItem = new WeightedMenuItem(30, "Preferences");
-
     }
 
     @Activate
     public void activate() {
         Platform.runLater(() -> {
-            initComponents();
-            layoutComponents();
             menuItem.setOnAction(event -> {
+                initComponents();
+                layoutComponents();
                 Platform.runLater(() -> {
-                    Platform.runLater(() -> {
                         stage.show();
-                    });
                 });
             });
         });
@@ -61,7 +58,7 @@ public class PreferenceProviderMenuEntry implements MenuBarEntryProvider {
         List<WeightedMenuItem> menuItems = new ArrayList<WeightedMenuItem>();
         menuItems.add(menuItem);
         return Optional.of(menuItems);
-
+            
     }
 
     @Override
