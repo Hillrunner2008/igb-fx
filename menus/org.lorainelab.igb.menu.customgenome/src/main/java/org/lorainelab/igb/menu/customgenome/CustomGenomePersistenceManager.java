@@ -19,10 +19,9 @@ import org.lorainelab.igb.data.model.sequence.ReferenceSequenceProvider;
 import org.lorainelab.igb.data.model.util.TwoBitParser;
 import static org.lorainelab.igb.menu.customgenome.CustomGenomePrefKeys.REFERENCE_PROVIDER_URL;
 import static org.lorainelab.igb.menu.customgenome.CustomGenomePrefKeys.SPECIES_NAME;
-import static org.lorainelab.igb.menu.customgenome.CustomGenomePrefKeys.VERSION_NAME;
 import static org.lorainelab.igb.menu.customgenome.CustomGenomePrefKeys.UUID;
+import static org.lorainelab.igb.menu.customgenome.CustomGenomePrefKeys.VERSION_NAME;
 import org.lorainelab.igb.preferences.PreferenceUtils;
-import org.lorainelab.igb.preferences.SessionPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,7 +87,7 @@ public class CustomGenomePersistenceManager {
 
     void persistCustomGenome(GenomeVersion customGenome) {
         String speciesName = customGenome.getSpeciesName();
-        String versionName = customGenome.getName();
+        String versionName = customGenome.getName().get();
         String sequenceFileUrl = customGenome.getReferenceSequenceProvider().getPath();
         String uuid = customGenome.getUuid().toString();
         String nodeName = md5Hash(uuid);

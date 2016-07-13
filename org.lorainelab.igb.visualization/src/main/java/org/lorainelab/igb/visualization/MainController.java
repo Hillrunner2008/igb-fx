@@ -184,6 +184,7 @@ public class MainController {
                     selectionInfoService.getSelectedGenomeVersion().get().ifPresent(gv -> {
                         if (selectedGenomeVersion == gv) {
                             Platform.runLater(() -> {
+                                trackRenderers.forEach(renderer -> eventBus.unregister(renderer));
                                 trackRenderers.clear();
                                 labelPane.getChildren().clear();
                                 hSlider.setValue(0);
@@ -202,6 +203,7 @@ public class MainController {
     private void initializeGenomeVersionSelectionListener() {
         selectionInfoService.getSelectedGenomeVersion().addListener((observable, oldValue, newValue) -> {
             Platform.runLater(() -> {
+                trackRenderers.forEach(renderer -> eventBus.unregister(renderer));
                 trackRenderers.clear();
                 labelPane.getChildren().clear();
                 hSlider.setValue(0);
@@ -871,9 +873,9 @@ public class MainController {
                 .forEach(renderer -> {
                     selectionInfoService.getSelectedGlyphs().addAll(
                             renderer.getTrack().getGlyphs()
-                            .stream()
-                            .filter(glyph -> glyph.isSelected())
-                            .collect(Collectors.toList())
+                                    .stream()
+                                    .filter(glyph -> glyph.isSelected())
+                                    .collect(Collectors.toList())
                     );
                 });
     }

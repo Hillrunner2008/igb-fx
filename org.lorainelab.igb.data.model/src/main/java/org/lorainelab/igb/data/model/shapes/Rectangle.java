@@ -101,8 +101,8 @@ public class Rectangle<T extends Feature> implements Shape {
 
     public enum Attribute {
 
-        thick
-        // we should avoid mixing genomic concepts with shapes... for now this is placeholder
+        THICK,
+        INSERTION
     }
 
     public interface Build {
@@ -118,7 +118,7 @@ public class Rectangle<T extends Feature> implements Shape {
         Build setColorByBase(boolean colorByBase);
 
         Build linkToModel(Feature model);
-
+        
         Build addAttribute(Attribute attr);
 
         Rectangle build();

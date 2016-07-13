@@ -5,6 +5,7 @@
  */
 package org.lorainelab.igb.filehandler.bam;
 
+import java.util.Optional;
 import javafx.scene.paint.Color;
 import org.lorainelab.igb.data.model.shapes.Composition;
 import org.lorainelab.igb.data.model.shapes.Line;
@@ -27,39 +28,59 @@ public class BamRenderer implements Renderer<BamFeature> {
         return composition(name[0],
                 bamFeature.getTooltipData(),
                 layer(
-                        bamFeature.getRange().lowerEndpoint(),
-                        bamFeature.getAnnotationBlocks().stream().map(alignmentBlock -> convertAlignmentBlockToRect(alignmentBlock))
-                ));
+                        0,
+                        bamFeature.getAnnotationBlocks().stream()
+                                .map(alignmentBlock -> convertAlignmentBlockToRect(alignmentBlock))
+                                .filter(optionalShape -> optionalShape.isPresent())
+                                .map(shape -> shape.get())
+                ),
+                layer(
+                        0,
+                        bamFeature.getAnnotationBlocks().stream()
+                                .map(alignmentBlock -> convertInsertions(alignmentBlock))
+                                .filter(optionalShape -> optionalShape.isPresent())
+                                .map(shape -> shape.get())
+                )
+        );
     }
 
-    private Shape convertAlignmentBlockToRect(AlignmentBlock alignmentBlock) {
+    private Optional<Shape> convertAlignmentBlockToRect(AlignmentBlock alignmentBlock) {
         switch (alignmentBlock.getAlignmentType()) {
             case DELETION:
-                return Rectangle.start(alignmentBlock.getRange().lowerEndpoint(), alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint())
+                return Optional.of(Rectangle.start(alignmentBlock.getRange().lowerEndpoint(), alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint())
                         .setColor(Color.RED)
                         .setInnerTextRefSeqTranslator(seq -> "X")
-                        .build();
-            case GAP:
-                return Line.start(alignmentBlock.getRange().lowerEndpoint(), alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint()
-                ).build();
-            case INSERTION:
-                return Rectangle.start(
-                        alignmentBlock.getRange().lowerEndpoint(),
-                        alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint())
-                        .setColor(Color.CHOCOLATE)
-                        .build();
+                        .build());
             case MATCH:
-                return Rectangle.start(
+                return Optional.of(Rectangle.start(
                         alignmentBlock.getRange().lowerEndpoint(),
                         alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint()
                 )
                         .setColorByBase(true)
                         .setInnerTextRefSeqTranslator(seq -> seq)
-                        .build();
+                        .build());
             case PADDING:
-                return Rectangle.start(alignmentBlock.getRange().lowerEndpoint(), alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint()).build();
+                return Optional.of(Rectangle.start(alignmentBlock.getRange().lowerEndpoint(), alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint()).build());
             default:
-                return Rectangle.start(alignmentBlock.getRange().lowerEndpoint(), alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint()).build();
+                return Optional.empty();
+        }
+    }
+
+    private Optional<Shape> convertInsertions(AlignmentBlock alignmentBlock) {
+        switch (alignmentBlock.getAlignmentType()) {
+            case GAP:
+                return Optional.of(Line.start(alignmentBlock.getRange().lowerEndpoint(), alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint()
+                ).build());
+            case INSERTION:
+                return Optional.of(Rectangle.start(
+                        alignmentBlock.getRange().lowerEndpoint(),
+                        2)
+                        .setColor(Color.GOLD)
+                        .addAttribute(Rectangle.Attribute.INSERTION)
+                        .setInnerTextRefSeqTranslator(seq -> "><")
+                        .build());
+            default:
+                return Optional.empty();
         }
     }
 
