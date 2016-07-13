@@ -20,6 +20,7 @@ import org.lorainelab.igb.data.model.datasource.DataSourceReference;
 import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandlerRegistry;
 import org.lorainelab.igb.menu.api.MenuBarEntryProvider;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
+import org.lorainelab.igb.menu.api.model.WeightedMenuEntry;
 import org.lorainelab.igb.menu.api.model.WeightedMenuItem;
 import org.lorainelab.igb.preferences.SessionPreferences;
 import org.lorainelab.igb.search.api.SearchService;
@@ -109,8 +110,8 @@ public class OpenFileMenuItem implements MenuBarEntryProvider, ToolbarButtonProv
     }
 
     @Override
-    public Optional<List<WeightedMenuItem>> getMenuItems() {
-        final List<WeightedMenuItem> menuItems = Lists.newArrayList(menuItem);
+    public Optional<List<WeightedMenuEntry>> getMenuItems() {
+        final List<WeightedMenuEntry> menuItems = Lists.newArrayList(menuItem);
         return Optional.of(menuItems);
     }
 

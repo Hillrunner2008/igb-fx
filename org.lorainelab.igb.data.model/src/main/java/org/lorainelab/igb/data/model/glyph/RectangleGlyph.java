@@ -14,7 +14,6 @@ import java.util.function.Function;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import org.lorainelab.igb.data.model.Chromosome;
@@ -31,9 +30,9 @@ import org.slf4j.LoggerFactory;
 public class RectangleGlyph implements Glyph {
 
     private static final Logger LOG = LoggerFactory.getLogger(RectangleGlyph.class);
-    private Paint fill = Color.BLACK;
+    private Color fill = Color.BLACK;
 
-    private Paint strokeColor = Color.BLACK;
+    private Color strokeColor = Color.BLACK;
 
     private Rectangle2D boundingRect;
     private Rectangle2D renderBoundingRect;
@@ -43,10 +42,13 @@ public class RectangleGlyph implements Glyph {
 
     public RectangleGlyph(Rectangle rectShape) {
         int height = 10;
-        if (rectShape.getAttributes().contains(org.lorainelab.igb.data.model.shapes.Rectangle.Attribute.thick)) {
+        double y = 20;
+        if (rectShape.getAttributes().contains(org.lorainelab.igb.data.model.shapes.Rectangle.Attribute.THICK)) {
             height = 15;
+            y = 17.5;
+        } else if (rectShape.getAttributes().contains(org.lorainelab.igb.data.model.shapes.Rectangle.Attribute.INSERTION)) {
+            height =3;
         }
-        double y = height == 15 ? 17.5 : 20;
         boundingRect = new Rectangle2D(rectShape.getOffset(), y, rectShape.getWidth(), height);
         innerTextRefSeqTranslator = rectShape.getInnerTextRefSeqTranslator();
         innerTextReferenceSequenceRange = rectShape.getInnerTextReferenceSequenceRange();
@@ -54,20 +56,20 @@ public class RectangleGlyph implements Glyph {
     }
 
     @Override
-    public Paint getFill() {
+    public Color getFill() {
         return fill;
     }
 
     @Override
-    public Paint getStrokeColor() {
+    public Color getStrokeColor() {
         return strokeColor;
     }
 
-    public void setFill(Paint fill) {
+    public void setFill(Color fill) {
         this.fill = fill;
     }
 
-    public void setStrokeColor(Paint strokeColor) {
+    public void setStrokeColor(Color strokeColor) {
         this.strokeColor = strokeColor;
     }
 
@@ -127,27 +129,29 @@ public class RectangleGlyph implements Glyph {
                         double textYOffset = (viewBoundingRect.get().getHeight() / textScale - fm.getLineHeight()) / 2;
                         textYPosition += textYOffset;
                         gc.scale(1 / textScale, 1 / textScale);
-                        if (colorByBase) {
-                            double i = 0;
-                            double minX = viewBoundingRect.get().getMinX();
-                            int baseWidth = 1;
-                            for (char c : innerText.toCharArray()) {
+                        double i = 0;
+                        double minX = viewBoundingRect.get().getMinX();
+                        int baseWidth = 1;
+                        for (char c : innerText.toCharArray()) {
+                            if (colorByBase) {
                                 gc.setFill(getBaseColor(c));
-                                if (startOffset % 1 > 0 && i == 0) {
-                                    gc.fillRect(minX, y, 1-startOffset % 1, viewBoundingRect.get().getHeight());
-                                    i += (1-startOffset % 1);
-                                    continue;
-                                } else {
-                                    gc.fillRect(minX + i, y, 1, viewBoundingRect.get().getHeight());
-                                }
-                                gc.setFill(Color.BLACK);
-                                gc.scale(textScale, textScale);
-                                double x = (minX + i) / textScale;
-                                double maxWidth = 1 / textScale;
-                                gc.fillText("" + c, x, textYPosition, maxWidth);
-                                gc.scale(1 / textScale, 1 / textScale);
-                                i++;
+                            } else {
+                                gc.setFill(fill);
                             }
+                            if (startOffset % 1 > 0 && i == 0) {
+                                gc.fillRect(minX, y, 1 - startOffset % 1, viewBoundingRect.get().getHeight());
+                                i += (1 - startOffset % 1);
+                                continue;
+                            } else {
+                                gc.fillRect(minX + i, y, 1, viewBoundingRect.get().getHeight());
+                            }
+                            gc.setFill(Color.BLACK);
+                            gc.scale(textScale, textScale);
+                            double x = (minX + i) / textScale;
+                            double maxWidth = 1 / textScale;
+                            gc.fillText("" + c, x, textYPosition, maxWidth);
+                            gc.scale(1 / textScale, 1 / textScale);
+                            i++;
                         }
                         gc.restore();
                     }

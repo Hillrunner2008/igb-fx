@@ -7,7 +7,7 @@ import javafx.scene.control.MenuItem;
  *
  * @author dcnorris
  */
-public class WeightedMenuItem extends MenuItem {
+public class WeightedMenuItem extends MenuItem implements WeightedMenuEntry {
 
     int weight;
 
@@ -27,6 +27,11 @@ public class WeightedMenuItem extends MenuItem {
 
     public int getWeight() {
         return weight;
+    }
+
+    @Override
+    public MenuItem getMenuEntry() {
+        return this;
     }
 
 }

@@ -1,6 +1,5 @@
 package org.lorainelab.igb.data.model;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Ordering;
@@ -8,6 +7,7 @@ import com.google.common.collect.SortedSetMultimap;
 import com.google.common.collect.TreeMultimap;
 import com.google.common.primitives.Ints;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -50,7 +50,7 @@ public class Track {
     public void draw(GraphicsContext gc, View view, CanvasContext canvasContext) {
         final double additionalYOffset = canvasContext.getBoundingRect().getMinY() / view.getYfactor();
         //TODO look into why concurrency issues are possible at this location during zooming
-        ImmutableList.copyOf(slotMap.values()).stream()
+        slotMap.values().stream()
                 .filter(glyph -> view.getBoundingRect().intersects(glyph.getRenderBoundingRect()))
                 .forEach(glyph -> glyph.draw(gc, view, additionalYOffset));
 
@@ -60,20 +60,21 @@ public class Track {
         for (Glyph glyph : compositionGlyph.getChildren()) {
             Rectangle2D boundingRect = glyph.getBoundingRect();
             final int modelHeight = SLOT_HEIGHT * maxStackHeight;
-            double yOffset = modelHeight / maxStackHeight;
             final double x = boundingRect.getMinX();
             final double width = boundingRect.getWidth();
             final double height = boundingRect.getHeight();
             if (isNegative) {
-                final double y = boundingRect.getMinY() + (slot * SLOT_HEIGHT) - PADDING;
+                final double MIN_OFFSET = 17.5;
+                final double y = boundingRect.getMinY() - MIN_OFFSET + (slot * SLOT_HEIGHT);
                 glyph.setRenderBoundingRect(new Rectangle2D(x, y, width, height));
             } else {
                 double slotStartingY = (maxStackHeight - slot) * SLOT_HEIGHT;
                 double originalY = boundingRect.getMinY();
-                final double y = originalY + slotStartingY - PADDING;
+                final double y = originalY + slotStartingY;
                 glyph.setRenderBoundingRect(new Rectangle2D(x, y, width, height));
             }
         }
+        compositionGlyph.refreshBounds();
     }
 
     public void buildSlots() {
@@ -87,7 +88,7 @@ public class Track {
                             break;
                         } else {
                             slotToadd++;
-                            if (slotToadd >= stackHeight && stackHeight != 0) {
+                            if (slotToadd >= stackHeight && isLimitedStackHeight()) {
                                 break;
                             }
                         }
@@ -99,17 +100,29 @@ public class Track {
 
         Optional<Integer> max = slotMap.keys().stream().max((x, y) -> Ints.compare(x, y));
         if (max.isPresent()) {
-            Integer optimalStackHeight = max.get() + 1;//for slop row
-            slotMap.entries().forEach(entry -> {
+            Integer slotCount = max.get();
+            if (isLimitedStackHeight()) {
+                if (stackHeight < max.get()) {
+                    slotCount = stackHeight;
+                }
+            }
+            for (Map.Entry<Integer, CompositionGlyph> entry : slotMap.entries()) {
                 int slotToadd = entry.getKey();
                 if (slotToadd < stackHeight || stackHeight == 0) {
-                    setGlyphPosition(entry.getValue(), slotToadd, stackHeight > 0 ? stackHeight : optimalStackHeight);
+
+                    setGlyphPosition(entry.getValue(), slotToadd, slotCount);
                 } else {
-                    setGlyphPosition(entry.getValue(), stackHeight - 1, stackHeight > 0 ? stackHeight : optimalStackHeight);
+                    //add to slop row
+                    setGlyphPosition(entry.getValue(), stackHeight - 1, slotCount);
                 }
-            });
-            modelHeight.set(SLOT_HEIGHT * optimalStackHeight);
+            }
+            slotCount++; // for slop row
+            modelHeight.set(SLOT_HEIGHT * slotCount);
         }
+    }
+
+    private boolean isLimitedStackHeight() {
+        return stackHeight != 0;
     }
 
     public SortedSetMultimap<Integer, CompositionGlyph> getSlotMap() {
@@ -128,7 +141,6 @@ public class Track {
         final int updatedStackHeight = Math.max(maxStackHeight, 0);
         if (updatedStackHeight != stackHeight) {
             this.stackHeight = updatedStackHeight;
-            this.stackHeight++; //for slop row
             slotMap.clear();
             buildSlots();
         }

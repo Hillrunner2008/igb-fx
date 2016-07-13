@@ -10,7 +10,7 @@ import java.util.Comparator;
 import java.util.Optional;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Paint;
+import javafx.scene.paint.Color;
 import org.lorainelab.igb.data.model.View;
 
 /**
@@ -21,9 +21,9 @@ public interface Glyph {
 
     final int SLOT_HEIGHT = 30;
 
-    Paint getFill();
+    Color getFill();
 
-    Paint getStrokeColor();
+    Color getStrokeColor();
 
     Rectangle2D getBoundingRect();
 

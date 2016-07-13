@@ -28,6 +28,7 @@ import javafx.stage.Stage;
 import org.controlsfx.control.HyperlinkLabel;
 import org.lorainelab.igb.menu.api.MenuBarEntryProvider;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
+import org.lorainelab.igb.menu.api.model.WeightedMenuEntry;
 import org.lorainelab.igb.menu.api.model.WeightedMenuItem;
 import org.lorainelab.igb.stage.provider.api.StageProvider;
 
@@ -144,8 +145,8 @@ public final class AboutMenuProvider implements MenuBarEntryProvider {
     }
 
     @Override
-    public Optional<List<WeightedMenuItem>> getMenuItems() {
-        final List<WeightedMenuItem> menuItems = Lists.newArrayList(menuItem);
+    public Optional<List<WeightedMenuEntry>> getMenuItems() {
+        final List<WeightedMenuEntry> menuItems = Lists.newArrayList(menuItem);
         return Optional.of(menuItems);
     }
 

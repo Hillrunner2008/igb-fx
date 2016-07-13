@@ -13,7 +13,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import org.lorainelab.igb.menu.api.MenuBarEntryProvider;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
-import org.lorainelab.igb.menu.api.model.WeightedMenuItem;
+import org.lorainelab.igb.menu.api.model.WeightedMenuEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -145,22 +145,22 @@ public class MenuBarManager {
                     .forEach(menuItem -> {
                         switch (menuBarExtension.getParentMenu()) {
                             case FILE:
-                                fileMenuEntries.put(menuItem.getWeight(), menuItem);
+                                fileMenuEntries.put(menuItem.getWeight(), menuItem.getMenuEntry());
                                 break;
                             case EDIT:
-                                editMenuEntries.put(menuItem.getWeight(), menuItem);
+                                editMenuEntries.put(menuItem.getWeight(), menuItem.getMenuEntry());
                                 break;
                             case TOOLS:
-                                toolsMenuEntries.put(menuItem.getWeight(), menuItem);
+                                toolsMenuEntries.put(menuItem.getWeight(), menuItem.getMenuEntry());
                                 break;
                             case VIEW:
-                                viewMenuEntries.put(menuItem.getWeight(), menuItem);
+                                viewMenuEntries.put(menuItem.getWeight(), menuItem.getMenuEntry());
                                 break;
                             case HELP:
-                                helpMenuEntries.put(menuItem.getWeight(), menuItem);
+                                helpMenuEntries.put(menuItem.getWeight(), menuItem.getMenuEntry());
                                 break;
                             case GENOME:
-                                genomeMenuEntries.put(menuItem.getWeight(), menuItem);
+                                genomeMenuEntries.put(menuItem.getWeight(), menuItem.getMenuEntry());
                                 break;
                         }
                     });
@@ -200,9 +200,9 @@ public class MenuBarManager {
         }
     }
 
-    private void removeMenuEntry(TreeMultimap<Integer, MenuItem> menuEntryHolder, WeightedMenuItem menuItem) {
-        if (menuEntryHolder.containsEntry(menuItem.getWeight(), menuItem)) {
-            menuEntryHolder.remove(menuItem.getWeight(), menuItem);
+    private void removeMenuEntry(TreeMultimap<Integer, MenuItem> menuEntryHolder, WeightedMenuEntry weightedMenuEntry) {
+        if (menuEntryHolder.containsEntry(weightedMenuEntry.getWeight(), weightedMenuEntry.getMenuEntry())) {
+            menuEntryHolder.remove(weightedMenuEntry.getWeight(), weightedMenuEntry.getMenuEntry());
         }
     }
 

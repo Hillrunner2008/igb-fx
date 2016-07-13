@@ -160,7 +160,7 @@ public class TrackLabel {
             });
             stage.setWidth(220);
             
-            stage.setHeight(150);
+            stage.setHeight(155);
             
             stage.setTitle("Set Track Stack Height");
             migPane.add(label, "growx, wrap");

@@ -5,11 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import org.lorainelab.igb.data.model.View;
@@ -20,14 +18,17 @@ import org.lorainelab.igb.data.model.View;
  */
 public class CompositionGlyph implements Glyph {
 
-    private final List<Glyph> children;
+    private final Glyph[] children;
     private final Map<String, String> tooltipData;
 
     private final String label;
     boolean isSelected = false;
+    private Rectangle2D boundingRect;
+    private static final double LABEL_SPACE_SCALER = 2;
+    private static final Color DEFAULT_COLOR = Color.web("#3F51B5");
 
     public CompositionGlyph(String label, Map<String, String> tooltipData, List<Glyph> children) {
-        this.children = children;
+        this.children = children.toArray(new Glyph[children.size()]);
         this.label = label;
         this.tooltipData = tooltipData;
     }
@@ -37,12 +38,12 @@ public class CompositionGlyph implements Glyph {
     }
 
     @Override
-    public Paint getFill() {
+    public Color getFill() {
         return Color.BLACK;
     }
 
     @Override
-    public Paint getStrokeColor() {
+    public Color getStrokeColor() {
         return Color.RED;
     }
 
@@ -52,6 +53,13 @@ public class CompositionGlyph implements Glyph {
 
     @Override
     public Rectangle2D getBoundingRect() {
+        if (boundingRect == null) {
+            boundingRect = calculateBoundingRect();
+        }
+        return boundingRect;
+    }
+
+    private Rectangle2D calculateBoundingRect() {
         double minX = Double.MAX_VALUE;
         double maxX = Double.MIN_VALUE;
         double minY = Double.MAX_VALUE;
@@ -109,7 +117,6 @@ public class CompositionGlyph implements Glyph {
         double y = (glyphMinY - maxGlyphheight) + additionalYoffset;
         return Optional.of(new Rectangle2D(minX, y, width, maxGlyphheight * LABEL_SPACE_SCALER));
     }
-    private static final double LABEL_SPACE_SCALER = 2;
 
     @Override
     public void draw(GraphicsContext gc, View view, double additionalYoffset) {
@@ -119,18 +126,32 @@ public class CompositionGlyph implements Glyph {
             return;
         }
         Rectangle2D glyphViewIntersectionBounds = glyphViewIntersectionBoundsWrapper.get();
-        if (viewBoundingRect.getWidth() < 25_000_000) {
-            List<Glyph> childrenToDraw = children.stream()
-                    .filter(glyph -> viewBoundingRect.intersects(glyph.getRenderBoundingRect())).collect(Collectors.toList());
-            childrenToDraw.stream().filter(child -> child instanceof LineGlyph).forEach(child -> child.draw(gc, view, additionalYoffset)); //draw lines first... in the future we will want to repect layers
-            childrenToDraw.stream().filter(child -> !(child instanceof LineGlyph)).forEach(child -> child.draw(gc, view, additionalYoffset));
+        if (viewBoundingRect.getWidth() < 15_000_000) {
+            drawChildren(viewBoundingRect, gc, view, additionalYoffset);
+            drawLabel(view, viewBoundingRect, gc, glyphViewIntersectionBounds);
         } else {
-            gc.save();
-            gc.setFill(Color.web("#3F51B5"));
-            gc.setStroke(Color.web("#3F51B5"));
-            gc.fillRect(glyphViewIntersectionBounds.getMinX(), glyphViewIntersectionBounds.getMinY() + (glyphViewIntersectionBounds.getHeight() / 2), glyphViewIntersectionBounds.getWidth(), glyphViewIntersectionBounds.getHeight() / 2);
-            gc.restore();
+            drawSummaryRectangle(gc, glyphViewIntersectionBounds);
         }
+        drawSelectionRectangle(gc, view, glyphViewIntersectionBounds);
+    }
+
+    private void drawChildren(Rectangle2D viewBoundingRect, GraphicsContext gc, View view, double additionalYoffset) {
+        for (Glyph glyph : children) {
+            if (viewBoundingRect.intersects(glyph.getRenderBoundingRect())) {
+                glyph.draw(gc, view, additionalYoffset);
+            }
+        }
+    }
+
+    private void drawSummaryRectangle(GraphicsContext gc, Rectangle2D glyphViewIntersectionBounds) {
+        gc.save();
+        gc.setFill(DEFAULT_COLOR);
+        gc.setStroke(DEFAULT_COLOR);
+        gc.fillRect(glyphViewIntersectionBounds.getMinX(), glyphViewIntersectionBounds.getMinY() + (glyphViewIntersectionBounds.getHeight() / 2), glyphViewIntersectionBounds.getWidth(), glyphViewIntersectionBounds.getHeight() / 2);
+        gc.restore();
+    }
+
+    private void drawLabel(View view, Rectangle2D viewBoundingRect, GraphicsContext gc, Rectangle2D glyphViewIntersectionBounds) {
         if (!Strings.isNullOrEmpty(label)) {
             final double fontSize = Math.min((SLOT_HEIGHT * view.getYfactor()) * .35, 10);
             if (viewBoundingRect.getWidth() < 300_000 && fontSize > 8) {
@@ -157,10 +178,12 @@ public class CompositionGlyph implements Glyph {
                 gc.restore();
             }
         }
+    }
+
+    private void drawSelectionRectangle(GraphicsContext gc, View view, Rectangle2D glyphViewIntersectionBounds) {
         if (isSelected()) {
             gc.save();
             gc.setFill(Color.RED);
-
             double xToYRatio = view.getXfactor() / view.getYfactor();
             double rectWidth = 1;
             double width = view.getBoundingRect().getWidth();
@@ -195,7 +218,7 @@ public class CompositionGlyph implements Glyph {
         return isSelected;
     }
 
-    public List<Glyph> getChildren() {
+    public Glyph[] getChildren() {
         return children;
     }
 
@@ -236,6 +259,10 @@ public class CompositionGlyph implements Glyph {
     @Override
     public void setRenderBoundingRect(Rectangle2D rectangle2D) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public void refreshBounds() {
+        boundingRect = calculateBoundingRect();
     }
 
 }
