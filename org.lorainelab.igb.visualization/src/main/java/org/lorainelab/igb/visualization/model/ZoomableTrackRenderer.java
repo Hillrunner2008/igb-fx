@@ -65,6 +65,25 @@ public class ZoomableTrackRenderer implements TrackRenderer {
 
     }
 
+    public void setLastMouseClickedPoint(Point2D point) {
+        if (!canvasContext.getBoundingRect().contains(point)) {
+            return;
+        }
+    }
+
+    public void setLastMouseDragPoint(Point2D point) {
+        if (!canvasContext.getBoundingRect().contains(point)) {
+            return;
+        }
+    }
+    
+    public void setMouseDragging(boolean isMouseDragging) {
+        if (!isMouseDragging) {
+//            lastMouseClickX = -1;
+//            lastMouseDragX = -1;
+        }
+    }
+
     @Override
     public void updateView(double scrollX, double scrollY) {
         if (canvasContext.isVisible()) {

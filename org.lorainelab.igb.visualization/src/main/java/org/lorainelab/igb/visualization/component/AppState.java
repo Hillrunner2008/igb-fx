@@ -7,6 +7,7 @@ package org.lorainelab.igb.visualization.component;
 
 import com.google.common.collect.Sets;
 import java.util.Set;
+import javafx.geometry.Point2D;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.DataSet;
 import org.lorainelab.igb.data.model.GenomeVersion;
@@ -30,6 +31,10 @@ public class AppState implements State {
     private Set<DataSet> loadedDataSets;
     private Chromosome selectedChromosome;
     private double zoomStripeCoordinates;
+    private Point2D mouseClickLocation;
+    private Point2D localPoint;
+    private Point2D screenPoint;
+    private boolean mouseDragging;
 
     private static AppState instance;
 
@@ -37,12 +42,49 @@ public class AppState implements State {
         this.trackRenderers = Sets.newConcurrentHashSet();
         this.loadedDataSets = Sets.newConcurrentHashSet();
         zoomStripeCoordinates = -1;
+        mouseDragging = false;
     }
 
     public static AppState factory() {
         return new AppState();
     }
 
+    public Point2D getMouseClickLocation() {
+        return mouseClickLocation;
+    }
+
+    public AppState setMouseClickLocation(Point2D mouseClickLocation) {
+        this.mouseClickLocation = mouseClickLocation;
+        return this;
+    }
+
+    public Point2D getLocalPoint() {
+        return localPoint;
+    }
+
+    public AppState setLocalPoint(Point2D localPoint) {
+        this.localPoint = localPoint;
+        return this;
+    }
+
+    public Point2D getScreenPoint() {
+        return screenPoint;
+    }
+
+    public AppState setScreenPoint(Point2D screenPoint) {
+        this.screenPoint = screenPoint;
+        return this;
+    }
+
+    public boolean isMouseDragging() {
+        return mouseDragging;
+    }
+
+    public AppState setMouseDragging(boolean mouseDragging) {
+        this.mouseDragging = mouseDragging;
+        return this;
+    }
+    
     public double getZoomStripeCoordinates() {
         return zoomStripeCoordinates;
     }

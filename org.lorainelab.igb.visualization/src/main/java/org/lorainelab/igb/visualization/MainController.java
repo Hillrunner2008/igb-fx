@@ -3,7 +3,6 @@ package org.lorainelab.igb.visualization;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
-import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.Subscribe;
 import java.util.LinkedList;
@@ -56,7 +55,6 @@ import org.lorainelab.igb.visualization.store.AppStore;
 import org.lorainelab.igb.visualization.tabs.TabPaneManager;
 import org.lorainelab.igb.visualization.toolbar.ToolBarManager;
 import static org.lorainelab.igb.visualization.util.BoundsUtil.enforceRangeBounds;
-import static org.lorainelab.igb.visualization.util.CanvasUtils.exponentialScaleTransform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

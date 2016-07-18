@@ -6,6 +6,7 @@
 package org.lorainelab.igb.visualization.component;
 
 import java.util.Set;
+import javafx.geometry.Point2D;
 import javafx.scene.layout.Pane;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.DataSet;
@@ -29,12 +30,17 @@ public class TrackContainerProps implements Props {
     private Chromosome selectedChromosome;
     private Pane labelPane;
     private double zoomStripeCoordinate;
+    private Point2D mouseClickLocation;
+    private Point2D localPoint;
+    private Point2D screenPoint;
+    private boolean mouseDragging;
 
     public TrackContainerProps(TrackRenderer trackRenderer, double scrollX,
             double scrollY, double hSlider, double vSlider,
-            CanvasPane canvasPane, Set<DataSet> loadedDataSets, 
+            CanvasPane canvasPane, Set<DataSet> loadedDataSets,
             Chromosome selectedChromosome, Pane labelPane,
-            double zoomStripeCoordinate) {
+            double zoomStripeCoordinate,Point2D mouseClickLocation, Point2D localPoint,
+            Point2D screenPoint, boolean mouseDragging) {
         this.trackRenderer = trackRenderer;
         this.scrollX = scrollX;
         this.scrollY = scrollY;
@@ -45,8 +51,28 @@ public class TrackContainerProps implements Props {
         this.selectedChromosome = selectedChromosome;
         this.labelPane = labelPane;
         this.zoomStripeCoordinate = zoomStripeCoordinate;
+        this.mouseClickLocation = mouseClickLocation;
+        this.localPoint = localPoint;
+        this.screenPoint = screenPoint;
+        this.mouseDragging = mouseDragging;
     }
 
+    public Point2D getMouseClickLocation() {
+        return mouseClickLocation;
+    }
+
+    public Point2D getLocalPoint() {
+        return localPoint;
+    }
+
+    public Point2D getScreenPoint() {
+        return screenPoint;
+    }
+
+    public boolean isMouseDragging() {
+        return mouseDragging;
+    }
+    
     public double getZoomStripeCoordinate() {
         return zoomStripeCoordinate;
     }
@@ -86,6 +112,5 @@ public class TrackContainerProps implements Props {
     public Chromosome getSelectedChromosome() {
         return selectedChromosome;
     }
-
 
 }

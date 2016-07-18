@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import javafx.geometry.Point2D;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.DataSet;
 import org.lorainelab.igb.data.model.GenomeVersion;
@@ -33,8 +34,13 @@ public class AppStore {
     private GenomeVersion selectedGenomeVersion;
     private Chromosome selectedChromosome;
     private double zoomStripeCoordinate;
+    private Point2D mouseClickLocation;
+    private Point2D localPoint;
+    private Point2D screenPoint;
+    private boolean mouseDragging;
 
     public AppStore() {
+        mouseDragging = false;
         zoomStripeCoordinate = -1;
         trackRenderers = Sets.newConcurrentHashSet();
         loadedDataSets = Sets.newConcurrentHashSet();
@@ -67,6 +73,22 @@ public class AppStore {
         emit();
     }
 
+    public Point2D getMouseClickLocation() {
+        return mouseClickLocation;
+    }
+
+    public Point2D getLocalPoint() {
+        return localPoint;
+    }
+
+    public Point2D getScreenPoint() {
+        return screenPoint;
+    }
+
+    public boolean isMouseDragging() {
+        return mouseDragging;
+    }
+
     public void setSelectedChromosome(Chromosome selectedChromosome) {
         this.selectedChromosome = selectedChromosome;
         emit();
@@ -89,6 +111,18 @@ public class AppStore {
 
     public void addTrackRenderer(TrackRenderer... trackRenderers) {
         this.trackRenderers.addAll(Arrays.asList(trackRenderers));
+        emit();
+    }
+    
+    public void updateMouseDraggedLocation(Point2D localPoint, Point2D screenPoint, boolean mouseDragging) {
+        this.localPoint = localPoint; 
+        this.screenPoint = screenPoint;
+        this.mouseDragging = mouseDragging;
+        emit();
+    }
+    
+    public void updateMouseClickedLocation(Point2D mouseClickLocation) {
+        this.mouseClickLocation = mouseClickLocation;
         emit();
     }
     
@@ -135,6 +169,16 @@ public class AppStore {
     
     public void updateZoomStripe(double zoomStripeCoordinate) {
         this.zoomStripeCoordinate = zoomStripeCoordinate;
+        emit();
+    }
+    
+    public void updateJumpZoom(double hSlider, double scrollX, Point2D localPoint, Point2D screenPoint, boolean mouseDragging) {
+        this.hSlider = hSlider;
+        this.scrollX = scrollX;
+        this.zoomStripeCoordinate = -1;
+        this.localPoint = localPoint; 
+        this.screenPoint = screenPoint;
+        this.mouseDragging = mouseDragging;
         emit();
     }
     

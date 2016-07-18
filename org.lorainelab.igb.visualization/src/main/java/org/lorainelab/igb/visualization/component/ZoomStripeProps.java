@@ -5,6 +5,7 @@
  */
 package org.lorainelab.igb.visualization.component;
 
+import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import org.lorainelab.igb.visualization.component.api.Props;
 
@@ -13,6 +14,7 @@ import org.lorainelab.igb.visualization.component.api.Props;
  * @author jeckstei
  */
 public class ZoomStripeProps implements Props {
+
     private Canvas canvas;
     private double zoomStripeCoordinate;
     private double xFactor;
@@ -21,6 +23,7 @@ public class ZoomStripeProps implements Props {
     private double modelWidth;
     private double modelHeight;
     private double scrollX;
+
 
     public ZoomStripeProps(Canvas canvas, double zoomStripeCoordinate,
             double xFactor, double xOffset, double canvasWidth,
@@ -34,7 +37,7 @@ public class ZoomStripeProps implements Props {
         this.modelHeight = modelHeight;
         this.scrollX = scrollX;
     }
-
+    
     public double getScrollX() {
         return scrollX;
     }
@@ -50,7 +53,7 @@ public class ZoomStripeProps implements Props {
     public double getxOffset() {
         return xOffset;
     }
-    
+
     public double getZoomStripeCoordinate() {
         return zoomStripeCoordinate;
     }
@@ -66,7 +69,5 @@ public class ZoomStripeProps implements Props {
     public double getModelHeight() {
         return modelHeight;
     }
-    
-    
-    
+
 }

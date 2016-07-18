@@ -362,23 +362,46 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         render();
     }
 
-    @Subscribe
-    public void handleClickDraggingEvent(ClickDraggingEvent event) {
-        if (!canvasContext.getBoundingRect().contains(new Point2D(event.getLocal().getX(), event.getLocal().getY()))) {
+//    @Subscribe
+//    public void handleClickDraggingEvent(ClickDraggingEvent event) {
+//        if (!canvasContext.getBoundingRect().contains(new Point2D(event.getLocal().getX(), event.getLocal().getY()))) {
+//            return;
+//        }
+//        lastMouseDragX = Math.floor(event.getLocal().getX() / xfactor);
+//        render();
+//    }
+    
+    @Override
+    public void setLastMouseClickedPoint(Point2D point) {
+        if (!canvasContext.getBoundingRect().contains(point)) {
             return;
         }
-        lastMouseDragX = Math.floor(event.getLocal().getX() / xfactor);
-        render();
+        lastMouseClickX = Math.floor(point.getX() / xfactor);
     }
 
-    @Subscribe
-    public void handleClickDragStartEvent(ClickDragStartEvent event) {
-        if (!canvasContext.getBoundingRect().contains(event.getLocal())) {
+    @Override
+    public void setLastMouseDragPoint(Point2D point) {
+        if (!canvasContext.getBoundingRect().contains(point)) {
             return;
         }
-        lastMouseClickX = Math.floor(event.getLocal().getX() / xfactor);
+        lastMouseDragX = Math.floor(point.getX() / xfactor);
     }
 
+    @Override
+    public void setMouseDragging(boolean isMouseDragging) {
+        if (!isMouseDragging) {
+            lastMouseClickX = -1;
+            lastMouseDragX = -1;
+        }
+    }
+
+//    @Subscribe
+//    public void handleClickDragStartEvent(ClickDragStartEvent event) {
+//        if (!canvasContext.getBoundingRect().contains(event.getLocal())) {
+//            return;
+//        }
+//        lastMouseClickX = Math.floor(event.getLocal().getX() / xfactor);
+//    }
     @Subscribe
     private void handleRefreshTrackEvent(RefreshTrackEvent event) {
         render();
