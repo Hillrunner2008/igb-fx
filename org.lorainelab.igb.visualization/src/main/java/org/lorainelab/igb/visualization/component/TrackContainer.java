@@ -8,7 +8,6 @@ package org.lorainelab.igb.visualization.component;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 import java.util.List;
-import javafx.application.Platform;
 import javafx.scene.layout.StackPane;
 import org.lorainelab.igb.visualization.CanvasPane;
 import org.lorainelab.igb.visualization.component.api.Component;

@@ -90,19 +90,19 @@ public class ZoomableTrackRenderer implements TrackRenderer {
             final double visibleVirtualCoordinatesX = Math.floor(canvasContext.getBoundingRect().getWidth() / view.getXfactor());
             final double visibleVirtualCoordinatesY = Math.floor(canvasContext.getBoundingRect().getHeight() / view.getYfactor());
             double xOffset = Math.round((scrollX / 100) * (modelWidth - visibleVirtualCoordinatesX));
-            if (zoomStripeCoordinate != -1) {
-                double zoomStripePositionPercentage = (zoomStripeCoordinate - view.getBoundingRect().getMinX()) / view.getBoundingRect().getWidth();
-                xOffset = Math.max(zoomStripeCoordinate - (visibleVirtualCoordinatesX * zoomStripePositionPercentage), 0);
-                double maxXoffset = modelWidth - visibleVirtualCoordinatesX;
-                xOffset = Math.min(maxXoffset, xOffset);
-                final double calculatedScrollXPosition;
-                if (maxXoffset > 0) {
-                    calculatedScrollXPosition = (xOffset / (maxXoffset)) * 100;
-                } else {
-                    calculatedScrollXPosition = 0;
-                }
-//                eventBus.post(new ScrollXUpdate(calculatedScrollXPosition));
-            }
+//            if (zoomStripeCoordinate != -1) {
+//                double zoomStripePositionPercentage = (zoomStripeCoordinate - view.getBoundingRect().getMinX()) / view.getBoundingRect().getWidth();
+//                xOffset = Math.max(zoomStripeCoordinate - (visibleVirtualCoordinatesX * zoomStripePositionPercentage), 0);
+//                double maxXoffset = modelWidth - visibleVirtualCoordinatesX;
+//                xOffset = Math.min(maxXoffset, xOffset);
+//                final double calculatedScrollXPosition;
+//                if (maxXoffset > 0) {
+//                    calculatedScrollXPosition = (xOffset / (maxXoffset)) * 100;
+//                } else {
+//                    calculatedScrollXPosition = 0;
+//                }
+////                eventBus.post(new ScrollXUpdate(calculatedScrollXPosition));
+//            }
             double yOffset = canvasContext.getRelativeTrackOffset() / view.getYfactor();
             view.setBoundingRect(new Rectangle2D(xOffset, yOffset, visibleVirtualCoordinatesX, visibleVirtualCoordinatesY));
             render();

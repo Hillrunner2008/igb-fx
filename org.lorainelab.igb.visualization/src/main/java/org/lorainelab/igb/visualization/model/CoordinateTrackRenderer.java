@@ -290,12 +290,12 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         if (canvasContext.isVisible()) {
             final double visibleVirtualCoordinatesX = Math.floor(canvasContext.getBoundingRect().getWidth() / xfactor);
             double xOffset = Math.round((scrollX / 100) * (modelWidth - visibleVirtualCoordinatesX));
-            if (zoomStripeCoordinate != -1) {
-                double zoomStripePositionPercentage = (zoomStripeCoordinate - viewBoundingRectangle.getMinX()) / viewBoundingRectangle.getWidth();
-                xOffset = Math.max(zoomStripeCoordinate - (visibleVirtualCoordinatesX * zoomStripePositionPercentage), 0);
-                double maxXoffset = modelWidth - visibleVirtualCoordinatesX;
-                xOffset = Math.min(maxXoffset, xOffset);
-            }
+//            if (zoomStripeCoordinate != -1) {
+//                double zoomStripePositionPercentage = (zoomStripeCoordinate - viewBoundingRectangle.getMinX()) / viewBoundingRectangle.getWidth();
+//                xOffset = Math.max(zoomStripeCoordinate - (visibleVirtualCoordinatesX * zoomStripePositionPercentage), 0);
+//                double maxXoffset = modelWidth - visibleVirtualCoordinatesX;
+//                xOffset = Math.min(maxXoffset, xOffset);
+//            }
             xOffset = enforceRangeBounds(xOffset, 0, modelWidth);
             viewBoundingRectangle = new Rectangle2D(xOffset, canvasContext.getBoundingRect().getMinY(), visibleVirtualCoordinatesX, canvasContext.getBoundingRect().getHeight());
             viewYcoordinateRange = Range.<Double>closed(viewBoundingRectangle.getMinY(), viewBoundingRectangle.getMaxY());
