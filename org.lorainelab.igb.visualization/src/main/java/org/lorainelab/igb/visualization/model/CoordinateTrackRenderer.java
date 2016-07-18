@@ -1,7 +1,6 @@
 package org.lorainelab.igb.visualization.model;
 
 import com.google.common.collect.Range;
-import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.sun.javafx.tk.FontMetrics;
 import com.sun.javafx.tk.Toolkit;
@@ -20,11 +19,8 @@ import static org.lorainelab.igb.data.model.sequence.BasePairColorReference.getB
 import org.lorainelab.igb.visualization.CanvasPane;
 import org.lorainelab.igb.visualization.event.ClickDragCancelEvent;
 import org.lorainelab.igb.visualization.event.ClickDragEndEvent;
-import org.lorainelab.igb.visualization.event.ClickDragStartEvent;
 import org.lorainelab.igb.visualization.event.ClickDragZoomEvent;
-import org.lorainelab.igb.visualization.event.ClickDraggingEvent;
 import org.lorainelab.igb.visualization.event.RefreshTrackEvent;
-import org.lorainelab.igb.visualization.event.ZoomStripeEvent;
 import static org.lorainelab.igb.visualization.util.BoundsUtil.enforceRangeBounds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +40,6 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     private Rectangle2D viewBoundingRectangle;
     private Range<Double> viewYcoordinateRange;
     private double xfactor = 1;
-    double zoomStripeCoordinate = -1;
     //protected EventBus eventBus;
     private final CanvasContext canvasContext;
     private final GraphicsContext gc;
@@ -423,7 +418,6 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     }
 
     public void setZoomStripeCoordinate(double zoomStripeCoordinate) {
-        this.zoomStripeCoordinate = zoomStripeCoordinate;
     }
 
     @Override

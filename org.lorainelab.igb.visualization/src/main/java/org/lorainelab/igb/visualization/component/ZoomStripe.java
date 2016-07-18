@@ -39,9 +39,6 @@ public class ZoomStripe extends Component<ZoomStripeProps, ZoomStripeState> {
             double scrollX = this.getProps().getScrollX();
             final double visibleVirtualCoordinatesX = Math.floor(this.getProps().getCanvasWidth() / xFactor);
             double xOffset = Math.round((scrollX / 100) * (modelWidth - visibleVirtualCoordinatesX));
-            Rectangle2D viewBoundingRectangle = new Rectangle2D(0, 0, modelWidth, modelHeight);
-            double zoomStripePositionPercentage = (zoomStripeCoordinate - viewBoundingRectangle.getMinX()) / viewBoundingRectangle.getWidth();
-            xOffset = Math.max(zoomStripeCoordinate - (visibleVirtualCoordinatesX * zoomStripePositionPercentage), 0);
             double maxXoffset = modelWidth - visibleVirtualCoordinatesX;
             xOffset = Math.min(maxXoffset, xOffset);
             GraphicsContext gc = this.getProps().getCanvas().getGraphicsContext2D();

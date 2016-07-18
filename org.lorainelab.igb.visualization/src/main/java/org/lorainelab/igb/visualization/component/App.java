@@ -93,39 +93,9 @@ public class App extends Component<AppProps, AppState> {
             this.getProps().getScrollX().set(xScrollValue);
         }
 
-        double[] calculatedScrollXPosition = new double[]{AppStore.getStore().getScrollX()};
-        LOG.info("scroll x before {}", calculatedScrollXPosition[0]);
-        AppStore.getStore().getTrackRenderers().stream().findFirst().ifPresent(tr -> {
-            if (AppStore.getStore().getZoomStripeCoordinate() != -1) {
-
-                //TODO: move into state
-                double xFactor = exponentialScaleTransform(
-                        this.getProps().getCanvasPane(),
-                        AppStore.getStore().gethSlider()
-                );
-
-                View view = tr.getView();
-                int modelWidth = tr.getModelWidth();
-                CanvasContext canvasContext = tr.getCanvasContext();
-                final double visibleVirtualCoordinatesX = Math.floor(canvasContext.getBoundingRect().getWidth() / xFactor);
-                final double visibleVirtualCoordinatesY = Math.floor(canvasContext.getBoundingRect().getHeight() / view.getYfactor());
-                double zoomStripeCoordinate = AppStore.getStore().getZoomStripeCoordinate();
-                double zoomStripePositionPercentage = (zoomStripeCoordinate - view.getBoundingRect().getMinX()) / view.getBoundingRect().getWidth();
-                double xOffset = Math.max(zoomStripeCoordinate - (visibleVirtualCoordinatesX * zoomStripePositionPercentage), 0);
-                double maxXoffset = modelWidth - visibleVirtualCoordinatesX;
-                xOffset = Math.min(maxXoffset, xOffset);
-                if (maxXoffset > 0) {
-                    calculatedScrollXPosition[0] = (xOffset / (maxXoffset)) * 100;
-                } else {
-                    calculatedScrollXPosition[0] = 0;
-                }
-            }
-        });
-        LOG.info("scroll x after {}", calculatedScrollXPosition[0]);
-        
         AppState state = this.getState()
                 .setScrollX(
-                        calculatedScrollXPosition[0]
+                        AppStore.getStore().getScrollX()
                 ).
                 setScrollY(
                         AppStore.getStore().getScrollY()
@@ -261,8 +231,10 @@ public class App extends Component<AppProps, AppState> {
                     //drawZoomCoordinateLine();
                 } else {
                     this.getState().getTrackRenderers().stream().filter(tr -> tr instanceof CoordinateTrackRenderer).findFirst().ifPresent(tr -> {
-                         double xOffset = tr.getModelWidth() * (this.getState().getScrollX() / 100);
-                        double zoomStripeCoordinate = Math.floor((event.getX() / this.getProps().getCanvasPane().getXFactor())
+                        double xFactor = this.getProps().getCanvasPane().getXFactor();
+                        final double visibleVirtualCoordinatesX = Math.floor(tr.getCanvasContext().getBoundingRect().getWidth() / xFactor);
+                        double xOffset = Math.round((tr.getModelWidth()-visibleVirtualCoordinatesX) * (this.getState().getScrollX() / 100));
+                        double zoomStripeCoordinate = Math.floor((event.getX() / xFactor)
                                 + xOffset);
                         AppStore.getStore().updateZoomStripe(zoomStripeCoordinate);
                     });
@@ -360,7 +332,7 @@ public class App extends Component<AppProps, AppState> {
         viewPortManager.refresh(this.getProps().getvSlider().getValue(), this.getProps().getScrollY().getValue());
 
         //TODO: MOve into other setstates
-        this.setState(this.getState().setTotalTrackHeight(viewPortManager.getTotalTrackSize()));
+        //this.setState(this.getState().setTotalTrackHeight(viewPortManager.getTotalTrackSize()));
         updateScrollY();
         //updateTrackLabels();
     }
@@ -372,6 +344,37 @@ public class App extends Component<AppProps, AppState> {
                 .mapToDouble(canvasContext -> canvasContext.getBoundingRect().getHeight())
                 .sum();
         this.setState(this.getState().setScrollYVisibleAmount((sum / this.getState().getTotalTrackHeight()) * 100));
+    }
+
+    private double calcScrollXWithZoomStripe(double hSlider) {
+        double[] calculatedScrollXPosition = new double[]{this.getState().getScrollX()};
+        this.getState().getTrackRenderers().stream().findFirst().ifPresent(tr -> {
+            double zoomStripeCoordinate = this.getState().getZoomStripeCoordinates();
+            if (zoomStripeCoordinate != -1) {
+
+                //TODO: move into state
+                double xFactor = exponentialScaleTransform(
+                        this.getProps().getCanvasPane(),
+                        hSlider
+                );
+
+                View view = tr.getView();
+                int modelWidth = tr.getModelWidth();
+                CanvasContext canvasContext = tr.getCanvasContext();
+                final double visibleVirtualCoordinatesX = Math.floor(canvasContext.getBoundingRect().getWidth() / xFactor);
+                final double visibleVirtualCoordinatesY = Math.floor(canvasContext.getBoundingRect().getHeight() / view.getYfactor());
+                double zoomStripePositionPercentage = (zoomStripeCoordinate - view.getBoundingRect().getMinX()) / view.getBoundingRect().getWidth();
+                double xOffset = Math.max(zoomStripeCoordinate - (visibleVirtualCoordinatesX * zoomStripePositionPercentage), 0);
+                double maxXoffset = modelWidth - visibleVirtualCoordinatesX;
+                xOffset = Math.min(maxXoffset, xOffset);
+                if (maxXoffset > 0) {
+                    calculatedScrollXPosition[0] = (xOffset / (maxXoffset)) * 100;
+                } else {
+                    calculatedScrollXPosition[0] = 0;
+                }
+            }
+        });
+        return calculatedScrollXPosition[0];
     }
 
     private void initializeCanvas() {
@@ -388,10 +391,13 @@ public class App extends Component<AppProps, AppState> {
             }
             final boolean isSnapEvent = newValue.doubleValue() % this.getProps().gethSlider().getMajorTickUnit() == 0;
             if (lastHSliderFire < 0 || Math.abs(lastHSliderFire - newValue.doubleValue()) > 1 || isSnapEvent) {
-                AppStore.getStore().updateHSlider(newValue.doubleValue());
+                double scrollX = calcScrollXWithZoomStripe(newValue.doubleValue());
+                AppStore.getStore().updateHSlider(newValue.doubleValue(), scrollX);
                 updateCanvasContexts();
                 syncWidgetSlider();
                 lastHSliderFire = newValue.doubleValue();
+                
+
             }
         });
         this.getProps().gethSliderWidget().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
@@ -513,7 +519,7 @@ public class App extends Component<AppProps, AppState> {
 
     private void syncHSlider(double xFactor) {
         ignoreHSliderEvent = true;
-        AppStore.getStore().updateHSlider(invertExpScaleTransform(this.getProps().getCanvasPane(), xFactor));
+        AppStore.getStore().updateHSlider(invertExpScaleTransform(this.getProps().getCanvasPane(), xFactor), this.getState().getScrollX());
     }
 
     public DoubleProperty getHSliderValue() {

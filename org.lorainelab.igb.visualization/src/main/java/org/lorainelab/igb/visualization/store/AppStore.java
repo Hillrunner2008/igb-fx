@@ -152,8 +152,9 @@ public class AppStore {
         emit();
     }
     
-    public void updateHSlider(double hSlider) {
+    public void updateHSlider(double hSlider, double scrollX) {
         this.hSlider = hSlider;
+        this.scrollX = scrollX;
         emit();
     }
     
