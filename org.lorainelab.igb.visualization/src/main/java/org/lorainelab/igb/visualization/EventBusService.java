@@ -6,16 +6,10 @@ import com.google.common.eventbus.EventBus;
 @Component(immediate = true, provide = EventBusService.class)
 public class EventBusService {
 
-    private static final EventBus bus = new EventBus();
+    private static EventBus bus;
 
     public EventBusService() {
     }
 
-    public EventBus getEventBus() {
-        return bus;
-    }
 
-    public static EventBus getModuleEventBus() {
-        return bus;
-    }
 }

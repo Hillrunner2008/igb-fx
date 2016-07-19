@@ -39,6 +39,8 @@ import org.slf4j.LoggerFactory;
 public class OpenFileMenuItem implements MenuBarEntryProvider, ToolbarButtonProvider {
 
     private static final Logger LOG = LoggerFactory.getLogger(OpenFileMenuItem.class);
+    private static final String DEFAULT_FILE_EXTENSION_FILTER_NAME = "All Supported Formats";
+
     private DataSource dataSource;
     private WeightedMenuItem menuItem;
     private WeightedButton openFileButton;
@@ -146,6 +148,11 @@ public class OpenFileMenuItem implements MenuBarEntryProvider, ToolbarButtonProv
                     return new FileChooser.ExtensionFilter(fileTypeHandler.getName(), fileTypeHandler.getSupportedExtensions().stream().map(ext -> "*." + ext).collect(Collectors.toList()));
                 })
                 .forEach(extensionFilter -> fileChooser.getExtensionFilters().add(extensionFilter));
+        List<String> allSupportedFileExtensions = fileTypeHandlerRegistry.getFileTypeHandlers().stream().flatMap(fileTypeHandler -> fileTypeHandler.getSupportedExtensions().stream().map(ext -> "*." + ext))
+                .collect(Collectors.toList());
+        final FileChooser.ExtensionFilter defaultExtensionFilter = new FileChooser.ExtensionFilter(DEFAULT_FILE_EXTENSION_FILTER_NAME, allSupportedFileExtensions);
+        fileChooser.getExtensionFilters().add(defaultExtensionFilter);
+        fileChooser.setSelectedExtensionFilter(defaultExtensionFilter);
     }
 
     @Override
