@@ -38,12 +38,16 @@ public class AppStore {
     private Point2D localPoint;
     private Point2D screenPoint;
     private boolean mouseDragging;
+    private double xFactor;
+    private double yFactor;
 
     public AppStore() {
         mouseDragging = false;
         zoomStripeCoordinate = -1;
         trackRenderers = Sets.newConcurrentHashSet();
         loadedDataSets = Sets.newConcurrentHashSet();
+        xFactor = 1;
+        yFactor = 1;
         bus = new EventBus();
     }
 
@@ -73,6 +77,14 @@ public class AppStore {
         emit();
     }
 
+    public double getxFactor() {
+        return xFactor;
+    }
+
+    public double getyFactor() {
+        return yFactor;
+    }
+    
     public Point2D getMouseClickLocation() {
         return mouseClickLocation;
     }
@@ -135,10 +147,13 @@ public class AppStore {
     public void update(double scrollX, double scrollY, double hSlider, 
             double vSlider, double scrollYVisibleAmount, 
             boolean clearTrackRenderers, GenomeVersion selectedGenomeVersion,
-            Chromosome selectedChromosome, Optional<TrackRenderer> trackRenderer) {
+            Chromosome selectedChromosome, Optional<TrackRenderer> trackRenderer,
+            double xFactor, double yFactor) {
         if (clearTrackRenderers) {
             trackRenderers.clear();
         }
+        this.xFactor = xFactor;
+        this.yFactor = yFactor;
         this.scrollX = scrollX;
         this.scrollY = scrollY;
         this.hSlider = hSlider;
@@ -152,7 +167,10 @@ public class AppStore {
         emit();
     }
     
-    public void updateHSlider(double hSlider, double scrollX) {
+    public void updateHSlider(double hSlider, double scrollX,
+            double xFactor, double yFactor) {
+        this.xFactor = xFactor;
+        this.yFactor = yFactor;
         this.hSlider = hSlider;
         this.scrollX = scrollX;
         emit();
@@ -173,7 +191,11 @@ public class AppStore {
         emit();
     }
     
-    public void updateJumpZoom(double hSlider, double scrollX, Point2D localPoint, Point2D screenPoint, boolean mouseDragging) {
+    public void updateJumpZoom(double hSlider, double scrollX, 
+            Point2D localPoint, Point2D screenPoint, boolean mouseDragging,
+            double xFactor, double yFactor) {
+        this.xFactor = xFactor;
+        this.yFactor = yFactor;
         this.hSlider = hSlider;
         this.scrollX = scrollX;
         this.zoomStripeCoordinate = -1;

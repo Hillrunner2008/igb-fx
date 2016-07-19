@@ -34,13 +34,15 @@ public class TrackContainerProps implements Props {
     private Point2D localPoint;
     private Point2D screenPoint;
     private boolean mouseDragging;
+    private double xFactor;
+    private double yFactor;
 
     public TrackContainerProps(TrackRenderer trackRenderer, double scrollX,
             double scrollY, double hSlider, double vSlider,
             CanvasPane canvasPane, Set<DataSet> loadedDataSets,
             Chromosome selectedChromosome, Pane labelPane,
             double zoomStripeCoordinate,Point2D mouseClickLocation, Point2D localPoint,
-            Point2D screenPoint, boolean mouseDragging) {
+            Point2D screenPoint, boolean mouseDragging, double xFactor, double yFactor) {
         this.trackRenderer = trackRenderer;
         this.scrollX = scrollX;
         this.scrollY = scrollY;
@@ -55,6 +57,16 @@ public class TrackContainerProps implements Props {
         this.localPoint = localPoint;
         this.screenPoint = screenPoint;
         this.mouseDragging = mouseDragging;
+        this.xFactor = xFactor;
+        this.yFactor = yFactor;
+    }
+
+    public double getxFactor() {
+        return xFactor;
+    }
+
+    public double getyFactor() {
+        return yFactor;
     }
 
     public Point2D getMouseClickLocation() {

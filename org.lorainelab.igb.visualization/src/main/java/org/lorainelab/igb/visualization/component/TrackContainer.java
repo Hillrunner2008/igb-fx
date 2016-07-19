@@ -6,14 +6,11 @@
 package org.lorainelab.igb.visualization.component;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Range;
 import java.util.List;
 import javafx.scene.layout.StackPane;
-import org.lorainelab.igb.visualization.CanvasPane;
 import org.lorainelab.igb.visualization.component.api.Component;
 import org.lorainelab.igb.visualization.event.ScaleEvent;
 import org.lorainelab.igb.visualization.model.TrackLabel;
-import static org.lorainelab.igb.visualization.util.CanvasUtils.exponentialScaleTransform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,16 +48,6 @@ public class TrackContainer extends Component<TrackContainerProps, TrackContaine
         return this;
     }
 
-    private Range<Integer> getCurrentRange() {
-        CanvasPane canvasPane = this.getProps().getCanvasPane();
-        double hSlider = this.getState().gethSlider();
-        double scrollX = this.getState().getScrollX();
-        final double xFactor = exponentialScaleTransform(canvasPane, hSlider);
-        final double visibleVirtualCoordinatesX = Math.floor(canvasPane.getWidth() / xFactor);
-        double xOffset = Math.round((scrollX / 100) * (canvasPane.getModelWidth() - visibleVirtualCoordinatesX));
-        return Range.closedOpen((int) xOffset, (int) xOffset + (int) visibleVirtualCoordinatesX);
-    }
-
     @Override
     public List<Component> render() {
         //LOG.info("render track container");
@@ -90,10 +77,7 @@ public class TrackContainer extends Component<TrackContainerProps, TrackContaine
 
     private void scaleCanvas() {
         this.getState().getTrackRenderer().scaleCanvas(
-                exponentialScaleTransform(
-                        this.getProps().getCanvasPane(),
-                        this.getState().gethSlider()
-                ),
+                this.getProps().getxFactor(),
                 this.getState().getScrollX(),
                 this.getState().getScrollY()
         );

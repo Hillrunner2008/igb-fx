@@ -35,6 +35,8 @@ public class AppState implements State {
     private Point2D localPoint;
     private Point2D screenPoint;
     private boolean mouseDragging;
+    private double xFactor;
+    private double yFactor;
 
     private static AppState instance;
 
@@ -43,10 +45,30 @@ public class AppState implements State {
         this.loadedDataSets = Sets.newConcurrentHashSet();
         zoomStripeCoordinates = -1;
         mouseDragging = false;
+        this.xFactor = 1;
+        this.yFactor = 1;
     }
 
     public static AppState factory() {
         return new AppState();
+    }
+
+    public double getxFactor() {
+        return xFactor;
+    }
+
+    public AppState setxFactor(double xFactor) {
+        this.xFactor = xFactor;
+        return this;
+    }
+
+    public double getyFactor() {
+        return yFactor;
+    }
+
+    public AppState setyFactor(double yFactor) {
+        this.yFactor = yFactor;
+        return this;
     }
 
     public Point2D getMouseClickLocation() {

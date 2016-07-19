@@ -26,7 +26,6 @@ import org.lorainelab.igb.visualization.event.MouseDoubleClickEvent;
 import org.lorainelab.igb.visualization.event.MouseStationaryEndEvent;
 import org.lorainelab.igb.visualization.event.MouseStationaryStartEvent;
 import org.lorainelab.igb.visualization.event.RefreshTrackEvent;
-import org.lorainelab.igb.visualization.event.ZoomStripeEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,12 +113,13 @@ public class ZoomableTrackRenderer implements TrackRenderer {
 
     @Override
     public void scaleCanvas(double xFactor, double scrollX, double scrollY) {
+        view.setXfactor(xFactor);
         this.scrollY = scrollY;
         if (canvasContext.isVisible()) {
             double scaleToY = canvasContext.getTrackHeight() / modelHeight.doubleValue();
             gc.save();
             gc.scale(xFactor, scaleToY);
-            view.setXfactor(xFactor);
+            
             view.setYfactor(scaleToY);
             gc.restore();
             updateView(scrollX, scrollY);

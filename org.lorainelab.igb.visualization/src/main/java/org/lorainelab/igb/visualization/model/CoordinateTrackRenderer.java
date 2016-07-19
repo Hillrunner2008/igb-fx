@@ -299,11 +299,13 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     }
 
     @Override
-    public void scaleCanvas(double xFactor, double scrollX, double scrollY) {
+    public void scaleCanvas(double xfactor, double scrollX, double scrollY) {
+        this.xfactor = xfactor;
+        LOG.info("ctr xfactor: {}", xfactor);
         if (canvasContext.isVisible()) {
             gc.save();
-            gc.scale(xFactor, 1);
-            xfactor = xFactor;
+            gc.scale(xfactor, 1);
+            
             gc.restore();
             updateView(scrollX, scrollY);
         }

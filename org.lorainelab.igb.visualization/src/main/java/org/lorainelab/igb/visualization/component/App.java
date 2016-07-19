@@ -95,6 +95,12 @@ public class App extends Component<AppProps, AppState> {
         }
 
         AppState state = this.getState()
+                .setxFactor(
+                        AppStore.getStore().getxFactor()
+                )
+                .setyFactor(
+                        AppStore.getStore().getyFactor()
+                )
                 .setScrollX(
                         AppStore.getStore().getScrollX()
                 ).
@@ -209,7 +215,7 @@ public class App extends Component<AppProps, AppState> {
 
                         Point2D lastMouseClickLocation = this.getState().getMouseClickLocation();
                         Point2D lastMouseDragLocation = getLocalPoint2DFromMouseEvent(event);
-                        double xfactor = this.getProps().getCanvasPane().getXFactor();
+                        double xfactor = this.getState().getxFactor();
                         double lastMouseDragX = lastMouseDragLocation.getX() / xfactor;
                         double lastMouseClickX = lastMouseClickLocation.getX() / xfactor;
                         double minX = tr.getView().getBoundingRect().getMinX();
@@ -237,7 +243,7 @@ public class App extends Component<AppProps, AppState> {
                     //drawZoomCoordinateLine();
                 } else {
                     this.getState().getTrackRenderers().stream().filter(tr -> tr instanceof CoordinateTrackRenderer).findFirst().ifPresent(tr -> {
-                        double xFactor = this.getProps().getCanvasPane().getXFactor();
+                        double xFactor = this.getState().getxFactor();
                         final double visibleVirtualCoordinatesX = Math.floor(tr.getCanvasContext().getBoundingRect().getWidth() / xFactor);
                         double xOffset = Math.round((tr.getModelWidth() - visibleVirtualCoordinatesX) * (this.getState().getScrollX() / 100));
                         double zoomStripeCoordinate = Math.floor((event.getX() / xFactor)
@@ -309,19 +315,19 @@ public class App extends Component<AppProps, AppState> {
         final double scaleXalt = eventLocationReference.getCanvasContext().getBoundingRect().getWidth() / width;
         double scrollPosition = (minX / (modelWidth - width)) * 100;
         final double scrollXValue = enforceRangeBounds(scrollPosition, 0, 100);
+        double xFactor = exponentialScaleTransform(
+                this.getProps().getCanvasPane(),
+                this.getState().gethSlider()
+        );
         AppStore.getStore().updateJumpZoom(
                 invertExpScaleTransform(canvasPane, scaleXalt),
                 scrollXValue,
                 getLocalPoint2DFromMouseEvent(event),
                 getScreenPoint2DFromMouseEvent(event),
-                false
+                false,
+                xFactor,
+                1
         );
-    }
-
-    private void drawZoomCoordinateLine(MouseEvent event) {
-        AppStore.getStore().updateZoomStripe(
-                Math.floor((event.getX() / this.getProps().getCanvasPane().getXFactor())
-                        + this.getProps().getCanvasPane().getXOffset()));
     }
 
     private Point2D getRangeBoundedDragEventLocation(MouseEvent event) {
@@ -398,7 +404,11 @@ public class App extends Component<AppProps, AppState> {
             final boolean isSnapEvent = newValue.doubleValue() % this.getProps().gethSlider().getMajorTickUnit() == 0;
             if (lastHSliderFire < 0 || Math.abs(lastHSliderFire - newValue.doubleValue()) > 1 || isSnapEvent) {
                 double scrollX = calcScrollXWithZoomStripe(newValue.doubleValue());
-                AppStore.getStore().updateHSlider(newValue.doubleValue(), scrollX);
+                double xFactor = exponentialScaleTransform(
+                        this.getProps().getCanvasPane(),
+                        newValue.doubleValue()
+                );
+                AppStore.getStore().updateHSlider(newValue.doubleValue(), scrollX, xFactor, 1);
                 updateCanvasContexts();
                 syncWidgetSlider();
                 lastHSliderFire = newValue.doubleValue();
@@ -408,7 +418,7 @@ public class App extends Component<AppProps, AppState> {
         this.getProps().gethSliderWidget().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             boolean isNearMaxZoom = newValue.doubleValue() > 98;
             if (lastHSliderFire < 0 || Math.abs(lastHSliderFire - newValue.doubleValue()) > 1 || isNearMaxZoom) {
-                final double xFactor = linearScaleTransform(this.getProps().getCanvasPane(), newValue.doubleValue());
+                final double xFactor = this.getState().getxFactor();
                 syncHSlider(xFactor);
                 lastHSliderFire = newValue.doubleValue();
             }
@@ -493,7 +503,7 @@ public class App extends Component<AppProps, AppState> {
         CanvasPane canvasPane = this.getProps().getCanvasPane();
         double hSlider = this.getState().gethSlider();
         double scrollX = this.getState().getScrollX();
-        final double xFactor = exponentialScaleTransform(canvasPane, hSlider);
+        final double xFactor = this.getState().getxFactor();
         final double visibleVirtualCoordinatesX = Math.floor(canvasPane.getWidth() / xFactor);
         double xOffset = Math.round((scrollX / 100) * (canvasPane.getModelWidth() - visibleVirtualCoordinatesX));
         return Range.closedOpen((int) xOffset, (int) xOffset + (int) visibleVirtualCoordinatesX);
@@ -503,7 +513,7 @@ public class App extends Component<AppProps, AppState> {
         double minScaleX = this.getProps().getCanvasPane().getModelWidth();
         double maxScaleX = MAX_ZOOM_MODEL_COORDINATES_X - 1;
         final double scaleRange = maxScaleX - minScaleX;
-        final double xFactor = exponentialScaleTransform(this.getProps().getCanvasPane(), this.getProps().gethSlider().getValue());
+        final double xFactor = this.getState().getxFactor();
         final double current = Math.floor(this.getProps().getCanvasPane().getWidth() / xFactor);
         double scaledPercentage = (current - minScaleX) / scaleRange;
 
@@ -524,7 +534,11 @@ public class App extends Component<AppProps, AppState> {
 
     private void syncHSlider(double xFactor) {
         ignoreHSliderEvent = true;
-        AppStore.getStore().updateHSlider(invertExpScaleTransform(this.getProps().getCanvasPane(), xFactor), this.getState().getScrollX());
+        AppStore.getStore().updateHSlider(
+                invertExpScaleTransform(this.getProps().getCanvasPane(), xFactor),
+                this.getState().getScrollX(),
+                xFactor,
+                1);
     }
 
     public DoubleProperty getHSliderValue() {
@@ -549,7 +563,11 @@ public class App extends Component<AppProps, AppState> {
                             loadDataSets(gv, chromosome);
                             //TODO: handle this comp
                             this.getProps().getLabelPane().getChildren().clear();
-
+                            updateCanvasContexts();
+                            double xFactor = exponentialScaleTransform(
+                                    this.getProps().getCanvasPane(),
+                                    this.getState().gethSlider()
+                            );
                             AppStore.getStore().update(
                                     this.getState().getScrollX(),
                                     0,
@@ -559,9 +577,11 @@ public class App extends Component<AppProps, AppState> {
                                     true,
                                     this.getState().getSelectedGenomeVersion(),
                                     newChromosomeSelection,
-                                    coordinateTrackRenderer[0]
+                                    coordinateTrackRenderer[0],
+                                    xFactor,
+                                    1
                             );
-                            updateCanvasContexts();
+
                         });
                     });
                 }
@@ -576,6 +596,11 @@ public class App extends Component<AppProps, AppState> {
                 this.getProps().getLabelPane().getChildren().clear();
 
                 Platform.runLater(() -> {
+                    double xFactor = exponentialScaleTransform(
+                            this.getProps().getCanvasPane(),
+                            this.getState().gethSlider()
+                    );
+                    updateCanvasContexts();
                     AppStore.getStore().update(
                             this.getState().getScrollX(),
                             0,
@@ -585,9 +610,11 @@ public class App extends Component<AppProps, AppState> {
                             true,
                             genomeVersion,
                             this.getState().getSelectedChromosome(),
-                            Optional.empty()
+                            Optional.empty(),
+                            xFactor,
+                            1
                     );
-                    updateCanvasContexts();
+
                 });
             });
 //                newValue.ifPresent(genomeVersion -> {
@@ -743,7 +770,9 @@ public class App extends Component<AppProps, AppState> {
                     this.getState().getMouseClickLocation(),
                     this.getState().getLocalPoint(),
                     this.getState().getScreenPoint(),
-                    this.getState().isMouseDragging()
+                    this.getState().isMouseDragging(),
+                    this.getState().getxFactor(),
+                    this.getState().getyFactor()
             )).beforeComponentReady();
             toReturn.add(trackContainer);
         });
@@ -752,7 +781,7 @@ public class App extends Component<AppProps, AppState> {
         zoomStripe.withAttributes(new ZoomStripeProps(
                 canvasPane.getCanvas(),
                 this.getState().getZoomStripeCoordinates(),
-                canvasPane.getXFactor(),
+                this.getState().getxFactor(),
                 canvasPane.getXOffset(),
                 canvasPane.getWidth(),
                 canvasPane.getModelWidth(),
