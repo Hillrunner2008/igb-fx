@@ -214,6 +214,11 @@ public class App extends Component<AppProps, AppState> {
                         double minX = tr.getView().getBoundingRect().getMinX();
                         double x1 = minX + lastMouseClickX;
                         double x2 = minX + lastMouseDragX;
+                        if(x1 > x2) {
+                            double x1old = x1;
+                            x1 = x2;
+                            x2 = x1old;
+                        }
                         final Rectangle2D zoomFocus = new Rectangle2D(x1, 0, x2 - x1, Double.MAX_VALUE);
                         jumpZoom(zoomFocus, tr, event);
                     }
