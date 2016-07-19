@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package lorainelab.igb.persistencemanager;
+package org.lorainelab.igb.persistencemanager;
 
 import java.util.HashMap;
 import java.util.Optional;
@@ -21,7 +21,7 @@ public interface PersistenceManager {
     void putAll(HashMap<String, String> valueMap);
     HashMap<String, String> getAll();
     void persistConnection();
-    HashMap<String, String> getAllLike(String regex);
+    HashMap<String, String> getAllLike(String pattern);
     //close connection
     //rollback
 }

@@ -7,9 +7,11 @@ package persistencemanagerFactory;
 
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
+import aQute.bnd.annotation.component.Reference;
 import java.util.HashMap;
 import java.util.Optional;
-import lorainelab.igb.persistencemanager.PersistenceManager;
+import org.lorainelab.igb.persistencemanager.PersistenceManager;
+import org.osgi.service.jdbc.DataSourceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import persistencemanagerImpl.PersistencemanagerImpl;
@@ -23,7 +25,8 @@ public class PersistencemanagerFactory {
 
     private static final Logger LOG = LoggerFactory.getLogger(PersistencemanagerFactory.class);
     private HashMap<String, PersistenceManager> persistenceManagers;
-
+    private DataSourceFactory dataSourceFactory;
+    
     public PersistencemanagerFactory() {
         persistenceManagers = new HashMap<String, PersistenceManager>();
     }
@@ -37,11 +40,13 @@ public class PersistencemanagerFactory {
             if (persistenceManagers.containsKey(tableName)) {
                 return Optional.of(persistenceManagers.get(tableName));
             } else {
-                PersistenceManager m = new PersistencemanagerImpl(tableName);
+                PersistencemanagerImpl m = new PersistencemanagerImpl(tableName);
+                m.setDatasourceFactory(dataSourceFactory);
+                m.initDB();
                 persistenceManagers.put(tableName, m);
                 return Optional.of(m);
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             LOG.error("Failed to get persistance manager", e);
             return Optional.empty();
         }
@@ -49,6 +54,13 @@ public class PersistencemanagerFactory {
 
     @Activate
     public void Activate() {
+        
+    }
+    
+    @Reference(target = "(osgi.jdbc.driver.name=sqlite)")
+    public void setDatasourceFactory(DataSourceFactory dataSourceFactory) {
+        System.out.println("setting DS factory");
+        this.dataSourceFactory = dataSourceFactory;
     }
 
 }

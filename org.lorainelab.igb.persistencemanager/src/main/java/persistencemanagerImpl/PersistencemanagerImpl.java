@@ -1,5 +1,9 @@
 package persistencemanagerImpl;
 
+import aQute.bnd.annotation.component.Activate;
+import aQute.bnd.annotation.component.Component;
+import aQute.bnd.annotation.component.ConfigurationPolicy;
+import aQute.bnd.annotation.component.Reference;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -12,7 +16,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
 import org.osgi.service.jdbc.DataSourceFactory;
-import lorainelab.igb.persistencemanager.PersistenceManager;
+import org.lorainelab.igb.persistencemanager.PersistenceManager;
 import org.slf4j.LoggerFactory;
 
 /*
@@ -24,9 +28,10 @@ import org.slf4j.LoggerFactory;
  *
  * @author Devdatta Kulkarni
  */
+@Component(immediate = true)
 public class PersistencemanagerImpl implements PersistenceManager {
 
-    private static final String DBNAME = "data/";
+    private static final String DBNAME = "data/database.sqlite";
     private static final String KEY_COLUMN_NAME = "key";
     private static final String VALUE_COLUMN_NAME = "value";
 
@@ -36,13 +41,29 @@ public class PersistencemanagerImpl implements PersistenceManager {
     private DataSourceFactory dataSourceFactory;
     private DataSource ds;
 
+
     public PersistencemanagerImpl(String tableName) {
-        System.out.println("Constructor creating table");
+        this.tableName = tableName;
+    }
+
+    @Activate
+    public void initDB() {
+        LOG.trace("init creating table");
         Properties props = new Properties();
         props.put("databaseName", DBNAME);
-        String sql = "CREATE TABLE " + tableName
+        String sql = "CREATE TABLE IF NOT EXISTS " + tableName
                 + " (" + KEY_COLUMN_NAME + " TEXT PRIMARY KEY NOT NULL,"
                 + " " + VALUE_COLUMN_NAME + " TEXT NOT NULL)";
+        System.out.println("before try datasrc factory: " + dataSourceFactory);
+        try {
+            ds = dataSourceFactory.createDataSource(props);
+            ds.getConnection();
+        } catch (Exception ex) {
+            System.out.println("exception");
+            ex.printStackTrace();
+        }
+        System.out.println("after try");
+
         try (Connection dsConnection = ds.getConnection()) {
             ds = dataSourceFactory.createDataSource(props);
             try (Statement stmt = dsConnection.createStatement()) {
@@ -83,6 +104,9 @@ public class PersistencemanagerImpl implements PersistenceManager {
             try (PreparedStatement stmt = dsConnection.prepareStatement(sql)) {
                 stmt.setString(1, key);
                 ResultSet result = stmt.executeQuery();
+                if(!result.next()){
+                    return Optional.empty();
+                }
                 value = result.getString(VALUE_COLUMN_NAME);
             } catch (SQLException ex) {
                 LOG.trace("sql called: " + sql);
@@ -202,9 +226,9 @@ public class PersistencemanagerImpl implements PersistenceManager {
     public HashMap<String, String> getAllLike(String pattern) {
         HashMap<String, String> valueMap = new HashMap<String, String>();
         try (Connection dsConnection = ds.getConnection()) {
-            String sql = "SELECT * FROM " + getTableName() + " WHERE key LIKE %?%";
+            String sql = "SELECT * FROM " + getTableName() + " WHERE "+KEY_COLUMN_NAME+" LIKE ?";
             try (PreparedStatement stmt = dsConnection.prepareStatement(sql)) {
-                stmt.setString(1, pattern);
+                stmt.setString(1, "%"+pattern+"%");
                 ResultSet result = stmt.executeQuery();
                 while (result.next()) {
                     valueMap.put(result.getString(KEY_COLUMN_NAME), result.getString(VALUE_COLUMN_NAME));
@@ -222,6 +246,11 @@ public class PersistencemanagerImpl implements PersistenceManager {
 
     private String getTableName() {
         return tableName;
+    }
+
+    //@Reference(target = "(osgi.jdbc.driver.name=sqlite)")
+    public void setDatasourceFactory(DataSourceFactory dataSourceFactory) {
+        this.dataSourceFactory = dataSourceFactory;
     }
 
 }
