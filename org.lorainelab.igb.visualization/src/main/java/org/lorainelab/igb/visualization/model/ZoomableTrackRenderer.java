@@ -51,8 +51,6 @@ public class ZoomableTrackRenderer implements TrackRenderer {
 
     public ZoomableTrackRenderer(CanvasPane canvasPane, Track track, Chromosome chromosome) {
         this.weight = 0;
-//        this.eventBus = canvasPane.getEventBus();
-//        this.eventBus.register(this);
         this.track = track;
         this.modelWidth = chromosome.getLength();
         modelHeight = new SimpleDoubleProperty();
@@ -92,19 +90,6 @@ public class ZoomableTrackRenderer implements TrackRenderer {
             final double visibleVirtualCoordinatesX = Math.floor(canvasContext.getBoundingRect().getWidth() / view.getXfactor());
             final double visibleVirtualCoordinatesY = Math.floor(canvasContext.getBoundingRect().getHeight() / view.getYfactor());
             double xOffset = Math.round((scrollX / 100) * (modelWidth - visibleVirtualCoordinatesX));
-//            if (zoomStripeCoordinate != -1) {
-//                double zoomStripePositionPercentage = (zoomStripeCoordinate - view.getBoundingRect().getMinX()) / view.getBoundingRect().getWidth();
-//                xOffset = Math.max(zoomStripeCoordinate - (visibleVirtualCoordinatesX * zoomStripePositionPercentage), 0);
-//                double maxXoffset = modelWidth - visibleVirtualCoordinatesX;
-//                xOffset = Math.min(maxXoffset, xOffset);
-//                final double calculatedScrollXPosition;
-//                if (maxXoffset > 0) {
-//                    calculatedScrollXPosition = (xOffset / (maxXoffset)) * 100;
-//                } else {
-//                    calculatedScrollXPosition = 0;
-//                }
-////                eventBus.post(new ScrollXUpdate(calculatedScrollXPosition));
-//            }
             double yOffset = canvasContext.getRelativeTrackOffset() / view.getYfactor();
             view.setBoundingRect(new Rectangle2D(xOffset, yOffset, visibleVirtualCoordinatesX, visibleVirtualCoordinatesY));
             render();
@@ -119,7 +104,6 @@ public class ZoomableTrackRenderer implements TrackRenderer {
             double scaleToY = canvasContext.getTrackHeight() / modelHeight.doubleValue();
             gc.save();
             gc.scale(xFactor, scaleToY);
-            
             view.setYfactor(scaleToY);
             gc.restore();
             updateView(scrollX, scrollY);

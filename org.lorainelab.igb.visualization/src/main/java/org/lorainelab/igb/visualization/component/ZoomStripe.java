@@ -36,7 +36,6 @@ public class ZoomStripe extends Component<ZoomStripeProps, ZoomStripeState> {
             double modelWidth = this.getProps().getModelWidth();
             double modelHeight = this.getProps().getModelHeight();
             double xFactor = this.getProps().getxFactor();
-            LOG.info("zs xfactor: {}", xFactor);
             double scrollX = this.getProps().getScrollX();
             final double visibleVirtualCoordinatesX = Math.floor(this.getProps().getCanvasWidth() / xFactor);
             double xOffset = Math.round((scrollX / 100) * (modelWidth - visibleVirtualCoordinatesX));

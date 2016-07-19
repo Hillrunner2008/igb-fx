@@ -50,8 +50,6 @@ public class CoordinateTrackRenderer implements TrackRenderer {
 
     public CoordinateTrackRenderer(CanvasPane canvasPane, Chromosome chromosome) {
         weight = 0;
-//        this.eventBus = canvasPane.getEventBus();
-        //eventBus.register(this);
         this.chromosome = chromosome;
         this.modelWidth = chromosome.getLength();
         this.modelHeight = 50;
@@ -285,12 +283,6 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         if (canvasContext.isVisible()) {
             final double visibleVirtualCoordinatesX = Math.floor(canvasContext.getBoundingRect().getWidth() / xfactor);
             double xOffset = Math.round((scrollX / 100) * (modelWidth - visibleVirtualCoordinatesX));
-//            if (zoomStripeCoordinate != -1) {
-//                double zoomStripePositionPercentage = (zoomStripeCoordinate - viewBoundingRectangle.getMinX()) / viewBoundingRectangle.getWidth();
-//                xOffset = Math.max(zoomStripeCoordinate - (visibleVirtualCoordinatesX * zoomStripePositionPercentage), 0);
-//                double maxXoffset = modelWidth - visibleVirtualCoordinatesX;
-//                xOffset = Math.min(maxXoffset, xOffset);
-//            }
             xOffset = enforceRangeBounds(xOffset, 0, modelWidth);
             viewBoundingRectangle = new Rectangle2D(xOffset, canvasContext.getBoundingRect().getMinY(), visibleVirtualCoordinatesX, canvasContext.getBoundingRect().getHeight());
             viewYcoordinateRange = Range.<Double>closed(viewBoundingRectangle.getMinY(), viewBoundingRectangle.getMaxY());
@@ -301,11 +293,9 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     @Override
     public void scaleCanvas(double xfactor, double scrollX, double scrollY) {
         this.xfactor = xfactor;
-        LOG.info("ctr xfactor: {}", xfactor);
         if (canvasContext.isVisible()) {
             gc.save();
             gc.scale(xfactor, 1);
-            
             gc.restore();
             updateView(scrollX, scrollY);
         }
