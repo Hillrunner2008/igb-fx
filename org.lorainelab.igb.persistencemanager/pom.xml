@@ -60,9 +60,9 @@
                             !${project.artifactId},
                             *
                         </Import-Package>
-                        <Export-Package>org.lorainelab.igb.persistencemanager,persistencemanagerFactory</Export-Package>
                         <Service-Component>*</Service-Component>
-                        <Private-Package>persistencemanagerFactory.*</Private-Package>
+                        <Export-Package>org.lorainelab.igb.persistencemanager,persistencemanagerFactory</Export-Package>
+                        <Private-Package>org.lorainelab.igb.persistencemanager.*,persistencemanagerFactory.*,persistencemanagerImpl.*</Private-Package>
                     </instructions>
                 </configuration>
             </plugin>  
