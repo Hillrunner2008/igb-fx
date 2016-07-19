@@ -315,12 +315,14 @@ public class App extends Component<AppProps, AppState> {
         final double scaleXalt = eventLocationReference.getCanvasContext().getBoundingRect().getWidth() / width;
         double scrollPosition = (minX / (modelWidth - width)) * 100;
         final double scrollXValue = enforceRangeBounds(scrollPosition, 0, 100);
+        
+        double newHSlider = invertExpScaleTransform(canvasPane, scaleXalt);
         double xFactor = exponentialScaleTransform(
                 this.getProps().getCanvasPane(),
-                this.getState().gethSlider()
+                newHSlider
         );
         AppStore.getStore().updateJumpZoom(
-                invertExpScaleTransform(canvasPane, scaleXalt),
+                newHSlider,
                 scrollXValue,
                 getLocalPoint2DFromMouseEvent(event),
                 getScreenPoint2DFromMouseEvent(event),
