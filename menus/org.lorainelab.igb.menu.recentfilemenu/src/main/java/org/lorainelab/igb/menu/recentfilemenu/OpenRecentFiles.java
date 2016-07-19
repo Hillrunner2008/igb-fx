@@ -85,7 +85,7 @@ public class OpenRecentFiles implements MenuBarEntryProvider {
         String nodeName = md5Hash(fileName);
         Preferences node = modulePreferencesNode.node(nodeName);
         node.put(FILE_NAME, fileName);
-        OpenRecentFilesMenu();
+        openRecentFilesMenu();
         recentFilesMenu.getItems().add(menuItem);
     }
 
@@ -98,7 +98,7 @@ public class OpenRecentFiles implements MenuBarEntryProvider {
 
     }
 
-    private void OpenRecentFilesMenu() throws BackingStoreException {
+    private void openRecentFilesMenu() throws BackingStoreException {
         Arrays.stream(modulePreferencesNode.childrenNames())
                 .map(nodeName -> modulePreferencesNode.node(nodeName))
                 .forEach(node -> {
@@ -128,7 +128,7 @@ public class OpenRecentFiles implements MenuBarEntryProvider {
 
         recentFilesMenu = new WeightedMenu(3, "Open Recent Files");
         menuItem = new WeightedMenuItem(recentFilesCount + 1, "Clear List");
-        OpenRecentFilesMenu();
+        openRecentFilesMenu();
         recentFilesMenu.getItems().add(menuItem);
 
     }
@@ -150,7 +150,7 @@ public class OpenRecentFiles implements MenuBarEntryProvider {
                         }
                     });
 
-            OpenRecentFilesMenu();
+            openRecentFilesMenu();
         } catch (BackingStoreException ex) {
             java.util.logging.Logger.getLogger(OpenRecentFiles.class.getName()).log(Level.SEVERE, null, ex);
         }
