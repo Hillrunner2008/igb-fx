@@ -65,18 +65,19 @@ public class App extends Component<AppProps, AppState> {
     private boolean ignoreScrollXEvent = false;
     private List<MouseEvent> mouseEvents;
 
-    public App() {
+    public App(AppProps appProps) {
+        this.props = appProps;
         mouseEvents = Lists.newArrayList();
         this.state = AppState.factory();
+        initializeCanvas();
+        initializeChromosomeSelectionListener();
+        initializeGenomeVersionSelectionListener();
+        initializeMouseEvents();
         AppStore.getStore().subscribe(this);
     }
 
     @Override
     public App beforeComponentReady() {
-        initializeCanvas();
-        initializeChromosomeSelectionListener();
-        initializeGenomeVersionSelectionListener();
-        initializeMouseEvents();
         return this;
     }
 
@@ -214,7 +215,7 @@ public class App extends Component<AppProps, AppState> {
                         double minX = tr.getView().getBoundingRect().getMinX();
                         double x1 = minX + lastMouseClickX;
                         double x2 = minX + lastMouseDragX;
-                        if(x1 > x2) {
+                        if (x1 > x2) {
                             double x1old = x1;
                             x1 = x2;
                             x2 = x1old;
@@ -229,8 +230,8 @@ public class App extends Component<AppProps, AppState> {
 //                } else {
 //                    eventBus.post(new ClickDragEndEvent(rangeBoundedDragEventLocation, screenPoint2DFromMouseEvent, selectionRectangle));
 //                }
-            } else {
-//                eventBus.post(new ClickDragCancelEvent());
+            } else //                eventBus.post(new ClickDragCancelEvent());
+            {
                 if (event.getClickCount() >= 2) {
                     //eventBus.post(new MouseDoubleClickEvent(rangeBoundedDragEventLocation, screenPoint2DFromMouseEvent));
                     //drawZoomCoordinateLine();
@@ -238,7 +239,7 @@ public class App extends Component<AppProps, AppState> {
                     this.getState().getTrackRenderers().stream().filter(tr -> tr instanceof CoordinateTrackRenderer).findFirst().ifPresent(tr -> {
                         double xFactor = this.getProps().getCanvasPane().getXFactor();
                         final double visibleVirtualCoordinatesX = Math.floor(tr.getCanvasContext().getBoundingRect().getWidth() / xFactor);
-                        double xOffset = Math.round((tr.getModelWidth()-visibleVirtualCoordinatesX) * (this.getState().getScrollX() / 100));
+                        double xOffset = Math.round((tr.getModelWidth() - visibleVirtualCoordinatesX) * (this.getState().getScrollX() / 100));
                         double zoomStripeCoordinate = Math.floor((event.getX() / xFactor)
                                 + xOffset);
                         AppStore.getStore().updateZoomStripe(zoomStripeCoordinate);
@@ -338,7 +339,7 @@ public class App extends Component<AppProps, AppState> {
 
         //TODO: MOve into other setstates
         //this.setState(this.getState().setTotalTrackHeight(viewPortManager.getTotalTrackSize()));
-        updateScrollY();
+//        updateScrollY();
         //updateTrackLabels();
     }
 
@@ -401,7 +402,6 @@ public class App extends Component<AppProps, AppState> {
                 updateCanvasContexts();
                 syncWidgetSlider();
                 lastHSliderFire = newValue.doubleValue();
-                
 
             }
         });
@@ -542,14 +542,11 @@ public class App extends Component<AppProps, AppState> {
                 if (selectedChromosome != newChromosomeSelection) {
                     this.getProps().getSelectionInfoService().getSelectedGenomeVersion().get().ifPresent(gv -> {
                         Optional[] coordinateTrackRenderer = new Optional[]{Optional.empty()};
-                        if (!this.getState().getTrackRenderers().stream()
-                                .anyMatch(renderer -> renderer instanceof CoordinateTrackRenderer)) {
-                            final Chromosome chromosome = newChromosomeSelection;
-                            coordinateTrackRenderer[0] = Optional.of(new CoordinateTrackRenderer(this.getProps().getCanvasPane(), chromosome));
-                            ((CoordinateTrackRenderer) coordinateTrackRenderer[0].get()).setWeight(getMinWeight());
-                            loadDataSets(gv, chromosome);
-                        }
+                        final Chromosome chromosome = newChromosomeSelection;
+                        coordinateTrackRenderer[0] = Optional.of(new CoordinateTrackRenderer(this.getProps().getCanvasPane(), chromosome));
+                        ((CoordinateTrackRenderer) coordinateTrackRenderer[0].get()).setWeight(getMinWeight());
                         Platform.runLater(() -> {
+                            loadDataSets(gv, chromosome);
                             //TODO: handle this comp
                             this.getProps().getLabelPane().getChildren().clear();
 
@@ -577,16 +574,7 @@ public class App extends Component<AppProps, AppState> {
             //Platform.runLater(() -> {
             newValue.ifPresent(genomeVersion -> {
                 this.getProps().getLabelPane().getChildren().clear();
-                Optional[] coordinateTrackRenderer = new Optional[]{Optional.empty()};
-                if (!this.getState().getTrackRenderers().stream()
-                        .anyMatch(renderer -> renderer instanceof CoordinateTrackRenderer)
-                        && this.getState().getSelectedChromosome() != null) {
-                    final Chromosome chromosome = this.getState().getSelectedChromosome();
-                    coordinateTrackRenderer[0] = Optional.of(new CoordinateTrackRenderer(this.getProps().getCanvasPane(), chromosome));
-                    ((CoordinateTrackRenderer) coordinateTrackRenderer[0].get()).setWeight(getMinWeight());
-                    //AppStore.getStore().addTrackRenderer(coordinateTrackRenderer);
-                    loadDataSets(genomeVersion, chromosome);
-                }
+
                 Platform.runLater(() -> {
                     AppStore.getStore().update(
                             this.getState().getScrollX(),
@@ -597,7 +585,7 @@ public class App extends Component<AppProps, AppState> {
                             true,
                             genomeVersion,
                             this.getState().getSelectedChromosome(),
-                            coordinateTrackRenderer[0]
+                            Optional.empty()
                     );
                     updateCanvasContexts();
                 });
@@ -610,6 +598,15 @@ public class App extends Component<AppProps, AppState> {
 //                });
         });
         //});
+    }
+
+    private boolean selectedChromosomeNotNull() {
+        return this.getState().getSelectedChromosome() != null;
+    }
+
+    private boolean coordinateTrackRendererExists() {
+        return this.getState().getTrackRenderers().stream()
+                .anyMatch(renderer -> renderer instanceof CoordinateTrackRenderer);
     }
 
 //    private void updateTrackRenderers(GenomeVersion gv) {
@@ -647,9 +644,7 @@ public class App extends Component<AppProps, AppState> {
                 updateCanvasContexts();
             });
         });
-        //TODO: may be bound multiple times
         gv.getLoadedDataSets().addListener((SetChangeListener.Change<? extends DataSet> change) -> {
-            //Platform.runLater(() -> { // there is a bug causing this event to fire multiple times for a single addition to the observable collection
             if (change.wasAdded()) {
                 final DataSet loadedDataSet = change.getElementAdded();
                 if (!this.getState().getLoadedDataSets().contains(loadedDataSet)) {
@@ -673,7 +668,6 @@ public class App extends Component<AppProps, AppState> {
             } else {
                 //todo implement remove
             }
-            //});
         });
         if (gv.getLoadedDataSets().isEmpty()) {
             updateCanvasContexts();

@@ -13,7 +13,7 @@ import java.util.List;
  */
 public abstract class Component<P extends Props, S extends State> {
 
-    private P props;
+    protected P props;
     protected S state;
     private List<Component> children;
 

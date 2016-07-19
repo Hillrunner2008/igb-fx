@@ -1,6 +1,5 @@
 package org.lorainelab.igb.visualization;
 
-import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Sets;
@@ -143,41 +142,12 @@ public class MainController {
         autocompleteEntries = Sets.newTreeSet();
         searchAutocomplete = new ContextMenu();
         searchAutocomplete.hide();
-        app = new App();
-
     }
 
     private void startApp() {
-        AppProps props = new AppProps(
-                hSlider,
-                scrollX,
-                scrollY,
-                zoomStripeCoordinate,
-                canvasPane,
-                selectionInfoService,
-                selectedChromosome,
-                selectedGenomeVersion,
-                vSlider,
-                totalTrackHeight,
-                hSliderWidget,
-                slider,
-                xSliderPane,
-                leftSliderThumb,
-                rightSliderThumb,
-                labelPane,
-                loadDataButton,
-                loadSequenceButton
-        );
         renderComponents(
-                app.withAttributes(props).beforeComponentReady()
+                app.beforeComponentReady()
         );
-    }
-
-    @Activate
-    public void activate() {
-
-//        eventBus = eventBusService.getEventBus();
-//        eventBus.register(this);
     }
 
     private void renderComponents(Component<Props, State> component) {
@@ -273,6 +243,26 @@ public class MainController {
     @FXML
     private void initialize() {
         initializeGuiComponents();
+        app = new App(new AppProps(
+                hSlider,
+                scrollX,
+                scrollY,
+                zoomStripeCoordinate,
+                canvasPane,
+                selectionInfoService,
+                selectedChromosome,
+                selectedGenomeVersion,
+                vSlider,
+                totalTrackHeight,
+                hSliderWidget,
+                slider,
+                xSliderPane,
+                leftSliderThumb,
+                rightSliderThumb,
+                labelPane,
+                loadDataButton,
+                loadSequenceButton
+        ));
         //initializeChromosomeSelectionListener();
         //initializeGenomeVersionSelectionListener();
         //initializeZoomScrollBar();
@@ -398,7 +388,6 @@ public class MainController {
 //    public void drawZoomCoordinateLine() {
 //        canvasPane.drawZoomCoordinateLine();
 //    }
-
     public void resetZoomStripe() {
         canvasPane.resetZoomStripe();
     }
@@ -621,7 +610,9 @@ public class MainController {
 
     @Deactivate
     private void deactivate() {
-        AppStore.getStore().unsubscribe(app);
+        if (app != null) {
+            AppStore.getStore().unsubscribe(app);
+        }
         try {
             Platform.runLater(() -> {
                 root.getChildren().clear();
