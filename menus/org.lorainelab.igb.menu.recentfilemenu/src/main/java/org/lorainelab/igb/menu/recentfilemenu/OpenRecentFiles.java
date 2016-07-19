@@ -108,7 +108,6 @@ public class OpenRecentFiles implements MenuBarEntryProvider {
         recentFiles.stream().forEach((file) -> {
             File f = new File(file);
             if (f.exists()) {
-                System.out.println("fileName: " + file + "-" + f.getName());
                 recentFile = new MenuItem(f.getName());
                 recentFilesMenu.getItems().add(recentFile);
                 recentFile.setOnAction(action -> openFileAction(f));
@@ -122,7 +121,7 @@ public class OpenRecentFiles implements MenuBarEntryProvider {
             recentFilesMenu.setDisable(false);
             menuItem.setOnAction(action -> clearRecentFiles());
         }
-        System.out.println(recentFilesCount);
+        
     }
 
     private void initRecentFileMenu() throws BackingStoreException {
