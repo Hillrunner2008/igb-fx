@@ -2,8 +2,6 @@ package org.lorainelab.igb.filehandler.bed;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public enum AminoAcid {
 
@@ -156,31 +154,6 @@ public enum AminoAcid {
         code1aminoAcid.put('V', Valine);
         code1aminoAcid.put('-', STOP);
     }
-    private static final Map<String, AminoAcid> code3aminoAcid = new HashMap<>();
-
-    static {
-        code3aminoAcid.put("Ala", Alanine);
-        code3aminoAcid.put("Arg", Arginine);
-        code3aminoAcid.put("Asn", Asparagine);
-        code3aminoAcid.put("Asp", AsparticAcid);
-        code3aminoAcid.put("Cys", Cysteine);
-        code3aminoAcid.put("Glu", GlutamicAcid);
-        code3aminoAcid.put("Gln", Glutamine);
-        code3aminoAcid.put("Gly", Glycine);
-        code3aminoAcid.put("His", Histidine);
-        code3aminoAcid.put("Ile", Isoleucine);
-        code3aminoAcid.put("Leu", Leucine);
-        code3aminoAcid.put("Lys", Lysine);
-        code3aminoAcid.put("Met", Methionine);
-        code3aminoAcid.put("Phe", Phenylalanine);
-        code3aminoAcid.put("Pro", Proline);
-        code3aminoAcid.put("Ser", Serine);
-        code3aminoAcid.put("Thr", Threonine);
-        code3aminoAcid.put("Trp", Tryptophan);
-        code3aminoAcid.put("Tyr", Tyrosine);
-        code3aminoAcid.put("Val", Valine);
-        code3aminoAcid.put("---", STOP);
-    }
     private final String code;
     private final char letter;
 
@@ -197,27 +170,78 @@ public enum AminoAcid {
         return letter;
     }
 
-    public static AminoAcid getByCode(String code) {
-        return code3aminoAcid.get(code.substring(0, 1).toUpperCase() + code.substring(1, 3).toLowerCase());
-    }
-    private static final Logger LOG = LoggerFactory.getLogger(AminoAcid.class);
-
-    public static String getAminoAcid(String residue, boolean forward) {
+    public static String getAminoAcid(String residues, boolean forward) {
+        int padding = 0;
+        if (!forward) {
+            residues = complement(residues);
+        }
         StringBuilder aminoAcidsSB = new StringBuilder("");
         String nextCodon;
-        for (int pos = 0; pos < residue.length(); pos += 3) {
-            nextCodon = residue.substring(pos, pos + 3).toUpperCase();
-            AminoAcid aminoAcid = AminoAcid.CODON_TO_AMINO_ACID.get(nextCodon);
+        for (int pos = 0; pos < residues.length(); pos += 3) {
+            try {
+                nextCodon = residues.substring(pos, pos + 3).toUpperCase();
+            } catch (StringIndexOutOfBoundsException ex) {
+                nextCodon = "---";
+            }
             String aaCode;
-            char aminoAcidletter = aminoAcid == null ? ' ' : aminoAcid.getLetter();
-            aaCode = " " + aminoAcidletter + " ";
+            if (nextCodon.contains("-")) {
+                if (forward) {
+                    aaCode = "-  ";
+                } else {
+                    aaCode = "  -";
+                }
+            } else {
+                AminoAcid aminoAcid = AminoAcid.CODON_TO_AMINO_ACID.get(nextCodon);
+                char aminoAcidletter = aminoAcid == null ? ' ' : aminoAcid.getLetter();
+                if (forward) {
+                    aaCode = aminoAcidletter + "  ";
+                } else {
+                    aaCode = "  " + aminoAcidletter;
+                }
+            }
             if (forward) {
                 aminoAcidsSB.append(aaCode);
             } else {
                 aminoAcidsSB.insert(0, aaCode);
             }
         }
+        String aminoAcids = aminoAcidsSB.toString();
 
-        return aminoAcidsSB.toString();
+        if (forward) {
+            return aminoAcids.substring(0, aminoAcids.length() - padding);
+        } else {
+            return aminoAcids.substring(padding, aminoAcids.length());
+        }
+    }
+
+    private static String complement(String dna) {
+        dna = reverse(dna).toLowerCase();
+        StringBuilder comp = new StringBuilder();
+        for (int k = 0; k < dna.length(); k++) {
+            if (dna.charAt(k) == 'a') {
+                comp.append('t');
+            }
+            if (dna.charAt(k) == 't') {
+                comp.append('a');
+            }
+            if (dna.charAt(k) == 'c') {
+                comp.append('g');
+            }
+            if (dna.charAt(k) == 'g') {
+                comp.append('c');
+            }
+            if (dna.charAt(k) == '-') {
+                comp.append('-');
+            }
+        }
+        return comp.toString();
+    }
+
+    private static String reverse(String s) {
+        final StringBuilder sb = new StringBuilder();
+        for (int i = s.length() - 1; i >= 0; i--) {
+            sb.append(s.charAt(i));
+        }
+        return sb.toString();
     }
 }

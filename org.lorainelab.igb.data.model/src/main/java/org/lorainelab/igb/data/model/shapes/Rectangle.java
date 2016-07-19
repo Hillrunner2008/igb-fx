@@ -32,7 +32,8 @@ public class Rectangle<T extends Feature> implements Shape {
     //enables a larger reference sequence context when defining a function for translation
     private Range<Integer> innerTextReferenceSequenceRange;
     private Color color;
-    private boolean colorByBase;
+    private boolean mirrorReferenceSequence;
+    private boolean isSelectable;
 
     public Rectangle() {
         attributes = Lists.newArrayList();
@@ -95,8 +96,12 @@ public class Rectangle<T extends Feature> implements Shape {
         this.offset = offset;
     }
 
-    public boolean getColorByBase() {
-        return colorByBase;
+    public boolean isMirrorReferenceSequence() {
+        return mirrorReferenceSequence;
+    }
+
+    public boolean isSelectable() {
+        return isSelectable;
     }
 
     public enum Attribute {
@@ -115,10 +120,12 @@ public class Rectangle<T extends Feature> implements Shape {
 
         Build setColor(Color color);
 
-        Build setColorByBase(boolean colorByBase);
+        Build setMirrorReferenceSequence(boolean mirrorReferenceSequence);
+
+        Build setIsSelectable(boolean isSelectable);
 
         Build linkToModel(Feature model);
-        
+
         Build addAttribute(Attribute attr);
 
         Rectangle build();
@@ -175,8 +182,14 @@ public class Rectangle<T extends Feature> implements Shape {
         }
 
         @Override
-        public Build setColorByBase(boolean colorByBase) {
-            instance.colorByBase = colorByBase;
+        public Build setMirrorReferenceSequence(boolean mirrorReferenceSequence) {
+            instance.mirrorReferenceSequence = mirrorReferenceSequence;
+            return this;
+        }
+
+        @Override
+        public Build setIsSelectable(boolean isSelectable) {
+            instance.isSelectable = isSelectable;
             return this;
         }
 

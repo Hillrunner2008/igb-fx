@@ -114,8 +114,17 @@ public class CompositionGlyph implements Glyph {
         if (width <= 0 || height <= 0) {
             return Optional.empty();
         }
-        double y = (glyphMinY - maxGlyphheight) + additionalYoffset;
+        double y;
+        if (isPositiveStrand()) {
+            y = (glyphMinY - maxGlyphheight) + additionalYoffset;
+        } else {
+            y = (glyphMinY) + additionalYoffset;
+        }
         return Optional.of(new Rectangle2D(minX, y, width, maxGlyphheight * LABEL_SPACE_SCALER));
+    }
+
+    private boolean isPositiveStrand() {
+        return tooltipData.get("forward").equals("true");
     }
 
     @Override
@@ -128,11 +137,11 @@ public class CompositionGlyph implements Glyph {
         Rectangle2D glyphViewIntersectionBounds = glyphViewIntersectionBoundsWrapper.get();
         if (viewBoundingRect.getWidth() < 15_000_000) {
             drawChildren(viewBoundingRect, gc, view, additionalYoffset);
-            drawLabel(view, viewBoundingRect, gc, glyphViewIntersectionBounds);
+            drawLabel(view, viewBoundingRect, gc, glyphViewIntersectionBounds, additionalYoffset);
         } else {
             drawSummaryRectangle(gc, glyphViewIntersectionBounds);
         }
-        drawSelectionRectangle(gc, view, glyphViewIntersectionBounds);
+        drawSelectionRectangle(gc, view, glyphViewIntersectionBounds, additionalYoffset);
     }
 
     private void drawChildren(Rectangle2D viewBoundingRect, GraphicsContext gc, View view, double additionalYoffset) {
@@ -151,10 +160,18 @@ public class CompositionGlyph implements Glyph {
         gc.restore();
     }
 
-    private void drawLabel(View view, Rectangle2D viewBoundingRect, GraphicsContext gc, Rectangle2D glyphViewIntersectionBounds) {
+    private void drawLabel(View view, Rectangle2D viewBoundingRect, GraphicsContext gc, Rectangle2D glyphViewIntersectionBounds, double additionalYoffset) {
         if (!Strings.isNullOrEmpty(label)) {
-            final double fontSize = Math.min((SLOT_HEIGHT * view.getYfactor()) * .35, 10);
-            if (viewBoundingRect.getWidth() < 300_000 && fontSize > 8) {
+//            double glyphMinY;
+//            final double glyphHeight = glyphViewIntersectionBounds.getHeight() / LABEL_SPACE_SCALER;
+//            if (isPositiveStrand()) {
+//                glyphMinY = -(-(glyphHeight / 2) + additionalYoffset - glyphViewIntersectionBounds.getMinY());
+//            } else {
+//                glyphMinY = -(-glyphViewIntersectionBounds.getMinY() + additionalYoffset);
+//            }
+//            Rectangle2D labelRect = new Rectangle2D(glyphViewIntersectionBounds.getMinX(), glyphViewIntersectionBounds.getMinY(), glyphViewIntersectionBounds.getWidth(), glyphMinY);
+            final double fontSize = Math.min((glyphViewIntersectionBounds.getHeight() * view.getYfactor()) * .35, 10);
+            if (viewBoundingRect.getWidth() < 100_000 && fontSize > 8) {
                 gc.save();
                 gc.scale(1 / view.getXfactor(), 1 / view.getYfactor());
                 double textScale = .8;
@@ -173,32 +190,43 @@ public class CompositionGlyph implements Glyph {
                     textWidth = (com.sun.javafx.tk.Toolkit.getToolkit().getFontLoader().computeStringWidth(drawLabel, gc.getFont()));
                 }
                 x = (x + (width / 2)) - (textWidth / 2);
-                y = (y + (textHeight / 2)) + (height / 4);
+                if (isPositiveStrand()) {
+                    y = (y + (textHeight / 2)) + (height / 5);
+                } else {
+                    y = (y + (textHeight / 2)) + (height / 5) * 4;
+                }
                 gc.fillText(drawLabel, x, y);
                 gc.restore();
             }
         }
     }
 
-    private void drawSelectionRectangle(GraphicsContext gc, View view, Rectangle2D glyphViewIntersectionBounds) {
+    private void drawSelectionRectangle(GraphicsContext gc, View view, Rectangle2D glyphViewIntersectionBounds, double additionalYoffset) {
         if (isSelected()) {
+            Rectangle2D drawRect = glyphViewIntersectionBounds;
+            for (Glyph g : children) {
+                if (g.isSelectable() && g.isSelected()) {
+                    Optional<Rectangle2D> viewBoundingRect = g.getViewBoundingRect(view.getBoundingRect(), additionalYoffset);
+                    if (viewBoundingRect.isPresent()) {
+                        drawRect = viewBoundingRect.get();
+                        break;
+                    }
+                }
+            }
             gc.save();
             gc.setFill(Color.RED);
+            double rectWidth = 0.25;
             double xToYRatio = view.getXfactor() / view.getYfactor();
-            double rectWidth = 1;
-            double width = view.getBoundingRect().getWidth();
-            double height = view.getBoundingRect().getHeight();
-            if (width > 1500 && height > 150) {
-                rectWidth = 2;
-            }
-            double minY = glyphViewIntersectionBounds.getMinY();
-            double minX = glyphViewIntersectionBounds.getMinX();
-            double maxX = glyphViewIntersectionBounds.getMaxX();
-            double maxY = glyphViewIntersectionBounds.getMaxY();
-            gc.fillRect(minX, minY, glyphViewIntersectionBounds.getWidth(), rectWidth); //top
-            gc.fillRect(minX, minY, rectWidth / xToYRatio, glyphViewIntersectionBounds.getHeight()); //left
-            gc.fillRect(maxX, minY, rectWidth / xToYRatio, glyphViewIntersectionBounds.getHeight() + 1);//right
-            gc.fillRect(minX, maxY, glyphViewIntersectionBounds.getWidth(), rectWidth);//bottom
+            double minY = drawRect.getMinY();
+            double minX = drawRect.getMinX();
+            double maxX = drawRect.getMaxX();
+            double maxY = drawRect.getMaxY();
+            double width = drawRect.getWidth();
+            double height = drawRect.getHeight();
+            gc.fillRect(minX, minY, width, rectWidth); //top
+            gc.fillRect(minX, minY, rectWidth / xToYRatio, height); //left
+            gc.fillRect(maxX, minY, rectWidth / xToYRatio, height + rectWidth);//right
+            gc.fillRect(minX, maxY, width, rectWidth);//bottom
             gc.restore();
         }
     }

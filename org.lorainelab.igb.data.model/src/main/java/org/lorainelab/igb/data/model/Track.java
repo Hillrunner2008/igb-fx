@@ -16,7 +16,6 @@ import javafx.scene.canvas.GraphicsContext;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
 import org.lorainelab.igb.data.model.glyph.Glyph;
 import static org.lorainelab.igb.data.model.glyph.Glyph.MIN_X_COMPARATOR;
-import static org.lorainelab.igb.data.model.glyph.Glyph.SLOT_HEIGHT;
 
 /**
  *
@@ -24,6 +23,7 @@ import static org.lorainelab.igb.data.model.glyph.Glyph.SLOT_HEIGHT;
  */
 public class Track {
 
+    final int SLOT_HEIGHT = 30;
     private final String trackLabel;
     private List<CompositionGlyph> glyphs;
     private SortedSetMultimap<Integer, CompositionGlyph> slotMap;
