@@ -4,17 +4,22 @@ import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Sets;
+import java.time.Duration;
 import java.util.Comparator;
 import java.util.Set;
 import javafx.application.Platform;
+import javafx.collections.SetChangeListener;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
+import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
 import org.lorainelab.igb.selections.SelectionInfoService;
 import org.lorainelab.igb.toolbar.api.ToolbarButtonProvider;
 import org.lorainelab.igb.toolbar.api.WeightedButton;
+import org.reactfx.AwaitingEventStream;
+import org.reactfx.EventStreams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,8 +52,8 @@ public class ToolBarManager {
 
     @Activate
     public void activate() {
-//        AwaitingEventStream<SetChangeListener.Change<? extends CompositionGlyph>> rebuildGridEventStream = EventStreams.changesOf(selectionInfoService.getSelectedGlyphs()).successionEnds(Duration.ofMillis(100));
-//        rebuildGridEventStream.subscribe(change -> updatedSelectionInfoText());
+        AwaitingEventStream<SetChangeListener.Change<? extends CompositionGlyph>> rebuildGridEventStream = EventStreams.changesOf(selectionInfoService.getSelectedGlyphs()).successionEnds(Duration.ofMillis(100));
+        rebuildGridEventStream.subscribe(change -> updatedSelectionInfoText());
     }
 
     public ToolBar getTopToolbar() {

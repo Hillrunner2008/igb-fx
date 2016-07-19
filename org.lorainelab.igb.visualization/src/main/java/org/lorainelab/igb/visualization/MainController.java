@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -867,17 +868,17 @@ public class MainController {
     private void updateGlyphSelections(SelectionChangeEvent event) {
         selectionInfoService.getSelectedGlyphs().clear();
         //TODO find a more performant way to update selections, possibly debouncing at this location would be sufficient
-//        trackRenderers.stream()
-//                .filter(renderer -> renderer instanceof ZoomableTrackRenderer)
-//                .map(renderer -> ZoomableTrackRenderer.class.cast(renderer))
-//                .forEach(renderer -> {
-//                    selectionInfoService.getSelectedGlyphs().addAll(
-//                            renderer.getTrack().getGlyphs()
-//                                    .stream()
-//                                    .filter(glyph -> glyph.isSelected())
-//                                    .collect(Collectors.toList())
-//                    );
-//                });
+        trackRenderers.stream()
+                .filter(renderer -> renderer instanceof ZoomableTrackRenderer)
+                .map(renderer -> ZoomableTrackRenderer.class.cast(renderer))
+                .forEach(renderer -> {
+                    selectionInfoService.getSelectedGlyphs().addAll(
+                            renderer.getTrack().getGlyphs()
+                                    .stream()
+                                    .filter(glyph -> glyph.isSelected())
+                                    .collect(Collectors.toList())
+                    );
+                });
     }
 
     private void addTabPanes() {

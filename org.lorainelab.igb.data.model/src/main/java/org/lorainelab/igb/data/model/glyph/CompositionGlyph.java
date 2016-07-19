@@ -203,26 +203,30 @@ public class CompositionGlyph implements Glyph {
 
     private void drawSelectionRectangle(GraphicsContext gc, View view, Rectangle2D glyphViewIntersectionBounds, double additionalYoffset) {
         if (isSelected()) {
+            Rectangle2D drawRect = glyphViewIntersectionBounds;
+            for (Glyph g : children) {
+                if (g.isSelectable() && g.isSelected()) {
+                    Optional<Rectangle2D> viewBoundingRect = g.getViewBoundingRect(view.getBoundingRect(), additionalYoffset);
+                    if (viewBoundingRect.isPresent()) {
+                        drawRect = viewBoundingRect.get();
+                        break;
+                    }
+                }
+            }
             gc.save();
             gc.setFill(Color.RED);
+            double rectWidth = 0.25;
             double xToYRatio = view.getXfactor() / view.getYfactor();
-            double rectWidth = 1;
-            double width = view.getBoundingRect().getWidth();
-            double height = view.getBoundingRect().getHeight();
-            if (width > 1500 && height > 150) {
-                rectWidth = 2;
-            }
-            double minY = glyphViewIntersectionBounds.getMinY();
-            double minX = glyphViewIntersectionBounds.getMinX();
-            double maxX = glyphViewIntersectionBounds.getMaxX();
-            double maxY = glyphViewIntersectionBounds.getMaxY();
-
-            gc.fillRect(minX, minY, glyphViewIntersectionBounds.getWidth(), rectWidth); //top
-            gc.fillRect(minX, minY, rectWidth / xToYRatio, glyphViewIntersectionBounds.getHeight()); //left
-            gc.fillRect(maxX, minY, rectWidth / xToYRatio, glyphViewIntersectionBounds.getHeight() + 1);//right
-            if (maxY < view.getBoundingRect().getMaxY() + additionalYoffset + 1) {
-                gc.fillRect(minX, maxY, glyphViewIntersectionBounds.getWidth(), rectWidth);//bottom
-            }
+            double minY = drawRect.getMinY();
+            double minX = drawRect.getMinX();
+            double maxX = drawRect.getMaxX();
+            double maxY = drawRect.getMaxY();
+            double width = drawRect.getWidth();
+            double height = drawRect.getHeight();
+            gc.fillRect(minX, minY, width, rectWidth); //top
+            gc.fillRect(minX, minY, rectWidth / xToYRatio, height); //left
+            gc.fillRect(maxX, minY, rectWidth / xToYRatio, height + rectWidth);//right
+            gc.fillRect(minX, maxY, width, rectWidth);//bottom
             gc.restore();
         }
     }

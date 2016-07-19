@@ -56,7 +56,7 @@ public class BamRenderer implements Renderer<BamFeature> {
                         alignmentBlock.getRange().lowerEndpoint(),
                         alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint()
                 )
-                        .setColorByBase(true)
+                        .setMirrorReferenceSequence(true)
                         .setInnerTextRefSeqTranslator(seq -> seq)
                         .build());
             case PADDING:
@@ -78,6 +78,7 @@ public class BamRenderer implements Renderer<BamFeature> {
                         .setColor(Color.GOLD)
                         .addAttribute(Rectangle.Attribute.INSERTION)
                         .setInnerTextRefSeqTranslator(seq -> "><")
+                        .setIsSelectable(true)
                         .build());
             default:
                 return Optional.empty();

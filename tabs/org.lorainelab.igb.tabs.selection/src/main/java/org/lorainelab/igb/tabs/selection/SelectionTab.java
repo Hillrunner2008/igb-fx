@@ -6,12 +6,14 @@ import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.List;
 import java.util.stream.Collectors;
 import static java.util.stream.Collectors.toList;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.SetChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -36,6 +38,8 @@ import org.lorainelab.igb.selections.SelectionInfoService;
 import org.lorainelab.igb.tabs.api.TabDockingPosition;
 import org.lorainelab.igb.tabs.api.TabProvider;
 import org.osgi.framework.BundleContext;
+import org.reactfx.AwaitingEventStream;
+import org.reactfx.EventStreams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,8 +74,8 @@ public class SelectionTab implements TabProvider {
                 throw new RuntimeException(exception);
             }
         });
-//        AwaitingEventStream<SetChangeListener.Change<? extends CompositionGlyph>> rebuildGridEventStream = EventStreams.changesOf(selectionInfoService.getSelectedGlyphs()).successionEnds(Duration.ofMillis(100));
-//        rebuildGridEventStream.subscribe(change -> rebuildGridData());
+        AwaitingEventStream<SetChangeListener.Change<? extends CompositionGlyph>> rebuildGridEventStream = EventStreams.changesOf(selectionInfoService.getSelectedGlyphs()).successionEnds(Duration.ofMillis(100));
+        rebuildGridEventStream.subscribe(change -> rebuildGridData());
     }
 
     @FXML

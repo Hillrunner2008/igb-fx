@@ -1,7 +1,6 @@
 package org.lorainelab.igb.filehandler.bed;
 
 import com.google.common.collect.Range;
-import java.util.function.Function;
 import java.util.stream.Stream;
 import org.lorainelab.igb.data.model.Strand;
 import org.lorainelab.igb.data.model.shapes.Composition;
@@ -32,20 +31,32 @@ public class BedRenderer implements Renderer<BedFeature> {
     private Stream<Shape> calculateCds(BedFeature bedFeature) {
         final Strand strand = bedFeature.getStrand();
         Range<Integer> cdsRange = Range.closed(bedFeature.getCdsStart() - bedFeature.getRange().lowerEndpoint(), bedFeature.getCdsEnd() - bedFeature.getRange().lowerEndpoint());
-        Function<String, String> innerTextRefSeqTranslator = referenceSequence -> {
-            String aminoAcidSequence = AminoAcid.getAminoAcid(referenceSequence, strand == Strand.POSITIVE);
-            return aminoAcidSequence;
-        };
 
         return bedFeature.getExons().asRanges().stream()
                 .map(exon -> Range.closed(exon.lowerEndpoint(), exon.upperEndpoint()))
                 .filter(exonRange -> exonRange.isConnected(cdsRange))
-                .map(eoxnRange -> eoxnRange.intersection(cdsRange))
+                .map(exonRange -> exonRange.intersection(cdsRange))
                 .map(intersectingRange -> Rectangle.start(intersectingRange.lowerEndpoint(), intersectingRange.upperEndpoint() - intersectingRange.lowerEndpoint())
-                .addAttribute(Rectangle.Attribute.THICK)
-                .setInnerTextReferenceSequenceRange(Range.closed(bedFeature.getCdsStart(), bedFeature.getCdsEnd()))
-                .setInnerTextRefSeqTranslator(innerTextRefSeqTranslator)
-                .build());
+                        .addAttribute(Rectangle.Attribute.THICK)
+                        .setInnerTextReferenceSequenceRange(Range.closed(bedFeature.getCdsStart(), bedFeature.getCdsEnd()))
+                        .setInnerTextRefSeqTranslator(referenceSequence -> {
+                            String aminoAcidSequence = AminoAcid.getAminoAcid(referenceSequence, strand == Strand.POSITIVE);
+//                            int startIndex = intersectingRange.lowerEndpoint() - bedFeature.getCdsStart() + bedFeature.getRange().lowerEndpoint();
+//                            int endIndex = intersectingRange.upperEndpoint() - bedFeature.getCdsStart() + bedFeature.getRange().lowerEndpoint();
+//                            int width = endIndex - startIndex;
+//                            endIndex = startIndex + Math.floorDiv(width, 3);
+//                            startIndex += startIndex % 3;
+//                            if (width < aminoAcidSequence.length()) {
+//                                int remainder = width % 3;
+//                                if (remainder > 1) {
+//                                    //allow look ahead to next exon
+//                                    return aminoAcidSequence.substring(startIndex, endIndex);
+//                                }
+//                            }
+
+                            return aminoAcidSequence;
+                        })
+                        .build());
     }
 
 }
