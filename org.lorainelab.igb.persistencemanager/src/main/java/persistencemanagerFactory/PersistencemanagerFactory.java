@@ -35,16 +35,16 @@ public class PersistencemanagerFactory {
         return persistenceManagers.containsKey(tableName);
     }
 
-    public synchronized Optional<PersistenceManager> getPersistenceManager(String tableName) {
+    public synchronized Optional<PersistenceManager> getPersistenceManager(Class module) {
+        String tableName = module.getName();
         try {
             if (persistenceManagers.containsKey(tableName)) {
                 return Optional.of(persistenceManagers.get(tableName));
             } else {
-                PersistencemanagerImpl m = new PersistencemanagerImpl(tableName);
-                m.setDatasourceFactory(dataSourceFactory);
-                m.initDB();
-                persistenceManagers.put(tableName, m);
-                return Optional.of(m);
+                PersistencemanagerImpl managerImpl = new PersistencemanagerImpl(tableName,dataSourceFactory);
+                //managerImpl.initDB();
+                persistenceManagers.put(tableName, managerImpl);
+                return Optional.of(managerImpl);
             }
         } catch (Exception e) {
             LOG.error("Failed to get persistance manager", e);
@@ -59,7 +59,6 @@ public class PersistencemanagerFactory {
     
     @Reference(target = "(osgi.jdbc.driver.name=sqlite)")
     public void setDatasourceFactory(DataSourceFactory dataSourceFactory) {
-        System.out.println("setting DS factory");
         this.dataSourceFactory = dataSourceFactory;
     }
 

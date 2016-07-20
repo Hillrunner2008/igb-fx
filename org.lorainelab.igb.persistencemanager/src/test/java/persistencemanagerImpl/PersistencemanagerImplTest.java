@@ -5,16 +5,27 @@
  */
 package persistencemanagerImpl;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.Optional;
+import java.util.Map;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.sql.DataSource;
 import org.lorainelab.igb.persistencemanager.PersistenceManager;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.Mock;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
 import org.osgi.service.jdbc.DataSourceFactory;
+import persistencemanagerFactory.PersistencemanagerFactory;
+import static org.mockito.Mockito.when;
 
 /**
  *
@@ -22,14 +33,19 @@ import org.osgi.service.jdbc.DataSourceFactory;
  */
 public class PersistencemanagerImplTest {
 
-    persistencemanagerFactory.PersistencemanagerFactory factory;
+    PersistencemanagerFactory factory;
     PersistenceManager pm;
+    HashMap<String, String> testMap;
+    @Mock DataSourceFactory dataSourceFactory = mock(DataSourceFactory.class);
+    @Mock DataSource dataSource = mock(DataSource.class);
+    Connection connection;
     
     public PersistencemanagerImplTest() {
     }
 
     @BeforeClass
     public static void setUpClass() {
+
     }
 
     @AfterClass
@@ -37,53 +53,54 @@ public class PersistencemanagerImplTest {
     }
 
     @Before
-    public void setUp() {
-        
-        pm = factory.getPersistenceManager("test").get();
-        System.out.println("return from setup");
+    public void setUp(){
+        try {
+            //load driver for sqlite
+            
+            Class.forName("org.sqlite.JDBC");
+            connection = DriverManager.getConnection("jdbc:sqlite:test.db");
+            
+            factory = new PersistencemanagerFactory();
+            factory.setDatasourceFactory(dataSourceFactory);
+            
+            when(dataSourceFactory.createDataSource(System.getProperties()))
+                    .thenReturn(dataSource);
+            when(dataSource.getConnection()).thenReturn(connection);
+            pm = factory.getPersistenceManager(PersistencemanagerImplTest.class).get();
+            System.out.println(factory.getPersistenceManager(PersistencemanagerImplTest.class).get());
+            System.out.println("connection init: "+connection+"\n\n");
+        } catch (ClassNotFoundException ex) {
+            ex.printStackTrace();
+            Logger.getLogger(PersistencemanagerImplTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            Logger.getLogger(PersistencemanagerImplTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @After
-    public void tearDown() {
-        pm.dropTable();
+    public void tearDown() throws SQLException {
+        pm.clear();
+        connection.close();
     }
 
-    // TODO add test methods here.
-    // The methods must be annotated with annotation @Test. For example:
-    //
+    /**
+     * Test of put method, of class PersistencemanagerImpl.
+     */
     @Test
-    public void testDbinsert() {
-        pm.put("dummyKey", "dummyValue");
-        assertTrue(pm.containsKey("dummyKey"));
+    public void testPut() {
+        System.out.println("pm in test: "+pm);
+        pm.put("key", "value");
+        assertEquals(pm.get("key").get(), "value");
     }
-//
-//    /**
-//     * Test of put method, of class PersistencemanagerImpl.
-//     */
-//    @Test
-//    public void testPut() {
-//        System.out.println("put");
-//        String key = "";
-//        String value = "";
-//        PersistencemanagerImpl instance = null;
-//        instance.put(key, value);
-//        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
-//    }
-//
+
 //    /**
 //     * Test of get method, of class PersistencemanagerImpl.
 //     */
 //    @Test
 //    public void testGet() {
-//        System.out.println("get");
-//        String key = "";
-//        PersistencemanagerImpl instance = null;
-//        Optional<String> expResult = null;
-//        Optional<String> result = instance.get(key);
-//        assertEquals(expResult, result);
-//        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
+//        pm.put("key", "value");
+//        assertEquals(pm.get("key").get(), "value");
 //    }
 //
 //    /**
@@ -91,14 +108,9 @@ public class PersistencemanagerImplTest {
 //     */
 //    @Test
 //    public void testContainsKey() {
-//        System.out.println("containsKey");
-//        String key = "";
-//        PersistencemanagerImpl instance = null;
-//        boolean expResult = false;
-//        boolean result = instance.containsKey(key);
-//        assertEquals(expResult, result);
-//        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
+//        pm.put("key", "value");
+//        assertTrue(pm.containsKey("key"));
+//        assertFalse(pm.containsKey("randomKey"));
 //    }
 //
 //    /**
@@ -106,24 +118,10 @@ public class PersistencemanagerImplTest {
 //     */
 //    @Test
 //    public void testRemove() {
-//        System.out.println("remove");
-//        String key = "";
-//        PersistencemanagerImpl instance = null;
-//        instance.remove(key);
-//        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
-//    }
-//
-//    /**
-//     * Test of dropTable method, of class PersistencemanagerImpl.
-//     */
-//    @Test
-//    public void testDropTable() {
-//        System.out.println("dropTable");
-//        PersistencemanagerImpl instance = null;
-//        instance.dropTable();
-//        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
+//        pm.put("key", "value");
+//        assertEquals(pm.get("key"), "value");
+//        pm.remove("key");
+//        assertFalse(pm.get("key").isPresent());
 //    }
 //
 //    /**
@@ -131,12 +129,13 @@ public class PersistencemanagerImplTest {
 //     */
 //    @Test
 //    public void testPutAll() {
-//        System.out.println("putAll");
-//        HashMap<String, String> valueMap = null;
-//        PersistencemanagerImpl instance = null;
-//        instance.putAll(valueMap);
-//        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
+//        HashMap<String, String> map = new HashMap<>();
+//        initMap();
+//        pm.putAll(testMap);
+//        Map tempmap = pm.getAll();
+//        map.keySet().forEach((key) -> {
+//            assertEquals(map.get(key), tempmap.get(key));
+//        });
 //    }
 //
 //    /**
@@ -144,25 +143,13 @@ public class PersistencemanagerImplTest {
 //     */
 //    @Test
 //    public void testGetAll() {
-//        System.out.println("getAll");
-//        PersistencemanagerImpl instance = null;
-//        HashMap<String, String> expResult = null;
-//        HashMap<String, String> result = instance.getAll();
-//        assertEquals(expResult, result);
-//        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
-//    }
-//
-//    /**
-//     * Test of persistConnection method, of class PersistencemanagerImpl.
-//     */
-//    @Test
-//    public void testPersistConnection() {
-//        System.out.println("persistConnection");
-//        PersistencemanagerImpl instance = null;
-//        instance.persistConnection();
-//        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
+//        HashMap<String, String> map = new HashMap<>();
+//        initMap();
+//        pm.putAll(testMap);
+//        Map tempmap = pm.getAll();
+//        map.keySet().forEach((key) -> {
+//            assertEquals(map.get(key), tempmap.get(key));
+//        });
 //    }
 //
 //    /**
@@ -170,26 +157,19 @@ public class PersistencemanagerImplTest {
 //     */
 //    @Test
 //    public void testGetAllLike() {
-//        System.out.println("getAllLike");
-//        String pattern = "";
-//        PersistencemanagerImpl instance = null;
-//        HashMap<String, String> expResult = null;
-//        HashMap<String, String> result = instance.getAllLike(pattern);
-//        assertEquals(expResult, result);
-//        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
+//        initMap();
+//        pm.putAll(testMap);
+//        Map<String, String> tempmap = pm.getAllLike("as");
+//        tempmap.keySet().forEach((key) -> {
+//            assertTrue(key.split("as").length > 1);
+//        });
 //    }
 //
-//    /**
-//     * Test of setDatasourceFactory method, of class PersistencemanagerImpl.
-//     */
-//    @Test
-//    public void testSetDatasourceFactory() {
-//        System.out.println("setDatasourceFactory");
-//        DataSourceFactory dataSourceFactory = null;
-//        PersistencemanagerImpl instance = null;
-//        instance.setDatasourceFactory(dataSourceFactory);
-//        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
+//    private void initMap() {
+//        testMap.put("qwe", "qwe");
+//        testMap.put("asd", "zxc");
+//        testMap.put("zxc", "qwe");
+//        testMap.put("dsasf", "val");
 //    }
+
 }

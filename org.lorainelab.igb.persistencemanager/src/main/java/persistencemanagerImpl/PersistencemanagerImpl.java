@@ -10,6 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -28,7 +29,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author Devdatta Kulkarni
  */
-//@Component(immediate = true)
 public class PersistencemanagerImpl implements PersistenceManager {
 
     private static final String DBNAME = "data/database.sqlite";
@@ -42,12 +42,13 @@ public class PersistencemanagerImpl implements PersistenceManager {
     private DataSource ds;
 
 
-    public PersistencemanagerImpl(String tableName) {
+    public PersistencemanagerImpl(String tableName,DataSourceFactory dataSourceFactory) {
         this.tableName = tableName;
+        this.dataSourceFactory = dataSourceFactory;
+        initDB();
     }
 
-//    @Activate
-    public void initDB() {
+    private void initDB() {
         LOG.trace("init creating table");
         Properties props = new Properties();
         props.put("databaseName", DBNAME);
@@ -155,7 +156,7 @@ public class PersistencemanagerImpl implements PersistenceManager {
     }
 
     @Override
-    public void dropTable() {
+    public void clear() {
         try (Connection dsConnection = ds.getConnection()) {
             String sql = "DROP TABLE " + getTableName();
             try (Statement stmt = dsConnection.createStatement()) {
@@ -170,7 +171,7 @@ public class PersistencemanagerImpl implements PersistenceManager {
     }
 
     @Override
-    public void putAll(HashMap<String, String> valueMap) {
+    public void putAll(Map<String, String> valueMap) {
         try (Connection dsConnection = ds.getConnection()) {
             dsConnection.setAutoCommit(false);
             String sql = "INSERT OR REPLACE INTO " + getTableName() + " (" + KEY_COLUMN_NAME + "," + VALUE_COLUMN_NAME + ") VALUES (?,?)";
@@ -218,11 +219,6 @@ public class PersistencemanagerImpl implements PersistenceManager {
     }
 
     @Override
-    public void persistConnection() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
     public HashMap<String, String> getAllLike(String pattern) {
         HashMap<String, String> valueMap = new HashMap<String, String>();
         try (Connection dsConnection = ds.getConnection()) {
@@ -246,11 +242,6 @@ public class PersistencemanagerImpl implements PersistenceManager {
 
     private String getTableName() {
         return tableName;
-    }
-
-    //@Reference(target = "(osgi.jdbc.driver.name=sqlite)")
-    public void setDatasourceFactory(DataSourceFactory dataSourceFactory) {
-        this.dataSourceFactory = dataSourceFactory;
     }
 
 }

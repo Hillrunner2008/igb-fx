@@ -6,6 +6,7 @@
 package org.lorainelab.igb.persistencemanager;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -17,10 +18,10 @@ public interface PersistenceManager {
     Optional<String> get(String key);
     boolean containsKey(String key);
     void remove(String key);
-    void dropTable();
-    void putAll(HashMap<String, String> valueMap);
-    HashMap<String, String> getAll();
-    void persistConnection();
+    void clear();
+    void putAll(Map<String, String> valueMap);
+    Map<String, String> getAll();
+    //void persistConnection();
     HashMap<String, String> getAllLike(String pattern);
     //close connection
     //rollback
