@@ -1,9 +1,5 @@
 package persistencemanagerImpl;
 
-import aQute.bnd.annotation.component.Activate;
-import aQute.bnd.annotation.component.Component;
-import aQute.bnd.annotation.component.ConfigurationPolicy;
-import aQute.bnd.annotation.component.Reference;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -41,8 +37,7 @@ public class PersistencemanagerImpl implements PersistenceManager {
     private DataSourceFactory dataSourceFactory;
     private DataSource ds;
 
-
-    public PersistencemanagerImpl(String tableName,DataSourceFactory dataSourceFactory) {
+    public PersistencemanagerImpl(String tableName, DataSourceFactory dataSourceFactory) {
         this.tableName = tableName;
         this.dataSourceFactory = dataSourceFactory;
         initDB();
@@ -55,18 +50,14 @@ public class PersistencemanagerImpl implements PersistenceManager {
         String sql = "CREATE TABLE IF NOT EXISTS " + tableName
                 + " (" + KEY_COLUMN_NAME + " TEXT PRIMARY KEY NOT NULL,"
                 + " " + VALUE_COLUMN_NAME + " TEXT NOT NULL)";
-        System.out.println("before try datasrc factory: " + dataSourceFactory);
         try {
             ds = dataSourceFactory.createDataSource(props);
-            ds.getConnection();
         } catch (Exception ex) {
-            System.out.println("exception");
-            ex.printStackTrace();
+            LOG.trace("sql called: " + sql);
+            LOG.error(ex.getMessage(), ex);
         }
-        System.out.println("after try");
 
         try (Connection dsConnection = ds.getConnection()) {
-            ds = dataSourceFactory.createDataSource(props);
             try (Statement stmt = dsConnection.createStatement()) {
                 stmt.executeUpdate(sql);
             } catch (SQLException ex) {
@@ -105,7 +96,7 @@ public class PersistencemanagerImpl implements PersistenceManager {
             try (PreparedStatement stmt = dsConnection.prepareStatement(sql)) {
                 stmt.setString(1, key);
                 ResultSet result = stmt.executeQuery();
-                if(!result.next()){
+                if (!result.next()) {
                     return Optional.empty();
                 }
                 value = result.getString(VALUE_COLUMN_NAME);
@@ -222,9 +213,9 @@ public class PersistencemanagerImpl implements PersistenceManager {
     public HashMap<String, String> getAllLike(String pattern) {
         HashMap<String, String> valueMap = new HashMap<String, String>();
         try (Connection dsConnection = ds.getConnection()) {
-            String sql = "SELECT * FROM " + getTableName() + " WHERE "+KEY_COLUMN_NAME+" LIKE ?";
+            String sql = "SELECT * FROM " + getTableName() + " WHERE " + KEY_COLUMN_NAME + " LIKE ?";
             try (PreparedStatement stmt = dsConnection.prepareStatement(sql)) {
-                stmt.setString(1, "%"+pattern+"%");
+                stmt.setString(1, "%" + pattern + "%");
                 ResultSet result = stmt.executeQuery();
                 while (result.next()) {
                     valueMap.put(result.getString(KEY_COLUMN_NAME), result.getString(VALUE_COLUMN_NAME));

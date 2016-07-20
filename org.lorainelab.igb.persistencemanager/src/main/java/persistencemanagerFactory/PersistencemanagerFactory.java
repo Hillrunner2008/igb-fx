@@ -42,7 +42,6 @@ public class PersistencemanagerFactory {
                 return Optional.of(persistenceManagers.get(tableName));
             } else {
                 PersistencemanagerImpl managerImpl = new PersistencemanagerImpl(tableName,dataSourceFactory);
-                //managerImpl.initDB();
                 persistenceManagers.put(tableName, managerImpl);
                 return Optional.of(managerImpl);
             }
