@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Devdatta Kulkarni
  */
-@Component(immediate = true)
+//@Component(immediate = true)
 public class PersistencemanagerImpl implements PersistenceManager {
 
     private static final String DBNAME = "data/database.sqlite";
@@ -46,7 +46,7 @@ public class PersistencemanagerImpl implements PersistenceManager {
         this.tableName = tableName;
     }
 
-    @Activate
+//    @Activate
     public void initDB() {
         LOG.trace("init creating table");
         Properties props = new Properties();
