@@ -36,7 +36,7 @@ public class PersistencemanagerFactory {
     }
 
     public synchronized Optional<PersistenceManager> getPersistenceManager(Class module) {
-        String tableName = module.getName();
+        String tableName = module.getName().replaceAll("\\.", "_");
         try {
             if (persistenceManagers.containsKey(tableName)) {
                 return Optional.of(persistenceManagers.get(tableName));
