@@ -23,9 +23,11 @@ import org.junit.Test;
 import org.mockito.Mock;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.any;
 import org.osgi.service.jdbc.DataSourceFactory;
 import persistencemanagerFactory.PersistencemanagerFactory;
 import static org.mockito.Mockito.when;
+import org.mockito.MockitoAnnotations;
 
 /**
  *
@@ -35,7 +37,7 @@ public class PersistencemanagerImplTest {
 
     PersistencemanagerFactory factory;
     PersistenceManager pm;
-    HashMap<String, String> testMap;
+    HashMap<String, String> testMap = new HashMap<>();
     @Mock DataSourceFactory dataSourceFactory = mock(DataSourceFactory.class);
     @Mock DataSource dataSource = mock(DataSource.class);
     Connection connection;
@@ -59,16 +61,15 @@ public class PersistencemanagerImplTest {
             
             Class.forName("org.sqlite.JDBC");
             connection = DriverManager.getConnection("jdbc:sqlite:test.db");
+            MockitoAnnotations.initMocks(this);
             
             factory = new PersistencemanagerFactory();
             factory.setDatasourceFactory(dataSourceFactory);
             
-            when(dataSourceFactory.createDataSource(System.getProperties()))
+            when(dataSourceFactory.createDataSource(any(Properties.class)))
                     .thenReturn(dataSource);
-            when(dataSource.getConnection()).thenReturn(connection);
+            when(dataSource.getConnection()).thenAnswer(x -> DriverManager.getConnection("jdbc:sqlite:test.db"));
             pm = factory.getPersistenceManager(PersistencemanagerImplTest.class).get();
-            System.out.println(factory.getPersistenceManager(PersistencemanagerImplTest.class).get());
-            System.out.println("connection init: "+connection+"\n\n");
         } catch (ClassNotFoundException ex) {
             ex.printStackTrace();
             Logger.getLogger(PersistencemanagerImplTest.class.getName()).log(Level.SEVERE, null, ex);
@@ -81,95 +82,93 @@ public class PersistencemanagerImplTest {
     @After
     public void tearDown() throws SQLException {
         pm.clear();
-        connection.close();
     }
 
     /**
      * Test of put method, of class PersistencemanagerImpl.
      */
     @Test
-    public void testPut() {
-        System.out.println("pm in test: "+pm);
+    public void testPut() throws SQLException {
         pm.put("key", "value");
         assertEquals(pm.get("key").get(), "value");
     }
 
-//    /**
-//     * Test of get method, of class PersistencemanagerImpl.
-//     */
-//    @Test
-//    public void testGet() {
-//        pm.put("key", "value");
-//        assertEquals(pm.get("key").get(), "value");
-//    }
-//
-//    /**
-//     * Test of containsKey method, of class PersistencemanagerImpl.
-//     */
-//    @Test
-//    public void testContainsKey() {
-//        pm.put("key", "value");
-//        assertTrue(pm.containsKey("key"));
-//        assertFalse(pm.containsKey("randomKey"));
-//    }
-//
-//    /**
-//     * Test of remove method, of class PersistencemanagerImpl.
-//     */
-//    @Test
-//    public void testRemove() {
-//        pm.put("key", "value");
-//        assertEquals(pm.get("key"), "value");
-//        pm.remove("key");
-//        assertFalse(pm.get("key").isPresent());
-//    }
-//
-//    /**
-//     * Test of putAll method, of class PersistencemanagerImpl.
-//     */
-//    @Test
-//    public void testPutAll() {
-//        HashMap<String, String> map = new HashMap<>();
-//        initMap();
-//        pm.putAll(testMap);
-//        Map tempmap = pm.getAll();
-//        map.keySet().forEach((key) -> {
-//            assertEquals(map.get(key), tempmap.get(key));
-//        });
-//    }
-//
-//    /**
-//     * Test of getAll method, of class PersistencemanagerImpl.
-//     */
-//    @Test
-//    public void testGetAll() {
-//        HashMap<String, String> map = new HashMap<>();
-//        initMap();
-//        pm.putAll(testMap);
-//        Map tempmap = pm.getAll();
-//        map.keySet().forEach((key) -> {
-//            assertEquals(map.get(key), tempmap.get(key));
-//        });
-//    }
-//
-//    /**
-//     * Test of getAllLike method, of class PersistencemanagerImpl.
-//     */
-//    @Test
-//    public void testGetAllLike() {
-//        initMap();
-//        pm.putAll(testMap);
-//        Map<String, String> tempmap = pm.getAllLike("as");
-//        tempmap.keySet().forEach((key) -> {
-//            assertTrue(key.split("as").length > 1);
-//        });
-//    }
-//
-//    private void initMap() {
-//        testMap.put("qwe", "qwe");
-//        testMap.put("asd", "zxc");
-//        testMap.put("zxc", "qwe");
-//        testMap.put("dsasf", "val");
-//    }
+    /**
+     * Test of get method, of class PersistencemanagerImpl.
+     */
+    @Test
+    public void testGet() {
+        pm.put("key", "value");
+        assertEquals(pm.get("key").get(), "value");
+    }
+
+    /**
+     * Test of containsKey method, of class PersistencemanagerImpl.
+     */
+    @Test
+    public void testContainsKey() {
+        pm.put("key", "value");
+        assertTrue(pm.containsKey("key"));
+        assertFalse(pm.containsKey("randomKey"));
+    }
+
+    /**
+     * Test of remove method, of class PersistencemanagerImpl.
+     */
+    @Test
+    public void testRemove() {
+        pm.put("key", "value");
+        assertEquals(pm.get("key").get(), "value");
+        pm.remove("key");
+        assertFalse(pm.get("key").isPresent());
+    }
+
+    /**
+     * Test of putAll method, of class PersistencemanagerImpl.
+     */
+    @Test
+    public void testPutAll() {
+        HashMap<String, String> map = new HashMap<>();
+        initMap();
+        pm.putAll(testMap);
+        Map tempmap = pm.getAll();
+        map.keySet().forEach((key) -> {
+            assertEquals(map.get(key), tempmap.get(key));
+        });
+    }
+
+    /**
+     * Test of getAll method, of class PersistencemanagerImpl.
+     */
+    @Test
+    public void testGetAll() {
+        HashMap<String, String> map = new HashMap<>();
+        initMap();
+        pm.putAll(testMap);
+        Map tempmap = pm.getAll();
+        map.keySet().forEach((key) -> {
+            assertEquals(map.get(key), tempmap.get(key));
+        });
+    }
+
+    /**
+     * Test of getAllLike method, of class PersistencemanagerImpl.
+     */
+    @Test
+    public void testGetAllLike() {
+        initMap();
+        pm.putAll(testMap);
+        Map<String, String> tempmap = pm.getAllLike("as");
+        tempmap.keySet().forEach((key) -> {
+            assertTrue(key.split("as").length > 1);
+        });
+    }
+
+    private void initMap() {
+        testMap.put("qwe", "qwe");
+        testMap.put("asd", "zxc");
+        testMap.put("zxc", "qwe");
+        testMap.put("dsasf", "val");
+    }
 
 }
