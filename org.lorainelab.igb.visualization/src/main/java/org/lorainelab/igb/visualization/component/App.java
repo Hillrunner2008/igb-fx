@@ -519,8 +519,9 @@ public class App extends Component<AppProps, AppState> {
         return calculatedScrollXPosition[0];
     }
 
-    final ChangeListener<Number> vSlideListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-        updateCanvasContexts();
+    final ChangeListener<Number> vSliderListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+        //updateCanvasContexts();
+        AppStore.getStore().updateVSlider(newValue.doubleValue());
     };
     final ChangeListener<Number> hSliderListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
 
@@ -620,7 +621,7 @@ public class App extends Component<AppProps, AppState> {
     private void initializeCanvas() {
         Canvas canvas = this.getProps().getCanvasPane().getCanvas();
         viewPortManager = new ViewPortManager(canvas, this.getState().getTrackRenderers(), 0, 0);
-        this.getProps().getvSlider().valueProperty().addListener(vSlideListener);
+        this.getProps().getvSlider().valueProperty().addListener(vSliderListener);
         this.getProps().gethSlider().valueProperty().addListener(hSliderListener);
         this.getProps().gethSliderWidget().addListener(hSliderWidgetListener);
         canvas.widthProperty().addListener(widthPropertyListener);
@@ -862,7 +863,6 @@ public class App extends Component<AppProps, AppState> {
         //LOG.info("render app");
         this.getProps().getLabelPane().getChildren().clear();
         List<Component> toReturn = Lists.newArrayList();
-        LOG.info("trackrender size: {}", this.getState().getTrackRenderers());
         this.getState().getTrackRenderers().forEach(tr -> {
             TrackContainer trackContainer = new TrackContainer();
             trackContainer.withAttributes(new TrackContainerProps(

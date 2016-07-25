@@ -126,6 +126,16 @@ public class AppStore {
         emit();
     }
     
+    public void updateScrollY(double scrollY) {
+        this.scrollY = scrollY;
+        emit();
+    }
+    
+    public void updateVSlider(double vSlider) {
+        this.vSlider = vSlider;
+        emit();
+    }
+    
     public void updateMouseDraggedLocation(Point2D localPoint, Point2D screenPoint, boolean mouseDragging) {
         this.localPoint = localPoint; 
         this.screenPoint = screenPoint;
