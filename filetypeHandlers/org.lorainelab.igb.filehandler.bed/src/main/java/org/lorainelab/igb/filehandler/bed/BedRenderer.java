@@ -40,7 +40,11 @@ public class BedRenderer implements Renderer<BedFeature> {
                         .addAttribute(Rectangle.Attribute.THICK)
                         .setInnerTextReferenceSequenceRange(Range.closed(bedFeature.getCdsStart(), bedFeature.getCdsEnd()))
                         .setInnerTextRefSeqTranslator(referenceSequence -> {
-                            String aminoAcidSequence = AminoAcid.getAminoAcid(referenceSequence, strand == Strand.POSITIVE);
+                            StringBuilder trimmedToExons = new StringBuilder();
+                            bedFeature.getExons().asRanges().forEach(exon -> {
+                                trimmedToExons.append(referenceSequence.substring(exon.lowerEndpoint(), exon.upperEndpoint()));
+                            });
+                            String aminoAcidSequence = AminoAcid.getAminoAcid(trimmedToExons.toString(), strand == Strand.POSITIVE);
 //                            int startIndex = intersectingRange.lowerEndpoint() - bedFeature.getCdsStart() + bedFeature.getRange().lowerEndpoint();
 //                            int endIndex = intersectingRange.upperEndpoint() - bedFeature.getCdsStart() + bedFeature.getRange().lowerEndpoint();
 //                            int width = endIndex - startIndex;

@@ -242,20 +242,18 @@ public class App extends Component<AppProps, AppState> {
 //                    eventBus.post(new ClickDragEndEvent(rangeBoundedDragEventLocation, screenPoint2DFromMouseEvent, selectionRectangle));
 //                }
             } else //                eventBus.post(new ClickDragCancelEvent());
-            {
-                if (event.getClickCount() >= 2) {
-                    //eventBus.post(new MouseDoubleClickEvent(rangeBoundedDragEventLocation, screenPoint2DFromMouseEvent));
-                    //drawZoomCoordinateLine();
-                } else {
-                    this.getState().getTrackRenderers().stream().filter(tr -> tr instanceof CoordinateTrackRenderer).findFirst().ifPresent(tr -> {
-                        double xFactor = this.getState().getxFactor();
-                        final double visibleVirtualCoordinatesX = Math.floor(tr.getCanvasContext().getBoundingRect().getWidth() / xFactor);
-                        double xOffset = Math.round((tr.getModelWidth() - visibleVirtualCoordinatesX) * (this.getState().getScrollX() / 100));
-                        double zoomStripeCoordinate = Math.floor((event.getX() / xFactor)
-                                + xOffset);
-                        AppStore.getStore().updateZoomStripe(zoomStripeCoordinate);
-                    });
-                }
+            if (event.getClickCount() >= 2) {
+                //eventBus.post(new MouseDoubleClickEvent(rangeBoundedDragEventLocation, screenPoint2DFromMouseEvent));
+                //drawZoomCoordinateLine();
+            } else {
+                this.getState().getTrackRenderers().stream().filter(tr -> tr instanceof CoordinateTrackRenderer).findFirst().ifPresent(tr -> {
+                    double xFactor = this.getState().getxFactor();
+                    final double visibleVirtualCoordinatesX = Math.floor(tr.getCanvasContext().getBoundingRect().getWidth() / xFactor);
+                    double xOffset = Math.round((tr.getModelWidth() - visibleVirtualCoordinatesX) * (this.getState().getScrollX() / 100));
+                    double zoomStripeCoordinate = Math.floor((event.getX() / xFactor)
+                            + xOffset);
+                    AppStore.getStore().updateZoomStripe(zoomStripeCoordinate);
+                });
             }
             mouseEvents.clear();
 //            eventBus.post(new SelectionChangeEvent());
@@ -721,36 +719,52 @@ public class App extends Component<AppProps, AppState> {
             //Platform.runLater(() -> {
             newValue.ifPresent(genomeVersion -> {
 
-                this.getProps().getLabelPane().getChildren().clear();
-                double xFactor = exponentialScaleTransform(
-                        this.getProps().getCanvasPane(),
-                        this.getState().gethSlider()
-                );
+                Platform.runLater(() -> {
+                    this.getProps().getLabelPane().getChildren().clear();
 
-                AppStore.getStore().update(
-                        this.getState().getScrollX(),
-                        0,
-                        0,
-                        0,
-                        0,
-                        true,
-                        genomeVersion,
-                        this.getState().getSelectedChromosome(),
-                        Optional.empty(),
-                        xFactor,
-                        1
-                );
-                updateCanvasContexts();
+                    double xFactor = exponentialScaleTransform(
+                            this.getProps().getCanvasPane(),
+                            this.getState().gethSlider()
+                    );
+                    updateCanvasContexts();
+                    AppStore.getStore().update(
+                            this.getState().getScrollX(),
+                            0,
+                            0,
+                            0,
+                            0,
+                            true,
+                            genomeVersion,
+                            this.getState().getSelectedChromosome(),
+                            Optional.empty(),
+                            xFactor,
+                            1
+                    );
+
+                    AppStore.getStore().update(
+                            this.getState().getScrollX(),
+                            0,
+                            0,
+                            0,
+                            0,
+                            true,
+                            genomeVersion,
+                            this.getState().getSelectedChromosome(),
+                            Optional.empty(),
+                            xFactor,
+                            1
+                    );
+                    updateCanvasContexts();
+                });
             });
-        });
 //                newValue.ifPresent(genomeVersion -> {
 //                    if (this.getProps().getSelectedGenomeVersion() != genomeVersion) {
 //                        //AppStore.getStore().setSelectedGenomeVersion(genomeVersion);
-        //updateTrackRenderers(genomeVersion);
+            //updateTrackRenderers(genomeVersion);
 //                    }
 //                });
-        //});
-    }
+            //});
+        }
 
     private boolean selectedChromosomeNotNull() {
         return this.getState().getSelectedChromosome() != null;
