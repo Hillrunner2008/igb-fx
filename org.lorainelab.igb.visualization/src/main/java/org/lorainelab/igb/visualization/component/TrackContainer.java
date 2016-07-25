@@ -53,10 +53,11 @@ public class TrackContainer extends Component<TrackContainerProps, TrackContaine
         //LOG.info("render track container");
 
         this.getState().getTrackRenderer().clearCanvas();
+        this.getState().getTrackRenderer().setIsMultiSelectModeActive(this.getProps().getCanvasPane().isMultiSelectModeActive());
         this.getState().getTrackRenderer().setLastMouseClickedPoint(this.getProps().getMouseClickLocation());
         this.getState().getTrackRenderer().setLastMouseDragPoint(this.getProps().getLocalPoint());
         this.getState().getTrackRenderer().setMouseDragging(this.getProps().isMouseDragging());
-        
+
         scaleCanvas();
         ScaleEvent scaleEvent = new ScaleEvent(this.getState().gethSlider(), this.getState().getvSlider(), this.getState().getScrollX(), this.getState().getScrollY());
         this.getProps().getCanvasPane().handleScaleEvent(scaleEvent);
@@ -64,12 +65,7 @@ public class TrackContainer extends Component<TrackContainerProps, TrackContaine
         TrackLabel trackLabel = this.getState().getTrackRenderer().getTrackLabel();
         trackLabel.setDimensions(this.getProps().getLabelPane());
         StackPane content = trackLabel.getContent();
-        //TODO: fix issues with multiple labels
-        try {
-            this.getProps().getLabelPane().getChildren().add(content);
-        } catch (Exception ex) {
-            //
-        }
+        this.getProps().getLabelPane().getChildren().add(content);
 
         return Lists.newArrayList();
     }

@@ -52,6 +52,7 @@ public interface TrackRenderer {
     void setZoomStripeCoordinate(double zoomStripeCoordinate);
 
     void setLastMouseClickedPoint(Point2D point);
+    void setIsMultiSelectModeActive(boolean multiSelectModeActive);
 
     void setLastMouseDragPoint(Point2D point);
     

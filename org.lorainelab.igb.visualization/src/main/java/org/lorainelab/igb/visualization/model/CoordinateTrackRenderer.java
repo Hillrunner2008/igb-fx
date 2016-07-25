@@ -451,4 +451,9 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         return trackLabel;
     }
 
+    @Override
+    public void setIsMultiSelectModeActive(boolean multiSelectModeActive) {
+        //do nothing for now since this may not be a relevant signal for coordinate track
+    }
+
 }

@@ -215,7 +215,7 @@ public class App extends Component<AppProps, AppState> {
             resetZoomStripe();
             List<EventType<? extends MouseEvent>> types = mouseEvents.stream().map(e -> e.getEventType()).collect(Collectors.toList());
             Point2D rangeBoundedDragEventLocation = getRangeBoundedDragEventLocation(event);
-            //final Point2D screenPoint2DFromMouseEvent = getScreenPoint2DFromMouseEvent(event);
+            final Point2D screenPoint2DFromMouseEvent = getScreenPoint2DFromMouseEvent(event);
             if (types.contains(MouseEvent.MOUSE_DRAGGED)) {
                 //Rectangle2D selectionRectangle = getSelectionRectangle(event);
                 this.getState().getTrackRenderers().stream().filter(tr -> tr instanceof CoordinateTrackRenderer).findFirst().ifPresent(tr -> {
@@ -246,19 +246,36 @@ public class App extends Component<AppProps, AppState> {
 //                } else {
 //                    eventBus.post(new ClickDragEndEvent(rangeBoundedDragEventLocation, screenPoint2DFromMouseEvent, selectionRectangle));
 //                }
-            } else //                eventBus.post(new ClickDragCancelEvent());
-            if (event.getClickCount() >= 2) {
-                //eventBus.post(new MouseDoubleClickEvent(rangeBoundedDragEventLocation, screenPoint2DFromMouseEvent));
-                //drawZoomCoordinateLine();
             } else {
-                this.getState().getTrackRenderers().stream().filter(tr -> tr instanceof CoordinateTrackRenderer).findFirst().ifPresent(tr -> {
-                    double xFactor = this.getState().getxFactor();
-                    final double visibleVirtualCoordinatesX = Math.floor(tr.getCanvasContext().getBoundingRect().getWidth() / xFactor);
-                    double xOffset = Math.round((tr.getModelWidth() - visibleVirtualCoordinatesX) * (this.getState().getScrollX() / 100));
-                    double zoomStripeCoordinate = Math.floor((event.getX() / xFactor)
-                            + xOffset);
-                    AppStore.getStore().updateZoomStripe(zoomStripeCoordinate);
-                });
+                if (event.getClickCount() >= 2) {
+                    this.getProps().getSelectionInfoService().getSelectedGlyphs().clear();
+                    this.getState().getTrackRenderers().stream()
+                            .filter(tr -> tr instanceof ZoomableTrackRenderer)
+                            .map(tr -> ZoomableTrackRenderer.class.cast(tr)).findFirst().ifPresent(tr
+                            -> tr.getTrack()
+                                    .getGlyphs()
+                                    .stream()
+                                    .filter(glyph -> glyph.isSelected())
+                                    .findFirst().ifPresent(glyphToJumpZoom -> {
+                                        jumpZoom(glyphToJumpZoom.getRenderBoundingRect(), tr, event);
+                                        this.getProps().getSelectionInfoService().getSelectedGlyphs().add(glyphToJumpZoom);
+                                    }));
+                    //eventBus.post(new MouseDoubleClickEvent(rangeBoundedDragEventLocation, screenPoint2DFromMouseEvent));
+                } else {
+                    this.getProps().getSelectionInfoService().getSelectedGlyphs().clear();
+                    this.getProps().getSelectionInfoService().getSelectedGlyphs().addAll(
+                            this.getState().getTrackRenderers().stream()
+                                    .filter(tr -> tr instanceof ZoomableTrackRenderer)
+                                    .map(tr -> ZoomableTrackRenderer.class.cast(tr)).flatMap(tr
+                                    -> tr.getTrack()
+                                            .getGlyphs()
+                                            .stream()
+                                            .filter(glyph -> glyph.isSelected()))
+                                    .collect(Collectors.toList())
+                    );
+
+                }
+                updateZoomStripe(event);
             }
             mouseEvents.clear();
 //            eventBus.post(new SelectionChangeEvent());
@@ -285,6 +302,17 @@ public class App extends Component<AppProps, AppState> {
 //                pos -> new MouseStationaryStartEvent(pos),
 //                stop -> new MouseStationaryEndEvent()))
 //                .subscribe(evt -> eventBus.post(evt));
+    }
+
+    private void updateZoomStripe(MouseEvent event) {
+        this.getState().getTrackRenderers().stream().filter(tr -> tr instanceof CoordinateTrackRenderer).findFirst().ifPresent(tr -> {
+            double xFactor = this.getState().getxFactor();
+            final double visibleVirtualCoordinatesX = Math.floor(tr.getCanvasContext().getBoundingRect().getWidth() / xFactor);
+            double xOffset = Math.round((tr.getModelWidth() - visibleVirtualCoordinatesX) * (this.getState().getScrollX() / 100));
+            double zoomStripeCoordinate = Math.floor((event.getX() / xFactor)
+                    + xOffset);
+            AppStore.getStore().updateZoomStripe(zoomStripeCoordinate);
+        });
     }
 
 //    private Rectangle2D getSelectionRectangle(MouseEvent event) {
