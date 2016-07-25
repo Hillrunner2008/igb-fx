@@ -25,6 +25,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -271,118 +272,7 @@ public class MainController {
 
     }
 
-//    private void initializeZoomScrollBar() {
-//        slider.setOnMousePressed((MouseEvent event) -> {
-//            lastDragX = event.getX();
-//        });
-//        leftSliderThumb.setOnMousePressed((MouseEvent event) -> {
-//            lastDragX = event.getX();
-//        });
-//        rightSliderThumb.setOnMousePressed((MouseEvent event) -> {
-//            lastDragX = event.getX();
-//        });
-//
-//        rightSliderThumb.setOnMouseDragged((MouseEvent event) -> {
-//            double increment = Math.round(event.getX() - lastDragX);
-//            double newSliderValue = slider.getWidth() + increment;
-//            double newRightThumbValue = rightSliderThumb.getX() + increment;
-//            if (newSliderValue < TOTAL_SLIDER_THUMB_WIDTH) {
-//                newSliderValue = TOTAL_SLIDER_THUMB_WIDTH;
-//                newRightThumbValue = rightSliderThumb.getX() - slider.getWidth() + newSliderValue;
-//            }
-//            if (newSliderValue > xSliderPane.getWidth()) {
-//                double tmp = slider.getWidth() + (xSliderPane.getWidth() - slider.getWidth() - slider.getX());
-//                double diff = Math.abs(newSliderValue - tmp);
-//                newRightThumbValue -= diff;
-//                newSliderValue = tmp;
-//            }
-//            if (newSliderValue >= 0 && newSliderValue <= (xSliderPane.getWidth() - slider.getX())) {
-//                slider.setWidth(newSliderValue);
-//                rightSliderThumb.setX(newRightThumbValue);
-//                double max = xSliderPane.getWidth() - TOTAL_SLIDER_THUMB_WIDTH;
-//                double current = slider.getWidth() - TOTAL_SLIDER_THUMB_WIDTH;
-//
-//                double maxSlider = xSliderPane.getWidth() - slider.getWidth();
-//                double currentSlider = slider.getX();
-//                double newScrollX;
-//                if (maxSlider < 0) {
-//                    newScrollX = 0;
-//                } else {
-//                    newScrollX = (currentSlider / maxSlider) * 100;
-//                }
-//                ignoreScrollXEvent = true;
-//                scrollX.setValue(newScrollX);
-//                hSliderWidget.setValue((1 - (current / max)) * 100);
-//            }
-//            lastDragX = event.getX();
-//        });
-//
-//        leftSliderThumb.setOnMouseDragged((MouseEvent event) -> {
-//            double increment = Math.round(event.getX() - lastDragX);
-//            double newSliderValue = slider.getX() + increment;
-//            double newLeftThumbValue = leftSliderThumb.getX() + increment;
-//            double newSliderWidth = (slider.getWidth() - increment);
-//            if (newSliderWidth < TOTAL_SLIDER_THUMB_WIDTH) {
-//                newSliderWidth = TOTAL_SLIDER_THUMB_WIDTH;
-//                newSliderValue = slider.getX() + slider.getWidth() - newSliderWidth;
-//                newLeftThumbValue = leftSliderThumb.getX() + slider.getWidth() - newSliderWidth;
-//            }
-//            if (newSliderValue < 0) {
-//                newSliderValue = 0;
-//                newLeftThumbValue = 0;
-//                newSliderWidth = slider.getWidth() + slider.getX();
-//            }
-//            if (newSliderValue > xSliderPane.getWidth()) {
-//                newSliderValue = xSliderPane.getWidth();
-//            }
-//            if (newSliderValue >= 0 && newSliderValue <= xSliderPane.getWidth()) {
-//                slider.setX(newSliderValue);
-//                slider.setWidth(newSliderWidth);
-//                leftSliderThumb.setX(newLeftThumbValue);
-//                double max = xSliderPane.getWidth() - TOTAL_SLIDER_THUMB_WIDTH;
-//                double current = slider.getWidth() - TOTAL_SLIDER_THUMB_WIDTH;
-//
-//                double maxSlider = xSliderPane.getWidth() - slider.getWidth();
-//                double currentSlider = slider.getX();
-//                double newScrollX;
-//                if (maxSlider <= 0) {
-//                    newScrollX = 0;
-//                } else {
-//                    newScrollX = (currentSlider / maxSlider) * 100;
-//                }
-//                ignoreScrollXEvent = true;
-//                scrollX.setValue(newScrollX);
-//                hSliderWidget.setValue((1 - (current / max)) * 100);
-//            }
-//            lastDragX = event.getX();
-//        });
-//
-//        slider.setOnMouseDragged((MouseEvent event) -> {
-//
-//            double increment = Math.round(event.getX() - lastDragX);
-//            double newSliderValue = slider.getX() + increment;
-//            double newRightThumbValue = rightSliderThumb.getX() + increment;
-//            double newLeftThumbValue = leftSliderThumb.getX() + increment;
-//            if (newSliderValue < 0) {
-//                newSliderValue = 0;
-//                newLeftThumbValue = 0;
-//                newRightThumbValue = rightSliderThumb.getX() - slider.getX();
-//            } else if (newSliderValue > (xSliderPane.getWidth() - slider.getWidth())) {
-//                newSliderValue = (xSliderPane.getWidth() - slider.getWidth());
-//                newLeftThumbValue = newSliderValue;
-//                newRightThumbValue = rightSliderThumb.getX() + xSliderPane.getWidth() - slider.getX() - slider.getWidth();
-//
-//            }
-//            slider.setX(newSliderValue);
-//            leftSliderThumb.setX(newLeftThumbValue);
-//            rightSliderThumb.setX(newRightThumbValue);
-//            double max = xSliderPane.getWidth() - slider.getWidth();
-//            double current = slider.getX();
-//            resetZoomStripe();
-//            scrollX.setValue((current / max) * 100);
-//            lastDragX = event.getX();
-//        });
-//    }
+    
     private static final int TOTAL_SLIDER_THUMB_WIDTH = 30;
 
 //    public void drawZoomCoordinateLine() {
