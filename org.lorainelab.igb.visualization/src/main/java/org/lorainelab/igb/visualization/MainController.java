@@ -103,7 +103,7 @@ public class MainController {
 
     @FXML
     private PlusMinusSlider plusMinusSlider;
-
+    
     private ToolBarManager toolbarProvider;
     private Pane labelPane;
     private Set<TrackRenderer> trackRenderers;

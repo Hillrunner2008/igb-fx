@@ -21,7 +21,6 @@ import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
 import org.lorainelab.igb.data.model.glyph.Glyph;
 import org.lorainelab.igb.visualization.CanvasPane;
 import org.lorainelab.igb.visualization.event.ClickDragEndEvent;
-import org.lorainelab.igb.visualization.event.MouseClickedEvent;
 import org.lorainelab.igb.visualization.event.MouseDoubleClickEvent;
 import org.lorainelab.igb.visualization.event.MouseStationaryEndEvent;
 import org.lorainelab.igb.visualization.event.MouseStationaryStartEvent;
@@ -48,8 +47,10 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     private final GraphicsContext gc;
     private int weight;
     private double scrollY;
+    private boolean multiSelectModeActive;
 
     public ZoomableTrackRenderer(CanvasPane canvasPane, Track track, Chromosome chromosome) {
+        multiSelectModeActive = false;
         this.weight = 0;
         this.track = track;
         this.modelWidth = chromosome.getLength();
@@ -65,9 +66,36 @@ public class ZoomableTrackRenderer implements TrackRenderer {
 
     }
 
-    public void setLastMouseClickedPoint(Point2D point) {
-        if (!canvasContext.getBoundingRect().contains(point)) {
+    public void setLastMouseClickedPoint(Point2D localPoint) {
+        if (!canvasContext.getBoundingRect().contains(localPoint)) {
+            if (!multiSelectModeActive) {
+                clearSelections();
+            }
             return;
+        }
+        Rectangle2D mouseEventBoundingBox = canvasToViewCoordinates(localPoint);
+        if (!multiSelectModeActive) {
+            clearSelections();
+        }
+        List<CompositionGlyph> selections = track.getSlotMap().values().stream()
+                .filter(glyph -> view.getBoundingRect().intersects(glyph.getRenderBoundingRect()))
+                .filter(glyph -> glyph.getRenderBoundingRect().intersects(mouseEventBoundingBox)).collect(Collectors.toList());
+        if (selections.size() > 1) {
+            selections.forEach(glyph -> glyph.setIsSelected(true));
+        } else {
+            selections.forEach(glyph -> {
+                boolean subSelectionActive = false;
+                for (Glyph g : glyph.getChildren()) {
+                    if (g.isSelectable()) {
+                        if (g.getRenderBoundingRect().intersects(mouseEventBoundingBox)) {
+                            g.setIsSelected(true);
+                            subSelectionActive = true;
+                            break;
+                        }
+                    }
+                }
+                glyph.setIsSelected(true);//set this flag regardless of subselection 
+            });
         }
     }
 
@@ -76,7 +104,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
             return;
         }
     }
-    
+
     public void setMouseDragging(boolean isMouseDragging) {
         if (!isMouseDragging) {
 //            lastMouseClickX = -1;
@@ -205,41 +233,39 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         hideTooltip();
     }
 
-    @Subscribe
-    private void handleMouseClickEvent(MouseClickedEvent event) {
-        if (!canvasContext.getBoundingRect().contains(event.getLocal())) {
-            if (!event.isMultiSelectModeActive()) {
-                clearSelections();
-            }
-            return;
-        }
-        Rectangle2D mouseEventBoundingBox = canvasToViewCoordinates(event.getLocal());
-        if (!event.isMultiSelectModeActive()) {
-            clearSelections();
-        }
-        List<CompositionGlyph> selections = track.getSlotMap().values().stream()
-                .filter(glyph -> view.getBoundingRect().intersects(glyph.getRenderBoundingRect()))
-                .filter(glyph -> glyph.getRenderBoundingRect().intersects(mouseEventBoundingBox)).collect(Collectors.toList());
-        if (selections.size() > 1) {
-            selections.forEach(glyph -> glyph.setIsSelected(true));
-        } else {
-            selections.forEach(glyph -> {
-                boolean subSelectionActive = false;
-                for (Glyph g : glyph.getChildren()) {
-                    if (g.isSelectable()) {
-                        if (g.getRenderBoundingRect().intersects(mouseEventBoundingBox)) {
-                            g.setIsSelected(true);
-                            subSelectionActive = true;
-                            break;
-                        }
-                    }
-                }
-                glyph.setIsSelected(true);//set this flag regardless of subselection 
-            });
-        }
-        render();
-    }
-
+//    private void handleMouseClickEvent(MouseClickedEvent event) {
+//        if (!canvasContext.getBoundingRect().contains(event.getLocal())) {
+//            if (!event.isMultiSelectModeActive()) {
+//                clearSelections();
+//            }
+//            return;
+//        }
+//        Rectangle2D mouseEventBoundingBox = canvasToViewCoordinates(event.getLocal());
+//        if (!event.isMultiSelectModeActive()) {
+//            clearSelections();
+//        }
+//        List<CompositionGlyph> selections = track.getSlotMap().values().stream()
+//                .filter(glyph -> view.getBoundingRect().intersects(glyph.getRenderBoundingRect()))
+//                .filter(glyph -> glyph.getRenderBoundingRect().intersects(mouseEventBoundingBox)).collect(Collectors.toList());
+//        if (selections.size() > 1) {
+//            selections.forEach(glyph -> glyph.setIsSelected(true));
+//        } else {
+//            selections.forEach(glyph -> {
+//                boolean subSelectionActive = false;
+//                for (Glyph g : glyph.getChildren()) {
+//                    if (g.isSelectable()) {
+//                        if (g.getRenderBoundingRect().intersects(mouseEventBoundingBox)) {
+//                            g.setIsSelected(true);
+//                            subSelectionActive = true;
+//                            break;
+//                        }
+//                    }
+//                }
+//                glyph.setIsSelected(true);//set this flag regardless of subselection 
+//            });
+//        }
+//        render();
+//    }
     @Subscribe
     private void handleMouseDoubleClickEvent(MouseDoubleClickEvent event) {
         if (canvasContext.isVisible() && canvasContext.getBoundingRect().contains(event.getLocal())) {
@@ -366,4 +392,8 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         return track;
     }
 
+    @Override
+    public void setIsMultiSelectModeActive(boolean multiSelectModeActive) {
+        this.multiSelectModeActive = multiSelectModeActive;
+    }
 }

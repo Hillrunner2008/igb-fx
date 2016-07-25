@@ -295,6 +295,10 @@ public class CanvasPane extends Region {
         this.mainController = controller;
     }
 
+    public boolean isMultiSelectModeActive() {
+        return multiSelectModeActive;
+    }
+    
     @Reference
     public void setSelectionInfoService(SelectionInfoService selectionInfoService) {
         this.selectionInfoService = selectionInfoService;

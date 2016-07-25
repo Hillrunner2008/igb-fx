@@ -37,14 +37,15 @@ public class BedRenderer implements Renderer<BedFeature> {
                 .filter(exonRange -> exonRange.isConnected(cdsRange))
                 .map(exonRange -> exonRange.intersection(cdsRange))
                 .map(intersectingRange -> Rectangle.start(intersectingRange.lowerEndpoint(), intersectingRange.upperEndpoint() - intersectingRange.lowerEndpoint())
-                        .addAttribute(Rectangle.Attribute.THICK)
-                        .setInnerTextReferenceSequenceRange(Range.closed(bedFeature.getCdsStart(), bedFeature.getCdsEnd()))
-                        .setInnerTextRefSeqTranslator(referenceSequence -> {
-                            StringBuilder trimmedToExons = new StringBuilder();
-                            bedFeature.getExons().asRanges().forEach(exon -> {
-                                trimmedToExons.append(referenceSequence.substring(exon.lowerEndpoint(), exon.upperEndpoint()));
-                            });
-                            String aminoAcidSequence = AminoAcid.getAminoAcid(trimmedToExons.toString(), strand == Strand.POSITIVE);
+                .addAttribute(Rectangle.Attribute.THICK)
+                .setInnerTextReferenceSequenceRange(bedFeature.getRange())
+                .setInnerTextRefSeqTranslator(referenceSequence -> {
+                    StringBuilder trimmedToExons = new StringBuilder();
+                    Range<Integer> cds = Range.closed(bedFeature.getCdsStart(), bedFeature.getCdsEnd());
+                    bedFeature.getExons().asRanges().forEach(exon -> {
+                        trimmedToExons.append(referenceSequence.substring(exon.lowerEndpoint(), exon.upperEndpoint()));
+                    });
+                    String aminoAcidSequence = AminoAcid.getAminoAcid(trimmedToExons.toString(), strand == Strand.POSITIVE);
 //                            int startIndex = intersectingRange.lowerEndpoint() - bedFeature.getCdsStart() + bedFeature.getRange().lowerEndpoint();
 //                            int endIndex = intersectingRange.upperEndpoint() - bedFeature.getCdsStart() + bedFeature.getRange().lowerEndpoint();
 //                            int width = endIndex - startIndex;
@@ -58,9 +59,9 @@ public class BedRenderer implements Renderer<BedFeature> {
 //                                }
 //                            }
 
-                            return aminoAcidSequence;
-                        })
-                        .build());
+                    return aminoAcidSequence;
+                })
+                .build());
     }
 
 }
