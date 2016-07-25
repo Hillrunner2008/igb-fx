@@ -520,7 +520,7 @@ public class App extends Component<AppProps, AppState> {
         Canvas canvas = this.getProps().getCanvasPane().getCanvas();
         viewPortManager = new ViewPortManager(canvas, this.getState().getTrackRenderers(), 0, 0);
         this.getProps().getvSlider().valueProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-            updateCanvasContexts();
+            //updateCanvasContexts();
         });
         this.getProps().gethSlider().valueProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
 
@@ -536,7 +536,7 @@ public class App extends Component<AppProps, AppState> {
                         newValue.doubleValue()
                 );
                 AppStore.getStore().updateHSlider(newValue.doubleValue(), scrollX, xFactor, 1);
-                updateCanvasContexts();
+                //updateCanvasContexts();
                 syncWidgetSlider();
                 lastHSliderFire = newValue.doubleValue();
 
@@ -554,14 +554,14 @@ public class App extends Component<AppProps, AppState> {
             Platform.runLater(() -> {
                 refreshSliderWidget();
             });
-            updateCanvasContexts();
+            //updateCanvasContexts();
         });
 
         canvas.heightProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             Platform.runLater(() -> {
                 refreshSliderWidget();
             });
-            updateCanvasContexts();
+            //updateCanvasContexts();
         });
 
         this.getProps().getScrollX().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
@@ -573,12 +573,12 @@ public class App extends Component<AppProps, AppState> {
             if (ignoreScrollXEvent) {
                 ignoreScrollXEvent = false;
             } else {
-                updateCanvasContexts();
+                //updateCanvasContexts();
             }
         });
 
         this.getProps().getScrollY().valueProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-            updateCanvasContexts();
+            //updateCanvasContexts();
         });
         this.getProps().getLoadDataButton().setOnAction(action -> {
             Chromosome selectedChromosome = this.getState().getSelectedChromosome();
@@ -594,7 +594,7 @@ public class App extends Component<AppProps, AppState> {
                             Platform.runLater(() -> {
                                 //TODO: hack for refresh
                                 AppStore.getStore().noop();
-                                updateCanvasContexts();
+                                //updateCanvasContexts();
                             });
                         });
                     });
@@ -611,7 +611,7 @@ public class App extends Component<AppProps, AppState> {
                     Platform.runLater(() -> {
                         //TODO: hack for refresh
                         AppStore.getStore().noop();
-                        updateCanvasContexts();
+                        //updateCanvasContexts();
                     });
                 }).exceptionally(ex -> {
                     LOG.error(ex.getMessage(), ex);
@@ -708,7 +708,7 @@ public class App extends Component<AppProps, AppState> {
                                 xFactor,
                                 1
                         );
-                        updateCanvasContexts();
+                        //updateCanvasContexts();
                         //AppStore.getStore().noop();
                     });
                 }
@@ -740,7 +740,7 @@ public class App extends Component<AppProps, AppState> {
                         xFactor,
                         1
                 );
-                updateCanvasContexts();
+                //updateCanvasContexts();
             });
         });
 //                newValue.ifPresent(genomeVersion -> {
@@ -793,7 +793,7 @@ public class App extends Component<AppProps, AppState> {
             negativeStrandTrackRenderer.setWeight(getMaxWeight());
             Platform.runLater(() -> {
                 AppStore.getStore().addTrackRenderer(positiveStrandTrackRenderer, negativeStrandTrackRenderer);
-                updateCanvasContexts();
+                //updateCanvasContexts();
             });
         });
         gv.getLoadedDataSets().addListener((SetChangeListener.Change<? extends DataSet> change) -> {
@@ -814,7 +814,7 @@ public class App extends Component<AppProps, AppState> {
                         //AppStore.getStore().addTrackRenderer(positiveStrandTrackRenderer, negativeStrandTrackRenderer);
                         AppStore.getStore().updateTrackRenderer(Arrays.asList(loadedDataSet),
                                 Arrays.asList(positiveStrandTrackRenderer, negativeStrandTrackRenderer));
-                        updateCanvasContexts();
+                        //updateCanvasContexts();
                     });
                 }
             } else {
@@ -822,7 +822,7 @@ public class App extends Component<AppProps, AppState> {
             }
         });
         if (gv.getLoadedDataSets().isEmpty()) {
-            updateCanvasContexts();
+            //updateCanvasContexts();
         }
     }
 
@@ -878,7 +878,7 @@ public class App extends Component<AppProps, AppState> {
         //LOG.info("render app");
         this.getProps().getLabelPane().getChildren().clear();
         List<Component> toReturn = Lists.newArrayList();
-
+        LOG.info("trackrender size: {}", this.getState().getTrackRenderers());
         this.getState().getTrackRenderers().forEach(tr -> {
             TrackContainer trackContainer = new TrackContainer();
             trackContainer.withAttributes(new TrackContainerProps(
