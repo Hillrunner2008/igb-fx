@@ -8,12 +8,16 @@ import java.util.Set;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.Canvas;
 import static org.lorainelab.igb.visualization.model.TrackRenderer.SORT_BY_WEIGHT;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author dcnorris
  */
 public class ViewPortManager {
+    
+    private static final Logger LOG = LoggerFactory.getLogger(ViewPortManager.class);
 
     private static double MIN_TRACK_HEIGHT = 50;
     private static final int MAX_TRACK_HEIGHT = 1000;

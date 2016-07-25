@@ -485,7 +485,9 @@ public class App extends Component<AppProps, AppState> {
                 .filter(canvasContext -> canvasContext.isVisible())
                 .mapToDouble(canvasContext -> canvasContext.getBoundingRect().getHeight())
                 .sum();
-        this.setState(this.getState().setScrollYVisibleAmount((sum / this.getState().getTotalTrackHeight()) * 100));
+        double scrollYVisibleAmount = (sum / viewPortManager.getTotalTrackSize()) * 100;
+        this.getProps().getScrollY().setVisibleAmount(scrollYVisibleAmount);
+        //this.setState(this.getState().setScrollYVisibleAmount((sum / this.getState().getTotalTrackHeight()) * 100));
     }
 
     private double calcScrollXWithZoomStripe(double hSlider) {
@@ -522,6 +524,7 @@ public class App extends Component<AppProps, AppState> {
     final ChangeListener<Number> vSliderListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
 
         AppStore.getStore().updateVSlider(newValue.doubleValue());
+        
         updateCanvasContexts();
     };
     final ChangeListener<Number> hSliderListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
@@ -577,6 +580,7 @@ public class App extends Component<AppProps, AppState> {
         }
     };
     final ChangeListener<Number> scrollYPositionListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+        AppStore.getStore().updateScrollY(newValue.doubleValue());
         updateCanvasContexts();
     };
     final EventHandler<ActionEvent> loadDataActionListener = action -> {
