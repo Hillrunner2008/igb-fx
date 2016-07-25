@@ -716,55 +716,52 @@ public class App extends Component<AppProps, AppState> {
 
     private void initializeGenomeVersionSelectionListener() {
         this.getProps().getSelectionInfoService().getSelectedGenomeVersion().addListener((observable, oldValue, newValue) -> {
-            //Platform.runLater(() -> {
             newValue.ifPresent(genomeVersion -> {
+                this.getProps().getLabelPane().getChildren().clear();
 
-                Platform.runLater(() -> {
-                    this.getProps().getLabelPane().getChildren().clear();
+                double xFactor = exponentialScaleTransform(
+                        this.getProps().getCanvasPane(),
+                        this.getState().gethSlider()
+                );
+                updateCanvasContexts();
+                AppStore.getStore().update(
+                        this.getState().getScrollX(),
+                        0,
+                        0,
+                        0,
+                        0,
+                        true,
+                        genomeVersion,
+                        this.getState().getSelectedChromosome(),
+                        Optional.empty(),
+                        xFactor,
+                        1
+                );
 
-                    double xFactor = exponentialScaleTransform(
-                            this.getProps().getCanvasPane(),
-                            this.getState().gethSlider()
-                    );
-                    updateCanvasContexts();
-                    AppStore.getStore().update(
-                            this.getState().getScrollX(),
-                            0,
-                            0,
-                            0,
-                            0,
-                            true,
-                            genomeVersion,
-                            this.getState().getSelectedChromosome(),
-                            Optional.empty(),
-                            xFactor,
-                            1
-                    );
-
-                    AppStore.getStore().update(
-                            this.getState().getScrollX(),
-                            0,
-                            0,
-                            0,
-                            0,
-                            true,
-                            genomeVersion,
-                            this.getState().getSelectedChromosome(),
-                            Optional.empty(),
-                            xFactor,
-                            1
-                    );
-                    updateCanvasContexts();
-                });
+                AppStore.getStore().update(
+                        this.getState().getScrollX(),
+                        0,
+                        0,
+                        0,
+                        0,
+                        true,
+                        genomeVersion,
+                        this.getState().getSelectedChromosome(),
+                        Optional.empty(),
+                        xFactor,
+                        1
+                );
+                updateCanvasContexts();
             });
+        });
 //                newValue.ifPresent(genomeVersion -> {
 //                    if (this.getProps().getSelectedGenomeVersion() != genomeVersion) {
 //                        //AppStore.getStore().setSelectedGenomeVersion(genomeVersion);
-            //updateTrackRenderers(genomeVersion);
+        //updateTrackRenderers(genomeVersion);
 //                    }
 //                });
-            //});
-        }
+        //});
+    }
 
     private boolean selectedChromosomeNotNull() {
         return this.getState().getSelectedChromosome() != null;
