@@ -11,9 +11,13 @@ import javafx.application.Platform;
 public class FXUtilities {
 
     public static void runAndWait(Runnable runnable) throws InterruptedException, ExecutionException {
-        FutureTask<Void> future = new FutureTask<>(runnable, null);
-        Platform.runLater(future);
-        future.get();
+        if (Platform.isFxApplicationThread()) {
+            runnable.run();
+        } else {
+            FutureTask<Void> future = new FutureTask<>(runnable, null);
+            Platform.runLater(future);
+            future.get();
+        }
     }
 
 }

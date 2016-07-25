@@ -1,7 +1,5 @@
 package org.lorainelab.igb.visualization;
 
-import aQute.bnd.annotation.component.Activate;
-import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +21,6 @@ import org.lorainelab.igb.visualization.util.CanvasUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(immediate = true, provide = CanvasPane.class)
 public class CanvasPane extends Region {
 
     private static final Logger LOG = LoggerFactory.getLogger(CanvasPane.class);
@@ -33,20 +30,15 @@ public class CanvasPane extends Region {
     private double zoomStripeCoordinate;
     private double xOffset;
     private double visibleVirtualCoordinatesX;
-    private MainController controller;
-    private EventBusService eventBusService;
+    private MainController mainController;
     private List<MouseEvent> mouseEvents;
     private SelectionInfoService selectionInfoService;
     private boolean multiSelectModeActive;
     private Point2D clickStartPosition;
 
-    public CanvasPane() {
-    }
-
-    @Activate
-    public void activate() {
-        //eventBus = eventBusService.getEventBus();
-        //eventBus.register(this);
+    public CanvasPane(SelectionInfoService selectionInfoService, MainController mainController) {
+        this.selectionInfoService = selectionInfoService;
+        this.mainController = mainController;
         mouseEvents = new ArrayList<>();
         this.modelWidth = 1;
         canvas = new Canvas();
@@ -180,7 +172,6 @@ public class CanvasPane extends Region {
 ////            }
 //        });
 //    }
-
     private Rectangle2D getSelectionRectangle(MouseEvent event) {
         double minX;
         double maxX;
@@ -246,13 +237,12 @@ public class CanvasPane extends Region {
     public double getModelWidth() {
         return modelWidth;
     }
-    
+
 //
 //    private void drawZoomCoordinateLine(MouseEvent event) {
 //        zoomStripeCoordinate = Math.floor((event.getX() / xFactor) + xOffset);
 //        drawZoomCoordinateLine();
 //    }
-
 //    public void drawZoomCoordinateLine() {
 //        if (zoomStripeCoordinate >= 0) {
 //            clear();
@@ -273,7 +263,6 @@ public class CanvasPane extends Region {
 //            gc.restore();
 //        }
 //    }
-
     private void drawSelectionRectangle(MouseEvent event) {
         clear();
         GraphicsContext gc = canvas.getGraphicsContext2D();
@@ -303,12 +292,7 @@ public class CanvasPane extends Region {
 
     @Reference(optional = true)
     public void setMainViewController(MainController controller) {
-        this.controller = controller;
-    }
-
-    @Reference
-    public void setEventBusService(EventBusService eventBusService) {
-        this.eventBusService = eventBusService;
+        this.mainController = controller;
     }
 
     @Reference
@@ -341,4 +325,5 @@ public class CanvasPane extends Region {
             }
         });
     }
+
 }

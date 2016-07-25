@@ -1,5 +1,6 @@
 package org.lorainelab.igb.visualization;
 
+import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Sets;
@@ -25,7 +26,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -119,7 +119,6 @@ public class MainController {
     private CanvasPane canvasPane;
     private Canvas canvas;
     private double totalTrackHeight;
-    private EventBusService eventBusService;
     private TabPaneManager tabPaneManager;
     private ZoomSliderMiniMapWidget zoomSliderMiniMapWidget;
     private MenuBarManager menuBarManager;
@@ -145,6 +144,12 @@ public class MainController {
         searchAutocomplete.hide();
     }
 
+    @Activate
+    public void activate() {
+        LOG.info("MainController activated");
+        canvasPane = new CanvasPane(selectionInfoService, this);
+    }
+
     private void startApp() {
         renderComponents(
                 app.beforeComponentReady()
@@ -157,9 +162,13 @@ public class MainController {
         });
     }
 
-    @Reference
+    @Reference(unbind = "removeSearchService")
     public void setSearchService(SearchService searchService) {
         this.searchService = searchService;
+    }
+
+    public void removeSearchService(SearchService searchService) {
+        LOG.info("removeSearchService called");
     }
 
     private void initializeSearch() {
@@ -272,7 +281,6 @@ public class MainController {
 
     }
 
-    
     private static final int TOTAL_SLIDER_THUMB_WIDTH = 30;
 
 //    public void drawZoomCoordinateLine() {
@@ -425,19 +433,14 @@ public class MainController {
 //                    jumpZoom(new JumpZoomEvent(zoomFocus, coordinateRenderer));
 //                });
 //    }
-    @Reference
-    public void setCanvasPane(CanvasPane canvasPane) {
-        this.canvasPane = canvasPane;
-    }
 
-    @Reference
-    public void setEventBusService(EventBusService eventBusService) {
-        this.eventBusService = eventBusService;
-    }
-
-    @Reference
+    @Reference(unbind = "removeTabPaneManager")
     public void setTabPaneManager(TabPaneManager tabPaneManager) {
         this.tabPaneManager = tabPaneManager;
+    }
+
+    public void removeTabPaneManager(TabPaneManager tabPaneManager) {
+        LOG.info("removeTabPaneManager called");
     }
 
     @Reference(unbind = "removeMenuBarManager")
@@ -446,6 +449,7 @@ public class MainController {
     }
 
     public void removeMenuBarManager(MenuBarManager menuBarManager) {
+        LOG.info("removeMenuBarManager called");
         try {
             root.getChildren().remove(menuBarManager.getMenuBar());
         } catch (Exception ex) {
@@ -453,9 +457,13 @@ public class MainController {
         }
     }
 
-    @Reference
+    @Reference(unbind = "removeSelectionInfoService")
     public void setSelectionInfoService(SelectionInfoService selectionInfoService) {
         this.selectionInfoService = selectionInfoService;
+    }
+
+    public void removeSelectionInfoService(SelectionInfoService selectionInfoService) {
+        LOG.info("removeSelectionInfoService called");
     }
 
     @Subscribe
@@ -468,9 +476,9 @@ public class MainController {
                 .forEach(renderer -> {
                     selectionInfoService.getSelectedGlyphs().addAll(
                             renderer.getTrack().getGlyphs()
-                            .stream()
-                            .filter(glyph -> glyph.isSelected())
-                            .collect(Collectors.toList())
+                                    .stream()
+                                    .filter(glyph -> glyph.isSelected())
+                                    .collect(Collectors.toList())
                     );
                 });
     }
@@ -480,17 +488,23 @@ public class MainController {
         bottomTabPaneContainer.getChildren().add(tabPaneManager.getBottomTabPane());
     }
 
-    @Reference
+    @Reference(unbind = "removeToolbarManager")
     public void setToolbarProvider(ToolBarManager toolbarProvider) {
         this.toolbarProvider = toolbarProvider;
     }
 
+    public void removeToolbarManager(ToolBarManager toolbarProvider) {
+        LOG.info("removeToolbarManager called");
+    }
+
     @Reference(unbind = "removeFooter")
     public void setFooter(Footer footer) {
+
         this.footer = footer;
     }
 
     public void removeFooter(Footer footer) {
+        LOG.info("removeFooter called");
         try {
             root.getChildren().remove(footer);
         } catch (Exception ex) {
@@ -500,7 +514,9 @@ public class MainController {
 
     @Deactivate
     private void deactivate() {
+        LOG.info("deactivate called in maincontroller");
         if (app != null) {
+            app.close();
             AppStore.getStore().unsubscribe(app);
         }
         try {
