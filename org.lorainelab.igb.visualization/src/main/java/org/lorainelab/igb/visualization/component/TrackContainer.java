@@ -68,7 +68,7 @@ public class TrackContainer extends Component<TrackContainerProps, TrackContaine
         try {
             this.getProps().getLabelPane().getChildren().add(content);
         } catch (Exception ex) {
-            //
+            LOG.error(ex.getMessage(), ex);
         }
 
         return Lists.newArrayList();
