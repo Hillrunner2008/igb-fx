@@ -475,7 +475,7 @@ public class App extends Component<AppProps, AppState> {
 
         //TODO: MOve into other setstates
         //this.setState(this.getState().setTotalTrackHeight(viewPortManager.getTotalTrackSize()));
-//        updateScrollY();
+        updateScrollY();
         //updateTrackLabels();
     }
 
@@ -520,8 +520,9 @@ public class App extends Component<AppProps, AppState> {
     }
 
     final ChangeListener<Number> vSliderListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-        //updateCanvasContexts();
+
         AppStore.getStore().updateVSlider(newValue.doubleValue());
+        updateCanvasContexts();
     };
     final ChangeListener<Number> hSliderListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
 
