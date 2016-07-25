@@ -2,6 +2,7 @@ package org.lorainelab.igb.visualization.menubar;
 
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
+import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.TreeMultimap;
@@ -58,7 +59,7 @@ public class MenuBarManager {
         menuBarMenuContainer.put(ParentMenu.EDIT, editMenuEntries);
         menuBarMenuContainer.put(ParentMenu.TOOLS, toolsMenuEntries);
         menuBarMenuContainer.put(ParentMenu.VIEW, viewMenuEntries);
-        menuBarMenuContainer.put(ParentMenu.GENOME,genomeMenuEntries);
+        menuBarMenuContainer.put(ParentMenu.GENOME, genomeMenuEntries);
         menuBarMenuContainer.put(ParentMenu.HELP, helpMenuEntries);
         parentMenuReference = new EnumMap<>(ParentMenu.class);
         initializeMenus();
@@ -85,7 +86,7 @@ public class MenuBarManager {
         genomeMenu = new Menu("Genome");
         genomeMenu.setMnemonicParsing(true);
     }
-    
+
     private void initFileMenu() {
         fileMenu = new Menu("File");
         fileMenu.setMnemonicParsing(true);
@@ -259,7 +260,7 @@ public class MenuBarManager {
             fileMenuEntries.get(key).forEach(menuItem -> fileMenu.getItems().add(menuItem));
         });
     }
-    
+
     private void rebuildGenomeMenu() {
         genomeMenu.getItems().clear();
         genomeMenuEntries.keySet().stream().forEach(key -> {
@@ -271,4 +272,8 @@ public class MenuBarManager {
         return menuBar;
     }
 
+    @Deactivate
+    public void deactivate() {
+        LOG.info("MenuBarManager deactivated");
+    }
 }

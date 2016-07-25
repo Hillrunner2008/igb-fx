@@ -14,11 +14,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.SetChangeListener;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.event.EventType;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
@@ -45,6 +49,7 @@ import org.lorainelab.igb.visualization.util.BoundsUtil;
 import static org.lorainelab.igb.visualization.util.BoundsUtil.enforceRangeBounds;
 import static org.lorainelab.igb.visualization.util.CanvasUtils.exponentialScaleTransform;
 import static org.lorainelab.igb.visualization.util.CanvasUtils.invertExpScaleTransform;
+import static org.lorainelab.igb.visualization.util.FXUtilities.runAndWait;
 import org.reactfx.EventStream;
 import org.reactfx.EventStreams;
 import org.slf4j.Logger;
@@ -514,115 +519,116 @@ public class App extends Component<AppProps, AppState> {
         return calculatedScrollXPosition[0];
     }
 
-    private void initializeCanvas() {
-        Canvas canvas = this.getProps().getCanvasPane().getCanvas();
-        viewPortManager = new ViewPortManager(canvas, this.getState().getTrackRenderers(), 0, 0);
-        this.getProps().getvSlider().valueProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+    final ChangeListener<Number> vSlideListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+        updateCanvasContexts();
+    };
+    final ChangeListener<Number> hSliderListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+
+        if (ignoreHSliderEvent) {
+            ignoreHSliderEvent = false;
+            return;
+        }
+        final boolean isSnapEvent = newValue.doubleValue() % this.getProps().gethSlider().getMajorTickUnit() == 0;
+        if (lastHSliderFire < 0 || Math.abs(lastHSliderFire - newValue.doubleValue()) > 1 || isSnapEvent) {
+            double scrollX = calcScrollXWithZoomStripe(newValue.doubleValue());
+            double xFactor = exponentialScaleTransform(
+                    this.getProps().getCanvasPane(),
+                    newValue.doubleValue()
+            );
+            AppStore.getStore().updateHSlider(newValue.doubleValue(), scrollX, xFactor, 1);
             updateCanvasContexts();
-        });
-        this.getProps().gethSlider().valueProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+            syncWidgetSlider();
+            lastHSliderFire = newValue.doubleValue();
 
-            if (ignoreHSliderEvent) {
-                ignoreHSliderEvent = false;
-                return;
-            }
-            final boolean isSnapEvent = newValue.doubleValue() % this.getProps().gethSlider().getMajorTickUnit() == 0;
-            if (lastHSliderFire < 0 || Math.abs(lastHSliderFire - newValue.doubleValue()) > 1 || isSnapEvent) {
-                double scrollX = calcScrollXWithZoomStripe(newValue.doubleValue());
-                double xFactor = exponentialScaleTransform(
-                        this.getProps().getCanvasPane(),
-                        newValue.doubleValue()
-                );
-                AppStore.getStore().updateHSlider(newValue.doubleValue(), scrollX, xFactor, 1);
-                updateCanvasContexts();
-                syncWidgetSlider();
-                lastHSliderFire = newValue.doubleValue();
-
-            }
+        }
+    };
+    final ChangeListener<Number> hSliderWidgetListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+        boolean isNearMaxZoom = newValue.doubleValue() > 98;
+        if (lastHSliderFire < 0 || Math.abs(lastHSliderFire - newValue.doubleValue()) > 1 || isNearMaxZoom) {
+            final double xFactor = this.getState().getxFactor();
+            syncHSlider(xFactor);
+            lastHSliderFire = newValue.doubleValue();
+        }
+    };
+    final ChangeListener<Number> widthPropertyListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+        Platform.runLater(() -> {
+            refreshSliderWidget();
         });
-        this.getProps().gethSliderWidget().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-            boolean isNearMaxZoom = newValue.doubleValue() > 98;
-            if (lastHSliderFire < 0 || Math.abs(lastHSliderFire - newValue.doubleValue()) > 1 || isNearMaxZoom) {
-                final double xFactor = this.getState().getxFactor();
-                syncHSlider(xFactor);
-                lastHSliderFire = newValue.doubleValue();
-            }
+        updateCanvasContexts();
+    };
+    final ChangeListener<Number> heightPropertyListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+        Platform.runLater(() -> {
+            refreshSliderWidget();
         });
-        canvas.widthProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-            Platform.runLater(() -> {
-                refreshSliderWidget();
-            });
+        updateCanvasContexts();
+    };
+    final ChangeListener<Number> scrollXPropertyListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+        final double boundedScrollValue = enforceRangeBounds(newValue.doubleValue(), 0, 100);
+        if (boundedScrollValue != newValue.doubleValue()) {
+            this.getProps().getScrollX().setValue(boundedScrollValue);
+            return;
+        }
+        if (ignoreScrollXEvent) {
+            ignoreScrollXEvent = false;
+        } else {
             updateCanvasContexts();
-        });
+        }
+    };
+    final ChangeListener<Number> scrollYPositionListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+        updateCanvasContexts();
+    };
+    final EventHandler<ActionEvent> loadDataActionListener = action -> {
+        Chromosome selectedChromosome = this.getState().getSelectedChromosome();
+        GenomeVersion selectedGenomeVersion = this.getState().getSelectedGenomeVersion();
+        Optional.ofNullable(selectedGenomeVersion).ifPresent(genomeVersion -> {
+            Optional.ofNullable(selectedChromosome).ifPresent(chr -> {
+                genomeVersion.getLoadedDataSets().forEach(dataSet -> {
+                    CompletableFuture.supplyAsync(() -> {
+                        dataSet.loadRegion(selectedChromosome.getName(), getCurrentRange());
+                        return null;
+                    }).thenRun(() -> {
 
-        canvas.heightProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-            Platform.runLater(() -> {
-                refreshSliderWidget();
-            });
-            updateCanvasContexts();
-        });
-
-        this.getProps().getScrollX().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-            final double boundedScrollValue = enforceRangeBounds(newValue.doubleValue(), 0, 100);
-            if (boundedScrollValue != newValue.doubleValue()) {
-                this.getProps().getScrollX().setValue(boundedScrollValue);
-                return;
-            }
-            if (ignoreScrollXEvent) {
-                ignoreScrollXEvent = false;
-            } else {
-                updateCanvasContexts();
-            }
-        });
-
-        this.getProps().getScrollY().valueProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-            updateCanvasContexts();
-        });
-        this.getProps().getLoadDataButton().setOnAction(action -> {
-            Chromosome selectedChromosome = this.getState().getSelectedChromosome();
-            GenomeVersion selectedGenomeVersion = this.getState().getSelectedGenomeVersion();
-            Optional.ofNullable(selectedGenomeVersion).ifPresent(genomeVersion -> {
-                Optional.ofNullable(selectedChromosome).ifPresent(chr -> {
-                    genomeVersion.getLoadedDataSets().forEach(dataSet -> {
-                        CompletableFuture.supplyAsync(() -> {
-                            dataSet.loadRegion(selectedChromosome.getName(), getCurrentRange());
-                            return null;
-                        }).thenRun(() -> {
-
-                            Platform.runLater(() -> {
-                                //TODO: hack for refresh
-                                AppStore.getStore().noop();
-                                updateCanvasContexts();
-                            });
+                        Platform.runLater(() -> {
+                            //TODO: hack for refresh
+                            AppStore.getStore().noop();
+                            updateCanvasContexts();
                         });
                     });
                 });
             });
         });
-        this.getProps().getLoadSequenceButton().setOnAction(action -> {
-            Chromosome selectedChromosome = this.getState().getSelectedChromosome();
-            Optional.ofNullable(selectedChromosome).ifPresent(chr -> {
-                CompletableFuture.supplyAsync(() -> {
-                    chr.loadRegion(getCurrentRange());
-                    return null;
-                }).thenRun(() -> {
-                    Platform.runLater(() -> {
-                        //TODO: hack for refresh
-                        AppStore.getStore().noop();
-                        updateCanvasContexts();
-                    });
-                }).exceptionally(ex -> {
-                    LOG.error(ex.getMessage(), ex);
-                    return null;
+    };
+    final EventHandler<ActionEvent> loadSequenceActionListener = action -> {
+        Chromosome selectedChromosome = this.getState().getSelectedChromosome();
+        Optional.ofNullable(selectedChromosome).ifPresent(chr -> {
+            CompletableFuture.supplyAsync(() -> {
+                chr.loadRegion(getCurrentRange());
+                return null;
+            }).thenRun(() -> {
+                Platform.runLater(() -> {
+                    //TODO: hack for refresh
+                    AppStore.getStore().noop();
+                    updateCanvasContexts();
                 });
+            }).exceptionally(ex -> {
+                LOG.error(ex.getMessage(), ex);
+                return null;
             });
         });
+    };
 
-        //fixes initialization race condition
-//        Platform.runLater(() -> {
-//            refreshSliderWidget();
-//            AppStore.getStore().noop();
-//        });
+    private void initializeCanvas() {
+        Canvas canvas = this.getProps().getCanvasPane().getCanvas();
+        viewPortManager = new ViewPortManager(canvas, this.getState().getTrackRenderers(), 0, 0);
+        this.getProps().getvSlider().valueProperty().addListener(vSlideListener);
+        this.getProps().gethSlider().valueProperty().addListener(hSliderListener);
+        this.getProps().gethSliderWidget().addListener(hSliderWidgetListener);
+        canvas.widthProperty().addListener(widthPropertyListener);
+        canvas.heightProperty().addListener(heightPropertyListener);
+        this.getProps().getScrollX().addListener(scrollXPropertyListener);
+        this.getProps().getScrollY().valueProperty().addListener(scrollYPositionListener);
+        this.getProps().getLoadDataButton().setOnAction(loadDataActionListener);
+        this.getProps().getLoadSequenceButton().setOnAction(loadSequenceActionListener);
     }
 
     private Range<Integer> getCurrentRange() {
@@ -675,93 +681,84 @@ public class App extends Component<AppProps, AppState> {
         return this.getProps().getScrollX();
     }
 
-    private void initializeChromosomeSelectionListener() {
-        this.getProps().getSelectionInfoService().getSelectedChromosome().addListener((observable, oldValue, newValue) -> {
-            newValue.ifPresent(newChromosomeSelection -> {
-                Chromosome selectedChromosome = this.getProps().getSelectedChromosome();
-                if (selectedChromosome != newChromosomeSelection) {
-                    this.getProps().getSelectionInfoService().getSelectedGenomeVersion().get().ifPresent(gv -> {
-                        Optional[] coordinateTrackRenderer = new Optional[]{Optional.empty()};
-                        final Chromosome chromosome = newChromosomeSelection;
-                        coordinateTrackRenderer[0] = Optional.of(new CoordinateTrackRenderer(this.getProps().getCanvasPane(), chromosome));
-                        ((CoordinateTrackRenderer) coordinateTrackRenderer[0].get()).setWeight(getMinWeight());
-                        loadDataSets(gv, chromosome);
-                        //TODO: handle this comp
-                        this.getProps().getLabelPane().getChildren().clear();
-                        double xFactor = exponentialScaleTransform(
-                                this.getProps().getCanvasPane(),
-                                this.getState().gethSlider()
-                        );
+    private ChangeListener<Optional<Chromosome>> chromosomeSelectionListener = (observable, oldValue, newValue) -> {
+        newValue.ifPresent(newChromosomeSelection -> {
+            Chromosome selectedChromosome = this.getProps().getSelectedChromosome();
+            if (selectedChromosome != newChromosomeSelection) {
+                this.getProps().getSelectionInfoService().getSelectedGenomeVersion().get().ifPresent(gv -> {
+                    Optional[] coordinateTrackRenderer = new Optional[]{Optional.empty()};
+                    final Chromosome chromosome = newChromosomeSelection;
+                    coordinateTrackRenderer[0] = Optional.of(new CoordinateTrackRenderer(this.getProps().getCanvasPane(), chromosome));
+                    ((CoordinateTrackRenderer) coordinateTrackRenderer[0].get()).setWeight(getMinWeight());
+                    loadDataSets(gv, chromosome);
+                    //TODO: handle this comp
+                    this.getProps().getLabelPane().getChildren().clear();
+                    double xFactor = exponentialScaleTransform(
+                            this.getProps().getCanvasPane(),
+                            this.getState().gethSlider()
+                    );
 
-                        AppStore.getStore().update(
-                                this.getState().getScrollX(),
-                                0,
-                                0,
-                                0,
-                                0,
-                                true,
-                                this.getState().getSelectedGenomeVersion(),
-                                newChromosomeSelection,
-                                coordinateTrackRenderer[0],
-                                xFactor,
-                                1
-                        );
-                        updateCanvasContexts();
-                        //AppStore.getStore().noop();
-                    });
-                }
-            });
+                    AppStore.getStore().update(
+                            this.getState().getScrollX(),
+                            0,
+                            0,
+                            0,
+                            0,
+                            true,
+                            this.getState().getSelectedGenomeVersion(),
+                            newChromosomeSelection,
+                            coordinateTrackRenderer[0],
+                            xFactor,
+                            1
+                    );
+                    updateCanvasContexts();
+                    //AppStore.getStore().noop();
+                });
+            }
         });
+    };
+
+    private void initializeChromosomeSelectionListener() {
+        this.getProps().getSelectionInfoService().getSelectedChromosome().addListener(chromosomeSelectionListener);
     }
 
     private void initializeGenomeVersionSelectionListener() {
-        this.getProps().getSelectionInfoService().getSelectedGenomeVersion().addListener((observable, oldValue, newValue) -> {
-            newValue.ifPresent(genomeVersion -> {
-                this.getProps().getLabelPane().getChildren().clear();
-
-                double xFactor = exponentialScaleTransform(
-                        this.getProps().getCanvasPane(),
-                        this.getState().gethSlider()
-                );
-                updateCanvasContexts();
-                AppStore.getStore().update(
-                        this.getState().getScrollX(),
-                        0,
-                        0,
-                        0,
-                        0,
-                        true,
-                        genomeVersion,
-                        this.getState().getSelectedChromosome(),
-                        Optional.empty(),
-                        xFactor,
-                        1
-                );
-
-                AppStore.getStore().update(
-                        this.getState().getScrollX(),
-                        0,
-                        0,
-                        0,
-                        0,
-                        true,
-                        genomeVersion,
-                        this.getState().getSelectedChromosome(),
-                        Optional.empty(),
-                        xFactor,
-                        1
-                );
-                updateCanvasContexts();
-            });
-        });
-//                newValue.ifPresent(genomeVersion -> {
-//                    if (this.getProps().getSelectedGenomeVersion() != genomeVersion) {
-//                        //AppStore.getStore().setSelectedGenomeVersion(genomeVersion);
-        //updateTrackRenderers(genomeVersion);
-//                    }
-//                });
-        //});
+        this.getProps().getSelectionInfoService().getSelectedGenomeVersion().addListener(genomeVersionSelectionListener);
     }
+    private ChangeListener<Optional<GenomeVersion>> genomeVersionSelectionListener = (observable, oldValue, newValue) -> {
+        LOG.info("initializeGenomeVersionSelectionListener event triggered");
+        newValue.ifPresent(genomeVersion -> {
+            try {
+                runAndWait(() -> {
+                    this.getProps().getLabelPane().getChildren().clear();
+                });
+            } catch (InterruptedException | ExecutionException ex) {
+                LOG.error(ex.getMessage(), ex);
+            }
+
+            double xFactor = exponentialScaleTransform(
+                    this.getProps().getCanvasPane(),
+                    this.getState().gethSlider()
+            );
+            AppStore.getStore().update(
+                    this.getState().getScrollX(),
+                    0,
+                    0,
+                    0,
+                    0,
+                    true,
+                    genomeVersion,
+                    this.getState().getSelectedChromosome(),
+                    Optional.empty(),
+                    xFactor,
+                    1
+            );
+            updateCanvasContexts();
+            initializeDataSetListener(genomeVersion);
+        });
+    };
+
+    ;
 
     private boolean selectedChromosomeNotNull() {
         return this.getState().getSelectedChromosome() != null;
@@ -807,31 +804,7 @@ public class App extends Component<AppProps, AppState> {
                 updateCanvasContexts();
             });
         });
-        gv.getLoadedDataSets().addListener((SetChangeListener.Change<? extends DataSet> change) -> {
-            if (change.wasAdded()) {
-                final DataSet loadedDataSet = change.getElementAdded();
-                if (!this.getState().getLoadedDataSets().contains(loadedDataSet)) {
 
-                    CanvasPane canvasPane = this.getProps().getCanvasPane();
-
-                    Track positiveStrandTrack = loadedDataSet.getPositiveStrandTrack(chromosome.getName());
-                    Track negativeStrandTrack = change.getElementAdded().getNegativeStrandTrack(gv.getSelectedChromosomeProperty().get().get().getName());
-                    final ZoomableTrackRenderer positiveStrandTrackRenderer = new ZoomableTrackRenderer(canvasPane, positiveStrandTrack, chromosome);
-                    positiveStrandTrackRenderer.setWeight(getMinWeight());
-                    final ZoomableTrackRenderer negativeStrandTrackRenderer = new ZoomableTrackRenderer(canvasPane, negativeStrandTrack, chromosome);
-                    negativeStrandTrackRenderer.setWeight(getMaxWeight());
-                    Platform.runLater(() -> {
-                        //AppStore.getStore().addDataSet(loadedDataSet);
-                        //AppStore.getStore().addTrackRenderer(positiveStrandTrackRenderer, negativeStrandTrackRenderer);
-                        AppStore.getStore().updateTrackRenderer(Arrays.asList(loadedDataSet),
-                                Arrays.asList(positiveStrandTrackRenderer, negativeStrandTrackRenderer));
-                        updateCanvasContexts();
-                    });
-                }
-            } else {
-                //todo implement remove
-            }
-        });
         if (gv.getLoadedDataSets().isEmpty()) {
             updateCanvasContexts();
         }
@@ -928,4 +901,42 @@ public class App extends Component<AppProps, AppState> {
         return toReturn;
     }
 
+    private void initializeDataSetListener(GenomeVersion gv) {
+        gv.getLoadedDataSets().removeListener(selectedGenomeVersionDataSetListener);
+        gv.getLoadedDataSets().addListener(selectedGenomeVersionDataSetListener);
+    }
+    private SetChangeListener<DataSet> selectedGenomeVersionDataSetListener = (SetChangeListener.Change<? extends DataSet> change) -> {
+        this.getProps().getSelectionInfoService().getSelectedGenomeVersion().get().ifPresent(gv -> {
+            if (change.wasAdded()) {
+                if (gv.getSelectedChromosomeProperty().get().isPresent()) {
+                    Chromosome selectedChromosome = gv.getSelectedChromosomeProperty().get().get();
+                    final DataSet loadedDataSet = change.getElementAdded();
+                    if (!this.getState().getLoadedDataSets().contains(loadedDataSet)) {
+                        CanvasPane canvasPane = this.getProps().getCanvasPane();
+                        Track positiveStrandTrack = loadedDataSet.getPositiveStrandTrack(selectedChromosome.getName());
+                        Track negativeStrandTrack = change.getElementAdded().getNegativeStrandTrack(gv.getSelectedChromosomeProperty().get().get().getName());
+                        final ZoomableTrackRenderer positiveStrandTrackRenderer = new ZoomableTrackRenderer(canvasPane, positiveStrandTrack, selectedChromosome);
+                        positiveStrandTrackRenderer.setWeight(getMinWeight());
+                        final ZoomableTrackRenderer negativeStrandTrackRenderer = new ZoomableTrackRenderer(canvasPane, negativeStrandTrack, selectedChromosome);
+                        negativeStrandTrackRenderer.setWeight(getMaxWeight());
+                        Platform.runLater(() -> {
+                            //AppStore.getStore().addDataSet(loadedDataSet);
+                            //AppStore.getStore().addTrackRenderer(positiveStrandTrackRenderer, negativeStrandTrackRenderer);
+                            AppStore.getStore().updateTrackRenderer(Arrays.asList(loadedDataSet),
+                                    Arrays.asList(positiveStrandTrackRenderer, negativeStrandTrackRenderer));
+                            updateCanvasContexts();
+                        });
+                    }
+                }
+            } else {
+                //todo implement remove
+            }
+        });
+    };
+
+    @Override
+    public void close() {
+        this.getProps().getSelectionInfoService().getSelectedChromosome().removeListener(chromosomeSelectionListener);
+        this.getProps().getSelectionInfoService().getSelectedGenomeVersion().removeListener(genomeVersionSelectionListener);
+    }
 }
