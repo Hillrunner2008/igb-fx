@@ -18,6 +18,8 @@ import persistencemanagerImpl.PersistencemanagerImpl;
 
 /**
  *
+ * This class defines a factory for creating objects of PersistenceManager.
+ * 
  * @author Devdatta Kulkarni
  */
 @Component(immediate = true, provide = PersistencemanagerFactory.class)
@@ -29,10 +31,6 @@ public class PersistencemanagerFactory {
     
     public PersistencemanagerFactory() {
         persistenceManagers = new HashMap<String, PersistenceManager>();
-    }
-
-    public boolean isAvailable(String tableName) {
-        return persistenceManagers.containsKey(tableName);
     }
 
     public synchronized Optional<PersistenceManager> getPersistenceManager(Class module) {

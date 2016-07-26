@@ -57,8 +57,7 @@ public class PersistencemanagerImplTest {
     @Before
     public void setUp(){
         try {
-            //load driver for sqlite
-            
+            //load driver for sqlite           
             Class.forName("org.sqlite.JDBC");
             connection = DriverManager.getConnection("jdbc:sqlite:test.db");
             MockitoAnnotations.initMocks(this);
