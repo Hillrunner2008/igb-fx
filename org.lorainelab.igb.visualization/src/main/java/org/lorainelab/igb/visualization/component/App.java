@@ -50,12 +50,12 @@ import org.lorainelab.igb.visualization.util.BoundsUtil;
 import static org.lorainelab.igb.visualization.util.BoundsUtil.enforceRangeBounds;
 import static org.lorainelab.igb.visualization.util.CanvasUtils.exponentialScaleTransform;
 import static org.lorainelab.igb.visualization.util.CanvasUtils.invertExpScaleTransform;
+import static org.lorainelab.igb.visualization.util.CanvasUtils.linearScaleTransform;
 import static org.lorainelab.igb.visualization.util.FXUtilities.runAndWait;
 import org.reactfx.EventStream;
 import org.reactfx.EventStreams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static org.lorainelab.igb.visualization.util.CanvasUtils.linearScaleTransform;
 
 /**
  *
@@ -291,7 +291,7 @@ public class App extends Component<AppProps, AppState> {
                     this.getState().getTrackRenderers().stream()
                             .filter(tr -> tr instanceof ZoomableTrackRenderer)
                             .map(tr -> ZoomableTrackRenderer.class.cast(tr)).findFirst().ifPresent(tr
-                                    -> tr.getTrack()
+                            -> tr.getTrack()
                                     .getGlyphs()
                                     .stream()
                                     .filter(glyph -> glyph.isSelected())
@@ -304,13 +304,13 @@ public class App extends Component<AppProps, AppState> {
                     this.getProps().getSelectionInfoService().getSelectedGlyphs().clear();
                     this.getProps().getSelectionInfoService().getSelectedGlyphs().addAll(
                             this.getState().getTrackRenderers().stream()
-                            .filter(tr -> tr instanceof ZoomableTrackRenderer)
-                            .map(tr -> ZoomableTrackRenderer.class.cast(tr)).flatMap(tr
+                                    .filter(tr -> tr instanceof ZoomableTrackRenderer)
+                                    .map(tr -> ZoomableTrackRenderer.class.cast(tr)).flatMap(tr
                                     -> tr.getTrack()
-                                    .getGlyphs()
-                                    .stream()
-                                    .filter(glyph -> glyph.isSelected()))
-                            .collect(Collectors.toList())
+                                            .getGlyphs()
+                                            .stream()
+                                            .filter(glyph -> glyph.isSelected()))
+                                    .collect(Collectors.toList())
                     );
 
                 }
@@ -662,14 +662,11 @@ public class App extends Component<AppProps, AppState> {
             Optional.ofNullable(selectedChromosome).ifPresent(chr -> {
                 genomeVersion.getLoadedDataSets().forEach(dataSet -> {
                     CompletableFuture.supplyAsync(() -> {
-                        dataSet.loadRegion(selectedChromosome.getName(), getCurrentRange());
+                        dataSet.loadRegion(chr.getName(), getCurrentRange());
                         return null;
                     }).thenRun(() -> {
-
                         Platform.runLater(() -> {
-                            //TODO: hack for refresh
                             AppStore.getStore().noop();
-                            //updateCanvasContexts();
                         });
                     });
                 });
@@ -998,13 +995,14 @@ public class App extends Component<AppProps, AppState> {
                         positiveStrandTrackRenderer.setWeight(getMinWeight());
                         final ZoomableTrackRenderer negativeStrandTrackRenderer = new ZoomableTrackRenderer(canvasPane, negativeStrandTrack, selectedChromosome);
                         negativeStrandTrackRenderer.setWeight(getMaxWeight());
-                        Platform.runLater(() -> {
-                            //AppStore.getStore().addDataSet(loadedDataSet);
-                            //AppStore.getStore().addTrackRenderer(positiveStrandTrackRenderer, negativeStrandTrackRenderer);
-                            AppStore.getStore().updateTrackRenderer(Arrays.asList(loadedDataSet),
-                                    Arrays.asList(positiveStrandTrackRenderer, negativeStrandTrackRenderer));
-                            //updateCanvasContexts();
-                        });
+                        try {
+                            runAndWait(() -> {
+                                AppStore.getStore().updateTrackRenderer(Arrays.asList(loadedDataSet),
+                                        Arrays.asList(positiveStrandTrackRenderer, negativeStrandTrackRenderer));
+                            });
+                        } catch (InterruptedException | ExecutionException ex) {
+                            LOG.error(ex.getMessage(), ex);
+                        }
                     }
                 }
             } else {

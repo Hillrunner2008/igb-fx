@@ -58,7 +58,9 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         modelHeight.bind(track.modelHeightProperty());
         view = new View(new Rectangle2D(0, 0, modelWidth, modelHeight.doubleValue()), chromosome);
         modelHeight.addListener((observable, oldValue, newValue) -> {
-            scaleCanvas(view.getXfactor(), view.getYfactor(), scrollY);
+            Platform.runLater(() -> {
+                scaleCanvas(view.getXfactor(), view.getYfactor(), scrollY);
+            });
         });
         canvasContext = new CanvasContext(canvasPane.getCanvas(), 0, 0);
         trackLabel = new TrackLabel(this, track.getTrackLabel());
