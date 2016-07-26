@@ -19,8 +19,6 @@ import org.lorainelab.igb.data.model.View;
  */
 public interface Glyph {
 
-    final int SLOT_HEIGHT = 30;
-
     Color getFill();
 
     Color getStrokeColor();

@@ -1,12 +1,15 @@
 package org.lorainelab.igb.visualization.footer;
 
 import aQute.bnd.annotation.component.Component;
+import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
 import javafx.geometry.Insets;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import org.controlsfx.control.StatusBar;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -15,6 +18,7 @@ import org.controlsfx.control.StatusBar;
 @Component(immediate = true, provide = Footer.class)
 public class Footer extends HBox {
 
+    private static final Logger LOG = LoggerFactory.getLogger(Footer.class);
     private static final double FIXED_HEIGHT = 25.0;
     private MemoryTracker memoryTracker;
     private Pane spacer;
@@ -41,4 +45,8 @@ public class Footer extends HBox {
         getChildren().addAll(statusBar);
     }
 
+    @Deactivate
+    public void deactivate() {
+        LOG.info("Footer deactivated");
+    }
 }

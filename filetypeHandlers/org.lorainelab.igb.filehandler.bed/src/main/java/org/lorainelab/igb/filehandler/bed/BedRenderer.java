@@ -1,7 +1,6 @@
 package org.lorainelab.igb.filehandler.bed;
 
 import com.google.common.collect.Range;
-import java.util.function.Function;
 import java.util.stream.Stream;
 import org.lorainelab.igb.data.model.Strand;
 import org.lorainelab.igb.data.model.shapes.Composition;
@@ -30,20 +29,25 @@ public class BedRenderer implements Renderer<BedFeature> {
     }
 
     private Stream<Shape> calculateCds(BedFeature bedFeature) {
-        Range<Integer> cdsRange = Range.closed(bedFeature.getCdsStart() - bedFeature.getRange().lowerEndpoint(), bedFeature.getCdsEnd() - bedFeature.getRange().lowerEndpoint());
-        Function<String, String> innerTextRefSeqTranslator = referenceSequence -> {
-            String aminoAcidSequence = AminoAcid.getAminoAcid(referenceSequence, bedFeature.getStrand() == Strand.POSITIVE);
-            return aminoAcidSequence;
-        };
+        final Strand strand = bedFeature.getStrand();
 
-        return bedFeature.getExons().asRanges().stream()
-                .map(exon -> Range.closed(exon.lowerEndpoint(), exon.upperEndpoint()))
-                .filter(exonRange -> exonRange.isConnected(cdsRange))
-                .map(eoxnRange -> eoxnRange.intersection(cdsRange))
-                .map(intersectingRange -> Rectangle.start(intersectingRange.lowerEndpoint(), intersectingRange.upperEndpoint() - intersectingRange.lowerEndpoint())
+        return bedFeature.getCdsBlocks().asRanges().stream()
+                .map(cdsBlock -> Rectangle.start(cdsBlock.lowerEndpoint(), cdsBlock.upperEndpoint() - cdsBlock.lowerEndpoint())
                 .addAttribute(Rectangle.Attribute.THICK)
-                .setInnerTextReferenceSequenceRange(Range.closed(bedFeature.getCdsStart(), bedFeature.getCdsEnd()))
-                .setInnerTextRefSeqTranslator(innerTextRefSeqTranslator)
+                .setInnerTextReferenceSequenceRange(bedFeature.getRange())
+                .setInnerTextRefSeqTranslator(referenceSequence -> {
+                    StringBuilder trimmedToExons = new StringBuilder();
+                    for (Range<Integer> cdsRect : bedFeature.getCdsBlocks().asRanges()) {
+                        trimmedToExons.append(referenceSequence.substring(cdsRect.lowerEndpoint(), cdsRect.upperEndpoint()));
+                    }
+                    String aminoAcidSequence = AminoAcid.getAminoAcid(trimmedToExons.toString(), strand == Strand.POSITIVE);
+                    int totalDownstreamCdsBlockLength = bedFeature.getCdsBlocks().asRanges().stream()
+                            .filter(range -> range.upperEndpoint() < cdsBlock.lowerEndpoint())
+                            .mapToInt(cdsRect -> cdsRect.upperEndpoint() - cdsRect.lowerEndpoint()).sum();
+
+                    return aminoAcidSequence.substring(totalDownstreamCdsBlockLength, totalDownstreamCdsBlockLength + cdsBlock.upperEndpoint() - cdsBlock.lowerEndpoint());
+
+                })
                 .build());
     }
 

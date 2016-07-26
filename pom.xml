@@ -121,7 +121,7 @@
             <dependency>
                 <groupId>org.controlsfx</groupId>
                 <artifactId>controlsfx</artifactId>
-                <version>8.40.10</version>
+                <version>8.40.11</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
@@ -213,6 +213,12 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>org.lorainelab.igb.preferencemanager.api</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.persistencemanager</artifactId>
                 <version>${project.version}</version>
                 <scope>provided</scope>
             </dependency>
@@ -335,6 +341,7 @@
         <module>org.lorainelab.igb.search.lucene</module>
         <module>org.lorainelab.igb.search.api</module>
         <module>preferences/org.lorainelab.igb.preferencemanager.api</module>
+        <module>org.lorainelab.igb.persistencemanager</module>
         <module>org.lorainelab.igb.kar</module>
     </modules>
     <properties>

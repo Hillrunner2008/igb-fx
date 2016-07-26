@@ -2,6 +2,7 @@ package org.lorainelab.igb.visualization.menubar;
 
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
+import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.TreeMultimap;
@@ -13,7 +14,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import org.lorainelab.igb.menu.api.MenuBarEntryProvider;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
-import org.lorainelab.igb.menu.api.model.WeightedMenuItem;
+import org.lorainelab.igb.menu.api.model.WeightedMenuEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +59,7 @@ public class MenuBarManager {
         menuBarMenuContainer.put(ParentMenu.EDIT, editMenuEntries);
         menuBarMenuContainer.put(ParentMenu.TOOLS, toolsMenuEntries);
         menuBarMenuContainer.put(ParentMenu.VIEW, viewMenuEntries);
-        menuBarMenuContainer.put(ParentMenu.GENOME,genomeMenuEntries);
+        menuBarMenuContainer.put(ParentMenu.GENOME, genomeMenuEntries);
         menuBarMenuContainer.put(ParentMenu.HELP, helpMenuEntries);
         parentMenuReference = new EnumMap<>(ParentMenu.class);
         initializeMenus();
@@ -85,7 +86,7 @@ public class MenuBarManager {
         genomeMenu = new Menu("Genome");
         genomeMenu.setMnemonicParsing(true);
     }
-    
+
     private void initFileMenu() {
         fileMenu = new Menu("File");
         fileMenu.setMnemonicParsing(true);
@@ -145,22 +146,22 @@ public class MenuBarManager {
                     .forEach(menuItem -> {
                         switch (menuBarExtension.getParentMenu()) {
                             case FILE:
-                                fileMenuEntries.put(menuItem.getWeight(), menuItem);
+                                fileMenuEntries.put(menuItem.getWeight(), menuItem.getMenuEntry());
                                 break;
                             case EDIT:
-                                editMenuEntries.put(menuItem.getWeight(), menuItem);
+                                editMenuEntries.put(menuItem.getWeight(), menuItem.getMenuEntry());
                                 break;
                             case TOOLS:
-                                toolsMenuEntries.put(menuItem.getWeight(), menuItem);
+                                toolsMenuEntries.put(menuItem.getWeight(), menuItem.getMenuEntry());
                                 break;
                             case VIEW:
-                                viewMenuEntries.put(menuItem.getWeight(), menuItem);
+                                viewMenuEntries.put(menuItem.getWeight(), menuItem.getMenuEntry());
                                 break;
                             case HELP:
-                                helpMenuEntries.put(menuItem.getWeight(), menuItem);
+                                helpMenuEntries.put(menuItem.getWeight(), menuItem.getMenuEntry());
                                 break;
                             case GENOME:
-                                genomeMenuEntries.put(menuItem.getWeight(), menuItem);
+                                genomeMenuEntries.put(menuItem.getWeight(), menuItem.getMenuEntry());
                                 break;
                         }
                     });
@@ -200,9 +201,9 @@ public class MenuBarManager {
         }
     }
 
-    private void removeMenuEntry(TreeMultimap<Integer, MenuItem> menuEntryHolder, WeightedMenuItem menuItem) {
-        if (menuEntryHolder.containsEntry(menuItem.getWeight(), menuItem)) {
-            menuEntryHolder.remove(menuItem.getWeight(), menuItem);
+    private void removeMenuEntry(TreeMultimap<Integer, MenuItem> menuEntryHolder, WeightedMenuEntry weightedMenuEntry) {
+        if (menuEntryHolder.containsEntry(weightedMenuEntry.getWeight(), weightedMenuEntry.getMenuEntry())) {
+            menuEntryHolder.remove(weightedMenuEntry.getWeight(), weightedMenuEntry.getMenuEntry());
         }
     }
 
@@ -259,7 +260,7 @@ public class MenuBarManager {
             fileMenuEntries.get(key).forEach(menuItem -> fileMenu.getItems().add(menuItem));
         });
     }
-    
+
     private void rebuildGenomeMenu() {
         genomeMenu.getItems().clear();
         genomeMenuEntries.keySet().stream().forEach(key -> {
@@ -271,4 +272,8 @@ public class MenuBarManager {
         return menuBar;
     }
 
+    @Deactivate
+    public void deactivate() {
+        LOG.info("MenuBarManager deactivated");
+    }
 }

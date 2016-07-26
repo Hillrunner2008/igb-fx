@@ -49,9 +49,9 @@ public class LineGlyph implements Glyph {
     public void draw(GraphicsContext gc, View view, double additionalYoffset) {
         Rectangle2D viewRect = view.getBoundingRect();
         Rectangle2D drawRect = getRenderBoundingRect();
-        double x = drawRect.getMinX();
+        double x = drawRect.getMinX()+.5;
         double y = drawRect.getMinY();
-        double width = drawRect.getWidth();
+        double width = drawRect.getWidth()-1;
         double height = drawRect.getHeight();
         if (x < viewRect.getMinX()) {
             int offSet = (int) (viewRect.getMinX() - x);

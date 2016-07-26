@@ -2,6 +2,7 @@ package org.lorainelab.igb.visualization.toolbar;
 
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
+import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Sets;
 import java.time.Duration;
@@ -72,7 +73,9 @@ public class ToolBarManager {
 
     public void removeToolbarButtonProvider(ToolbarButtonProvider buttonProvider) {
         toolbarEntries.remove(buttonProvider.getToolbarButton());
-        topToolbar.getItems().remove(buttonProvider.getToolbarButton());
+        Platform.runLater(() -> {
+            topToolbar.getItems().remove(buttonProvider.getToolbarButton());
+        });
     }
 
     @Reference
@@ -88,4 +91,8 @@ public class ToolBarManager {
         }
     }
 
+    @Deactivate
+    public void deactivate() {
+        LOG.info("ToolBarManager deactivated");
+    }
 }

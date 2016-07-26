@@ -26,7 +26,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import net.miginfocom.layout.CC;
-import static org.lorainelab.igb.visualization.util.ColorUtils.colorToWebStyle;
+import static org.lorainelab.igb.data.model.util.ColorUtils.colorToWebStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tbee.javafx.scene.layout.MigPane;
@@ -160,7 +160,7 @@ public class TrackLabel {
             });
             stage.setWidth(220);
             
-            stage.setHeight(150);
+            stage.setHeight(155);
             
             stage.setTitle("Set Track Stack Height");
             migPane.add(label, "growx, wrap");

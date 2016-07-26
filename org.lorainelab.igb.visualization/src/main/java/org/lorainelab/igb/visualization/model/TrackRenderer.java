@@ -6,6 +6,7 @@
 package org.lorainelab.igb.visualization.model;
 
 import java.util.Comparator;
+import javafx.geometry.Point2D;
 import org.lorainelab.igb.data.model.CanvasContext;
 import org.lorainelab.igb.data.model.View;
 
@@ -17,7 +18,7 @@ public interface TrackRenderer {
 
     final Comparator<TrackRenderer> SORT_BY_WEIGHT = (TrackRenderer o1, TrackRenderer o2) -> Double.compare(o1.getWeight(), o2.getWeight());
 
-    final int MAX_ZOOM_MODEL_COORDINATES_X = 85;
+    final int MAX_ZOOM_MODEL_COORDINATES_X = 120;
     final int MAX_ZOOM_MODEL_COORDINATES_Y = 50;
 
     String getTrackLabelText();
@@ -39,10 +40,22 @@ public interface TrackRenderer {
     double getModelHeight();
 
     /**
-     *@return the weight that will be used for sorting tracks. Lower weights will be
+     * @return the weight that will be used for sorting tracks. Lower weights
+     * will be
      */
     int getWeight();
 
     void setWeight(int weight);
+
+    void clearCanvas();
+
+    void setZoomStripeCoordinate(double zoomStripeCoordinate);
+
+    void setLastMouseClickedPoint(Point2D point);
+    void setIsMultiSelectModeActive(boolean multiSelectModeActive);
+
+    void setLastMouseDragPoint(Point2D point);
+    
+    void setMouseDragging(boolean isMouseDragging);
 
 }

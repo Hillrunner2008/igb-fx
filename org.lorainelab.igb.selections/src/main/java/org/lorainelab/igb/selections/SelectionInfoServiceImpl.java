@@ -2,6 +2,7 @@ package org.lorainelab.igb.selections;
 
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
+import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Sets;
@@ -14,6 +15,8 @@ import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.GenomeVersion;
 import org.lorainelab.igb.data.model.GenomeVersionRegistry;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -22,6 +25,7 @@ import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
 @Component(immediate = true)
 public class SelectionInfoServiceImpl implements SelectionInfoService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(SelectionInfoServiceImpl.class);
     private GenomeVersionRegistry genomeVersionRegistry;
     private final ObjectProperty<Optional<Chromosome>> selectedChromosomeProperty;
     private ObservableSet<CompositionGlyph> selectedGlyphs;
@@ -65,5 +69,10 @@ public class SelectionInfoServiceImpl implements SelectionInfoService {
     @Override
     public ObservableSet<CompositionGlyph> getSelectedGlyphs() {
         return selectedGlyphs;
+    }
+
+    @Deactivate
+    public void deactivate() {
+        LOG.info("SelectionInfoService deactivated");
     }
 }

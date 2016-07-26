@@ -28,6 +28,8 @@ import org.lorainelab.igb.data.model.GenomeVersion;
 import org.lorainelab.igb.data.model.GenomeVersionRegistry;
 import org.lorainelab.igb.tabs.api.TabDockingPosition;
 import org.lorainelab.igb.tabs.api.TabProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component(immediate = true)
 public class GenomeAssemblyTab implements TabProvider {
@@ -51,6 +53,7 @@ public class GenomeAssemblyTab implements TabProvider {
     private final ObservableList<GenomeVersion> genomeVersionData;
 
     private GenomeVersionRegistry genomeVersionRegistry;
+        private static final Logger LOG = LoggerFactory.getLogger(GenomeAssemblyTab.class);
 
     public GenomeAssemblyTab() {
         tableData = FXCollections.observableArrayList();
@@ -93,6 +96,7 @@ public class GenomeAssemblyTab implements TabProvider {
         });
         genomeVersionComboBox.setDisable(true);
         genomeVersionComboBox.valueProperty().addListener((observable, oldValue, selectedGenomeVersion) -> {
+            LOG.info("genomeVersionComboBox event fired");
             genomeVersionRegistry.setSelectedGenomeVersion(selectedGenomeVersion);
         });
         selectedGenomeVersionChangeListener = (observable, oldValue, newValue) -> {

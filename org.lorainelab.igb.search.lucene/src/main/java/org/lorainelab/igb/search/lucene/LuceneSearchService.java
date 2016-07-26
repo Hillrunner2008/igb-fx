@@ -97,6 +97,7 @@ public class LuceneSearchService implements SearchService {
 
     @Deactivate
     public void deactivate() throws IOException {
+        LOG.info("LuceneSearchService deactivated");
         analyzer.close();
     }
 

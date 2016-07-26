@@ -12,3 +12,4 @@ karaf/deploy
 
 distribution/build/
 karaf/local
+/org.lorainelab.igb.persistencemanager/nbproject/
