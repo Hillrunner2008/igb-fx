@@ -257,7 +257,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
                         y2 -= yOffset;
                     }
                     gc.scale(textScale, textScale);
-                    if (viewBoundingRectangle.getWidth() < 100) {
+                    if (viewBoundingRectangle.getWidth() < 125) {
                         gc.setFill(Color.BLACK);
                         gc.fillText("" + base, index * 2 + .5, y2, 1);
                     }

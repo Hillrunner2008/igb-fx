@@ -30,36 +30,23 @@ public class BedRenderer implements Renderer<BedFeature> {
 
     private Stream<Shape> calculateCds(BedFeature bedFeature) {
         final Strand strand = bedFeature.getStrand();
-        Range<Integer> cdsRange = Range.closed(bedFeature.getCdsStart() - bedFeature.getRange().lowerEndpoint(), bedFeature.getCdsEnd() - bedFeature.getRange().lowerEndpoint());
 
-        return bedFeature.getExons().asRanges().stream()
-                .map(exon -> Range.closed(exon.lowerEndpoint(), exon.upperEndpoint()))
-                .filter(exonRange -> exonRange.isConnected(cdsRange))
-                .map(exonRange -> exonRange.intersection(cdsRange))
-                .map(intersectingRange -> Rectangle.start(intersectingRange.lowerEndpoint(), intersectingRange.upperEndpoint() - intersectingRange.lowerEndpoint())
+        return bedFeature.getCdsBlocks().asRanges().stream()
+                .map(cdsBlock -> Rectangle.start(cdsBlock.lowerEndpoint(), cdsBlock.upperEndpoint() - cdsBlock.lowerEndpoint())
                 .addAttribute(Rectangle.Attribute.THICK)
                 .setInnerTextReferenceSequenceRange(bedFeature.getRange())
                 .setInnerTextRefSeqTranslator(referenceSequence -> {
                     StringBuilder trimmedToExons = new StringBuilder();
-                    Range<Integer> cds = Range.closed(bedFeature.getCdsStart(), bedFeature.getCdsEnd());
-                    bedFeature.getExons().asRanges().forEach(exon -> {
-                        trimmedToExons.append(referenceSequence.substring(exon.lowerEndpoint(), exon.upperEndpoint()));
-                    });
+                    for (Range<Integer> cdsRect : bedFeature.getCdsBlocks().asRanges()) {
+                        trimmedToExons.append(referenceSequence.substring(cdsRect.lowerEndpoint(), cdsRect.upperEndpoint()));
+                    }
                     String aminoAcidSequence = AminoAcid.getAminoAcid(trimmedToExons.toString(), strand == Strand.POSITIVE);
-//                            int startIndex = intersectingRange.lowerEndpoint() - bedFeature.getCdsStart() + bedFeature.getRange().lowerEndpoint();
-//                            int endIndex = intersectingRange.upperEndpoint() - bedFeature.getCdsStart() + bedFeature.getRange().lowerEndpoint();
-//                            int width = endIndex - startIndex;
-//                            endIndex = startIndex + Math.floorDiv(width, 3);
-//                            startIndex += startIndex % 3;
-//                            if (width < aminoAcidSequence.length()) {
-//                                int remainder = width % 3;
-//                                if (remainder > 1) {
-//                                    //allow look ahead to next exon
-//                                    return aminoAcidSequence.substring(startIndex, endIndex);
-//                                }
-//                            }
+                    int totalDownstreamCdsBlockLength = bedFeature.getCdsBlocks().asRanges().stream()
+                            .filter(range -> range.upperEndpoint() < cdsBlock.lowerEndpoint())
+                            .mapToInt(cdsRect -> cdsRect.upperEndpoint() - cdsRect.lowerEndpoint()).sum();
 
-                    return aminoAcidSequence;
+                    return aminoAcidSequence.substring(totalDownstreamCdsBlockLength, totalDownstreamCdsBlockLength + cdsBlock.upperEndpoint() - cdsBlock.lowerEndpoint());
+
                 })
                 .build());
     }

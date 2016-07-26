@@ -129,9 +129,9 @@ public class RectangleGlyph implements Glyph {
                             sequence = new String(chromosome.getSequence(innerTextReferenceSequenceRange.get().lowerEndpoint(),
                                     innerTextReferenceSequenceRange.get().upperEndpoint() - innerTextReferenceSequenceRange.get().lowerEndpoint()));
                             innerText = translationFunction.apply(sequence);
-                            int diff = innerText.length() - sequence.length();
-                            int startPos = (int) boundingRect.getMinX() + (int) startOffset - innerTextReferenceSequenceRange.get().lowerEndpoint() + diff;
-                            int endPos = (int) (startPos + (boundingRect.getWidth() - (int) startOffset) - endOffset);
+//                            int diff = innerText.length() - sequence.length();
+                            int startPos = (int) startOffset;
+                            int endPos = (int) (startPos + boundingRect.getWidth() - (int) startOffset - endOffset);
                             innerText = innerText.substring(startPos, endPos);
                         } else {
                             sequence = new String(chromosome.getSequence(basePairRange.lowerEndpoint(), basePairRange.upperEndpoint() - basePairRange.lowerEndpoint()));
@@ -166,7 +166,7 @@ public class RectangleGlyph implements Glyph {
                                 } else {
                                     gc.fillRect(minX + i, y, 1, viewBoundingRect.get().getHeight());
                                 }
-                                gc.setFill(Color.WHITE);
+                                gc.setFill(Color.BLACK);
                                 gc.scale(textScale, textScale);
                                 double x = ((minX + i) / textScale) + (1 / textScale) * .1;
                                 double maxWidth = (1 / textScale) * .8;

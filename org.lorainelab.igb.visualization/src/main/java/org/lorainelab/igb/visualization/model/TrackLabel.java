@@ -26,7 +26,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import net.miginfocom.layout.CC;
-import static org.lorainelab.igb.visualization.util.ColorUtils.colorToWebStyle;
+import static org.lorainelab.igb.data.model.util.ColorUtils.colorToWebStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tbee.javafx.scene.layout.MigPane;
