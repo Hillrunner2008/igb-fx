@@ -20,6 +20,7 @@ import javafx.stage.Stage;
 import org.lorainelab.igb.menu.api.MenuBarEntryProvider;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
 import org.lorainelab.igb.menu.api.model.WeightedMenuItem;
+import org.lorainelab.igb.menu.api.model.WeightedMenuEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,22 +44,22 @@ public class PreferenceProviderMenuEntry implements MenuBarEntryProvider {
     @Activate
     public void activate() {
         Platform.runLater(() -> {
-            menuItem.setOnAction(event -> {
-                initComponents();
-                layoutComponents();
-                Platform.runLater(() -> {
-                        stage.show();
-                });
+            initComponents();
+            layoutComponents();
+        });
+        menuItem.setOnAction(event -> {
+            Platform.runLater(() -> {
+                stage.show();
             });
         });
     }
 
     @Override
-    public Optional<List<WeightedMenuItem>> getMenuItems() {
-        List<WeightedMenuItem> menuItems = new ArrayList<WeightedMenuItem>();
+    public Optional<List<WeightedMenuEntry>> getMenuItems() {
+        List<WeightedMenuEntry> menuItems = new ArrayList<WeightedMenuEntry>();
         menuItems.add(menuItem);
         return Optional.of(menuItems);
-            
+
     }
 
     @Override
@@ -84,6 +85,5 @@ public class PreferenceProviderMenuEntry implements MenuBarEntryProvider {
     private void layoutComponents() {
         stage.setScene(new Scene(pane));
     }
-    
 
 }

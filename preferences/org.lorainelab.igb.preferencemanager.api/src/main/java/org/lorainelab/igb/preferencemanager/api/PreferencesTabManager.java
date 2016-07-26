@@ -29,26 +29,29 @@ public class PreferencesTabManager {
 
     public PreferencesTabManager() {
         pane = new TabPane();
-        tabs = new TreeSet<PreferencesTabProvider>((x,y)-> x.getTabWeight() - y.getTabWeight());
+        tabs = new TreeSet<PreferencesTabProvider>((x, y) -> x.getTabWeight() - y.getTabWeight());
         setAnchorPaneConstraints(pane);
     }
 
 
     @Reference(optional = true, multiple = true, unbind = "removeTab", dynamic = true)
     public void addTab(PreferencesTabProvider tabProvider) {
-        Platform.runLater(()->tabs.add(tabProvider));
+        tabs.add(tabProvider);
+        Platform.runLater(() -> {
+            pane.getTabs().clear();
+            pane.getTabs().addAll(tabs.stream().map(tab -> tab.getPreferencesTab()).collect(Collectors.toList()));
+        });
     }
 
     public void removeTab(PreferencesTabProvider tabProvider) {
-        Platform.runLater(()->tabs.remove(tabProvider));
+        tabs.remove(tabProvider);
+        Platform.runLater(() -> pane.getTabs().remove(tabProvider.getPreferencesTab()));
     }
 
-    public TabPane getPreferencesTabPane(){
-        pane.getTabs().clear();
-        pane.getTabs().addAll(tabs.stream().map(tab -> tab.getPreferencesTab()).collect(Collectors.toList()));
+    public TabPane getPreferencesTabPane() {
         return pane;
     }
-    
+
     private void setAnchorPaneConstraints(TabPane pane) {
         double anchor = 0;
         AnchorPane.setBottomAnchor(pane, anchor);

@@ -30,7 +30,7 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.lorainelab</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>org.lorainelab.igb.menu.api</artifactId>
         </dependency>
     </dependencies>
