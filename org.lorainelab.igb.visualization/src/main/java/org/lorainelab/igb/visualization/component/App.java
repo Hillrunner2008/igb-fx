@@ -263,9 +263,10 @@ public class App extends Component<AppProps, AppState> {
             if (types.contains(MouseEvent.MOUSE_DRAGGED)) {
                 //Rectangle2D selectionRectangle = getSelectionRectangle(event);
                 this.getState().getTrackRenderers().stream().filter(tr -> tr instanceof CoordinateTrackRenderer).findFirst().ifPresent(tr -> {
+                    Point2D mouseClickLocation = this.getState().getMouseClickLocation();
                     Point2D point = getLocalPoint2DFromMouseEvent(event);
                     Rectangle2D boundingRect = tr.getCanvasContext().getBoundingRect();
-                    if (boundingRect.contains(point)) {
+                    if (boundingRect.contains(mouseClickLocation)) {
 
                         Point2D lastMouseClickLocation = this.getState().getMouseClickLocation();
                         Point2D lastMouseDragLocation = getLocalPoint2DFromMouseEvent(event);
