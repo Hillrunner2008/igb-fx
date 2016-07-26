@@ -82,7 +82,12 @@ public class App extends Component<AppProps, AppState> {
         initializeMouseEvents();
         initializePlusMinusSlider();
         initializeZoomScrollBar();
+        Platform.runLater(() -> {
+            refreshSliderWidget();
+            updateCanvasContexts();
+        });
         AppStore.getStore().subscribe(this);
+
     }
 
     @Override
@@ -454,8 +459,13 @@ public class App extends Component<AppProps, AppState> {
                 } else {
                     newScrollX = (currentSlider / maxSlider) * 100;
                 }
-                AppStore.getStore().updatePlusMinusSlider(newScrollX);
-                this.getProps().gethSliderWidget().setValue((1 - (current / max)) * 100);
+                double hSlider = (1 - (current / max)) * 100;
+                double xFactor = linearScaleTransform(
+                        this.getProps().getCanvasPane(),
+                        hSlider
+                );
+                double exphSlider = invertExpScaleTransform(this.getProps().getCanvasPane(), xFactor);
+                AppStore.getStore().updateHSlider(exphSlider, newScrollX, xFactor, 1);
             }
             lastDragX = event.getX();
         });
@@ -493,8 +503,13 @@ public class App extends Component<AppProps, AppState> {
                 } else {
                     newScrollX = (currentSlider / maxSlider) * 100;
                 }
-                AppStore.getStore().updatePlusMinusSlider(newScrollX);
-                this.getProps().gethSliderWidget().setValue((1 - (current / max)) * 100);
+                double hSlider = (1 - (current / max)) * 100;
+                double xFactor = linearScaleTransform(
+                        this.getProps().getCanvasPane(),
+                        hSlider
+                );
+                double exphSlider = invertExpScaleTransform(this.getProps().getCanvasPane(), xFactor);
+                AppStore.getStore().updateHSlider(exphSlider, newScrollX, xFactor, 1);
             }
             lastDragX = event.getX();
         });
@@ -586,10 +601,7 @@ public class App extends Component<AppProps, AppState> {
     }
 
     final ChangeListener<Number> vSliderListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-
         AppStore.getStore().updateVSlider(newValue.doubleValue());
-
-        //updateCanvasContexts();
     };
     final ChangeListener<Number> hSliderListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
 
@@ -605,7 +617,6 @@ public class App extends Component<AppProps, AppState> {
                     newValue.doubleValue()
             );
             AppStore.getStore().updateHSlider(newValue.doubleValue(), scrollX, xFactor, 1);
-            //updateCanvasContexts();
             syncWidgetSlider();
             lastHSliderFire = newValue.doubleValue();
 
@@ -620,9 +631,7 @@ public class App extends Component<AppProps, AppState> {
         }
     };
     final ChangeListener<Number> widthPropertyListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-        Platform.runLater(() -> {
-            refreshSliderWidget();
-        });
+
         updateCanvasContexts();
         double hSlider = this.getState().gethSlider();
         double scrollX = calcScrollXWithZoomStripe(hSlider);
@@ -631,6 +640,9 @@ public class App extends Component<AppProps, AppState> {
                 hSlider
         );
         AppStore.getStore().updateHSlider(hSlider, scrollX, xFactor, 1);
+        Platform.runLater(() -> {
+            refreshSliderWidget();
+        });
     };
     final ChangeListener<Number> heightPropertyListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
         Platform.runLater(() -> {
@@ -653,7 +665,6 @@ public class App extends Component<AppProps, AppState> {
     };
     final ChangeListener<Number> scrollYPositionListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
         AppStore.getStore().updateScrollY(newValue.doubleValue());
-        //updateCanvasContexts();
     };
     final EventHandler<ActionEvent> loadDataActionListener = action -> {
         Chromosome selectedChromosome = this.getState().getSelectedChromosome();
@@ -669,7 +680,6 @@ public class App extends Component<AppProps, AppState> {
                         Platform.runLater(() -> {
                             //TODO: hack for refresh
                             AppStore.getStore().noop();
-                            //updateCanvasContexts();
                         });
                     });
                 });
@@ -686,7 +696,6 @@ public class App extends Component<AppProps, AppState> {
                 Platform.runLater(() -> {
                     //TODO: hack for refresh
                     AppStore.getStore().noop();
-                    //updateCanvasContexts();
                 });
             }).exceptionally(ex -> {
                 LOG.error(ex.getMessage(), ex);
@@ -700,7 +709,7 @@ public class App extends Component<AppProps, AppState> {
         viewPortManager = new ViewPortManager(canvas, this.getState().getTrackRenderers(), 0, 0);
         this.getProps().getvSlider().valueProperty().addListener(vSliderListener);
         this.getProps().gethSlider().valueProperty().addListener(hSliderListener);
-        this.getProps().gethSliderWidget().addListener(hSliderWidgetListener);
+        //this.getProps().gethSliderWidget().addListener(hSliderWidgetListener);
         canvas.widthProperty().addListener(widthPropertyListener);
         canvas.heightProperty().addListener(heightPropertyListener);
         this.getProps().getScrollX().addListener(scrollXPropertyListener);
@@ -790,8 +799,6 @@ public class App extends Component<AppProps, AppState> {
                             xFactor,
                             1
                     );
-                    //updateCanvasContexts();
-                    //AppStore.getStore().noop();
                 });
             }
         });
@@ -833,7 +840,6 @@ public class App extends Component<AppProps, AppState> {
                     xFactor,
                     1
             );
-            //updateCanvasContexts();
             initializeDataSetListener(genomeVersion);
         });
     };
@@ -881,7 +887,6 @@ public class App extends Component<AppProps, AppState> {
             negativeStrandTrackRenderer.setWeight(getMaxWeight());
             Platform.runLater(() -> {
                 AppStore.getStore().addTrackRenderer(positiveStrandTrackRenderer, negativeStrandTrackRenderer);
-                //updateCanvasContexts();
             });
         });
 
@@ -907,34 +912,41 @@ public class App extends Component<AppProps, AppState> {
     }
 
     private void refreshSliderWidget() {
-//        if (xSliderPane.getWidth() > 0) {
-//            double max = xSliderPane.getWidth() - slider.getWidth();
-//            double current = slider.getX();
-//            double newXValue = (max * scrollX.getValue() / 100);
-//
-//            if (newXValue <= 0) {
-//                newXValue = 0;
-//            }
-//            if (slider.getWidth() >= xSliderPane.getWidth()) {
-//                double newWidth = xSliderPane.getWidth();
-//                if (newWidth < TOTAL_SLIDER_THUMB_WIDTH) {
-//                    newWidth = TOTAL_SLIDER_THUMB_WIDTH;
-//                }
-//                double oldWidth = slider.getWidth();
-//                slider.setWidth(newWidth);
-//                rightSliderThumb.setX(rightSliderThumb.getX() + newWidth - oldWidth);
-//            }
-//            if (scrollX.getValue() >= 0 && xSliderPane.getWidth() > TOTAL_SLIDER_THUMB_WIDTH) {
-//                slider.setX(newXValue);
-//                leftSliderThumb.setX(newXValue);
-//                double maxPaneWidth = xSliderPane.getWidth() - TOTAL_SLIDER_THUMB_WIDTH;
-//                double newSliderWidth = -maxPaneWidth * ((hSliderWidget.getValue() / 100) - 1) + TOTAL_SLIDER_THUMB_WIDTH;
-//                double rightThumbX = rightSliderThumb.getX() + newXValue - current - slider.getWidth() + newSliderWidth;
-//                rightSliderThumb.setX(rightThumbX);
-//                slider.setWidth(newSliderWidth);
-//
-//            }
-//        }
+        Pane xSliderPane = this.getProps().getxSliderPane();
+        Rectangle slider = this.getProps().getSlider();
+        DoubleProperty scrollX = this.getProps().getScrollX();
+        Rectangle rightSliderThumb = this.getProps().getRightSliderThumb();
+        Rectangle leftSliderThumb = this.getProps().getLeftSliderThumb();
+        double hSliderWidget = this.getState().gethSlider();
+        if (xSliderPane.getWidth() > 0) {
+            double max = xSliderPane.getWidth() - slider.getWidth();
+            double current = slider.getX();
+            double newXValue = (max * scrollX.getValue() / 100);
+
+            if (newXValue <= 0) {
+                newXValue = 0;
+            }
+            if (slider.getWidth() >= xSliderPane.getWidth()) {
+                double newWidth = xSliderPane.getWidth();
+                if (newWidth < TOTAL_SLIDER_THUMB_WIDTH) {
+                    newWidth = TOTAL_SLIDER_THUMB_WIDTH;
+                }
+                double oldWidth = slider.getWidth();
+                slider.setWidth(newWidth);
+                rightSliderThumb.setX(rightSliderThumb.getX() + newWidth - oldWidth);
+            }
+            if (scrollX.getValue() >= 0 && xSliderPane.getWidth() > TOTAL_SLIDER_THUMB_WIDTH) {
+                slider.setX(newXValue);
+                leftSliderThumb.setX(newXValue);
+                double maxPaneWidth = xSliderPane.getWidth() - TOTAL_SLIDER_THUMB_WIDTH;
+                double newSliderWidth = -maxPaneWidth * ((hSliderWidget / 100) - 1) + TOTAL_SLIDER_THUMB_WIDTH;
+                LOG.info("sliderw: {}", hSliderWidget);
+                double rightThumbX = rightSliderThumb.getX() + newXValue - current - slider.getWidth() + newSliderWidth;
+                rightSliderThumb.setX(rightThumbX);
+                slider.setWidth(newSliderWidth);
+
+            }
+        }
     }
 
     @Override
@@ -999,11 +1011,8 @@ public class App extends Component<AppProps, AppState> {
                         final ZoomableTrackRenderer negativeStrandTrackRenderer = new ZoomableTrackRenderer(canvasPane, negativeStrandTrack, selectedChromosome);
                         negativeStrandTrackRenderer.setWeight(getMaxWeight());
                         Platform.runLater(() -> {
-                            //AppStore.getStore().addDataSet(loadedDataSet);
-                            //AppStore.getStore().addTrackRenderer(positiveStrandTrackRenderer, negativeStrandTrackRenderer);
                             AppStore.getStore().updateTrackRenderer(Arrays.asList(loadedDataSet),
                                     Arrays.asList(positiveStrandTrackRenderer, negativeStrandTrackRenderer));
-                            //updateCanvasContexts();
                         });
                     }
                 }
