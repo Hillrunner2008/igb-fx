@@ -30,6 +30,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Rectangle;
+import org.controlsfx.control.PlusMinusSlider.PlusMinusEvent;
 import org.lorainelab.igb.data.model.CanvasContext;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.DataSet;
@@ -78,6 +79,7 @@ public class App extends Component<AppProps, AppState> {
         initializeChromosomeSelectionListener();
         initializeGenomeVersionSelectionListener();
         initializeMouseEvents();
+        initializePlusMinusSlider();
         AppStore.getStore().subscribe(this);
     }
 
@@ -155,6 +157,45 @@ public class App extends Component<AppProps, AppState> {
         }
         this.setState(state);
 
+    }
+
+    private void initializePlusMinusSlider() {
+        this.getProps().getPlusMinusSlider().setOnValueChanged((PlusMinusEvent event) -> {
+            final double updatedScrollXValue = getUpdatedScrollxValue(event.getValue());
+            double scrollX = this.getState().getScrollX();
+            if (updatedScrollXValue != scrollX) {
+                if (Platform.isFxApplicationThread()) {
+                   // scrollX.setValue(updatedScrollXValue);
+                    AppStore.getStore().updatePlusMinusSlider(updatedScrollXValue);
+                    //resetZoomStripe();
+                    syncWidgetSlider();
+                } else {
+                    Platform.runLater(() -> {
+                        //scrollX.setValue(updatedScrollXValue);
+                        AppStore.getStore().updatePlusMinusSlider(updatedScrollXValue);
+                        //resetZoomStripe();
+                        syncWidgetSlider();
+                    });
+                }
+            }
+        });
+    }
+
+    private double getUpdatedScrollxValue(double eventValue) {
+        double updatedScrollXValue = this.getState().getScrollX() + getAdjustedScrollValue(eventValue);
+        updatedScrollXValue = enforceRangeBounds(updatedScrollXValue, 0, 100);
+        return updatedScrollXValue;
+    }
+
+    private double getAdjustedScrollValue(double value) {
+        if (value < -0.8 || value > 0.8) {
+            return value;
+        } else if ((value < 0 && value > -0.1) || value < .1) {
+            return value / 10000;
+        } else if ((value < 0 && value > -0.2) || value < .2) {
+            return value / 2000;
+        }
+        return value / 50;
     }
 
     private Point2D getLocalPoint2DFromMouseEvent(MouseEvent event) {
@@ -553,7 +594,7 @@ public class App extends Component<AppProps, AppState> {
 
         AppStore.getStore().updateVSlider(newValue.doubleValue());
 
-        updateCanvasContexts();
+        //updateCanvasContexts();
     };
     final ChangeListener<Number> hSliderListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
 
@@ -569,7 +610,7 @@ public class App extends Component<AppProps, AppState> {
                     newValue.doubleValue()
             );
             AppStore.getStore().updateHSlider(newValue.doubleValue(), scrollX, xFactor, 1);
-            updateCanvasContexts();
+            //updateCanvasContexts();
             syncWidgetSlider();
             lastHSliderFire = newValue.doubleValue();
 
@@ -612,12 +653,12 @@ public class App extends Component<AppProps, AppState> {
         if (ignoreScrollXEvent) {
             ignoreScrollXEvent = false;
         } else {
-            updateCanvasContexts();
+            //updateCanvasContexts();
         }
     };
     final ChangeListener<Number> scrollYPositionListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
         AppStore.getStore().updateScrollY(newValue.doubleValue());
-        updateCanvasContexts();
+        //updateCanvasContexts();
     };
     final EventHandler<ActionEvent> loadDataActionListener = action -> {
         Chromosome selectedChromosome = this.getState().getSelectedChromosome();
@@ -633,7 +674,7 @@ public class App extends Component<AppProps, AppState> {
                         Platform.runLater(() -> {
                             //TODO: hack for refresh
                             AppStore.getStore().noop();
-                            updateCanvasContexts();
+                            //updateCanvasContexts();
                         });
                     });
                 });
@@ -650,7 +691,7 @@ public class App extends Component<AppProps, AppState> {
                 Platform.runLater(() -> {
                     //TODO: hack for refresh
                     AppStore.getStore().noop();
-                    updateCanvasContexts();
+                    //updateCanvasContexts();
                 });
             }).exceptionally(ex -> {
                 LOG.error(ex.getMessage(), ex);
@@ -753,7 +794,7 @@ public class App extends Component<AppProps, AppState> {
                             xFactor,
                             1
                     );
-                    updateCanvasContexts();
+                    //updateCanvasContexts();
                     //AppStore.getStore().noop();
                 });
             }
@@ -796,7 +837,7 @@ public class App extends Component<AppProps, AppState> {
                     xFactor,
                     1
             );
-            updateCanvasContexts();
+            //updateCanvasContexts();
             initializeDataSetListener(genomeVersion);
         });
     };
@@ -966,7 +1007,7 @@ public class App extends Component<AppProps, AppState> {
                             //AppStore.getStore().addTrackRenderer(positiveStrandTrackRenderer, negativeStrandTrackRenderer);
                             AppStore.getStore().updateTrackRenderer(Arrays.asList(loadedDataSet),
                                     Arrays.asList(positiveStrandTrackRenderer, negativeStrandTrackRenderer));
-                            updateCanvasContexts();
+                            //updateCanvasContexts();
                         });
                     }
                 }

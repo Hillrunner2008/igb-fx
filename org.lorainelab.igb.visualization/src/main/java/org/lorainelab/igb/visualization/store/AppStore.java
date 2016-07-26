@@ -126,6 +126,12 @@ public class AppStore {
         emit();
     }
     
+    public void updatePlusMinusSlider(double scrollX) {
+        this.scrollX = scrollX;
+        this.zoomStripeCoordinate = -1;
+        emit();
+    }
+    
     public void updateScrollY(double scrollY) {
         this.scrollY = scrollY;
         emit();

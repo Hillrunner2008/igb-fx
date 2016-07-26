@@ -11,6 +11,7 @@ import javafx.scene.control.ScrollBar;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Rectangle;
+import org.controlsfx.control.PlusMinusSlider;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.GenomeVersion;
 import org.lorainelab.igb.selections.SelectionInfoService;
@@ -41,6 +42,7 @@ public class AppProps implements Props {
     private Pane labelPane;
     private Button loadDataButton;
     private Button loadSequenceButton;
+    private PlusMinusSlider plusMinusSlider;
 
     public AppProps(Slider hslider, DoubleProperty scrollX, ScrollBar scrollY,
             double zoomStripeCoordinate, CanvasPane canvasPane,
@@ -48,7 +50,7 @@ public class AppProps implements Props {
             GenomeVersion selectedGenomeVersion, Slider vslider, double totalTrackHeight,
             DoubleProperty hSliderWidget, Rectangle slider, Pane xSliderPane,
             Rectangle leftSliderThumb, Rectangle rightSliderThumb, Pane labelPane,
-            Button loadDataButton, Button loadSequenceButton) {
+            Button loadDataButton, Button loadSequenceButton, PlusMinusSlider plusMinusSlider) {
         this.hSlider = hslider;
         this.scrollX = scrollX;
         this.scrollY = scrollY;
@@ -67,8 +69,13 @@ public class AppProps implements Props {
         this.labelPane = labelPane;
         this.loadDataButton = loadDataButton;
         this.loadSequenceButton = loadSequenceButton;
+        this.plusMinusSlider = plusMinusSlider;
     }
 
+    public PlusMinusSlider getPlusMinusSlider() {
+        return plusMinusSlider;
+    }
+    
     public Button getLoadDataButton() {
         return loadDataButton;
     }
