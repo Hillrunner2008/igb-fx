@@ -55,6 +55,7 @@ import org.reactfx.EventStream;
 import org.reactfx.EventStreams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static org.lorainelab.igb.visualization.util.CanvasUtils.linearScaleTransform;
 
 /**
  *
@@ -80,6 +81,7 @@ public class App extends Component<AppProps, AppState> {
         initializeGenomeVersionSelectionListener();
         initializeMouseEvents();
         initializePlusMinusSlider();
+        initializeZoomScrollBar();
         AppStore.getStore().subscribe(this);
     }
 
@@ -403,6 +405,7 @@ public class App extends Component<AppProps, AppState> {
                 xFactor,
                 1
         );
+        syncWidgetSlider();
     }
 
     double lastDragX = 0;
@@ -451,9 +454,8 @@ public class App extends Component<AppProps, AppState> {
                 } else {
                     newScrollX = (currentSlider / maxSlider) * 100;
                 }
-                //ignoreScrollXEvent = true;
-//                scrollX.setValue(newScrollX);
-//                hSliderWidget.setValue((1 - (current / max)) * 100);
+                AppStore.getStore().updatePlusMinusSlider(newScrollX);
+                this.getProps().gethSliderWidget().setValue((1 - (current / max)) * 100);
             }
             lastDragX = event.getX();
         });
@@ -491,15 +493,13 @@ public class App extends Component<AppProps, AppState> {
                 } else {
                     newScrollX = (currentSlider / maxSlider) * 100;
                 }
-//                ignoreScrollXEvent = true;
-//                scrollX.setValue(newScrollX);
-//                hSliderWidget.setValue((1 - (current / max)) * 100);
+                AppStore.getStore().updatePlusMinusSlider(newScrollX);
+                this.getProps().gethSliderWidget().setValue((1 - (current / max)) * 100);
             }
             lastDragX = event.getX();
         });
 
         slider.setOnMouseDragged((MouseEvent event) -> {
-
             double increment = Math.round(event.getX() - lastDragX);
             double newSliderValue = slider.getX() + increment;
             double newRightThumbValue = rightSliderThumb.getX() + increment;
@@ -519,8 +519,7 @@ public class App extends Component<AppProps, AppState> {
             rightSliderThumb.setX(newRightThumbValue);
             double max = xSliderPane.getWidth() - slider.getWidth();
             double current = slider.getX();
-            resetZoomStripe();
-            //scrollX.setValue((current / max) * 100);
+            AppStore.getStore().updatePlusMinusSlider((current / max) * 100);
             lastDragX = event.getX();
         });
     }
@@ -615,7 +614,7 @@ public class App extends Component<AppProps, AppState> {
     final ChangeListener<Number> hSliderWidgetListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
         boolean isNearMaxZoom = newValue.doubleValue() > 98;
         if (lastHSliderFire < 0 || Math.abs(lastHSliderFire - newValue.doubleValue()) > 1 || isNearMaxZoom) {
-            final double xFactor = this.getState().getxFactor();
+            final double xFactor = linearScaleTransform(this.getProps().getCanvasPane(), newValue.doubleValue());
             syncHSlider(xFactor);
             lastHSliderFire = newValue.doubleValue();
         }
@@ -749,7 +748,8 @@ public class App extends Component<AppProps, AppState> {
                 invertExpScaleTransform(this.getProps().getCanvasPane(), xFactor),
                 this.getState().getScrollX(),
                 xFactor,
-                1);
+                1
+        );
     }
 
     public DoubleProperty getHSliderValue() {
