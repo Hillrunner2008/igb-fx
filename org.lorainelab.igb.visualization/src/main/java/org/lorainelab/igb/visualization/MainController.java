@@ -129,6 +129,7 @@ public class MainController {
     private SearchService searchService;
     //Apps
     private Component app;
+    private boolean fxReady;
 
     public MainController() {
         trackRenderers = Sets.newConcurrentHashSet();
@@ -142,6 +143,7 @@ public class MainController {
         autocompleteEntries = Sets.newTreeSet();
         searchAutocomplete = new ContextMenu();
         searchAutocomplete.hide();
+        fxReady = true;
     }
 
     @Activate
@@ -252,6 +254,11 @@ public class MainController {
 //    }
     @FXML
     private void initialize() {
+        if(!fxReady) {
+            LOG.info("fx cancelled so aborting start");
+            return;
+        }
+        LOG.info("initialize fxml");
         initializeGuiComponents();
         app = new App(new AppProps(
                 hSlider,
@@ -514,6 +521,7 @@ public class MainController {
 
     @Deactivate
     private void deactivate() {
+        fxReady = false;
         LOG.info("deactivate called in maincontroller");
         if (app != null) {
             app.close();

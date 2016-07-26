@@ -761,6 +761,7 @@ public class App extends Component<AppProps, AppState> {
     }
     private ChangeListener<Optional<GenomeVersion>> genomeVersionSelectionListener = (observable, oldValue, newValue) -> {
         LOG.info("initializeGenomeVersionSelectionListener event triggered");
+        LOG.info(App.this.toString());
         newValue.ifPresent(genomeVersion -> {
             try {
                 runAndWait(() -> {
@@ -969,6 +970,7 @@ public class App extends Component<AppProps, AppState> {
 
     @Override
     public void close() {
+        LOG.info("closing app: " + genomeVersionSelectionListener.toString());
         this.getProps().getSelectionInfoService().getSelectedChromosome().removeListener(chromosomeSelectionListener);
         this.getProps().getSelectionInfoService().getSelectedGenomeVersion().removeListener(genomeVersionSelectionListener);
     }
