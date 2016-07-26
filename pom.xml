@@ -212,6 +212,12 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.persistencemanager</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>org.lorainelab.igb.menu.about</artifactId>
                 <version>${project.version}</version>
                 <scope>provided</scope>
@@ -328,6 +334,7 @@
         <module>org.lorainelab.igb.feature</module>
         <module>org.lorainelab.igb.search.lucene</module>
         <module>org.lorainelab.igb.search.api</module>
+        <module>org.lorainelab.igb.persistencemanager</module>
         <module>org.lorainelab.igb.kar</module>
     </modules>
     <properties>
