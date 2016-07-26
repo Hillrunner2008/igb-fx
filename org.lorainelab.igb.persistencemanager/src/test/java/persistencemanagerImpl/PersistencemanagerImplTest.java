@@ -57,8 +57,6 @@ public class PersistencemanagerImplTest {
     @Before
     public void setUp(){
         try {
-            //load driver for sqlite           
-            Class.forName("org.sqlite.JDBC");
             connection = DriverManager.getConnection("jdbc:sqlite:test.db");
             MockitoAnnotations.initMocks(this);
             
@@ -69,9 +67,6 @@ public class PersistencemanagerImplTest {
                     .thenReturn(dataSource);
             when(dataSource.getConnection()).thenAnswer(x -> DriverManager.getConnection("jdbc:sqlite:test.db"));
             pm = factory.getPersistenceManager(PersistencemanagerImplTest.class).get();
-        } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
-            Logger.getLogger(PersistencemanagerImplTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (SQLException ex) {
             ex.printStackTrace();
             Logger.getLogger(PersistencemanagerImplTest.class.getName()).log(Level.SEVERE, null, ex);
