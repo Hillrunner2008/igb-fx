@@ -25,7 +25,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.any;
 import org.osgi.service.jdbc.DataSourceFactory;
-import persistencemanagerFactory.PersistencemanagerFactory;
+import org.lorainelab.igb.persistencemanagerFactory.PersistencemanagerFactory;
 import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
 

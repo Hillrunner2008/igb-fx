@@ -60,7 +60,7 @@ public interface PersistenceManager {
      * @param pattern - which is to present in key.
      * @return the <String, String> map containing all keys containing pattern and associated values.
      */
-    HashMap<String, String> getAllLike(String pattern);
+    Map<String, String> getAllLike(String pattern);
     //void persistConnection();
     //close connection
     //rollback

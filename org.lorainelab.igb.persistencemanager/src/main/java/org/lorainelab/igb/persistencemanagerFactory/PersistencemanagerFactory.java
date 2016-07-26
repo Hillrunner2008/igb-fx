@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package persistencemanagerFactory;
+package org.lorainelab.igb.persistencemanagerFactory;
 
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
@@ -14,7 +14,7 @@ import org.lorainelab.igb.persistencemanager.PersistenceManager;
 import org.osgi.service.jdbc.DataSourceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import persistencemanagerImpl.PersistencemanagerImpl;
+import org.lorainelab.igb.persistencemanagerImpl.PersistencemanagerImpl;
 
 /**
  *

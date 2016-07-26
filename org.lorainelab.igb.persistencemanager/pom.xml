@@ -33,15 +33,11 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
             <version>1.10.19</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.service.jdbc</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jooq</groupId>
-            <artifactId>jool</artifactId>
-            <version>0.9.11</version>
         </dependency>
         <dependency>
             <groupId>org.xerial</groupId>
@@ -71,8 +67,7 @@
                             *
                         </Import-Package>
                         <Service-Component>*</Service-Component>
-                        <Export-Package>org.lorainelab.igb.persistencemanager,persistencemanagerFactory</Export-Package>
-                        <Private-Package>org.lorainelab.igb.persistencemanager.*,persistencemanagerFactory.*,persistencemanagerImpl.*</Private-Package>
+                        <Export-Package>org.lorainelab.igb.persistencemanager,org.lorainelab.igb.persistencemanagerFactory</Export-Package>
                     </instructions>
                 </configuration>
             </plugin>  

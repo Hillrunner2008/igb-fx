@@ -1,4 +1,4 @@
-package persistencemanagerImpl;
+package org.lorainelab.igb.persistencemanagerImpl;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -90,7 +90,6 @@ public class PersistencemanagerImpl implements PersistenceManager {
 
     @Override
     public Optional<String> get(String key) {
-        String value = null;
         try (Connection dsConnection = ds.getConnection()) {
             String sql = "SELECT * FROM " + getTableName() + " WHERE " + KEY_COLUMN_NAME + "=?";
             try (PreparedStatement stmt = dsConnection.prepareStatement(sql)) {
@@ -99,7 +98,7 @@ public class PersistencemanagerImpl implements PersistenceManager {
                 if (!result.next()) {
                     return Optional.empty();
                 }
-                value = result.getString(VALUE_COLUMN_NAME);
+                return Optional.of(result.getString(VALUE_COLUMN_NAME));
             } catch (SQLException ex) {
                 LOG.trace("sql called: " + sql);
                 LOG.error(ex.getMessage(), ex);
@@ -109,7 +108,6 @@ public class PersistencemanagerImpl implements PersistenceManager {
             LOG.error(ex.getMessage(), ex);
             return Optional.empty();
         }
-        return Optional.of(value);
     }
 
     @Override
@@ -133,7 +131,7 @@ public class PersistencemanagerImpl implements PersistenceManager {
     @Override
     public void remove(String key) {
         try (Connection dsConnection = ds.getConnection()) {
-            String sql = "DELETE FROM " + getTableName() + " WHERE key=?";
+            String sql = "DELETE FROM " + getTableName() + " WHERE "+KEY_COLUMN_NAME+"=?";
             try (PreparedStatement stmt = dsConnection.prepareStatement(sql)) {
                 stmt.setString(1, key);
                 stmt.execute();
@@ -149,7 +147,7 @@ public class PersistencemanagerImpl implements PersistenceManager {
     @Override
     public void clear() {
         try (Connection dsConnection = ds.getConnection()) {
-            String sql = "DROP TABLE " + getTableName();
+            String sql = "TRUNCATE TABLE " + getTableName();
             try (Statement stmt = dsConnection.createStatement()) {
                 stmt.execute(sql);
             } catch (SQLException ex) {
@@ -189,8 +187,8 @@ public class PersistencemanagerImpl implements PersistenceManager {
     }
 
     @Override
-    public HashMap<String, String> getAll() {
-        HashMap<String, String> valueMap = new HashMap<String, String>();
+    public Map<String, String> getAll() {
+        Map<String, String> valueMap = new HashMap<String, String>();
         try (Connection dsConnection = ds.getConnection()) {
             String sql = "SELECT * FROM " + getTableName();
             try (PreparedStatement stmt = dsConnection.prepareStatement(sql)) {
@@ -210,8 +208,8 @@ public class PersistencemanagerImpl implements PersistenceManager {
     }
 
     @Override
-    public HashMap<String, String> getAllLike(String pattern) {
-        HashMap<String, String> valueMap = new HashMap<String, String>();
+    public Map<String, String> getAllLike(String pattern) {
+        Map<String, String> valueMap = new HashMap<String, String>();
         try (Connection dsConnection = ds.getConnection()) {
             String sql = "SELECT * FROM " + getTableName() + " WHERE " + KEY_COLUMN_NAME + " LIKE ?";
             try (PreparedStatement stmt = dsConnection.prepareStatement(sql)) {
