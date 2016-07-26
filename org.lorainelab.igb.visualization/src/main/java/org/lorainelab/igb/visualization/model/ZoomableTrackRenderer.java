@@ -31,7 +31,6 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     final int modelWidth;
     final Track track;
     double zoomStripeCoordinate = -1;
-//    protected EventBus eventBus;
     private final View view;
     private final Tooltip tooltip = new Tooltip();
     private final CanvasContext canvasContext;
@@ -212,12 +211,10 @@ public class ZoomableTrackRenderer implements TrackRenderer {
 //        }
 //        showToolTip(event.getLocal(), event.getScreen());
 //    }
-
 //    @Subscribe
 //    private void handleMouseStationaryEndEvent(MouseStationaryEndEvent event) {
 //        hideTooltip();
 //    }
-
 //    private void handleMouseClickEvent(MouseClickedEvent event) {
 //        if (!canvasContext.getBoundingRect().contains(event.getLocal())) {
 //            if (!event.isMultiSelectModeActive()) {
@@ -264,12 +261,10 @@ public class ZoomableTrackRenderer implements TrackRenderer {
 //            render();
 //        }
 //    }
-
 //    @Subscribe
 //    private void handleRefreshTrackEvent(RefreshTrackEvent event) {
 //        render();
 //    }
-
 //    @Subscribe
 //    public void handleClickDragEndEvent(ClickDragEndEvent event) {
 //        clearSelections();
@@ -287,7 +282,6 @@ public class ZoomableTrackRenderer implements TrackRenderer {
 //        }
 //        render();
 //    }
-
     private void clearSelections() {
         track.getSlotMap().values().stream().forEach(glyph -> {
             glyph.setIsSelected(false);
@@ -380,5 +374,9 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     @Override
     public void setIsMultiSelectModeActive(boolean multiSelectModeActive) {
         this.multiSelectModeActive = multiSelectModeActive;
+    }
+
+    public boolean isContained(Point2D point) {
+        return canvasContext.getBoundingRect().contains(point);
     }
 }

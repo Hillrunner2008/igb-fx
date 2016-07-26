@@ -151,7 +151,7 @@ public class TrackLabel {
             okBtn.setOnAction(event -> {
                 Platform.runLater(() -> {
                     zoomableTrackRenderer.getTrack().setMaxStackHeight(Integer.parseInt(stackHeightEntryField.getText()));
-                     AppStore.getStore().noop();
+                    AppStore.getStore().noop();
                     stage.hide();
                 });
             });

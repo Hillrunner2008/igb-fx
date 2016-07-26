@@ -290,7 +290,9 @@ public class App extends Component<AppProps, AppState> {
                     this.getProps().getSelectionInfoService().getSelectedGlyphs().clear();
                     this.getState().getTrackRenderers().stream()
                             .filter(tr -> tr instanceof ZoomableTrackRenderer)
-                            .map(tr -> ZoomableTrackRenderer.class.cast(tr)).findFirst().ifPresent(tr
+                            .map(tr -> ZoomableTrackRenderer.class.cast(tr))
+                            .filter(tr ->tr.isContained(getLocalPoint2DFromMouseEvent(event)))
+                            .findFirst().ifPresent(tr
                             -> tr.getTrack()
                                     .getGlyphs()
                                     .stream()
