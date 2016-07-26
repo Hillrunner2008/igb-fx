@@ -252,7 +252,7 @@ public class App extends Component<AppProps, AppState> {
                     this.getState().getTrackRenderers().stream()
                             .filter(tr -> tr instanceof ZoomableTrackRenderer)
                             .map(tr -> ZoomableTrackRenderer.class.cast(tr)).findFirst().ifPresent(tr
-                            -> tr.getTrack()
+                                    -> tr.getTrack()
                                     .getGlyphs()
                                     .stream()
                                     .filter(glyph -> glyph.isSelected())
@@ -265,13 +265,13 @@ public class App extends Component<AppProps, AppState> {
                     this.getProps().getSelectionInfoService().getSelectedGlyphs().clear();
                     this.getProps().getSelectionInfoService().getSelectedGlyphs().addAll(
                             this.getState().getTrackRenderers().stream()
-                                    .filter(tr -> tr instanceof ZoomableTrackRenderer)
-                                    .map(tr -> ZoomableTrackRenderer.class.cast(tr)).flatMap(tr
+                            .filter(tr -> tr instanceof ZoomableTrackRenderer)
+                            .map(tr -> ZoomableTrackRenderer.class.cast(tr)).flatMap(tr
                                     -> tr.getTrack()
-                                            .getGlyphs()
-                                            .stream()
-                                            .filter(glyph -> glyph.isSelected()))
-                                    .collect(Collectors.toList())
+                                    .getGlyphs()
+                                    .stream()
+                                    .filter(glyph -> glyph.isSelected()))
+                            .collect(Collectors.toList())
                     );
 
                 }
@@ -552,7 +552,7 @@ public class App extends Component<AppProps, AppState> {
     final ChangeListener<Number> vSliderListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
 
         AppStore.getStore().updateVSlider(newValue.doubleValue());
-        
+
         updateCanvasContexts();
     };
     final ChangeListener<Number> hSliderListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
@@ -588,12 +588,20 @@ public class App extends Component<AppProps, AppState> {
             refreshSliderWidget();
         });
         updateCanvasContexts();
+        double hSlider = this.getState().gethSlider();
+        double scrollX = calcScrollXWithZoomStripe(hSlider);
+        double xFactor = exponentialScaleTransform(
+                this.getProps().getCanvasPane(),
+                hSlider
+        );
+        AppStore.getStore().updateHSlider(hSlider, scrollX, xFactor, 1);
     };
     final ChangeListener<Number> heightPropertyListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
         Platform.runLater(() -> {
             refreshSliderWidget();
         });
         updateCanvasContexts();
+        AppStore.getStore().noop();
     };
     final ChangeListener<Number> scrollXPropertyListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
         final double boundedScrollValue = enforceRangeBounds(newValue.doubleValue(), 0, 100);
