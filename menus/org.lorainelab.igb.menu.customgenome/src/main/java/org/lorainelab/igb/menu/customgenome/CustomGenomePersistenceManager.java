@@ -36,7 +36,7 @@ public class CustomGenomePersistenceManager {
     private static HashFunction md5HashFunction;
     private Preferences modulePreferencesNode;
     private GenomeVersionRegistry genomeVersionRegistry;
-
+    
     public CustomGenomePersistenceManager() {
         md5HashFunction = Hashing.md5();
         modulePreferencesNode = PreferenceUtils.getPackagePrefsNode(CustomGenomePersistenceManager.class);
@@ -60,7 +60,7 @@ public class CustomGenomePersistenceManager {
     public void setGenomeVersionRegistry(GenomeVersionRegistry genomeVersionRegistry) {
         this.genomeVersionRegistry = genomeVersionRegistry;
     }
-
+    
     private void initializeCustomGenomeFromPreferencesNode(Preferences node) {
         String speciesName = node.get(SPECIES_NAME, "");
         String versionName = node.get(VERSION_NAME, "");

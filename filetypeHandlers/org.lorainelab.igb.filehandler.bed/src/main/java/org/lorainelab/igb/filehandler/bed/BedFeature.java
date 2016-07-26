@@ -21,18 +21,21 @@ public class BedFeature implements Feature {
     protected int cdsStart = -1;
     protected int cdsEnd = -1;
     protected RangeSet<Integer> exons;
+    protected RangeSet<Integer> cdsBlocks;
     protected Range<Integer> range;
     protected Strand strand;
     private String id;
     private final String chrId;
     private String description;
     private String score;
+    private int cdsBlockLength;
 
     public BedFeature(String chrId, Range range, Strand strand) {
         this.chrId = chrId;
         this.range = range;
         this.strand = strand;
         exons = TreeRangeSet.create();
+        cdsBlockLength = -1;
     }
 
     public Map<String, String> getTooltipData() {
@@ -128,13 +131,6 @@ public class BedFeature implements Feature {
                 .collect(Collectors.toSet());
     }
 
-    private Range<Integer> getCds() {
-        if (cdsStart == -1 || cdsEnd == -1) {
-            return range;
-        }
-        return Range.closedOpen(cdsStart, cdsEnd);
-    }
-
     @Override
     public String getChromosomeId() {
         return chrId;
@@ -142,6 +138,19 @@ public class BedFeature implements Feature {
 
     public RangeSet<Integer> getExons() {
         return exons;
+    }
+
+    public RangeSet<Integer> getCdsBlocks() {
+        if (cdsBlocks == null) {
+            cdsBlocks = TreeRangeSet.create();
+            Range<Integer> cdsRange = Range.closed(cdsStart - range.lowerEndpoint(), cdsEnd - range.lowerEndpoint());
+            exons.asRanges().stream()
+                    .map(exon -> Range.closed(exon.lowerEndpoint(), exon.upperEndpoint()))
+                    .filter(exonRange -> exonRange.isConnected(cdsRange))
+                    .map(exonRange -> exonRange.intersection(cdsRange))
+                    .forEach(cdsBlock -> cdsBlocks.add(cdsBlock));
+        }
+        return cdsBlocks;
     }
 
     public String getDescription() {

@@ -47,11 +47,13 @@
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.menu.about/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.menu.openfile/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.menu.customgenome/${project.version}</bundle>
+        <bundle>mvn:${project.groupId}/org.lorainelab.igb.persistencemanager/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.filehandler.registry/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.filehandler.bed/${project.version}</bundle>
 
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.visualization/${project.version}</bundle>
         
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.cache.http/${project.version}</bundle>
+        <bundle>mvn:${project.groupId}/org.lorainelab.igb.preferencemanager.api/${project.version}</bundle>
     </feature>
 </features>

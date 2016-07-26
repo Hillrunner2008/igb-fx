@@ -185,9 +185,9 @@ public enum AminoAcid {
             String aaCode;
             if (nextCodon.contains("-")) {
                 if (forward) {
-                    aaCode = "-  ";
+                    aaCode = "?  ";
                 } else {
-                    aaCode = "  -";
+                    aaCode = "  ?";
                 }
             } else {
                 AminoAcid aminoAcid = AminoAcid.CODON_TO_AMINO_ACID.get(nextCodon);
