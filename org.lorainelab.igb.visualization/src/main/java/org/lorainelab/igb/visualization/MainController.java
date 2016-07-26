@@ -278,7 +278,8 @@ public class MainController {
                 rightSliderThumb,
                 labelPane,
                 loadDataButton,
-                loadSequenceButton
+                loadSequenceButton,
+                plusMinusSlider
         ));
         //initializeChromosomeSelectionListener();
         //initializeGenomeVersionSelectionListener();
@@ -298,7 +299,6 @@ public class MainController {
     }
 
     private void initializeGuiComponents() {
-        setupPlusMinusSlider();
         addMenuBar();
         addTopToolbar();
         addFooter();
@@ -548,40 +548,8 @@ public class MainController {
         root.getChildren().add(3, footer);
     }
 
-    private void setupPlusMinusSlider() {
-//        plusMinusSlider.setOnValueChanged((PlusMinusEvent event) -> {
-//            final double updatedScrollXValue = getUpdatedScrollxValue(event.getValue());
-//            if (updatedScrollXValue != scrollX.doubleValue()) {
-//                if (Platform.isFxApplicationThread()) {
-//                    scrollX.setValue(updatedScrollXValue);
-//                    resetZoomStripe();
-//                    syncWidgetSlider();
-//                } else {
-//                    Platform.runLater(() -> {
-//                        scrollX.setValue(updatedScrollXValue);
-//                        resetZoomStripe();
-//                        syncWidgetSlider();
-//                    });
-//                }
-//            }
-//        });
-    }
 
-    private double getUpdatedScrollxValue(double eventValue) {
-        double updatedScrollXValue = scrollX.doubleValue() + getAdjustedScrollValue(eventValue);
-        updatedScrollXValue = enforceRangeBounds(updatedScrollXValue, 0, 100);
-        return updatedScrollXValue;
-    }
 
-    private double getAdjustedScrollValue(double value) {
-        if (value < -0.8 || value > 0.8) {
-            return value;
-        } else if ((value < 0 && value > -0.1) || value < .1) {
-            return value / 10000;
-        } else if ((value < 0 && value > -0.2) || value < .2) {
-            return value / 2000;
-        }
-        return value / 50;
-    }
+
 
 }
