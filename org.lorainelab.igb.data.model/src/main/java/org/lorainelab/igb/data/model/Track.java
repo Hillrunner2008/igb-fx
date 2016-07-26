@@ -9,8 +9,6 @@ import com.google.common.primitives.Ints;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
@@ -29,7 +27,7 @@ public class Track {
     private SortedSetMultimap<Integer, CompositionGlyph> slotMap;
 
     private final boolean isNegative;
-    private DoubleProperty modelHeight;
+    private double modelHeight;
     private int stackHeight;
     private static final int PADDING = 5;
 
@@ -38,7 +36,7 @@ public class Track {
         this.trackLabel = trackLabel;
         this.stackHeight = Math.max(stackHeight, 0);
         //handles case when stackHeight is set to 0 i.e. unlimited
-        this.modelHeight = new SimpleDoubleProperty(Math.max(SLOT_HEIGHT * stackHeight, SLOT_HEIGHT));
+        this.modelHeight = Math.max(SLOT_HEIGHT * stackHeight, SLOT_HEIGHT);
         slotMap = Multimaps.synchronizedSortedSetMultimap(TreeMultimap.create(Ordering.natural(), MIN_X_COMPARATOR));
         glyphs = Lists.newArrayList();
     }
@@ -117,7 +115,7 @@ public class Track {
                 }
             }
             slotCount++; // for slop row
-            modelHeight.set(SLOT_HEIGHT * slotCount);
+            modelHeight = SLOT_HEIGHT * slotCount;
         }
     }
 
@@ -131,10 +129,6 @@ public class Track {
 
     public String getTrackLabel() {
         return trackLabel;
-    }
-
-    public DoubleProperty modelHeightProperty() {
-        return modelHeight;
     }
 
     public void setMaxStackHeight(int maxStackHeight) {
@@ -153,6 +147,10 @@ public class Track {
 
     public int getStackHeight() {
         return stackHeight;
+    }
+
+    public double getModelHeight() {
+        return modelHeight;
     }
 
 }

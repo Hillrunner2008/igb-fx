@@ -25,8 +25,6 @@ public interface TrackRenderer {
 
     TrackLabel getTrackLabel();
 
-    void render();
-
     void scaleCanvas(double xFactor, double scrollX, double scrollY);
 
     void updateView(double scrollX, double scrollY);

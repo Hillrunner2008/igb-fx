@@ -1,12 +1,9 @@
 package org.lorainelab.igb.visualization.model;
 
-import com.google.common.eventbus.Subscribe;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javafx.application.Platform;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
@@ -20,11 +17,6 @@ import org.lorainelab.igb.data.model.View;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
 import org.lorainelab.igb.data.model.glyph.Glyph;
 import org.lorainelab.igb.visualization.CanvasPane;
-import org.lorainelab.igb.visualization.event.ClickDragEndEvent;
-import org.lorainelab.igb.visualization.event.MouseDoubleClickEvent;
-import org.lorainelab.igb.visualization.event.MouseStationaryEndEvent;
-import org.lorainelab.igb.visualization.event.MouseStationaryStartEvent;
-import org.lorainelab.igb.visualization.event.RefreshTrackEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +29,6 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     private static final Logger LOG = LoggerFactory.getLogger(ZoomableTrackRenderer.class);
     private TrackLabel trackLabel;
     final int modelWidth;
-    DoubleProperty modelHeight;
     final Track track;
     double zoomStripeCoordinate = -1;
 //    protected EventBus eventBus;
@@ -54,14 +45,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         this.weight = 0;
         this.track = track;
         this.modelWidth = chromosome.getLength();
-        modelHeight = new SimpleDoubleProperty();
-        modelHeight.bind(track.modelHeightProperty());
-        view = new View(new Rectangle2D(0, 0, modelWidth, modelHeight.doubleValue()), chromosome);
-        modelHeight.addListener((observable, oldValue, newValue) -> {
-            Platform.runLater(() -> {
-                scaleCanvas(view.getXfactor(), view.getYfactor(), scrollY);
-            });
-        });
+        view = new View(new Rectangle2D(0, 0, modelWidth, track.getModelHeight()), chromosome);
         canvasContext = new CanvasContext(canvasPane.getCanvas(), 0, 0);
         trackLabel = new TrackLabel(this, track.getTrackLabel());
         gc = canvasPane.getCanvas().getGraphicsContext2D();
@@ -131,7 +115,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         view.setXfactor(xFactor);
         this.scrollY = scrollY;
         if (canvasContext.isVisible()) {
-            double scaleToY = canvasContext.getTrackHeight() / modelHeight.doubleValue();
+            double scaleToY = canvasContext.getTrackHeight() / track.getModelHeight();
             gc.save();
             gc.scale(xFactor, scaleToY);
             view.setYfactor(scaleToY);
@@ -166,8 +150,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         gc.restore();
     }
 
-    @Override
-    public void render() {
+    private void render() {
         if (canvasContext.isVisible()) {
             if (Platform.isFxApplicationThread()) {
                 clearCanvas();
@@ -222,18 +205,18 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         }
     }
 
-    @Subscribe
-    private void handleMouseStationaryStartEvent(MouseStationaryStartEvent event) {
-        if (!canvasContext.getBoundingRect().contains(event.getLocal())) {
-            return;
-        }
-        showToolTip(event.getLocal(), event.getScreen());
-    }
+//    @Subscribe
+//    private void handleMouseStationaryStartEvent(MouseStationaryStartEvent event) {
+//        if (!canvasContext.getBoundingRect().contains(event.getLocal())) {
+//            return;
+//        }
+//        showToolTip(event.getLocal(), event.getScreen());
+//    }
 
-    @Subscribe
-    private void handleMouseStationaryEndEvent(MouseStationaryEndEvent event) {
-        hideTooltip();
-    }
+//    @Subscribe
+//    private void handleMouseStationaryEndEvent(MouseStationaryEndEvent event) {
+//        hideTooltip();
+//    }
 
 //    private void handleMouseClickEvent(MouseClickedEvent event) {
 //        if (!canvasContext.getBoundingRect().contains(event.getLocal())) {
@@ -268,42 +251,42 @@ public class ZoomableTrackRenderer implements TrackRenderer {
 //        }
 //        render();
 //    }
-    @Subscribe
-    private void handleMouseDoubleClickEvent(MouseDoubleClickEvent event) {
-        if (canvasContext.isVisible() && canvasContext.getBoundingRect().contains(event.getLocal())) {
-            zoomStripeCoordinate = -1;
-            track.getSlotMap().values().stream()
-                    .filter(glyph -> glyph.isSelected())
-                    .findFirst()
-                    .ifPresent(t -> {
-                        jumpZoom(t.getRenderBoundingRect());
-                    });
-            render();
-        }
-    }
+//    @Subscribe
+//    private void handleMouseDoubleClickEvent(MouseDoubleClickEvent event) {
+//        if (canvasContext.isVisible() && canvasContext.getBoundingRect().contains(event.getLocal())) {
+//            zoomStripeCoordinate = -1;
+//            track.getSlotMap().values().stream()
+//                    .filter(glyph -> glyph.isSelected())
+//                    .findFirst()
+//                    .ifPresent(t -> {
+//                        jumpZoom(t.getRenderBoundingRect());
+//                    });
+//            render();
+//        }
+//    }
 
-    @Subscribe
-    private void handleRefreshTrackEvent(RefreshTrackEvent event) {
-        render();
-    }
+//    @Subscribe
+//    private void handleRefreshTrackEvent(RefreshTrackEvent event) {
+//        render();
+//    }
 
-    @Subscribe
-    public void handleClickDragEndEvent(ClickDragEndEvent event) {
-        clearSelections();
-        if (canvasContext.isVisible()) {
-            Rectangle2D selectionRectangle = event.getSelectionRectangle();
-            if (canvasContext.getBoundingRect().intersects(selectionRectangle)) {
-                Rectangle2D mouseEventBoundingBox = canvasToViewCoordinates(selectionRectangle);
-                track.getSlotMap().values().stream()
-                        .filter(glyph -> view.getBoundingRect().intersects(glyph.getRenderBoundingRect()))
-                        .filter(glyph -> glyph.getRenderBoundingRect().intersects(mouseEventBoundingBox))
-                        .forEach(glyph -> {
-                            glyph.setIsSelected(true);
-                        });
-            }
-        }
-        render();
-    }
+//    @Subscribe
+//    public void handleClickDragEndEvent(ClickDragEndEvent event) {
+//        clearSelections();
+//        if (canvasContext.isVisible()) {
+//            Rectangle2D selectionRectangle = event.getSelectionRectangle();
+//            if (canvasContext.getBoundingRect().intersects(selectionRectangle)) {
+//                Rectangle2D mouseEventBoundingBox = canvasToViewCoordinates(selectionRectangle);
+//                track.getSlotMap().values().stream()
+//                        .filter(glyph -> view.getBoundingRect().intersects(glyph.getRenderBoundingRect()))
+//                        .filter(glyph -> glyph.getRenderBoundingRect().intersects(mouseEventBoundingBox))
+//                        .forEach(glyph -> {
+//                            glyph.setIsSelected(true);
+//                        });
+//            }
+//        }
+//        render();
+//    }
 
     private void clearSelections() {
         track.getSlotMap().values().stream().forEach(glyph -> {
@@ -372,7 +355,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
 
     @Override
     public double getModelHeight() {
-        return modelHeight.doubleValue();
+        return track.getModelHeight();
     }
 
     @Override
