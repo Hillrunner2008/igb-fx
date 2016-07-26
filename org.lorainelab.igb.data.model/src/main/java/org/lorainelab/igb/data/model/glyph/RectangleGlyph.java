@@ -20,6 +20,7 @@ import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.View;
 import static org.lorainelab.igb.data.model.sequence.BasePairColorReference.getBaseColor;
 import org.lorainelab.igb.data.model.shapes.Rectangle;
+import org.lorainelab.igb.data.model.util.ColorUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -166,7 +167,11 @@ public class RectangleGlyph implements Glyph {
                                 } else {
                                     gc.fillRect(minX + i, y, 1, viewBoundingRect.get().getHeight());
                                 }
-                                gc.setFill(Color.BLACK);
+                                if (colorByBase) {
+                                    gc.setFill(Color.BLACK);
+                                } else {
+                                   gc.setFill(ColorUtils.getEffectiveContrastColor(fill));
+                                }
                                 gc.scale(textScale, textScale);
                                 double x = ((minX + i) / textScale) + (1 / textScale) * .1;
                                 double maxWidth = (1 / textScale) * .8;
