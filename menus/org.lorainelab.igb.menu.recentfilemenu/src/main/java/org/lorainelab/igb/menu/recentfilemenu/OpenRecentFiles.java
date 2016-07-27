@@ -27,19 +27,15 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import org.lorainelab.igb.data.model.DataSet;
 import org.lorainelab.igb.data.model.GenomeVersion;
-import org.lorainelab.igb.data.model.GenomeVersionRegistry;
 import org.lorainelab.igb.data.model.datasource.DataSource;
 import org.lorainelab.igb.data.model.datasource.DataSourceReference;
 import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandler;
-import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandlerRegistry;
 import org.lorainelab.igb.menu.api.MenuBarEntryProvider;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
 import org.lorainelab.igb.menu.api.model.WeightedMenu;
 import org.lorainelab.igb.menu.api.model.WeightedMenuEntry;
 import org.lorainelab.igb.menu.api.model.WeightedMenuItem;
-import org.lorainelab.igb.menu.customgenome.CustomGenomePersistenceManager;
 import org.lorainelab.igb.preferences.PreferenceUtils;
-import static org.lorainelab.igb.menu.customgenome.CustomGenomePrefKeys.FILE_NAME;
 import org.lorainelab.igb.search.api.SearchService;
 import org.lorainelab.igb.search.api.model.IndexIdentity;
 import org.lorainelab.igb.selections.SelectionInfoService;
@@ -53,8 +49,9 @@ import org.slf4j.LoggerFactory;
 @Component(immediate = true)
 public class OpenRecentFiles implements MenuBarEntryProvider {
 
-    public static Set<String> recentFiles = new HashSet<String>();
-    private static final Logger LOG = LoggerFactory.getLogger(OpenRecentFiles.class);
+    public Set<String> recentFiles = new HashSet<String>();
+    private final String FILE_NAME = "fileName";
+    private final Logger LOG = LoggerFactory.getLogger(OpenRecentFiles.class);
     private static Preferences modulePreferencesNode;
     private static HashFunction md5HashFunction;
     private static int recentFilesCount = 0;
@@ -63,13 +60,10 @@ public class OpenRecentFiles implements MenuBarEntryProvider {
     private SelectionInfoService selectionInfoService;
     private SearchService searchService;
     private DataSource dataSource;
-    private FileTypeHandlerRegistry fileTypeHandlerRegistry;
     private FileTypeHandler fileTypeHandler;
-    private GenomeVersionRegistry genomeVersionRegistry;
-    private CustomGenomePersistenceManager customGenomePersistenceManager;
     private static WeightedMenu recentFilesMenu;
 
-    private static String md5Hash(String filePath) {
+    private String md5Hash(String filePath) {
         HashCode hc = md5HashFunction.newHasher().putString(filePath, Charsets.UTF_8).hash();
         return hc.toString();
     }
@@ -89,7 +83,7 @@ public class OpenRecentFiles implements MenuBarEntryProvider {
         recentFilesMenu.getItems().add(menuItem);
     }
 
-    private static void fetchFilePreferences(Preferences node, Menu recentFilesMenu) {
+    private void fetchFilePreferences(Preferences node, Menu recentFilesMenu) {
 
         String fileName = node.get(FILE_NAME, "");
         if (!recentFiles.contains(fileName)) {
@@ -190,16 +184,7 @@ public class OpenRecentFiles implements MenuBarEntryProvider {
 
     }
 
-    @Reference
-    public void setGenomeVersionRegistry(GenomeVersionRegistry genomeVersionRegistry) {
-        this.genomeVersionRegistry = genomeVersionRegistry;
-    }
-
-    @Reference
-    public void setCustomGenomePersistenceManager(CustomGenomePersistenceManager customGenomePersistenceManager) {
-        this.customGenomePersistenceManager = customGenomePersistenceManager;
-    }
-
+    
     @Reference
     public void setSelectionInfoService(SelectionInfoService selectionInfoService) {
         this.selectionInfoService = selectionInfoService;

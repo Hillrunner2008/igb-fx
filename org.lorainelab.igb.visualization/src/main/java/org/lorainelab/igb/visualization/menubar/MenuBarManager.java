@@ -58,7 +58,7 @@ public class MenuBarManager {
         menuBarMenuContainer.put(ParentMenu.EDIT, editMenuEntries);
         menuBarMenuContainer.put(ParentMenu.TOOLS, toolsMenuEntries);
         menuBarMenuContainer.put(ParentMenu.VIEW, viewMenuEntries);
-        menuBarMenuContainer.put(ParentMenu.GENOME,genomeMenuEntries);
+        menuBarMenuContainer.put(ParentMenu.GENOME, genomeMenuEntries);
         menuBarMenuContainer.put(ParentMenu.HELP, helpMenuEntries);
         parentMenuReference = new EnumMap<>(ParentMenu.class);
         initializeMenus();
@@ -85,14 +85,11 @@ public class MenuBarManager {
         genomeMenu = new Menu("Genome");
         genomeMenu.setMnemonicParsing(true);
     }
-    
+
     private void initFileMenu() {
-//        Menu recentFilesMenu = new Menu("Open Recent Files");
-//        recentFilesMenu.getItems().add(new MenuItem("Open Recent File"));
         fileMenu = new Menu("File");
         fileMenu.setMnemonicParsing(true);
         fileMenuEntries.put(5, new MenuItem("Load Url"));
-//        fileMenuEntries.put(6, recentFilesMenu);
         fileMenuEntries.put(10, new SeparatorMenuItem());
         fileMenuEntries.put(70, getExitMenuItem());
     }
@@ -262,7 +259,7 @@ public class MenuBarManager {
             fileMenuEntries.get(key).forEach(menuItem -> fileMenu.getItems().add(menuItem));
         });
     }
-    
+
     private void rebuildGenomeMenu() {
         genomeMenu.getItems().clear();
         genomeMenuEntries.keySet().stream().forEach(key -> {
