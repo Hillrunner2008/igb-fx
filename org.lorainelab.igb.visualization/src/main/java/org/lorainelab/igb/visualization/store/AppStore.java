@@ -144,11 +144,6 @@ public class AppStore {
         emit();
     }
 
-//    public void updateSelectionRectangle(Rectangle2D selectionRectangle) {
-//        this.selectionRectangle = selectionRectangle;
-////        emit();
-//    }
-
     public void updateClickStartPosition(Point2D clickStartPosition) {
         this.clickStartPosition = clickStartPosition;
         emit();

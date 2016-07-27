@@ -12,7 +12,6 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
@@ -108,8 +107,6 @@ public class App extends Component<AppProps, AppState> {
             ignoreScrollXEvent = true;
             this.getProps().getScrollX().set(xScrollValue);
         }
-        Set<TrackRenderer> trackRenderers = AppStore.getStore().getTrackRenderers();
-        int oldTrSize = this.getState().getTrackRenderers().size();
 
         AppState state = this.getState()
                 .setxFactor(AppStore.getStore().getxFactor())
@@ -119,7 +116,7 @@ public class App extends Component<AppProps, AppState> {
                 .setScrollYVisibleAmount(AppStore.getStore().getScrollYVisibleAmount())
                 .sethSlider(AppStore.getStore().gethSlider())
                 .setvSlider(AppStore.getStore().getvSlider())
-                .setTrackRenderers(trackRenderers)
+                .setTrackRenderers(AppStore.getStore().getTrackRenderers())
                 .setLoadedDataSets(AppStore.getStore().getLoadedDataSets())
                 .setSelectedGenomeVersion(AppStore.getStore().getSelectedGenomeVersion())
                 .setSelectedChromosome(AppStore.getStore().getSelectedChromosome())
@@ -128,9 +125,7 @@ public class App extends Component<AppProps, AppState> {
                 .setMouseClickLocation(AppStore.getStore().getMouseClickLocation())
                 .setMouseDragging(AppStore.getStore().isMouseDragging())
                 .setScreenPoint(AppStore.getStore().getScreenPoint());
-        if (this.getState().getTrackRenderers().size() != oldTrSize) {
-            updateCanvasContexts();
-        }
+        updateCanvasContexts();
         this.setState(state);
 
     }
