@@ -75,7 +75,7 @@ public class AppProps implements Props {
     public PlusMinusSlider getPlusMinusSlider() {
         return plusMinusSlider;
     }
-    
+
     public Button getLoadDataButton() {
         return loadDataButton;
     }

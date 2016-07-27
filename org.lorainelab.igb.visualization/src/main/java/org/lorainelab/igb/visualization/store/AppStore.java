@@ -40,6 +40,8 @@ public class AppStore {
     private boolean mouseDragging;
     private double xFactor;
     private double yFactor;
+//    private Rectangle2D selectionRectangle;
+    private Point2D clickStartPosition;
 
     public AppStore() {
         mouseDragging = false;
@@ -52,15 +54,15 @@ public class AppStore {
     }
 
     private static AppStore instance;
-    
+
     public void subscribe(Object object) {
         this.bus.register(object);
     }
-    
+
     public void unsubscribe(Object object) {
         this.bus.unregister(object);
     }
-    
+
     public void emit() {
         this.bus.post(new AppStoreEvent());
     }
@@ -84,7 +86,7 @@ public class AppStore {
     public double getyFactor() {
         return yFactor;
     }
-    
+
     public Point2D getMouseClickLocation() {
         return mouseClickLocation;
     }
@@ -125,43 +127,53 @@ public class AppStore {
         this.trackRenderers.addAll(Arrays.asList(trackRenderers));
         emit();
     }
-    
+
     public void updatePlusMinusSlider(double scrollX) {
         this.scrollX = scrollX;
         this.zoomStripeCoordinate = -1;
         emit();
     }
-    
+
     public void updateScrollY(double scrollY) {
         this.scrollY = scrollY;
         emit();
     }
-    
+
     public void updateVSlider(double vSlider) {
         this.vSlider = vSlider;
         emit();
     }
-    
+
+//    public void updateSelectionRectangle(Rectangle2D selectionRectangle) {
+//        this.selectionRectangle = selectionRectangle;
+////        emit();
+//    }
+
+    public void updateClickStartPosition(Point2D clickStartPosition) {
+        this.clickStartPosition = clickStartPosition;
+        emit();
+    }
+
     public void updateMouseDraggedLocation(Point2D localPoint, Point2D screenPoint, boolean mouseDragging) {
-        this.localPoint = localPoint; 
+        this.localPoint = localPoint;
         this.screenPoint = screenPoint;
         this.mouseDragging = mouseDragging;
         emit();
     }
-    
+
     public void updateMouseClickedLocation(Point2D mouseClickLocation) {
         this.mouseClickLocation = mouseClickLocation;
         emit();
     }
-    
+
     public void updateTrackRenderer(List<DataSet> dataSets, List<TrackRenderer> trackRenderers) {
         this.loadedDataSets.addAll(dataSets);
         this.trackRenderers.addAll(trackRenderers);
         emit();
     }
 
-    public void update(double scrollX, double scrollY, double hSlider, 
-            double vSlider, double scrollYVisibleAmount, 
+    public void update(double scrollX, double scrollY, double hSlider,
+            double vSlider, double scrollYVisibleAmount,
             boolean clearTrackRenderers, GenomeVersion selectedGenomeVersion,
             Chromosome selectedChromosome, Optional<TrackRenderer> trackRenderer,
             double xFactor, double yFactor) {
@@ -177,12 +189,12 @@ public class AppStore {
         this.scrollYVisibleAmount = scrollYVisibleAmount;
         this.selectedGenomeVersion = selectedGenomeVersion;
         this.selectedChromosome = selectedChromosome;
-        trackRenderer.ifPresent(tr ->{
+        trackRenderer.ifPresent(tr -> {
             this.trackRenderers.add(tr);
         });
         emit();
     }
-    
+
     public void updateHSlider(double hSlider, double scrollX,
             double xFactor, double yFactor) {
         this.xFactor = xFactor;
@@ -191,7 +203,7 @@ public class AppStore {
         this.scrollX = scrollX;
         emit();
     }
-    
+
     //TODO: This is bad practice
     public void noop() {
         emit();
@@ -201,13 +213,13 @@ public class AppStore {
         this.scrollYVisibleAmount = scrollYVisibleAmount;
         emit();
     }
-    
+
     public void updateZoomStripe(double zoomStripeCoordinate) {
         this.zoomStripeCoordinate = zoomStripeCoordinate;
         emit();
     }
-    
-    public void updateJumpZoom(double hSlider, double scrollX, 
+
+    public void updateJumpZoom(double hSlider, double scrollX,
             Point2D localPoint, Point2D screenPoint, boolean mouseDragging,
             double xFactor, double yFactor) {
         this.xFactor = xFactor;
@@ -215,14 +227,13 @@ public class AppStore {
         this.hSlider = hSlider;
         this.scrollX = scrollX;
         this.zoomStripeCoordinate = -1;
-        this.localPoint = localPoint; 
+        this.localPoint = localPoint;
         this.screenPoint = screenPoint;
         this.mouseDragging = mouseDragging;
         emit();
     }
-    
-    // Getters
 
+    // Getters
     public double getZoomStripeCoordinate() {
         return zoomStripeCoordinate;
     }
@@ -230,7 +241,7 @@ public class AppStore {
     public void setZoomStripeCoordinate(double zoomStripeCoordinate) {
         this.zoomStripeCoordinate = zoomStripeCoordinate;
     }
-    
+
     public EventBus getBus() {
         return bus;
     }
@@ -271,5 +282,12 @@ public class AppStore {
         return selectedChromosome;
     }
 
-  
+    public Point2D getClickStartPosition() {
+        return clickStartPosition;
+    }
+
+//    public Rectangle2D getSelectionRectangle() {
+//        return selectionRectangle;
+//    }
+
 }

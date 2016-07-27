@@ -6,7 +6,6 @@ import java.util.List;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import static javafx.scene.input.KeyCode.SHIFT;
@@ -16,7 +15,6 @@ import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import org.lorainelab.igb.selections.SelectionInfoService;
 import org.lorainelab.igb.visualization.event.ScaleEvent;
-import org.lorainelab.igb.visualization.util.BoundsUtil;
 import org.lorainelab.igb.visualization.util.CanvasUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -172,34 +170,7 @@ public class CanvasPane extends Region {
 ////            }
 //        });
 //    }
-    private Rectangle2D getSelectionRectangle(MouseEvent event) {
-        double minX;
-        double maxX;
-        double minY;
-        double maxY;
-        Point2D rangeBoundedEventLocation = getRangeBoundedDragEventLocation(event);
-        if (clickStartPosition.getX() < rangeBoundedEventLocation.getX()) {
-            minX = clickStartPosition.getX();
-            maxX = rangeBoundedEventLocation.getX();
-        } else {
-            minX = rangeBoundedEventLocation.getX();
-            maxX = clickStartPosition.getX();
-        }
-        if (clickStartPosition.getY() < rangeBoundedEventLocation.getY()) {
-            minY = clickStartPosition.getY();
-            maxY = rangeBoundedEventLocation.getY();
-        } else {
-            minY = rangeBoundedEventLocation.getY();
-            maxY = clickStartPosition.getY();
-        }
-        return new Rectangle2D(minX, minY, maxX - minX, maxY - minY);
-    }
 
-    private Point2D getRangeBoundedDragEventLocation(MouseEvent event) {
-        double boundedEventX = BoundsUtil.enforceRangeBounds(event.getX(), 0, getWidth());
-        double boundedEventY = BoundsUtil.enforceRangeBounds(event.getY(), 0, getHeight());
-        return new Point2D(boundedEventX, boundedEventY);
-    }
 
     public void resetZoomStripe() {
         this.zoomStripeCoordinate = -1;
@@ -263,15 +234,6 @@ public class CanvasPane extends Region {
 //            gc.restore();
 //        }
 //    }
-    private void drawSelectionRectangle(MouseEvent event) {
-        clear();
-        GraphicsContext gc = canvas.getGraphicsContext2D();
-        gc.save();
-        gc.setStroke(Color.RED);
-        Rectangle2D selectionRectangle = getSelectionRectangle(event);
-        gc.strokeRect(selectionRectangle.getMinX(), selectionRectangle.getMinY(), selectionRectangle.getWidth(), selectionRectangle.getHeight());
-        gc.restore();
-    }
 
     public double getXFactor() {
         return xFactor;

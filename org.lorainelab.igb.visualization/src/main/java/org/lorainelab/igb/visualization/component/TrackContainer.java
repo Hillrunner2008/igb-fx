@@ -22,7 +22,8 @@ public class TrackContainer extends Component<TrackContainerProps, TrackContaine
 
     private static final Logger LOG = LoggerFactory.getLogger(TrackContainer.class);
 
-    public TrackContainer() {
+    public TrackContainer(TrackContainerProps props) {
+        this.props = props;
         this.state = TrackContainerState.factory();
 
     }

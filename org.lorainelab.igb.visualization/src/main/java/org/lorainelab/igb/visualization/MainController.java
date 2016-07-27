@@ -54,7 +54,6 @@ import org.lorainelab.igb.visualization.model.ZoomableTrackRenderer;
 import org.lorainelab.igb.visualization.store.AppStore;
 import org.lorainelab.igb.visualization.tabs.TabPaneManager;
 import org.lorainelab.igb.visualization.toolbar.ToolBarManager;
-import static org.lorainelab.igb.visualization.util.BoundsUtil.enforceRangeBounds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,10 +110,8 @@ public class MainController {
     private DoubleProperty scrollX;
     private DoubleProperty hSliderWidget;
     private double lastDragX;
-    //private EventBus eventBus;
     private boolean ignoreScrollXEvent;
     private boolean ignoreHSliderEvent;
-
     private double zoomStripeCoordinate;
     private CanvasPane canvasPane;
     private Canvas canvas;
