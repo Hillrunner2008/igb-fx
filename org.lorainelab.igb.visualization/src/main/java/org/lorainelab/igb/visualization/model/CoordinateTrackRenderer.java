@@ -363,10 +363,14 @@ public class CoordinateTrackRenderer implements TrackRenderer {
 
     @Override
     public void setLastMouseDragPoint(Point2D point) {
-        if (!canvasContext.getBoundingRect().contains(point)) {
+        if (point == null || lastMouseClickX < 0) {
             return;
         }
-        lastMouseDragX = Math.floor(point.getX() / xfactor);
+        double x = point.getX();
+        if(x < 0) {
+            x = 0;
+        }
+        lastMouseDragX = Math.floor(x / xfactor);
     }
 
     @Override

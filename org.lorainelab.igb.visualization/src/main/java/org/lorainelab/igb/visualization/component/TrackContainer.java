@@ -7,10 +7,21 @@ package org.lorainelab.igb.visualization.component;
 
 import com.google.common.collect.Lists;
 import java.util.List;
+import javafx.scene.SnapshotParameters;
+import javafx.scene.image.WritableImage;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DataFormat;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.TransferMode;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.transform.Transform;
 import org.lorainelab.igb.visualization.component.api.Component;
 import org.lorainelab.igb.visualization.event.ScaleEvent;
 import org.lorainelab.igb.visualization.model.TrackLabel;
+import org.lorainelab.igb.visualization.store.AppStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,6 +77,64 @@ public class TrackContainer extends Component<TrackContainerProps, TrackContaine
         TrackLabel trackLabel = this.getState().getTrackRenderer().getTrackLabel();
         trackLabel.setDimensions(this.getProps().getLabelPane());
         StackPane content = trackLabel.getContent();
+
+        content.setOnDragDetected((MouseEvent event) -> {
+            if (event.getSource() instanceof StackPane) {
+                Pane rootPane = (Pane) content.getScene().getRoot();
+                rootPane.setOnDragOver(dragEvent -> {
+                    dragEvent.acceptTransferModes(TransferMode.ANY);
+                    dragEvent.consume();
+                });
+                SnapshotParameters snapshotParams = new SnapshotParameters();
+                snapshotParams.setTransform(Transform.scale(0.75, 0.75));
+                WritableImage snapshot = content.snapshot(snapshotParams, null);
+                Dragboard db = content.startDragAndDrop(TransferMode.MOVE);
+                ClipboardContent clipboardContent = new ClipboardContent();
+                clipboardContent.put(DataFormat.PLAIN_TEXT, content.getBoundsInParent().getMinY());
+                db.setDragView(snapshot, 5, 5);
+                db.setContent(clipboardContent);
+            }
+            event.consume();
+        });
+
+        content.setOnDragDropped((DragEvent event) -> {
+            if (event.getSource() instanceof StackPane) {
+                StackPane dropLocationLabelNode = StackPane.class.cast(event.getSource());
+                boolean droppedAbove = event.getY() < (dropLocationLabelNode.getHeight() / 2);
+                double dropLocationMinY = dropLocationLabelNode.getBoundsInParent().getMinY();
+                Object dragboardContent = event.getDragboard().getContent(DataFormat.PLAIN_TEXT);
+                if (dragboardContent instanceof Double) {
+                    double eventTriggerMinY = (Double) dragboardContent;
+                    if (dropLocationMinY != eventTriggerMinY) {
+                        Lists.newArrayList(AppStore.getStore().getTrackRenderers()).stream()
+                                .filter(trackRenderer -> trackRenderer.getCanvasContext().isVisible())
+                                .filter(draggedTrackRenderer -> draggedTrackRenderer.getTrackLabel().getContent().getBoundsInParent().getMinY() == eventTriggerMinY)
+                                .findFirst()
+                                .ifPresent(draggedTrackRenderer -> {
+                                    Lists.newArrayList(AppStore.getStore().getTrackRenderers()).stream()
+                                    .filter(trackRenderer -> trackRenderer.getTrackLabel().getContent() == dropLocationLabelNode)
+                                    .findFirst()
+                                    .ifPresent(droppedTrackRenderer -> {
+                                        int droppedIndex = droppedTrackRenderer.getWeight();
+                                        if (droppedAbove) {
+                                            AppStore.getStore().getTrackRenderers().remove(draggedTrackRenderer);
+                                            draggedTrackRenderer.setWeight(droppedIndex - 1);
+                                            AppStore.getStore().getTrackRenderers().add(draggedTrackRenderer);
+                                        } else {
+                                            AppStore.getStore().getTrackRenderers().remove(draggedTrackRenderer);
+                                            draggedTrackRenderer.setWeight(droppedIndex + 1);
+                                            AppStore.getStore().getTrackRenderers().add(draggedTrackRenderer);
+                                        }
+                                        AppStore.getStore().noop();
+                                   });
+                                });
+                    }
+                }
+
+            }
+            event.consume();
+        });
+
         this.getProps().getLabelPane().getChildren().add(content);
 
         return Lists.newArrayList();

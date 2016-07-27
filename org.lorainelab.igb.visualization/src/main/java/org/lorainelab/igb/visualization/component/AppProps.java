@@ -104,9 +104,9 @@ public class AppProps implements Props {
         return slider;
     }
 
-    public DoubleProperty gethSliderWidget() {
-        return hSliderWidget;
-    }
+//    public DoubleProperty gethSliderWidget() {
+//        return hSliderWidget;
+//    }
 
     public Slider gethSlider() {
         return hSlider;

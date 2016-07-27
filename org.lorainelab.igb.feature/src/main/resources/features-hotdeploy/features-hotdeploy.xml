@@ -54,5 +54,6 @@
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.visualization/${project.version}</bundle>
         
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.cache.http/${project.version}</bundle>
+        <bundle>mvn:${project.groupId}/org.lorainelab.igb.preferencemanager.api/${project.version}</bundle>
     </feature>
 </features>
