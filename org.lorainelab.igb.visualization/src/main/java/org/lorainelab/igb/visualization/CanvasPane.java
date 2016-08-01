@@ -1,11 +1,9 @@
 package org.lorainelab.igb.visualization;
 
-import aQute.bnd.annotation.component.Reference;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
-import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import static javafx.scene.input.KeyCode.SHIFT;
@@ -14,8 +12,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import org.lorainelab.igb.selections.SelectionInfoService;
-import org.lorainelab.igb.visualization.event.ScaleEvent;
-import org.lorainelab.igb.visualization.util.CanvasUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,16 +19,12 @@ public class CanvasPane extends Region {
 
     private static final Logger LOG = LoggerFactory.getLogger(CanvasPane.class);
     private Canvas canvas;
+    private Canvas overlayCanvas;
     private double modelWidth;
-    private double xFactor;
-    private double zoomStripeCoordinate;
-    private double xOffset;
-    private double visibleVirtualCoordinatesX;
     private MainController mainController;
     private List<MouseEvent> mouseEvents;
     private SelectionInfoService selectionInfoService;
     private boolean multiSelectModeActive;
-    private Point2D clickStartPosition;
 
     public CanvasPane(SelectionInfoService selectionInfoService, MainController mainController) {
         this.selectionInfoService = selectionInfoService;
@@ -40,32 +32,20 @@ public class CanvasPane extends Region {
         mouseEvents = new ArrayList<>();
         this.modelWidth = 1;
         canvas = new Canvas();
+        overlayCanvas = new Canvas();
         canvas.setFocusTraversable(true);
         canvas.addEventFilter(MouseEvent.ANY, (e) -> canvas.requestFocus());
         getChildren().add(canvas);
         canvas.widthProperty().addListener(observable -> {
             clear();
-            xFactor = canvas.getWidth() / modelWidth;
         });
         canvas.heightProperty().addListener(observable -> clear());
-        zoomStripeCoordinate = -1;
         initailizeKeyListener();
-        //initializeMouseEventHandlers();
         selectionInfoService.getSelectedChromosome().addListener((observable, oldValue, newValue) -> {
             if (newValue.isPresent()) {
                 modelWidth = newValue.get().getLength();
-                xFactor = canvas.getWidth() / modelWidth;
             }
         });
-        clickStartPosition = new Point2D(0, 0);
-    }
-
-    private Point2D getLocalPoint2DFromMouseEvent(MouseEvent event) {
-        return new Point2D(event.getX(), event.getY());
-    }
-
-    private Point2D getScreenPoint2DFromMouseEvent(MouseEvent event) {
-        return new Point2D(event.getScreenX(), event.getScreenY());
     }
 
     //TODO there are jump zooming bugs that appear to be related to too mouse event selection rectangles not matching coordinate range selected..
@@ -170,14 +150,6 @@ public class CanvasPane extends Region {
 ////            }
 //        });
 //    }
-
-
-    public void resetZoomStripe() {
-        this.zoomStripeCoordinate = -1;
-//        eventBus.post(new ZoomStripeEvent(zoomStripeCoordinate));
-//        eventBus.post(new RefreshTrackEvent());
-    }
-
     @Override
     protected void layoutChildren() {
         super.layoutChildren();
@@ -234,36 +206,11 @@ public class CanvasPane extends Region {
 //            gc.restore();
 //        }
 //    }
-
-    public double getXFactor() {
-        return xFactor;
-    }
-
-    public double getXOffset() {
-        return xOffset;
-    }
 //    public EventBus getEventBus() {
 //        return eventBus;
 //    }
-
-    public void handleScaleEvent(ScaleEvent scaleEvent) {
-        xFactor = CanvasUtils.exponentialScaleTransform(this, scaleEvent.getScaleX());
-        visibleVirtualCoordinatesX = (canvas.getWidth() / xFactor);
-        xOffset = ((scaleEvent.getScrollX() / 100) * (modelWidth - visibleVirtualCoordinatesX));
-    }
-
-    @Reference(optional = true)
-    public void setMainViewController(MainController controller) {
-        this.mainController = controller;
-    }
-
     public boolean isMultiSelectModeActive() {
         return multiSelectModeActive;
-    }
-    
-    @Reference
-    public void setSelectionInfoService(SelectionInfoService selectionInfoService) {
-        this.selectionInfoService = selectionInfoService;
     }
 
     private void initailizeKeyListener() {

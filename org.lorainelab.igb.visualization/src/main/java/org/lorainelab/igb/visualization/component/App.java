@@ -927,11 +927,13 @@ public class App extends Component<AppProps, AppState> {
     private ZoomStripe getZoomStripeComponent() {
         CanvasPane canvasPane = this.getProps().getCanvasPane();
         ZoomStripe zoomStripe = new ZoomStripe();
+        double visibleVirtualCoordinatesX = (canvasPane.getCanvas().getWidth() / this.getState().getxFactor());
+        double xOffset = ((this.getState().getScrollX() / 100) * (canvasPane.getModelWidth() - visibleVirtualCoordinatesX));
         zoomStripe.withAttributes(new ZoomStripeProps(
                 canvasPane.getCanvas(),
                 this.getState().getZoomStripeCoordinates(),
                 this.getState().getxFactor(),
-                canvasPane.getXOffset(),
+                xOffset,
                 canvasPane.getWidth(),
                 canvasPane.getModelWidth(),
                 50,

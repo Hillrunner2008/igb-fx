@@ -230,25 +230,6 @@ public class MainController {
 
     }
 
-//    @Subscribe
-//    private void handleScrollScaleEvent(ScrollScaleEvent event) {
-//        Platform.runLater(() -> {
-//            if (event.getDirection().equals(Direction.INCREMENT)) {
-//                hSlider.increment();
-//            } else {
-//                hSlider.decrement();
-//            }
-//        });
-//
-//    }
-//
-//    @Subscribe
-//    public void handleClickDragEndEvent(ClickDragEndEvent event) {
-//        if (canvasPane.getHeight() > viewPortManager.getTotalTrackSize()) {
-//            canvasPane.clear();
-//            updateTrackRenderers();
-//        }
-//    }
     @FXML
     private void initialize() {
         if(!fxReady) {
@@ -284,15 +265,6 @@ public class MainController {
         //initializeSearch();
         startApp();
 
-    }
-
-    private static final int TOTAL_SLIDER_THUMB_WIDTH = 30;
-
-//    public void drawZoomCoordinateLine() {
-//        canvasPane.drawZoomCoordinateLine();
-//    }
-    public void resetZoomStripe() {
-        canvasPane.resetZoomStripe();
     }
 
     private void initializeGuiComponents() {

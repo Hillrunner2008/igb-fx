@@ -19,7 +19,6 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.transform.Transform;
 import org.lorainelab.igb.visualization.component.api.Component;
-import org.lorainelab.igb.visualization.event.ScaleEvent;
 import org.lorainelab.igb.visualization.model.TrackLabel;
 import org.lorainelab.igb.visualization.store.AppStore;
 import org.slf4j.Logger;
@@ -71,9 +70,6 @@ public class TrackContainer extends Component<TrackContainerProps, TrackContaine
         this.getState().getTrackRenderer().setMouseDragging(this.getProps().isMouseDragging());
 
         scaleCanvas();
-        ScaleEvent scaleEvent = new ScaleEvent(this.getState().gethSlider(), this.getState().getvSlider(), this.getState().getScrollX(), this.getState().getScrollY());
-        this.getProps().getCanvasPane().handleScaleEvent(scaleEvent);
-
         TrackLabel trackLabel = this.getState().getTrackRenderer().getTrackLabel();
         trackLabel.setDimensions(this.getProps().getLabelPane());
         StackPane content = trackLabel.getContent();
