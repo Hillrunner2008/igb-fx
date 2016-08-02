@@ -1,5 +1,6 @@
 package org.lorainelab.igb.visualization;
 
+import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Sets;
@@ -53,7 +54,6 @@ import org.lorainelab.igb.visualization.model.ZoomableTrackRenderer;
 import org.lorainelab.igb.visualization.store.AppStore;
 import org.lorainelab.igb.visualization.tabs.TabPaneManager;
 import org.lorainelab.igb.visualization.toolbar.ToolBarManager;
-import static org.lorainelab.igb.visualization.util.BoundsUtil.enforceRangeBounds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,7 +102,7 @@ public class MainController {
 
     @FXML
     private PlusMinusSlider plusMinusSlider;
-
+    
     private ToolBarManager toolbarProvider;
     private Pane labelPane;
     private Set<TrackRenderer> trackRenderers;
@@ -110,15 +110,12 @@ public class MainController {
     private DoubleProperty scrollX;
     private DoubleProperty hSliderWidget;
     private double lastDragX;
-    //private EventBus eventBus;
     private boolean ignoreScrollXEvent;
     private boolean ignoreHSliderEvent;
-
     private double zoomStripeCoordinate;
     private CanvasPane canvasPane;
     private Canvas canvas;
     private double totalTrackHeight;
-    private EventBusService eventBusService;
     private TabPaneManager tabPaneManager;
     private ZoomSliderMiniMapWidget zoomSliderMiniMapWidget;
     private MenuBarManager menuBarManager;
@@ -129,6 +126,7 @@ public class MainController {
     private SearchService searchService;
     //Apps
     private Component app;
+    private boolean fxReady;
 
     public MainController() {
         trackRenderers = Sets.newConcurrentHashSet();
@@ -142,6 +140,13 @@ public class MainController {
         autocompleteEntries = Sets.newTreeSet();
         searchAutocomplete = new ContextMenu();
         searchAutocomplete.hide();
+        fxReady = true;
+    }
+
+    @Activate
+    public void activate() {
+        LOG.info("MainController activated");
+        canvasPane = new CanvasPane(selectionInfoService, this);
     }
 
     private void startApp() {
@@ -156,9 +161,13 @@ public class MainController {
         });
     }
 
-    @Reference
+    @Reference(unbind = "removeSearchService")
     public void setSearchService(SearchService searchService) {
         this.searchService = searchService;
+    }
+
+    public void removeSearchService(SearchService searchService) {
+        LOG.info("removeSearchService called");
     }
 
     private void initializeSearch() {
@@ -221,27 +230,13 @@ public class MainController {
 
     }
 
-//    @Subscribe
-//    private void handleScrollScaleEvent(ScrollScaleEvent event) {
-//        Platform.runLater(() -> {
-//            if (event.getDirection().equals(Direction.INCREMENT)) {
-//                hSlider.increment();
-//            } else {
-//                hSlider.decrement();
-//            }
-//        });
-//
-//    }
-//
-//    @Subscribe
-//    public void handleClickDragEndEvent(ClickDragEndEvent event) {
-//        if (canvasPane.getHeight() > viewPortManager.getTotalTrackSize()) {
-//            canvasPane.clear();
-//            updateTrackRenderers();
-//        }
-//    }
     @FXML
     private void initialize() {
+        if(!fxReady) {
+            LOG.info("fx cancelled so aborting start");
+            return;
+        }
+        LOG.info("initialize fxml");
         initializeGuiComponents();
         app = new App(new AppProps(
                 hSlider,
@@ -261,7 +256,8 @@ public class MainController {
                 rightSliderThumb,
                 labelPane,
                 loadDataButton,
-                loadSequenceButton
+                loadSequenceButton,
+                plusMinusSlider
         ));
         //initializeChromosomeSelectionListener();
         //initializeGenomeVersionSelectionListener();
@@ -271,129 +267,7 @@ public class MainController {
 
     }
 
-//    private void initializeZoomScrollBar() {
-//        slider.setOnMousePressed((MouseEvent event) -> {
-//            lastDragX = event.getX();
-//        });
-//        leftSliderThumb.setOnMousePressed((MouseEvent event) -> {
-//            lastDragX = event.getX();
-//        });
-//        rightSliderThumb.setOnMousePressed((MouseEvent event) -> {
-//            lastDragX = event.getX();
-//        });
-//
-//        rightSliderThumb.setOnMouseDragged((MouseEvent event) -> {
-//            double increment = Math.round(event.getX() - lastDragX);
-//            double newSliderValue = slider.getWidth() + increment;
-//            double newRightThumbValue = rightSliderThumb.getX() + increment;
-//            if (newSliderValue < TOTAL_SLIDER_THUMB_WIDTH) {
-//                newSliderValue = TOTAL_SLIDER_THUMB_WIDTH;
-//                newRightThumbValue = rightSliderThumb.getX() - slider.getWidth() + newSliderValue;
-//            }
-//            if (newSliderValue > xSliderPane.getWidth()) {
-//                double tmp = slider.getWidth() + (xSliderPane.getWidth() - slider.getWidth() - slider.getX());
-//                double diff = Math.abs(newSliderValue - tmp);
-//                newRightThumbValue -= diff;
-//                newSliderValue = tmp;
-//            }
-//            if (newSliderValue >= 0 && newSliderValue <= (xSliderPane.getWidth() - slider.getX())) {
-//                slider.setWidth(newSliderValue);
-//                rightSliderThumb.setX(newRightThumbValue);
-//                double max = xSliderPane.getWidth() - TOTAL_SLIDER_THUMB_WIDTH;
-//                double current = slider.getWidth() - TOTAL_SLIDER_THUMB_WIDTH;
-//
-//                double maxSlider = xSliderPane.getWidth() - slider.getWidth();
-//                double currentSlider = slider.getX();
-//                double newScrollX;
-//                if (maxSlider < 0) {
-//                    newScrollX = 0;
-//                } else {
-//                    newScrollX = (currentSlider / maxSlider) * 100;
-//                }
-//                ignoreScrollXEvent = true;
-//                scrollX.setValue(newScrollX);
-//                hSliderWidget.setValue((1 - (current / max)) * 100);
-//            }
-//            lastDragX = event.getX();
-//        });
-//
-//        leftSliderThumb.setOnMouseDragged((MouseEvent event) -> {
-//            double increment = Math.round(event.getX() - lastDragX);
-//            double newSliderValue = slider.getX() + increment;
-//            double newLeftThumbValue = leftSliderThumb.getX() + increment;
-//            double newSliderWidth = (slider.getWidth() - increment);
-//            if (newSliderWidth < TOTAL_SLIDER_THUMB_WIDTH) {
-//                newSliderWidth = TOTAL_SLIDER_THUMB_WIDTH;
-//                newSliderValue = slider.getX() + slider.getWidth() - newSliderWidth;
-//                newLeftThumbValue = leftSliderThumb.getX() + slider.getWidth() - newSliderWidth;
-//            }
-//            if (newSliderValue < 0) {
-//                newSliderValue = 0;
-//                newLeftThumbValue = 0;
-//                newSliderWidth = slider.getWidth() + slider.getX();
-//            }
-//            if (newSliderValue > xSliderPane.getWidth()) {
-//                newSliderValue = xSliderPane.getWidth();
-//            }
-//            if (newSliderValue >= 0 && newSliderValue <= xSliderPane.getWidth()) {
-//                slider.setX(newSliderValue);
-//                slider.setWidth(newSliderWidth);
-//                leftSliderThumb.setX(newLeftThumbValue);
-//                double max = xSliderPane.getWidth() - TOTAL_SLIDER_THUMB_WIDTH;
-//                double current = slider.getWidth() - TOTAL_SLIDER_THUMB_WIDTH;
-//
-//                double maxSlider = xSliderPane.getWidth() - slider.getWidth();
-//                double currentSlider = slider.getX();
-//                double newScrollX;
-//                if (maxSlider <= 0) {
-//                    newScrollX = 0;
-//                } else {
-//                    newScrollX = (currentSlider / maxSlider) * 100;
-//                }
-//                ignoreScrollXEvent = true;
-//                scrollX.setValue(newScrollX);
-//                hSliderWidget.setValue((1 - (current / max)) * 100);
-//            }
-//            lastDragX = event.getX();
-//        });
-//
-//        slider.setOnMouseDragged((MouseEvent event) -> {
-//
-//            double increment = Math.round(event.getX() - lastDragX);
-//            double newSliderValue = slider.getX() + increment;
-//            double newRightThumbValue = rightSliderThumb.getX() + increment;
-//            double newLeftThumbValue = leftSliderThumb.getX() + increment;
-//            if (newSliderValue < 0) {
-//                newSliderValue = 0;
-//                newLeftThumbValue = 0;
-//                newRightThumbValue = rightSliderThumb.getX() - slider.getX();
-//            } else if (newSliderValue > (xSliderPane.getWidth() - slider.getWidth())) {
-//                newSliderValue = (xSliderPane.getWidth() - slider.getWidth());
-//                newLeftThumbValue = newSliderValue;
-//                newRightThumbValue = rightSliderThumb.getX() + xSliderPane.getWidth() - slider.getX() - slider.getWidth();
-//
-//            }
-//            slider.setX(newSliderValue);
-//            leftSliderThumb.setX(newLeftThumbValue);
-//            rightSliderThumb.setX(newRightThumbValue);
-//            double max = xSliderPane.getWidth() - slider.getWidth();
-//            double current = slider.getX();
-//            resetZoomStripe();
-//            scrollX.setValue((current / max) * 100);
-//            lastDragX = event.getX();
-//        });
-//    }
-    private static final int TOTAL_SLIDER_THUMB_WIDTH = 30;
-
-//    public void drawZoomCoordinateLine() {
-//        canvasPane.drawZoomCoordinateLine();
-//    }
-    public void resetZoomStripe() {
-        canvasPane.resetZoomStripe();
-    }
-
     private void initializeGuiComponents() {
-        setupPlusMinusSlider();
         addMenuBar();
         addTopToolbar();
         addFooter();
@@ -535,19 +409,14 @@ public class MainController {
 //                    jumpZoom(new JumpZoomEvent(zoomFocus, coordinateRenderer));
 //                });
 //    }
-    @Reference
-    public void setCanvasPane(CanvasPane canvasPane) {
-        this.canvasPane = canvasPane;
-    }
 
-    @Reference
-    public void setEventBusService(EventBusService eventBusService) {
-        this.eventBusService = eventBusService;
-    }
-
-    @Reference
+    @Reference(unbind = "removeTabPaneManager")
     public void setTabPaneManager(TabPaneManager tabPaneManager) {
         this.tabPaneManager = tabPaneManager;
+    }
+
+    public void removeTabPaneManager(TabPaneManager tabPaneManager) {
+        LOG.info("removeTabPaneManager called");
     }
 
     @Reference(unbind = "removeMenuBarManager")
@@ -556,6 +425,7 @@ public class MainController {
     }
 
     public void removeMenuBarManager(MenuBarManager menuBarManager) {
+        LOG.info("removeMenuBarManager called");
         try {
             root.getChildren().remove(menuBarManager.getMenuBar());
         } catch (Exception ex) {
@@ -563,9 +433,13 @@ public class MainController {
         }
     }
 
-    @Reference
+    @Reference(unbind = "removeSelectionInfoService")
     public void setSelectionInfoService(SelectionInfoService selectionInfoService) {
         this.selectionInfoService = selectionInfoService;
+    }
+
+    public void removeSelectionInfoService(SelectionInfoService selectionInfoService) {
+        LOG.info("removeSelectionInfoService called");
     }
 
     @Subscribe
@@ -578,9 +452,9 @@ public class MainController {
                 .forEach(renderer -> {
                     selectionInfoService.getSelectedGlyphs().addAll(
                             renderer.getTrack().getGlyphs()
-                            .stream()
-                            .filter(glyph -> glyph.isSelected())
-                            .collect(Collectors.toList())
+                                    .stream()
+                                    .filter(glyph -> glyph.isSelected())
+                                    .collect(Collectors.toList())
                     );
                 });
     }
@@ -590,17 +464,23 @@ public class MainController {
         bottomTabPaneContainer.getChildren().add(tabPaneManager.getBottomTabPane());
     }
 
-    @Reference
+    @Reference(unbind = "removeToolbarManager")
     public void setToolbarProvider(ToolBarManager toolbarProvider) {
         this.toolbarProvider = toolbarProvider;
     }
 
+    public void removeToolbarManager(ToolBarManager toolbarProvider) {
+        LOG.info("removeToolbarManager called");
+    }
+
     @Reference(unbind = "removeFooter")
     public void setFooter(Footer footer) {
+
         this.footer = footer;
     }
 
     public void removeFooter(Footer footer) {
+        LOG.info("removeFooter called");
         try {
             root.getChildren().remove(footer);
         } catch (Exception ex) {
@@ -610,7 +490,10 @@ public class MainController {
 
     @Deactivate
     private void deactivate() {
+        fxReady = false;
+        LOG.info("deactivate called in maincontroller");
         if (app != null) {
+            app.close();
             AppStore.getStore().unsubscribe(app);
         }
         try {
@@ -634,40 +517,8 @@ public class MainController {
         root.getChildren().add(3, footer);
     }
 
-    private void setupPlusMinusSlider() {
-//        plusMinusSlider.setOnValueChanged((PlusMinusEvent event) -> {
-//            final double updatedScrollXValue = getUpdatedScrollxValue(event.getValue());
-//            if (updatedScrollXValue != scrollX.doubleValue()) {
-//                if (Platform.isFxApplicationThread()) {
-//                    scrollX.setValue(updatedScrollXValue);
-//                    resetZoomStripe();
-//                    syncWidgetSlider();
-//                } else {
-//                    Platform.runLater(() -> {
-//                        scrollX.setValue(updatedScrollXValue);
-//                        resetZoomStripe();
-//                        syncWidgetSlider();
-//                    });
-//                }
-//            }
-//        });
-    }
 
-    private double getUpdatedScrollxValue(double eventValue) {
-        double updatedScrollXValue = scrollX.doubleValue() + getAdjustedScrollValue(eventValue);
-        updatedScrollXValue = enforceRangeBounds(updatedScrollXValue, 0, 100);
-        return updatedScrollXValue;
-    }
 
-    private double getAdjustedScrollValue(double value) {
-        if (value < -0.8 || value > 0.8) {
-            return value;
-        } else if ((value < 0 && value > -0.1) || value < .1) {
-            return value / 10000;
-        } else if ((value < 0 && value > -0.2) || value < .2) {
-            return value / 2000;
-        }
-        return value / 50;
-    }
+
 
 }

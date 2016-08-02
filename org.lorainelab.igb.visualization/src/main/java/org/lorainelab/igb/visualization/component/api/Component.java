@@ -45,5 +45,7 @@ public abstract class Component<P extends Props, S extends State> {
             renderComponents(child);
         });
     }
+    
+    public void close(){}
 
 }

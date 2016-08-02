@@ -13,11 +13,16 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.SetChangeListener;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.event.EventType;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
@@ -25,6 +30,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Rectangle;
+import org.controlsfx.control.PlusMinusSlider.PlusMinusEvent;
 import org.lorainelab.igb.data.model.CanvasContext;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.DataSet;
@@ -45,6 +51,7 @@ import static org.lorainelab.igb.visualization.util.BoundsUtil.enforceRangeBound
 import static org.lorainelab.igb.visualization.util.CanvasUtils.exponentialScaleTransform;
 import static org.lorainelab.igb.visualization.util.CanvasUtils.invertExpScaleTransform;
 import static org.lorainelab.igb.visualization.util.CanvasUtils.linearScaleTransform;
+import static org.lorainelab.igb.visualization.util.FXUtilities.runAndWait;
 import org.reactfx.EventStream;
 import org.reactfx.EventStreams;
 import org.slf4j.Logger;
@@ -68,12 +75,19 @@ public class App extends Component<AppProps, AppState> {
     public App(AppProps appProps) {
         this.props = appProps;
         mouseEvents = Lists.newArrayList();
-        this.state = AppState.factory();
+        this.state = new AppState();
         initializeCanvas();
         initializeChromosomeSelectionListener();
         initializeGenomeVersionSelectionListener();
         initializeMouseEvents();
+        initializePlusMinusSlider();
+        initializeZoomScrollBar();
+        Platform.runLater(() -> {
+            refreshSliderWidget();
+            updateCanvasContexts();
+        });
         AppStore.getStore().subscribe(this);
+
     }
 
     @Override
@@ -95,56 +109,60 @@ public class App extends Component<AppProps, AppState> {
         }
 
         AppState state = this.getState()
-                .setxFactor(
-                        AppStore.getStore().getxFactor()
-                )
-                .setyFactor(
-                        AppStore.getStore().getyFactor()
-                )
-                .setScrollX(
-                        AppStore.getStore().getScrollX()
-                ).
-                setScrollY(
-                        AppStore.getStore().getScrollY()
-                ).
-                setScrollYVisibleAmount(
-                        AppStore.getStore().getScrollYVisibleAmount()
-                ).
-                sethSlider(
-                        AppStore.getStore().gethSlider()
-                ).
-                setvSlider(
-                        AppStore.getStore().getvSlider()
-                ).
-                setTrackRenderers(
-                        AppStore.getStore().getTrackRenderers()
-                ).
-                setLoadedDataSets(
-                        AppStore.getStore().getLoadedDataSets()
-                ).
-                setSelectedGenomeVersion(
-                        AppStore.getStore().getSelectedGenomeVersion()
-                ).
-                setSelectedChromosome(
-                        AppStore.getStore().getSelectedChromosome()
-                ).
-                setZoomStripeCoordinates(
-                        AppStore.getStore().getZoomStripeCoordinate()
-                ).
-                setLocalPoint(
-                        AppStore.getStore().getLocalPoint()
-                ).
-                setMouseClickLocation(
-                        AppStore.getStore().getMouseClickLocation()
-                ).
-                setMouseDragging(
-                        AppStore.getStore().isMouseDragging()
-                ).
-                setScreenPoint(
-                        AppStore.getStore().getScreenPoint()
-                );
+                .setxFactor(AppStore.getStore().getxFactor())
+                .setyFactor(AppStore.getStore().getyFactor())
+                .setScrollX(AppStore.getStore().getScrollX())
+                .setScrollY(AppStore.getStore().getScrollY())
+                .setScrollYVisibleAmount(AppStore.getStore().getScrollYVisibleAmount())
+                .sethSlider(AppStore.getStore().gethSlider())
+                .setvSlider(AppStore.getStore().getvSlider())
+                .setTrackRenderers(AppStore.getStore().getTrackRenderers())
+                .setLoadedDataSets(AppStore.getStore().getLoadedDataSets())
+                .setSelectedGenomeVersion(AppStore.getStore().getSelectedGenomeVersion())
+                .setSelectedChromosome(AppStore.getStore().getSelectedChromosome())
+                .setZoomStripeCoordinates(AppStore.getStore().getZoomStripeCoordinate())
+                .setLocalPoint(AppStore.getStore().getLocalPoint())
+                .setMouseClickLocation(AppStore.getStore().getMouseClickLocation())
+                .setMouseDragging(AppStore.getStore().isMouseDragging())
+                .setScreenPoint(AppStore.getStore().getScreenPoint());
+        updateCanvasContexts();
         this.setState(state);
 
+    }
+
+    private void initializePlusMinusSlider() {
+        this.getProps().getPlusMinusSlider().setOnValueChanged((PlusMinusEvent event) -> {
+            final double updatedScrollXValue = getUpdatedScrollxValue(event.getValue());
+            double scrollX = this.getState().getScrollX();
+            if (updatedScrollXValue != scrollX) {
+                if (Platform.isFxApplicationThread()) {
+                    AppStore.getStore().updatePlusMinusSlider(updatedScrollXValue);
+                    syncWidgetSlider();
+                } else {
+                    Platform.runLater(() -> {
+                        AppStore.getStore().updatePlusMinusSlider(updatedScrollXValue);
+                        syncWidgetSlider();
+                    });
+                }
+            }
+        });
+    }
+
+    private double getUpdatedScrollxValue(double eventValue) {
+        double updatedScrollXValue = this.getState().getScrollX() + getAdjustedScrollValue(eventValue);
+        updatedScrollXValue = enforceRangeBounds(updatedScrollXValue, 0, 100);
+        return updatedScrollXValue;
+    }
+
+    private double getAdjustedScrollValue(double value) {
+        if (value < -0.8 || value > 0.8) {
+            return value;
+        } else if ((value < 0 && value > -0.1) || value < .1) {
+            return value / 10000;
+        } else if ((value < 0 && value > -0.2) || value < .2) {
+            return value / 2000;
+        }
+        return value / 50;
     }
 
     private Point2D getLocalPoint2DFromMouseEvent(MouseEvent event) {
@@ -182,7 +200,6 @@ public class App extends Component<AppProps, AppState> {
             mouseEvents.add(event);
         });
         canvas.setOnMouseDragged((MouseEvent event) -> {
-            //drawSelectionRectangle(event);
             mouseEvents.add(event);
             AppStore.getStore().updateMouseDraggedLocation(
                     getLocalPoint2DFromMouseEvent(event),
@@ -197,21 +214,22 @@ public class App extends Component<AppProps, AppState> {
             mouseEvents.add(event);
         });
         canvas.setOnMousePressed((MouseEvent event) -> {
-            Point2D localPoint2DFromMouseEvent = getLocalPoint2DFromMouseEvent(event);
             mouseEvents.add(event);
+            Point2D localPoint2DFromMouseEvent = getLocalPoint2DFromMouseEvent(event);
             AppStore.getStore().updateMouseClickedLocation(localPoint2DFromMouseEvent);
         });
         canvas.setOnMouseReleased((MouseEvent event) -> {
             resetZoomStripe();
             List<EventType<? extends MouseEvent>> types = mouseEvents.stream().map(e -> e.getEventType()).collect(Collectors.toList());
             Point2D rangeBoundedDragEventLocation = getRangeBoundedDragEventLocation(event);
-            //final Point2D screenPoint2DFromMouseEvent = getScreenPoint2DFromMouseEvent(event);
+            final Point2D screenPoint2DFromMouseEvent = getScreenPoint2DFromMouseEvent(event);
             if (types.contains(MouseEvent.MOUSE_DRAGGED)) {
                 //Rectangle2D selectionRectangle = getSelectionRectangle(event);
                 this.getState().getTrackRenderers().stream().filter(tr -> tr instanceof CoordinateTrackRenderer).findFirst().ifPresent(tr -> {
+                    Point2D mouseClickLocation = this.getState().getMouseClickLocation();
                     Point2D point = getLocalPoint2DFromMouseEvent(event);
                     Rectangle2D boundingRect = tr.getCanvasContext().getBoundingRect();
-                    if (boundingRect.contains(point)) {
+                    if (boundingRect.contains(mouseClickLocation)) {
 
                         Point2D lastMouseClickLocation = this.getState().getMouseClickLocation();
                         Point2D lastMouseDragLocation = getLocalPoint2DFromMouseEvent(event);
@@ -236,23 +254,40 @@ public class App extends Component<AppProps, AppState> {
 //                } else {
 //                    eventBus.post(new ClickDragEndEvent(rangeBoundedDragEventLocation, screenPoint2DFromMouseEvent, selectionRectangle));
 //                }
-            } else //                eventBus.post(new ClickDragCancelEvent());
-            {
+            } else {
                 if (event.getClickCount() >= 2) {
-                    //eventBus.post(new MouseDoubleClickEvent(rangeBoundedDragEventLocation, screenPoint2DFromMouseEvent));
-                    //drawZoomCoordinateLine();
+                    this.getProps().getSelectionInfoService().getSelectedGlyphs().clear();
+                    this.getState().getTrackRenderers().stream()
+                            .filter(tr -> tr instanceof ZoomableTrackRenderer)
+                            .map(tr -> ZoomableTrackRenderer.class.cast(tr))
+                            .filter(tr -> tr.isContained(getLocalPoint2DFromMouseEvent(event)))
+                            .findFirst().ifPresent(tr
+                                    -> tr.getTrack()
+                                    .getGlyphs()
+                                    .stream()
+                                    .filter(glyph -> glyph.isSelected())
+                                    .findFirst().ifPresent(glyphToJumpZoom -> {
+                                        jumpZoom(glyphToJumpZoom.getRenderBoundingRect(), tr, event);
+                                        this.getProps().getSelectionInfoService().getSelectedGlyphs().add(glyphToJumpZoom);
+                                    }));
                 } else {
-                    this.getState().getTrackRenderers().stream().filter(tr -> tr instanceof CoordinateTrackRenderer).findFirst().ifPresent(tr -> {
-                        double xFactor = this.getState().getxFactor();
-                        final double visibleVirtualCoordinatesX = Math.floor(tr.getCanvasContext().getBoundingRect().getWidth() / xFactor);
-                        double xOffset = Math.round((tr.getModelWidth() - visibleVirtualCoordinatesX) * (this.getState().getScrollX() / 100));
-                        double zoomStripeCoordinate = Math.floor((event.getX() / xFactor)
-                                + xOffset);
-                        AppStore.getStore().updateZoomStripe(zoomStripeCoordinate);
-                    });
+                    this.getProps().getSelectionInfoService().getSelectedGlyphs().clear();
+                    this.getProps().getSelectionInfoService().getSelectedGlyphs().addAll(
+                            this.getState().getTrackRenderers().stream()
+                                    .filter(tr -> tr instanceof ZoomableTrackRenderer)
+                                    .map(tr -> ZoomableTrackRenderer.class.cast(tr)).flatMap(tr
+                                    -> tr.getTrack()
+                                            .getGlyphs()
+                                            .stream()
+                                            .filter(glyph -> glyph.isSelected()))
+                                    .collect(Collectors.toList())
+                    );
+
                 }
+                updateZoomStripe(event);
             }
-            mouseEvents.clear();
+            clearMouseEventState();
+
 //            eventBus.post(new SelectionChangeEvent());
         });
 
@@ -277,6 +312,22 @@ public class App extends Component<AppProps, AppState> {
 //                pos -> new MouseStationaryStartEvent(pos),
 //                stop -> new MouseStationaryEndEvent()))
 //                .subscribe(evt -> eventBus.post(evt));
+    }
+
+    private void clearMouseEventState() {
+        AppStore.getStore().updateMouseDraggedLocation(null, null, false);
+        mouseEvents.clear();
+    }
+
+    private void updateZoomStripe(MouseEvent event) {
+        this.getState().getTrackRenderers().stream().filter(tr -> tr instanceof CoordinateTrackRenderer).findFirst().ifPresent(tr -> {
+            double xFactor = this.getState().getxFactor();
+            final double visibleVirtualCoordinatesX = Math.floor(tr.getCanvasContext().getBoundingRect().getWidth() / xFactor);
+            double xOffset = Math.round((tr.getModelWidth() - visibleVirtualCoordinatesX) * (this.getState().getScrollX() / 100));
+            double zoomStripeCoordinate = Math.floor((event.getX() / xFactor)
+                    + xOffset);
+            AppStore.getStore().updateZoomStripe(zoomStripeCoordinate);
+        });
     }
 
 //    private Rectangle2D getSelectionRectangle(MouseEvent event) {
@@ -315,7 +366,7 @@ public class App extends Component<AppProps, AppState> {
         final double scaleXalt = eventLocationReference.getCanvasContext().getBoundingRect().getWidth() / width;
         double scrollPosition = (minX / (modelWidth - width)) * 100;
         final double scrollXValue = enforceRangeBounds(scrollPosition, 0, 100);
-        
+
         double newHSlider = invertExpScaleTransform(canvasPane, scaleXalt);
         double xFactor = exponentialScaleTransform(
                 this.getProps().getCanvasPane(),
@@ -330,6 +381,133 @@ public class App extends Component<AppProps, AppState> {
                 xFactor,
                 1
         );
+        syncWidgetSlider();
+    }
+
+    double lastDragX = 0;
+
+    private void initializeZoomScrollBar() {
+        Rectangle slider = this.getProps().getSlider();
+        Rectangle leftSliderThumb = this.getProps().getLeftSliderThumb();
+        Rectangle rightSliderThumb = this.getProps().getRightSliderThumb();
+        Pane xSliderPane = this.getProps().getxSliderPane();
+        slider.setOnMousePressed((MouseEvent event) -> {
+            lastDragX = event.getX();
+        });
+        leftSliderThumb.setOnMousePressed((MouseEvent event) -> {
+            lastDragX = event.getX();
+        });
+        rightSliderThumb.setOnMousePressed((MouseEvent event) -> {
+            lastDragX = event.getX();
+        });
+
+        rightSliderThumb.setOnMouseDragged((MouseEvent event) -> {
+            double increment = Math.round(event.getX() - lastDragX);
+            double newSliderValue = slider.getWidth() + increment;
+            double newRightThumbValue = rightSliderThumb.getX() + increment;
+
+            if (newSliderValue < TOTAL_SLIDER_THUMB_WIDTH) {
+                newSliderValue = TOTAL_SLIDER_THUMB_WIDTH;
+                newRightThumbValue = rightSliderThumb.getX() - slider.getWidth() + newSliderValue;
+            }
+            if (newSliderValue > xSliderPane.getWidth()) {
+                double tmp = slider.getWidth() + (xSliderPane.getWidth() - slider.getWidth() - slider.getX());
+                double diff = Math.abs(newSliderValue - tmp);
+                newRightThumbValue -= diff;
+                newSliderValue = tmp;
+            }
+            if (newSliderValue >= 0 && newSliderValue <= (xSliderPane.getWidth() - slider.getX())) {
+                slider.setWidth(newSliderValue);
+                rightSliderThumb.setX(newRightThumbValue);
+                double max = xSliderPane.getWidth() - TOTAL_SLIDER_THUMB_WIDTH;
+                double current = slider.getWidth() - TOTAL_SLIDER_THUMB_WIDTH;
+
+                double maxSlider = xSliderPane.getWidth() - slider.getWidth();
+                double currentSlider = slider.getX();
+                double newScrollX;
+                if (maxSlider < 0) {
+                    newScrollX = 0;
+                } else {
+                    newScrollX = (currentSlider / maxSlider) * 100;
+                }
+                double hSlider = (1 - (current / max)) * 100;
+                double xFactor = linearScaleTransform(
+                        this.getProps().getCanvasPane(),
+                        hSlider
+                );
+                double exphSlider = invertExpScaleTransform(this.getProps().getCanvasPane(), xFactor);
+                AppStore.getStore().updateHSlider(exphSlider, newScrollX, xFactor, 1);
+            }
+            lastDragX = event.getX();
+        });
+
+        leftSliderThumb.setOnMouseDragged((MouseEvent event) -> {
+            double increment = Math.round(event.getX() - lastDragX);
+            double newSliderValue = slider.getX() + increment;
+            double newLeftThumbValue = leftSliderThumb.getX() + increment;
+            double newSliderWidth = (slider.getWidth() - increment);
+            if (newSliderWidth < TOTAL_SLIDER_THUMB_WIDTH) {
+                newSliderWidth = TOTAL_SLIDER_THUMB_WIDTH;
+                newSliderValue = slider.getX() + slider.getWidth() - newSliderWidth;
+                newLeftThumbValue = leftSliderThumb.getX() + slider.getWidth() - newSliderWidth;
+            }
+            if (newSliderValue < 0) {
+                newSliderValue = 0;
+                newLeftThumbValue = 0;
+                newSliderWidth = slider.getWidth() + slider.getX();
+            }
+            if (newSliderValue > xSliderPane.getWidth()) {
+                newSliderValue = xSliderPane.getWidth();
+            }
+            if (newSliderValue >= 0 && newSliderValue <= xSliderPane.getWidth()) {
+                slider.setX(newSliderValue);
+                slider.setWidth(newSliderWidth);
+                leftSliderThumb.setX(newLeftThumbValue);
+                double max = xSliderPane.getWidth() - TOTAL_SLIDER_THUMB_WIDTH;
+                double current = slider.getWidth() - TOTAL_SLIDER_THUMB_WIDTH;
+
+                double maxSlider = xSliderPane.getWidth() - slider.getWidth();
+                double currentSlider = slider.getX();
+                double newScrollX;
+                if (maxSlider <= 0) {
+                    newScrollX = 0;
+                } else {
+                    newScrollX = (currentSlider / maxSlider) * 100;
+                }
+                double hSlider = (1 - (current / max)) * 100;
+                double xFactor = linearScaleTransform(
+                        this.getProps().getCanvasPane(),
+                        hSlider
+                );
+                double exphSlider = invertExpScaleTransform(this.getProps().getCanvasPane(), xFactor);
+                AppStore.getStore().updateHSlider(exphSlider, newScrollX, xFactor, 1);
+            }
+            lastDragX = event.getX();
+        });
+
+        slider.setOnMouseDragged((MouseEvent event) -> {
+            double increment = Math.round(event.getX() - lastDragX);
+            double newSliderValue = slider.getX() + increment;
+            double newRightThumbValue = rightSliderThumb.getX() + increment;
+            double newLeftThumbValue = leftSliderThumb.getX() + increment;
+            if (newSliderValue < 0) {
+                newSliderValue = 0;
+                newLeftThumbValue = 0;
+                newRightThumbValue = rightSliderThumb.getX() - slider.getX();
+            } else if (newSliderValue > (xSliderPane.getWidth() - slider.getWidth())) {
+                newSliderValue = (xSliderPane.getWidth() - slider.getWidth());
+                newLeftThumbValue = newSliderValue;
+                newRightThumbValue = rightSliderThumb.getX() + xSliderPane.getWidth() - slider.getX() - slider.getWidth();
+
+            }
+            slider.setX(newSliderValue);
+            leftSliderThumb.setX(newLeftThumbValue);
+            rightSliderThumb.setX(newRightThumbValue);
+            double max = xSliderPane.getWidth() - slider.getWidth();
+            double current = slider.getX();
+            AppStore.getStore().updatePlusMinusSlider((current / max) * 100);
+            lastDragX = event.getX();
+        });
     }
 
     private Point2D getRangeBoundedDragEventLocation(MouseEvent event) {
@@ -343,11 +521,11 @@ public class App extends Component<AppProps, AppState> {
     }
 
     private void updateCanvasContexts() {
-        viewPortManager.refresh(this.getProps().getvSlider().getValue(), this.getProps().getScrollY().getValue());
+        viewPortManager.refresh(this.getState().getvSlider(), this.getState().getScrollY());
 
         //TODO: MOve into other setstates
         //this.setState(this.getState().setTotalTrackHeight(viewPortManager.getTotalTrackSize()));
-//        updateScrollY();
+        updateScrollY();
         //updateTrackLabels();
     }
 
@@ -357,7 +535,9 @@ public class App extends Component<AppProps, AppState> {
                 .filter(canvasContext -> canvasContext.isVisible())
                 .mapToDouble(canvasContext -> canvasContext.getBoundingRect().getHeight())
                 .sum();
-        this.setState(this.getState().setScrollYVisibleAmount((sum / this.getState().getTotalTrackHeight()) * 100));
+        double scrollYVisibleAmount = (sum / viewPortManager.getTotalTrackSize()) * 100;
+        this.getProps().getScrollY().setVisibleAmount(scrollYVisibleAmount);
+        //this.setState(this.getState().setScrollYVisibleAmount((sum / this.getState().getTotalTrackHeight()) * 100));
     }
 
     private double calcScrollXWithZoomStripe(double hSlider) {
@@ -391,114 +571,116 @@ public class App extends Component<AppProps, AppState> {
         return calculatedScrollXPosition[0];
     }
 
-    private void initializeCanvas() {
-        Canvas canvas = this.getProps().getCanvasPane().getCanvas();
-        viewPortManager = new ViewPortManager(canvas, this.getState().getTrackRenderers(), 0, 0);
-        this.getProps().getvSlider().valueProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-            updateCanvasContexts();
-        });
-        this.getProps().gethSlider().valueProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+    final ChangeListener<Number> vSliderListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+        AppStore.getStore().updateVSlider(newValue.doubleValue());
+    };
+    final ChangeListener<Number> hSliderListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
 
-            if (ignoreHSliderEvent) {
-                ignoreHSliderEvent = false;
-                return;
-            }
-            final boolean isSnapEvent = newValue.doubleValue() % this.getProps().gethSlider().getMajorTickUnit() == 0;
-            if (lastHSliderFire < 0 || Math.abs(lastHSliderFire - newValue.doubleValue()) > 1 || isSnapEvent) {
-                double scrollX = calcScrollXWithZoomStripe(newValue.doubleValue());
-                double xFactor = exponentialScaleTransform(
-                        this.getProps().getCanvasPane(),
-                        newValue.doubleValue()
-                );
-                AppStore.getStore().updateHSlider(newValue.doubleValue(), scrollX, xFactor, 1);
-                updateCanvasContexts();
-                syncWidgetSlider();
-                lastHSliderFire = newValue.doubleValue();
+        if (ignoreHSliderEvent) {
+            ignoreHSliderEvent = false;
+            return;
+        }
+        final boolean isSnapEvent = newValue.doubleValue() % this.getProps().gethSlider().getMajorTickUnit() == 0;
+        if (lastHSliderFire < 0 || Math.abs(lastHSliderFire - newValue.doubleValue()) > 1 || isSnapEvent) {
+            double scrollX = calcScrollXWithZoomStripe(newValue.doubleValue());
+            double xFactor = exponentialScaleTransform(
+                    this.getProps().getCanvasPane(),
+                    newValue.doubleValue()
+            );
+            AppStore.getStore().updateHSlider(newValue.doubleValue(), scrollX, xFactor, 1);
+            syncWidgetSlider();
+            lastHSliderFire = newValue.doubleValue();
 
-            }
+        }
+    };
+    final ChangeListener<Number> hSliderWidgetListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+        boolean isNearMaxZoom = newValue.doubleValue() > 98;
+        if (lastHSliderFire < 0 || Math.abs(lastHSliderFire - newValue.doubleValue()) > 1 || isNearMaxZoom) {
+            final double xFactor = linearScaleTransform(this.getProps().getCanvasPane(), newValue.doubleValue());
+            syncHSlider(xFactor);
+            lastHSliderFire = newValue.doubleValue();
+        }
+    };
+    final ChangeListener<Number> widthPropertyListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+        updateCanvasContexts();
+        double hSlider = this.getState().gethSlider();
+        double scrollX = calcScrollXWithZoomStripe(hSlider);
+        double xFactor = exponentialScaleTransform(
+                this.getProps().getCanvasPane(),
+                hSlider
+        );
+        AppStore.getStore().updateHSlider(hSlider, scrollX, xFactor, 1);
+        Platform.runLater(() -> {
+            refreshSliderWidget();
         });
-        this.getProps().gethSliderWidget().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-            boolean isNearMaxZoom = newValue.doubleValue() > 98;
-            if (lastHSliderFire < 0 || Math.abs(lastHSliderFire - newValue.doubleValue()) > 1 || isNearMaxZoom) {
-                final double xFactor = this.getState().getxFactor();
-                syncHSlider(xFactor);
-                lastHSliderFire = newValue.doubleValue();
-            }
-        });
-        canvas.widthProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-            Platform.runLater(() -> {
-                refreshSliderWidget();
-            });
-            updateCanvasContexts();
-        });
-
-        canvas.heightProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-            Platform.runLater(() -> {
-                refreshSliderWidget();
-            });
-            updateCanvasContexts();
-        });
-
-        this.getProps().getScrollX().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-            final double boundedScrollValue = enforceRangeBounds(newValue.doubleValue(), 0, 100);
-            if (boundedScrollValue != newValue.doubleValue()) {
-                this.getProps().getScrollX().setValue(boundedScrollValue);
-                return;
-            }
-            if (ignoreScrollXEvent) {
-                ignoreScrollXEvent = false;
-            } else {
-                updateCanvasContexts();
-            }
-        });
-
-        this.getProps().getScrollY().valueProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-            updateCanvasContexts();
-        });
-        this.getProps().getLoadDataButton().setOnAction(action -> {
-            Chromosome selectedChromosome = this.getState().getSelectedChromosome();
-            GenomeVersion selectedGenomeVersion = this.getState().getSelectedGenomeVersion();
-            Optional.ofNullable(selectedGenomeVersion).ifPresent(genomeVersion -> {
-                Optional.ofNullable(selectedChromosome).ifPresent(chr -> {
-                    genomeVersion.getLoadedDataSets().forEach(dataSet -> {
-                        CompletableFuture.supplyAsync(() -> {
-                            dataSet.loadRegion(selectedChromosome.getName(), getCurrentRange());
-                            return null;
-                        }).thenRun(() -> {
-                            Platform.runLater(() -> {
-                                //TODO: hack for refresh
-                                AppStore.getStore().noop();
-                                updateCanvasContexts();
-                            });
+    };
+    final ChangeListener<Number> heightPropertyListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+        updateCanvasContexts();
+        AppStore.getStore().noop();
+    };
+    final ChangeListener<Number> scrollXPropertyListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+        final double boundedScrollValue = enforceRangeBounds(newValue.doubleValue(), 0, 100);
+        if (boundedScrollValue != newValue.doubleValue()) {
+            this.getProps().getScrollX().setValue(boundedScrollValue);
+            return;
+        }
+        if (ignoreScrollXEvent) {
+            ignoreScrollXEvent = false;
+        } else {
+            //updateCanvasContexts();
+        }
+    };
+    final ChangeListener<Number> scrollYPositionListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+        AppStore.getStore().updateScrollY(newValue.doubleValue());
+    };
+    final EventHandler<ActionEvent> loadDataActionListener = action -> {
+        Chromosome selectedChromosome = this.getState().getSelectedChromosome();
+        GenomeVersion selectedGenomeVersion = this.getState().getSelectedGenomeVersion();
+        Optional.ofNullable(selectedGenomeVersion).ifPresent(genomeVersion -> {
+            Optional.ofNullable(selectedChromosome).ifPresent(chr -> {
+                genomeVersion.getLoadedDataSets().forEach(dataSet -> {
+                    CompletableFuture.supplyAsync(() -> {
+                        dataSet.loadRegion(chr.getName(), getCurrentRange());
+                        return null;
+                    }).thenRun(() -> {
+                        Platform.runLater(() -> {
+                            AppStore.getStore().noop();
                         });
                     });
                 });
             });
         });
-        this.getProps().getLoadSequenceButton().setOnAction(action -> {
-            Chromosome selectedChromosome = this.getState().getSelectedChromosome();
-            Optional.ofNullable(selectedChromosome).ifPresent(chr -> {
-                CompletableFuture.supplyAsync(() -> {
-                    chr.loadRegion(getCurrentRange());
-                    return null;
-                }).thenRun(() -> {
-                    Platform.runLater(() -> {
-                        //TODO: hack for refresh
-                        AppStore.getStore().noop();
-                        updateCanvasContexts();
-                    });
-                }).exceptionally(ex -> {
-                    LOG.error(ex.getMessage(), ex);
-                    return null;
+    };
+    final EventHandler<ActionEvent> loadSequenceActionListener = action -> {
+        Chromosome selectedChromosome = this.getState().getSelectedChromosome();
+        Optional.ofNullable(selectedChromosome).ifPresent(chr -> {
+            CompletableFuture.supplyAsync(() -> {
+                chr.loadRegion(getCurrentRange());
+                return null;
+            }).thenRun(() -> {
+                Platform.runLater(() -> {
+                    //TODO: hack for refresh
+                    AppStore.getStore().noop();
                 });
+            }).exceptionally(ex -> {
+                LOG.error(ex.getMessage(), ex);
+                return null;
             });
         });
+    };
 
-        //fixes initialization race condition
-//        Platform.runLater(() -> {
-//            refreshSliderWidget();
-//            AppStore.getStore().noop();
-//        });
+    private void initializeCanvas() {
+        Canvas canvas = this.getProps().getCanvasPane().getCanvas();
+        viewPortManager = new ViewPortManager(canvas, this.getState().getTrackRenderers(), 0, 0);
+        this.getProps().getvSlider().valueProperty().addListener(vSliderListener);
+        this.getProps().gethSlider().valueProperty().addListener(hSliderListener);
+        //this.getProps().gethSliderWidget().addListener(hSliderWidgetListener);
+        canvas.widthProperty().addListener(widthPropertyListener);
+        canvas.heightProperty().addListener(heightPropertyListener);
+        this.getProps().getScrollX().addListener(scrollXPropertyListener);
+        this.getProps().getScrollY().valueProperty().addListener(scrollYPositionListener);
+        this.getProps().getLoadDataButton().setOnAction(loadDataActionListener);
+        this.getProps().getLoadSequenceButton().setOnAction(loadSequenceActionListener);
     }
 
     private Range<Integer> getCurrentRange() {
@@ -540,7 +722,8 @@ public class App extends Component<AppProps, AppState> {
                 invertExpScaleTransform(this.getProps().getCanvasPane(), xFactor),
                 this.getState().getScrollX(),
                 xFactor,
-                1);
+                1
+        );
     }
 
     public DoubleProperty getHSliderValue() {
@@ -551,58 +734,23 @@ public class App extends Component<AppProps, AppState> {
         return this.getProps().getScrollX();
     }
 
-    private void initializeChromosomeSelectionListener() {
-        this.getProps().getSelectionInfoService().getSelectedChromosome().addListener((observable, oldValue, newValue) -> {
-            newValue.ifPresent(newChromosomeSelection -> {
-                Chromosome selectedChromosome = this.getProps().getSelectedChromosome();
-                if (selectedChromosome != newChromosomeSelection) {
-                    this.getProps().getSelectionInfoService().getSelectedGenomeVersion().get().ifPresent(gv -> {
-                        Optional[] coordinateTrackRenderer = new Optional[]{Optional.empty()};
-                        final Chromosome chromosome = newChromosomeSelection;
-                        coordinateTrackRenderer[0] = Optional.of(new CoordinateTrackRenderer(this.getProps().getCanvasPane(), chromosome));
-                        ((CoordinateTrackRenderer) coordinateTrackRenderer[0].get()).setWeight(getMinWeight());
-                        Platform.runLater(() -> {
-                            loadDataSets(gv, chromosome);
-                            //TODO: handle this comp
-                            this.getProps().getLabelPane().getChildren().clear();
-                            updateCanvasContexts();
-                            double xFactor = exponentialScaleTransform(
-                                    this.getProps().getCanvasPane(),
-                                    this.getState().gethSlider()
-                            );
-                            AppStore.getStore().update(
-                                    this.getState().getScrollX(),
-                                    0,
-                                    0,
-                                    0,
-                                    0,
-                                    true,
-                                    this.getState().getSelectedGenomeVersion(),
-                                    newChromosomeSelection,
-                                    coordinateTrackRenderer[0],
-                                    xFactor,
-                                    1
-                            );
-
-                        });
-                    });
-                }
-            });
-        });
-    }
-
-    private void initializeGenomeVersionSelectionListener() {
-        this.getProps().getSelectionInfoService().getSelectedGenomeVersion().addListener((observable, oldValue, newValue) -> {
-            //Platform.runLater(() -> {
-            newValue.ifPresent(genomeVersion -> {
-                this.getProps().getLabelPane().getChildren().clear();
-
-                Platform.runLater(() -> {
+    private ChangeListener<Optional<Chromosome>> chromosomeSelectionListener = (observable, oldValue, newValue) -> {
+        newValue.ifPresent(newChromosomeSelection -> {
+            Chromosome selectedChromosome = this.getProps().getSelectedChromosome();
+            if (selectedChromosome != newChromosomeSelection) {
+                this.getProps().getSelectionInfoService().getSelectedGenomeVersion().get().ifPresent(gv -> {
+                    Optional[] coordinateTrackRenderer = new Optional[]{Optional.empty()};
+                    final Chromosome chromosome = newChromosomeSelection;
+                    coordinateTrackRenderer[0] = Optional.of(new CoordinateTrackRenderer(this.getProps().getCanvasPane(), chromosome));
+                    ((CoordinateTrackRenderer) coordinateTrackRenderer[0].get()).setWeight(getMinWeight());
+                    loadDataSets(gv, chromosome);
+                    //TODO: handle this comp
+                    this.getProps().getLabelPane().getChildren().clear();
                     double xFactor = exponentialScaleTransform(
                             this.getProps().getCanvasPane(),
                             this.getState().gethSlider()
                     );
-                    updateCanvasContexts();
+
                     AppStore.getStore().update(
                             this.getState().getScrollX(),
                             0,
@@ -610,24 +758,58 @@ public class App extends Component<AppProps, AppState> {
                             0,
                             0,
                             true,
-                            genomeVersion,
-                            this.getState().getSelectedChromosome(),
-                            Optional.empty(),
+                            this.getState().getSelectedGenomeVersion(),
+                            newChromosomeSelection,
+                            coordinateTrackRenderer[0],
                             xFactor,
                             1
                     );
-
                 });
-            });
-//                newValue.ifPresent(genomeVersion -> {
-//                    if (this.getProps().getSelectedGenomeVersion() != genomeVersion) {
-//                        //AppStore.getStore().setSelectedGenomeVersion(genomeVersion);
-            //updateTrackRenderers(genomeVersion);
-//                    }
-//                });
+            }
         });
-        //});
+    };
+
+    private void initializeChromosomeSelectionListener() {
+        this.getProps().getSelectionInfoService().getSelectedChromosome().addListener(chromosomeSelectionListener);
     }
+
+    private void initializeGenomeVersionSelectionListener() {
+        this.getProps().getSelectionInfoService().getSelectedGenomeVersion().addListener(genomeVersionSelectionListener);
+    }
+    private ChangeListener<Optional<GenomeVersion>> genomeVersionSelectionListener = (observable, oldValue, newValue) -> {
+        LOG.info("initializeGenomeVersionSelectionListener event triggered");
+        LOG.info(App.this.toString());
+        newValue.ifPresent(genomeVersion -> {
+            try {
+                runAndWait(() -> {
+                    this.getProps().getLabelPane().getChildren().clear();
+                });
+            } catch (InterruptedException | ExecutionException ex) {
+                LOG.error(ex.getMessage(), ex);
+            }
+
+            double xFactor = exponentialScaleTransform(
+                    this.getProps().getCanvasPane(),
+                    this.getState().gethSlider()
+            );
+            AppStore.getStore().update(
+                    this.getState().getScrollX(),
+                    0,
+                    0,
+                    0,
+                    0,
+                    true,
+                    genomeVersion,
+                    this.getState().getSelectedChromosome(),
+                    Optional.empty(),
+                    xFactor,
+                    1
+            );
+            initializeDataSetListener(genomeVersion);
+        });
+    };
+
+    ;
 
     private boolean selectedChromosomeNotNull() {
         return this.getState().getSelectedChromosome() != null;
@@ -670,36 +852,11 @@ public class App extends Component<AppProps, AppState> {
             negativeStrandTrackRenderer.setWeight(getMaxWeight());
             Platform.runLater(() -> {
                 AppStore.getStore().addTrackRenderer(positiveStrandTrackRenderer, negativeStrandTrackRenderer);
-                updateCanvasContexts();
             });
         });
-        gv.getLoadedDataSets().addListener((SetChangeListener.Change<? extends DataSet> change) -> {
-            if (change.wasAdded()) {
-                final DataSet loadedDataSet = change.getElementAdded();
-                if (!this.getState().getLoadedDataSets().contains(loadedDataSet)) {
 
-                    CanvasPane canvasPane = this.getProps().getCanvasPane();
-
-                    Track positiveStrandTrack = loadedDataSet.getPositiveStrandTrack(chromosome.getName());
-                    Track negativeStrandTrack = change.getElementAdded().getNegativeStrandTrack(gv.getSelectedChromosomeProperty().get().get().getName());
-                    final ZoomableTrackRenderer positiveStrandTrackRenderer = new ZoomableTrackRenderer(canvasPane, positiveStrandTrack, chromosome);
-                    positiveStrandTrackRenderer.setWeight(getMinWeight());
-                    final ZoomableTrackRenderer negativeStrandTrackRenderer = new ZoomableTrackRenderer(canvasPane, negativeStrandTrack, chromosome);
-                    negativeStrandTrackRenderer.setWeight(getMaxWeight());
-                    Platform.runLater(() -> {
-                        //AppStore.getStore().addDataSet(loadedDataSet);
-                        //AppStore.getStore().addTrackRenderer(positiveStrandTrackRenderer, negativeStrandTrackRenderer);
-                        AppStore.getStore().updateTrackRenderer(Arrays.asList(loadedDataSet),
-                                Arrays.asList(positiveStrandTrackRenderer, negativeStrandTrackRenderer));
-                        updateCanvasContexts();
-                    });
-                }
-            } else {
-                //todo implement remove
-            }
-        });
         if (gv.getLoadedDataSets().isEmpty()) {
-            updateCanvasContexts();
+            //updateCanvasContexts();
         }
     }
 
@@ -720,78 +877,144 @@ public class App extends Component<AppProps, AppState> {
     }
 
     private void refreshSliderWidget() {
-//        if (xSliderPane.getWidth() > 0) {
-//            double max = xSliderPane.getWidth() - slider.getWidth();
-//            double current = slider.getX();
-//            double newXValue = (max * scrollX.getValue() / 100);
-//
-//            if (newXValue <= 0) {
-//                newXValue = 0;
-//            }
-//            if (slider.getWidth() >= xSliderPane.getWidth()) {
-//                double newWidth = xSliderPane.getWidth();
-//                if (newWidth < TOTAL_SLIDER_THUMB_WIDTH) {
-//                    newWidth = TOTAL_SLIDER_THUMB_WIDTH;
-//                }
-//                double oldWidth = slider.getWidth();
-//                slider.setWidth(newWidth);
-//                rightSliderThumb.setX(rightSliderThumb.getX() + newWidth - oldWidth);
-//            }
-//            if (scrollX.getValue() >= 0 && xSliderPane.getWidth() > TOTAL_SLIDER_THUMB_WIDTH) {
-//                slider.setX(newXValue);
-//                leftSliderThumb.setX(newXValue);
-//                double maxPaneWidth = xSliderPane.getWidth() - TOTAL_SLIDER_THUMB_WIDTH;
-//                double newSliderWidth = -maxPaneWidth * ((hSliderWidget.getValue() / 100) - 1) + TOTAL_SLIDER_THUMB_WIDTH;
-//                double rightThumbX = rightSliderThumb.getX() + newXValue - current - slider.getWidth() + newSliderWidth;
-//                rightSliderThumb.setX(rightThumbX);
-//                slider.setWidth(newSliderWidth);
-//
-//            }
-//        }
+        Pane xSliderPane = this.getProps().getxSliderPane();
+        Rectangle slider = this.getProps().getSlider();
+        DoubleProperty scrollX = this.getProps().getScrollX();
+        Rectangle rightSliderThumb = this.getProps().getRightSliderThumb();
+        Rectangle leftSliderThumb = this.getProps().getLeftSliderThumb();
+        double hSliderWidget = this.getState().gethSlider();
+        if (xSliderPane.getWidth() > 0) {
+            double max = xSliderPane.getWidth() - slider.getWidth();
+            double current = slider.getX();
+            double newXValue = (max * scrollX.getValue() / 100);
+
+            if (newXValue <= 0) {
+                newXValue = 0;
+            }
+            if (slider.getWidth() >= xSliderPane.getWidth()) {
+                double newWidth = xSliderPane.getWidth();
+                if (newWidth < TOTAL_SLIDER_THUMB_WIDTH) {
+                    newWidth = TOTAL_SLIDER_THUMB_WIDTH;
+                }
+                double oldWidth = slider.getWidth();
+                slider.setWidth(newWidth);
+                rightSliderThumb.setX(rightSliderThumb.getX() + newWidth - oldWidth);
+            }
+            if (scrollX.getValue() >= 0 && xSliderPane.getWidth() > TOTAL_SLIDER_THUMB_WIDTH) {
+                slider.setX(newXValue);
+                leftSliderThumb.setX(newXValue);
+                double maxPaneWidth = xSliderPane.getWidth() - TOTAL_SLIDER_THUMB_WIDTH;
+                double newSliderWidth = -maxPaneWidth * ((hSliderWidget / 100) - 1) + TOTAL_SLIDER_THUMB_WIDTH;
+                LOG.info("sliderw: {}", hSliderWidget);
+                double rightThumbX = rightSliderThumb.getX() + newXValue - current - slider.getWidth() + newSliderWidth;
+                rightSliderThumb.setX(rightThumbX);
+                slider.setWidth(newSliderWidth);
+
+            }
+        }
     }
 
     @Override
     public List<Component> render() {
-        //LOG.info("render app");
         this.getProps().getLabelPane().getChildren().clear();
-        List<Component> toReturn = Lists.newArrayList();
+        List<Component> children = Lists.newArrayList();
+        this.getState().getTrackRenderers().stream().map(trackRendererToTrackContainer).forEach(children::add);
+        children.add(getSelectionRectangleComponent());
+        children.add(getZoomStripeComponent());
+        return children;
+    }
 
-        this.getState().getTrackRenderers().forEach(tr -> {
-            TrackContainer trackContainer = new TrackContainer();
-            trackContainer.withAttributes(new TrackContainerProps(
-                    tr,
-                    this.getState().getScrollX(),
-                    this.getState().getScrollY(),
-                    this.getState().gethSlider(),
-                    this.getState().getvSlider(),
-                    this.getProps().getCanvasPane(),
-                    this.getState().getLoadedDataSets(),
-                    this.getState().getSelectedChromosome(),
-                    this.getProps().getLabelPane(),
-                    this.getState().getZoomStripeCoordinates(),
-                    this.getState().getMouseClickLocation(),
-                    this.getState().getLocalPoint(),
-                    this.getState().getScreenPoint(),
-                    this.getState().isMouseDragging(),
-                    this.getState().getxFactor(),
-                    this.getState().getyFactor()
-            )).beforeComponentReady();
-            toReturn.add(trackContainer);
-        });
+    private ZoomStripe getZoomStripeComponent() {
         CanvasPane canvasPane = this.getProps().getCanvasPane();
         ZoomStripe zoomStripe = new ZoomStripe();
+        double visibleVirtualCoordinatesX = (canvasPane.getCanvas().getWidth() / this.getState().getxFactor());
+        double xOffset = ((this.getState().getScrollX() / 100) * (canvasPane.getModelWidth() - visibleVirtualCoordinatesX));
         zoomStripe.withAttributes(new ZoomStripeProps(
                 canvasPane.getCanvas(),
                 this.getState().getZoomStripeCoordinates(),
                 this.getState().getxFactor(),
-                canvasPane.getXOffset(),
+                xOffset,
                 canvasPane.getWidth(),
                 canvasPane.getModelWidth(),
                 50,
                 this.getState().getScrollX()
         ));
-        toReturn.add(zoomStripe);
-        return toReturn;
+        return zoomStripe;
     }
 
+    private SelectionRectangle getSelectionRectangleComponent() {
+        CanvasPane canvasPane = this.getProps().getCanvasPane();
+        SelectionRectangle selectionRectangle = new SelectionRectangle(
+                new SelectionRectangleProps(
+                        canvasPane,
+                        this.getState().getMouseClickLocation(),
+                        this.getState().getLocalPoint()
+                ));
+        return selectionRectangle;
+    }
+
+    private Function<TrackRenderer, TrackContainer> trackRendererToTrackContainer = tr -> {
+        final TrackContainerProps trackContainerProps = new TrackContainerProps(
+                tr,
+                this.getState().getScrollX(),
+                this.getState().getScrollY(),
+                this.getState().gethSlider(),
+                this.getState().getvSlider(),
+                this.getProps().getCanvasPane(),
+                this.getState().getLoadedDataSets(),
+                this.getState().getSelectedChromosome(),
+                this.getProps().getLabelPane(),
+                this.getState().getZoomStripeCoordinates(),
+                this.getState().getMouseClickLocation(),
+                this.getState().getLocalPoint(),
+                this.getState().getScreenPoint(),
+                this.getState().isMouseDragging(),
+                this.getState().getxFactor(),
+                this.getState().getyFactor()
+        );
+        TrackContainer trackContainer = new TrackContainer(trackContainerProps);
+        trackContainer.beforeComponentReady();
+        return trackContainer;
+    };
+
+    private void initializeDataSetListener(GenomeVersion gv) {
+        gv.getLoadedDataSets().removeListener(selectedGenomeVersionDataSetListener);
+        gv.getLoadedDataSets().addListener(selectedGenomeVersionDataSetListener);
+    }
+    private SetChangeListener<DataSet> selectedGenomeVersionDataSetListener = (SetChangeListener.Change<? extends DataSet> change) -> {
+        this.getProps().getSelectionInfoService().getSelectedGenomeVersion().get().ifPresent(gv -> {
+            if (change.wasAdded()) {
+                if (gv.getSelectedChromosomeProperty().get().isPresent()) {
+                    Chromosome selectedChromosome = gv.getSelectedChromosomeProperty().get().get();
+                    final DataSet loadedDataSet = change.getElementAdded();
+                    if (!this.getState().getLoadedDataSets().contains(loadedDataSet)) {
+                        CanvasPane canvasPane = this.getProps().getCanvasPane();
+                        Track positiveStrandTrack = loadedDataSet.getPositiveStrandTrack(selectedChromosome.getName());
+                        Track negativeStrandTrack = change.getElementAdded().getNegativeStrandTrack(gv.getSelectedChromosomeProperty().get().get().getName());
+                        final ZoomableTrackRenderer positiveStrandTrackRenderer = new ZoomableTrackRenderer(canvasPane, positiveStrandTrack, selectedChromosome);
+                        positiveStrandTrackRenderer.setWeight(getMinWeight());
+                        final ZoomableTrackRenderer negativeStrandTrackRenderer = new ZoomableTrackRenderer(canvasPane, negativeStrandTrack, selectedChromosome);
+                        negativeStrandTrackRenderer.setWeight(getMaxWeight());
+                        try {
+                            runAndWait(() -> {
+                                AppStore.getStore().updateTrackRenderer(Arrays.asList(loadedDataSet),
+                                        Arrays.asList(positiveStrandTrackRenderer, negativeStrandTrackRenderer));
+                            });
+                        } catch (InterruptedException | ExecutionException ex) {
+                            LOG.error(ex.getMessage(), ex);
+                        }
+                    }
+                }
+            } else {
+                //todo implement remove
+            }
+        });
+    };
+
+    @Override
+    public void close() {
+        LOG.info("closing app: " + genomeVersionSelectionListener.toString());
+        this.getProps().getSelectionInfoService().getSelectedChromosome().removeListener(chromosomeSelectionListener);
+        this.getProps().getSelectionInfoService().getSelectedGenomeVersion().removeListener(genomeVersionSelectionListener);
+    }
 }

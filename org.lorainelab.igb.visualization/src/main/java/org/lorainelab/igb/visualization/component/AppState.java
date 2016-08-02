@@ -49,10 +49,6 @@ public class AppState implements State {
         this.yFactor = 1;
     }
 
-    public static AppState factory() {
-        return new AppState();
-    }
-
     public double getxFactor() {
         return xFactor;
     }
@@ -106,7 +102,7 @@ public class AppState implements State {
         this.mouseDragging = mouseDragging;
         return this;
     }
-    
+
     public double getZoomStripeCoordinates() {
         return zoomStripeCoordinates;
     }

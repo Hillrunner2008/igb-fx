@@ -26,7 +26,8 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import net.miginfocom.layout.CC;
-import static org.lorainelab.igb.visualization.util.ColorUtils.colorToWebStyle;
+import static org.lorainelab.igb.data.model.util.ColorUtils.colorToWebStyle;
+import org.lorainelab.igb.visualization.store.AppStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tbee.javafx.scene.layout.MigPane;
@@ -141,7 +142,7 @@ public class TrackLabel {
                 if (ke.getCode().equals(KeyCode.ENTER)) {
                     Platform.runLater(() -> {
                         zoomableTrackRenderer.getTrack().setMaxStackHeight(Integer.parseInt(stackHeightEntryField.getText()));
-                        zoomableTrackRenderer.render();
+                        AppStore.getStore().noop();
                         stage.hide();
                     });
                 }
@@ -150,7 +151,7 @@ public class TrackLabel {
             okBtn.setOnAction(event -> {
                 Platform.runLater(() -> {
                     zoomableTrackRenderer.getTrack().setMaxStackHeight(Integer.parseInt(stackHeightEntryField.getText()));
-                    zoomableTrackRenderer.render();
+                    AppStore.getStore().noop();
                     stage.hide();
                 });
             });
@@ -159,16 +160,16 @@ public class TrackLabel {
                 stage.hide();
             });
             stage.setWidth(220);
-            
+
             stage.setHeight(155);
-            
+
             stage.setTitle("Set Track Stack Height");
             migPane.add(label, "growx, wrap");
             migPane.add(stackHeightEntryField, "growx, wrap");
             migPane.add(okBtn, new CC().gap("rel").x("container.x+55").y("container.y+90").span(3).tag("ok").split());
             migPane.add(cancelBtn, new CC().x("container.x+105").y("container.y+90").tag("ok"));
             stage.initModality(Modality.APPLICATION_MODAL);
-            
+
             stage.setResizable(false);
             Scene scene = new Scene(migPane);
             stage.setScene(scene);

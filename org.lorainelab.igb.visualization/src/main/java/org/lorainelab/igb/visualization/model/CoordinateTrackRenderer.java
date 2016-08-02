@@ -1,7 +1,6 @@
 package org.lorainelab.igb.visualization.model;
 
 import com.google.common.collect.Range;
-import com.google.common.eventbus.Subscribe;
 import com.sun.javafx.tk.FontMetrics;
 import com.sun.javafx.tk.Toolkit;
 import java.text.DecimalFormat;
@@ -17,10 +16,6 @@ import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.View;
 import static org.lorainelab.igb.data.model.sequence.BasePairColorReference.getBaseColor;
 import org.lorainelab.igb.visualization.CanvasPane;
-import org.lorainelab.igb.visualization.event.ClickDragCancelEvent;
-import org.lorainelab.igb.visualization.event.ClickDragEndEvent;
-import org.lorainelab.igb.visualization.event.ClickDragZoomEvent;
-import org.lorainelab.igb.visualization.event.RefreshTrackEvent;
 import static org.lorainelab.igb.visualization.util.BoundsUtil.enforceRangeBounds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -257,7 +252,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
                         y2 -= yOffset;
                     }
                     gc.scale(textScale, textScale);
-                    if (viewBoundingRectangle.getWidth() < 100) {
+                    if (viewBoundingRectangle.getWidth() < 125) {
                         gc.setFill(Color.BLACK);
                         gc.fillText("" + base, index * 2 + .5, y2, 1);
                     }
@@ -315,39 +310,39 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     private double lastMouseClickX = -1;
     private double lastMouseDragX = -1;
 
-    @Subscribe
-    private void handleClickDragCancelEvent(ClickDragCancelEvent event) {
-        lastMouseClickX = -1;
-        lastMouseDragX = -1;
-        render();
-    }
+//    @Subscribe
+//    private void handleClickDragCancelEvent(ClickDragCancelEvent event) {
+//        lastMouseClickX = -1;
+//        lastMouseDragX = -1;
+//        render();
+//    }
 
-    @Subscribe
-    public void handleClickDragEndEvent(ClickDragEndEvent mouseEvent) {
-        LOG.info("handleClickDragEndEvent method called");
-        if (lastMouseClickX == -1
-                || !canvasContext.getBoundingRect().contains(new Point2D(mouseEvent.getLocal().getX(), canvasContext.getBoundingRect().getMinY()))) {
-            render();
-            return;
-        }
-        final double visibleVirtualCoordinatesX = viewBoundingRectangle.getWidth();
-        double xOffset = viewBoundingRectangle.getMinX();
-        Range<Double> currentRange = Range.closedOpen(xOffset, xOffset + visibleVirtualCoordinatesX);
-
-        lastMouseDragX = Math.floor(mouseEvent.getLocal().getX() / xfactor);
-        ClickDragZoomEvent event;
-        double x1 = viewBoundingRectangle.getMinX() + lastMouseClickX;
-        double x2 = viewBoundingRectangle.getMinX() + lastMouseDragX;
-        if (lastMouseDragX > lastMouseClickX) {
-            event = new ClickDragZoomEvent(x1, x2);
-        } else {
-            event = new ClickDragZoomEvent(x2, x1);
-        }
-//        eventBus.post(event);
-        lastMouseClickX = -1;
-        lastMouseDragX = -1;
-        render();
-    }
+//    @Subscribe
+//    public void handleClickDragEndEvent(ClickDragEndEvent mouseEvent) {
+//        LOG.info("handleClickDragEndEvent method called");
+//        if (lastMouseClickX == -1
+//                || !canvasContext.getBoundingRect().contains(new Point2D(mouseEvent.getLocal().getX(), canvasContext.getBoundingRect().getMinY()))) {
+//            render();
+//            return;
+//        }
+//        final double visibleVirtualCoordinatesX = viewBoundingRectangle.getWidth();
+//        double xOffset = viewBoundingRectangle.getMinX();
+//        Range<Double> currentRange = Range.closedOpen(xOffset, xOffset + visibleVirtualCoordinatesX);
+//
+//        lastMouseDragX = Math.floor(mouseEvent.getLocal().getX() / xfactor);
+//        ClickDragZoomEvent event;
+//        double x1 = viewBoundingRectangle.getMinX() + lastMouseClickX;
+//        double x2 = viewBoundingRectangle.getMinX() + lastMouseDragX;
+//        if (lastMouseDragX > lastMouseClickX) {
+//            event = new ClickDragZoomEvent(x1, x2);
+//        } else {
+//            event = new ClickDragZoomEvent(x2, x1);
+//        }
+////        eventBus.post(event);
+//        lastMouseClickX = -1;
+//        lastMouseDragX = -1;
+//        render();
+//    }
 
 //    @Subscribe
 //    public void handleClickDraggingEvent(ClickDraggingEvent event) {
@@ -368,10 +363,14 @@ public class CoordinateTrackRenderer implements TrackRenderer {
 
     @Override
     public void setLastMouseDragPoint(Point2D point) {
-        if (!canvasContext.getBoundingRect().contains(point)) {
+        if (point == null || lastMouseClickX < 0) {
             return;
         }
-        lastMouseDragX = Math.floor(point.getX() / xfactor);
+        double x = point.getX();
+        if(x < 0) {
+            x = 0;
+        }
+        lastMouseDragX = Math.floor(x / xfactor);
     }
 
     @Override
@@ -389,13 +388,8 @@ public class CoordinateTrackRenderer implements TrackRenderer {
 //        }
 //        lastMouseClickX = Math.floor(event.getLocal().getX() / xfactor);
 //    }
-    @Subscribe
-    private void handleRefreshTrackEvent(RefreshTrackEvent event) {
-        render();
-    }
 
-    @Override
-    public void render() {
+    private void render() {
         if (canvasContext.isVisible()) {
             if (Platform.isFxApplicationThread()) {
                 clearCanvas();
@@ -449,6 +443,11 @@ public class CoordinateTrackRenderer implements TrackRenderer {
 
     public TrackLabel getTrackLabel() {
         return trackLabel;
+    }
+
+    @Override
+    public void setIsMultiSelectModeActive(boolean multiSelectModeActive) {
+        //do nothing for now since this may not be a relevant signal for coordinate track
     }
 
 }

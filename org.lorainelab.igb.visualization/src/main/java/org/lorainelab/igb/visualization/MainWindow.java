@@ -30,6 +30,7 @@ public class MainWindow {
 
     @Activate
     public void activate() {
+        LOG.info("MainWindow activate");
         try {
             initiailize();
         } catch (IOException ex) {
@@ -68,6 +69,7 @@ public class MainWindow {
 
     @Deactivate
     public void deactivate() {
+        LOG.info("MainWindow deactivate");
         Platform.runLater(() -> {
             try {
                 stage.hide();

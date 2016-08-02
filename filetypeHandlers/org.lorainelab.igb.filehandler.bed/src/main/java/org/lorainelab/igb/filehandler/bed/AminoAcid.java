@@ -171,7 +171,6 @@ public enum AminoAcid {
     }
 
     public static String getAminoAcid(String residues, boolean forward) {
-        int padding = 0;
         if (!forward) {
             residues = complement(residues);
         }
@@ -186,9 +185,9 @@ public enum AminoAcid {
             String aaCode;
             if (nextCodon.contains("-")) {
                 if (forward) {
-                    aaCode = "-  ";
+                    aaCode = "?  ";
                 } else {
-                    aaCode = "  -";
+                    aaCode = "  ?";
                 }
             } else {
                 AminoAcid aminoAcid = AminoAcid.CODON_TO_AMINO_ACID.get(nextCodon);
@@ -207,11 +206,7 @@ public enum AminoAcid {
         }
         String aminoAcids = aminoAcidsSB.toString();
 
-        if (forward) {
-            return aminoAcids.substring(0, aminoAcids.length() - padding);
-        } else {
-            return aminoAcids.substring(padding, aminoAcids.length());
-        }
+        return aminoAcids.substring(0, aminoAcids.length());
     }
 
     private static String complement(String dna) {

@@ -10,17 +10,21 @@ import javafx.stage.Stage;
 import org.lorainelab.igb.stage.provider.api.StageProvider;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // This class is needed to work around the problem of being unable to initialize fields from a javafx runtime context
 @Component(immediate = true, provide = StageProviderRegistrationManager.class)
 public class StageProviderRegistrationManager {
 
+    private static final Logger LOG = LoggerFactory.getLogger(StageProviderRegistrationManager.class);
     private ServiceRegistration<StageProvider> registerService;
     private BundleContext bundleContext;
     private Stage stage;
 
     @Activate
     public void activate(BundleContext bundleContext) {
+        LOG.info("StageProviderRegistrationManager activated");
         this.bundleContext = bundleContext;
     }
 
@@ -31,6 +35,7 @@ public class StageProviderRegistrationManager {
 
     @Deactivate
     public void deactivate() throws IOException {
+        LOG.info("StageProviderRegistrationManager deactivated");
         Platform.runLater(() -> {
             stage.hide();
 
