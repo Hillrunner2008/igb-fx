@@ -40,12 +40,19 @@ public abstract class Component<P extends Props, S extends State> {
         return state;
     }
 
-    private void renderComponents(Component<Props, State> component) {
+    public void renderComponents() {
+        render().forEach(child -> {
+            renderComponents(child);
+        });
+    }
+
+    public void renderComponents(Component<Props, State> component) {
         component.render().forEach(child -> {
             renderComponents(child);
         });
     }
-    
-    public void close(){}
+
+    public void close() {
+    }
 
 }

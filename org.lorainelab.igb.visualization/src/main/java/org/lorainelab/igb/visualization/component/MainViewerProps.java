@@ -22,7 +22,7 @@ import org.lorainelab.igb.visualization.component.api.Props;
  *
  * @author jeckstei
  */
-public class AppProps implements Props {
+public class MainViewerProps implements Props {
 
     private Slider hSlider;
     private DoubleProperty scrollX;
@@ -44,7 +44,7 @@ public class AppProps implements Props {
     private Button loadSequenceButton;
     private PlusMinusSlider plusMinusSlider;
 
-    public AppProps(Slider hslider, DoubleProperty scrollX, ScrollBar scrollY,
+    public MainViewerProps(Slider hslider, DoubleProperty scrollX, ScrollBar scrollY,
             double zoomStripeCoordinate, CanvasPane canvasPane,
             SelectionInfoService selectionInfoService, Chromosome selectedChromosome,
             GenomeVersion selectedGenomeVersion, Slider vslider, double totalTrackHeight,

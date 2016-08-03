@@ -64,7 +64,7 @@ public class TrackContainer extends Component<TrackContainerProps, TrackContaine
         //LOG.info("render track container");
 
         this.getState().getTrackRenderer().clearCanvas();
-        this.getState().getTrackRenderer().setIsMultiSelectModeActive(this.getProps().getCanvasPane().isMultiSelectModeActive());
+//        this.getState().getTrackRenderer().setIsMultiSelectModeActive(this.getProps().getCanvasPane().isMultiSelectModeActive());
         this.getState().getTrackRenderer().setLastMouseClickedPoint(this.getProps().getMouseClickLocation());
         this.getState().getTrackRenderer().setLastMouseDragPoint(this.getProps().getLocalPoint());
         this.getState().getTrackRenderer().setMouseDragging(this.getProps().isMouseDragging());

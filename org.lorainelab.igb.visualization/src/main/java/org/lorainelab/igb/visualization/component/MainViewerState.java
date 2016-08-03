@@ -18,7 +18,7 @@ import org.lorainelab.igb.visualization.model.TrackRenderer;
  *
  * @author jeckstei
  */
-public class AppState implements State {
+public class MainViewerState implements State {
 
     private double totalTrackHeight;
     private Set<TrackRenderer> trackRenderers;
@@ -38,9 +38,8 @@ public class AppState implements State {
     private double xFactor;
     private double yFactor;
 
-    private static AppState instance;
 
-    public AppState() {
+    public MainViewerState() {
         this.trackRenderers = Sets.newConcurrentHashSet();
         this.loadedDataSets = Sets.newConcurrentHashSet();
         zoomStripeCoordinates = -1;
@@ -53,7 +52,7 @@ public class AppState implements State {
         return xFactor;
     }
 
-    public AppState setxFactor(double xFactor) {
+    public MainViewerState setxFactor(double xFactor) {
         this.xFactor = xFactor;
         return this;
     }
@@ -62,7 +61,7 @@ public class AppState implements State {
         return yFactor;
     }
 
-    public AppState setyFactor(double yFactor) {
+    public MainViewerState setyFactor(double yFactor) {
         this.yFactor = yFactor;
         return this;
     }
@@ -71,7 +70,7 @@ public class AppState implements State {
         return mouseClickLocation;
     }
 
-    public AppState setMouseClickLocation(Point2D mouseClickLocation) {
+    public MainViewerState setMouseClickLocation(Point2D mouseClickLocation) {
         this.mouseClickLocation = mouseClickLocation;
         return this;
     }
@@ -80,7 +79,7 @@ public class AppState implements State {
         return localPoint;
     }
 
-    public AppState setLocalPoint(Point2D localPoint) {
+    public MainViewerState setLocalPoint(Point2D localPoint) {
         this.localPoint = localPoint;
         return this;
     }
@@ -89,7 +88,7 @@ public class AppState implements State {
         return screenPoint;
     }
 
-    public AppState setScreenPoint(Point2D screenPoint) {
+    public MainViewerState setScreenPoint(Point2D screenPoint) {
         this.screenPoint = screenPoint;
         return this;
     }
@@ -98,7 +97,7 @@ public class AppState implements State {
         return mouseDragging;
     }
 
-    public AppState setMouseDragging(boolean mouseDragging) {
+    public MainViewerState setMouseDragging(boolean mouseDragging) {
         this.mouseDragging = mouseDragging;
         return this;
     }
@@ -107,7 +106,7 @@ public class AppState implements State {
         return zoomStripeCoordinates;
     }
 
-    public AppState setZoomStripeCoordinates(double zoomStripeCoordinates) {
+    public MainViewerState setZoomStripeCoordinates(double zoomStripeCoordinates) {
         this.zoomStripeCoordinates = zoomStripeCoordinates;
         return this;
     }
@@ -116,7 +115,7 @@ public class AppState implements State {
         return selectedChromosome;
     }
 
-    public AppState setSelectedChromosome(Chromosome selectedChromosome) {
+    public MainViewerState setSelectedChromosome(Chromosome selectedChromosome) {
         this.selectedChromosome = selectedChromosome;
         return this;
     }
@@ -125,7 +124,7 @@ public class AppState implements State {
         return loadedDataSets;
     }
 
-    public AppState setLoadedDataSets(Set<DataSet> loadedDataSets) {
+    public MainViewerState setLoadedDataSets(Set<DataSet> loadedDataSets) {
         this.loadedDataSets.clear();
         this.loadedDataSets.addAll(loadedDataSets);
         return this;
@@ -135,7 +134,7 @@ public class AppState implements State {
         return selectedGenomeVersion;
     }
 
-    public AppState setSelectedGenomeVersion(GenomeVersion selectedGenomeVersion) {
+    public MainViewerState setSelectedGenomeVersion(GenomeVersion selectedGenomeVersion) {
         this.selectedGenomeVersion = selectedGenomeVersion;
         return this;
     }
@@ -144,7 +143,7 @@ public class AppState implements State {
         return scrollX;
     }
 
-    public AppState setScrollX(double scrollX) {
+    public MainViewerState setScrollX(double scrollX) {
         this.scrollX = scrollX;
         return this;
     }
@@ -153,7 +152,7 @@ public class AppState implements State {
         return scrollY;
     }
 
-    public AppState setScrollY(double scrollY) {
+    public MainViewerState setScrollY(double scrollY) {
         this.scrollY = scrollY;
         return this;
     }
@@ -162,7 +161,7 @@ public class AppState implements State {
         return scrollYVisibleAmount;
     }
 
-    public AppState setScrollYVisibleAmount(double scrollYVisibleAmount) {
+    public MainViewerState setScrollYVisibleAmount(double scrollYVisibleAmount) {
         this.scrollYVisibleAmount = scrollYVisibleAmount;
         return this;
     }
@@ -171,7 +170,7 @@ public class AppState implements State {
         return hSlider;
     }
 
-    public AppState sethSlider(double hSlider) {
+    public MainViewerState sethSlider(double hSlider) {
         this.hSlider = hSlider;
         return this;
     }
@@ -180,7 +179,7 @@ public class AppState implements State {
         return vSlider;
     }
 
-    public AppState setvSlider(double vSlider) {
+    public MainViewerState setvSlider(double vSlider) {
         this.vSlider = vSlider;
         return this;
     }
@@ -189,7 +188,7 @@ public class AppState implements State {
         return totalTrackHeight;
     }
 
-    public AppState setTotalTrackHeight(double totalTrackHeight) {
+    public MainViewerState setTotalTrackHeight(double totalTrackHeight) {
         this.totalTrackHeight = totalTrackHeight;
         return this;
     }
@@ -198,7 +197,7 @@ public class AppState implements State {
         return trackRenderers;
     }
 
-    public AppState setTrackRenderers(Set<TrackRenderer> trackRenderers) {
+    public MainViewerState setTrackRenderers(Set<TrackRenderer> trackRenderers) {
         this.trackRenderers.clear();
         this.trackRenderers.addAll(trackRenderers);
         return this;

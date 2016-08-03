@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 import org.lorainelab.igb.visualization.component.SelectionRectangle.SelectionRectangleState;
 import org.lorainelab.igb.visualization.component.api.Component;
 import org.lorainelab.igb.visualization.component.api.State;
@@ -33,16 +31,16 @@ public class SelectionRectangle extends Component<SelectionRectangleProps, Selec
 
     @Override
     public List<Component> render() {
-        GraphicsContext gc = this.getProps().getCanvasPane().getCanvas().getGraphicsContext2D();
-        try {
-            gc.save();
-            getSelectionRectangle().ifPresent(selectionRectangle -> {
-                gc.setStroke(Color.RED);
-                gc.strokeRect(selectionRectangle.getMinX(), selectionRectangle.getMinY(), selectionRectangle.getWidth(), selectionRectangle.getHeight());
-            });
-        } finally {
-            gc.restore();
-        }
+//        GraphicsContext gc = this.getProps().getCanvasPane().getOverlayCanvas().getGraphicsContext2D();
+//        try {
+//            gc.save();
+//            getSelectionRectangle().ifPresent(selectionRectangle -> {
+//                gc.setStroke(Color.RED);
+//                gc.strokeRect(selectionRectangle.getMinX(), selectionRectangle.getMinY(), selectionRectangle.getWidth(), selectionRectangle.getHeight());
+//            });
+//        } finally {
+//            gc.restore();
+//        }
         return Lists.newArrayList();
     }
 

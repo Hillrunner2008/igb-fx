@@ -19,112 +19,88 @@
     <children>
         <StackPane VBox.vgrow="ALWAYS">
             <children>
-                <SplitPane fx:id="rightPanelSplitPane" dividerPositions="0.85" prefHeight="160.0" prefWidth="200.0">
+                <SplitPane dividerPositions="0.85" prefHeight="160.0" prefWidth="200.0">
                     <items>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                             <children>
-                                <SplitPane dividerPositions="0.65" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                <SplitPane dividerPositions="0.7" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                     <items>
                                         <StackPane>
                                             <children>
-                                                <VBox>
-                                                    <children>
-                                                        <HBox prefHeight="100.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+                                                <SplitPane>
+                                                    <items>
+                                                        <VBox prefHeight="200.0" prefWidth="800.0">
                                                             <children>
-                                                                <StackPane HBox.hgrow="ALWAYS">
+                                                                <HBox VBox.vgrow="NEVER">
+                                                                    <VBox.margin>
+                                                                        <Insets />
+                                                                    </VBox.margin>
                                                                     <children>
-                                                                        <SplitPane>
-                                                                            <items>
-                                                                                <VBox prefHeight="200.0" prefWidth="800.0">
-                                                                                    <children>
-                                                                                        <HBox VBox.vgrow="NEVER">
-                                                                                            <VBox.margin>
-                                                                                                <Insets />
-                                                                                            </VBox.margin>
-                                                                                            <children>
-                                                                                                <TextField fx:id="search" prefHeight="26.0" prefWidth="203.0" promptText="chr1:0-30,427,671">
-                                                                                                    <HBox.margin>
-                                                                                                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                                                                                                    </HBox.margin>
-                                                                                                </TextField>
-                                                                                                <Slider fx:id="hSlider" prefHeight="16.0" prefWidth="388.0" HBox.hgrow="ALWAYS">
-                                                                                                    <padding>
-                                                                                                        <Insets bottom="5.0" left="10.0" right="10.0" top="10.0" />
-                                                                                                    </padding>
-                                                                                                </Slider>
-                                                                                                <Button fx:id="loadDataButton" mnemonicParsing="false" text="Load Data">
-                                                                                                    <HBox.margin>
-                                                                                                        <Insets right="5.0" top="5.0" />
-                                                                                                    </HBox.margin>
-                                                                                                </Button>
-                                                                                                <Button fx:id="loadSequenceButton" mnemonicParsing="false" text="Load Sequence">
-                                                                                                    <HBox.margin>
-                                                                                                        <Insets right="5.0" top="5.0" />
-                                                                                                    </HBox.margin>
-                                                                                                </Button>
-                                                                                            </children>
-                                                                                        </HBox>
-                                                                                        <HBox VBox.vgrow="ALWAYS">
-                                                                                            <children>
-                                                                                                <HBox prefHeight="100.0" prefWidth="200.0" HBox.hgrow="ALWAYS">
-                                                                                                    <children>
-                                                                                                        <SplitPane fx:id="trackLabelSplitPane" dividerPositions="0.1" prefHeight="160.0" prefWidth="200.0" HBox.hgrow="ALWAYS">
-                                                                                                            <items>
-                                                                                                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" SplitPane.resizableWithParent="false">
-                                                                                                                    <children>
-                                                                                                                        <HBox fx:id="labelHbox" layoutX="17.0" layoutY="141.0" prefHeight="100.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                                                                                            <children>
-                                                                                                                                <BorderPane HBox.hgrow="NEVER">
-                                                                                                                                    <center>
-                                                                                                                                        <Slider fx:id="vSlider" maxWidth="15.0" orientation="VERTICAL" prefWidth="15.0" rotate="180.0">
-                                                                                                                                            <padding>
-                                                                                                                                                <Insets bottom="15.0" top="15.0" />
-                                                                                                                                            </padding>
-                                                                                                                                        </Slider>
-                                                                                                                                    </center>
-                                                                                                                                </BorderPane>
-                                                                                                                            </children>
-                                                                                                                        </HBox>
-                                                                                                                    </children>
-                                                                                                                </AnchorPane>
-                                                                                                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
-                                                                                                                    <children>
-                                                                                                                        <VBox fx:id="canvasVBox" layoutX="223.0" layoutY="72.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                                                                                            <children>
-                                                                                                                                <StackPane fx:id="canvasContainer" prefHeight="150.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
-                                                                                                                                <HBox fx:id="zoomSliderMiniMapWidgetContainer" maxHeight="20.0" minHeight="20.0" prefHeight="20.0" prefWidth="1194.0">
-                                                                                                                                    <children>
-                                                                                                                                        <Pane maxHeight="15.0" minHeight="15.0" prefHeight="15.0" prefWidth="1194.0" style="-fx-background-image: url('track_overview.png'); -fx-background-repeat: stretch; -fx-background-size: stretch;" HBox.hgrow="ALWAYS" fx:id="xSliderPane">
-                                                                                                                                            <children>
-                                                                                                                                                <Rectangle fx:id="slider" arcHeight="5.0" arcWidth="5.0" fill="#0397c9" height="10.0" layoutY="3.0" stroke="BLACK" strokeType="INSIDE" width="832.0" />
-                                                                                                                                                <Rectangle fx:id="rightSliderThumb" arcHeight="5.0" arcWidth="5.0" fill="#dddddd" height="15.0" layoutX="818.0" stroke="BLACK" strokeType="INSIDE" width="15.0" />
-                                                                                                                                                <Rectangle fx:id="leftSliderThumb" arcHeight="5.0" arcWidth="5.0" fill="#dddddd" height="15.0" stroke="BLACK" strokeType="INSIDE" width="15.0" />
-                                                                                                                                            </children>
-                                                                                                                                        </Pane>
-                                                                                                                                    </children>
-                                                                                                                                </HBox>
-                                                                                                                                <PlusMinusSlider fx:id="plusMinusSlider" />
-                                                                                                                            </children>
-                                                                                                                        </VBox>
-                                                                                                                    </children>
-                                                                                                                </AnchorPane>
-                                                                                                            </items>
-                                                                                                        </SplitPane>
-                                                                                                        <ScrollBar fx:id="scrollY" orientation="VERTICAL" />
-                                                                                                    </children>
-                                                                                                </HBox>
-                                                                                            </children>
-                                                                                        </HBox>
-                                                                                    </children>
-                                                                                </VBox>
-                                                                            </items>
-                                                                        </SplitPane>
+                                                                        <TextField fx:id="search" prefHeight="26.0" prefWidth="203.0" promptText="chr1:0-30,427,671">
+                                                                            <HBox.margin>
+                                                                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                                                            </HBox.margin>
+                                                                        </TextField>
+                                                                        <Slider fx:id="hSlider" prefHeight="16.0" prefWidth="388.0" HBox.hgrow="ALWAYS">
+                                                                            <padding>
+                                                                                <Insets bottom="5.0" left="10.0" right="10.0" top="10.0" />
+                                                                            </padding>
+                                                                        </Slider>
+                                                                        <Button fx:id="loadDataButton" mnemonicParsing="false" text="Load Data">
+                                                                            <HBox.margin>
+                                                                                <Insets right="5.0" top="5.0" />
+                                                                            </HBox.margin>
+                                                                        </Button>
+                                                                        <Button fx:id="loadSequenceButton" mnemonicParsing="false" text="Load Sequence">
+                                                                            <HBox.margin>
+                                                                                <Insets right="5.0" top="5.0" />
+                                                                            </HBox.margin>
+                                                                        </Button>
                                                                     </children>
-                                                                </StackPane>
+                                                                </HBox>
+                                                <HBox prefHeight="100.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+                                                   <children>
+                                                      <SplitPane fx:id="trackLabelSplitPane" dividerPositions="0.1" prefHeight="160.0" prefWidth="200.0" HBox.hgrow="ALWAYS">
+                                                         <items>
+                                                            <HBox fx:id="labelHbox" prefHeight="100.0" prefWidth="200.0">
+                                                               <children>
+                                                                  <BorderPane HBox.hgrow="NEVER">
+                                                                     <center>
+                                                                        <Slider fx:id="vSlider" maxWidth="15.0" orientation="VERTICAL" prefWidth="15.0" rotate="180.0">
+                                                                           <padding>
+                                                                              <Insets bottom="15.0" top="15.0" />
+                                                                           </padding>
+                                                                        </Slider>
+                                                                     </center>
+                                                                  </BorderPane>
+                                                               </children>
+                                                            </HBox>
+                                                            <VBox fx:id="canvasVBox">
+                                                               <children>
+                                                                  <StackPane fx:id="canvasContainer" prefHeight="150.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
+                                                                  <HBox fx:id="zoomSliderMiniMapWidgetContainer" maxHeight="20.0" minHeight="20.0" prefHeight="20.0" prefWidth="1194.0">
+                                                                     <children>
+                                                                        <Pane maxHeight="15.0" minHeight="15.0" prefHeight="15.0" prefWidth="1194.0" style="-fx-background-image: url('track_overview.png'); -fx-background-repeat: stretch; -fx-background-size: stretch;" HBox.hgrow="ALWAYS" fx:id="xSliderPane">
+                                                                           <children>
+                                                                              <Rectangle fx:id="slider" arcHeight="5.0" arcWidth="5.0" fill="#0397c9" height="10.0" layoutY="3.0" stroke="BLACK" strokeType="INSIDE" width="832.0" />
+                                                                              <Rectangle fx:id="rightSliderThumb" arcHeight="5.0" arcWidth="5.0" fill="#dddddd" height="15.0" layoutX="818.0" stroke="BLACK" strokeType="INSIDE" width="15.0" />
+                                                                              <Rectangle fx:id="leftSliderThumb" arcHeight="5.0" arcWidth="5.0" fill="#dddddd" height="15.0" stroke="BLACK" strokeType="INSIDE" width="15.0" />
+                                                                           </children>
+                                                                        </Pane>
+                                                                     </children>
+                                                                  </HBox>
+                                                                  <PlusMinusSlider fx:id="plusMinusSlider" />
+                                                               </children>
+                                                            </VBox>
+                                                         </items>
+                                                      </SplitPane>
+                                                      <ScrollBar fx:id="scrollY" orientation="VERTICAL" />
+                                                   </children>
+                                                </HBox>
                                                             </children>
-                                                        </HBox>
-                                                    </children>
-                                                </VBox>
+                                                        </VBox>
+                                                    </items>
+                                                </SplitPane>
                                             </children>
                                         </StackPane>
                                         <AnchorPane fx:id="bottomTabPaneContainer" />
