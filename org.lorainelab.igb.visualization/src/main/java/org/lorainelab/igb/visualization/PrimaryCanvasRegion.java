@@ -22,6 +22,7 @@ public class PrimaryCanvasRegion extends Region {
         canvas = new Canvas();
         canvas.setFocusTraversable(true);
         canvas.addEventFilter(MouseEvent.ANY, (e) -> canvas.requestFocus());
+        getChildren().add(canvas);
         initailizeKeyListener();
     }
 
@@ -73,5 +74,10 @@ public class PrimaryCanvasRegion extends Region {
             }
         });
     }
+
+//    private void clearCanvas() {
+//         canvas.getGraphicsContext2D().setFill(Color.RED);
+//        canvas.getGraphicsContext2D().fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+//    }
 
 }

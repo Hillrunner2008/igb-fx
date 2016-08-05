@@ -10,6 +10,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.geometry.Point2D;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.selections.SelectionInfoService;
+import org.lorainelab.igb.visualization.PrimaryCanvasRegion;
+import org.lorainelab.igb.visualization.VerticalScrollBar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +30,7 @@ public class CanvasPaneModel {
     private DoubleProperty yFactor;
     private DoubleProperty visibleVirtualCoordinatesX;
     private DoubleProperty zoomStripeCoordinate;
+    private DoubleProperty xOffset;
     private DoubleProperty scrollX;
     private DoubleProperty scrollY;
     private DoubleProperty scrollYVisibleAmount;
@@ -37,7 +40,9 @@ public class CanvasPaneModel {
     private Point2D localPoint;
     private Point2D screenPoint;
     private boolean mouseDragging;
+    private VerticalScrollBar verticalScrollBar;
     private SelectionInfoService selectionInfoService;
+    private PrimaryCanvasRegion primaryCanvasRegion;
 
     public CanvasPaneModel() {
         modelWidth = new SimpleDoubleProperty(1);
@@ -45,6 +50,7 @@ public class CanvasPaneModel {
         yFactor = new SimpleDoubleProperty(1);
         visibleVirtualCoordinatesX = new SimpleDoubleProperty();
         zoomStripeCoordinate = new SimpleDoubleProperty(-1);
+        xOffset = new SimpleDoubleProperty(0);
         scrollX = new SimpleDoubleProperty(0);
         scrollY = new SimpleDoubleProperty(0);
         scrollYVisibleAmount = new SimpleDoubleProperty(100);
@@ -55,8 +61,14 @@ public class CanvasPaneModel {
 
     @Activate
     public void activate() {
+        verticalScrollBar.valueProperty().bindBidirectional(scrollY);
+        verticalScrollBar.visibleAmountProperty().bindBidirectional(scrollYVisibleAmount);
         xFactor.addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             LOG.info("Zooming {}", newValue.doubleValue());
+            visibleVirtualCoordinatesX.setValue(Math.floor(primaryCanvasRegion.getWidth() / newValue.doubleValue()));
+            updateScrollXPosition();
+            xOffset.setValue(Math.round(scrollX.get() / 100) * (modelWidth.get() - visibleVirtualCoordinatesX.get()));
+            LOG.info("Results visibleVirtualCoordinatesX {},scrollX {},xOffset {}", visibleVirtualCoordinatesX.get(), scrollX.get(), xOffset.get());
         });
         selectionInfoService.getSelectedChromosome().addListener((ObservableValue<? extends Optional<Chromosome>> observable, Optional<Chromosome> oldValue, Optional<Chromosome> newValue) -> {
             newValue.ifPresent(selectedChromosome -> {
@@ -64,6 +76,21 @@ public class CanvasPaneModel {
                 resetPositionalState();
             });
         });
+    }
+
+    // this method corrects the scrollX position if zoom stripe centering is required
+    private void updateScrollXPosition() {
+        if (zoomStripeCoordinate.get() != -1) {
+            double zoomStripePositionPercentage = (zoomStripeCoordinate.get() - xOffset.get()) / visibleVirtualCoordinatesX.get();
+            double xOffset = Math.max(zoomStripeCoordinate.get() - (visibleVirtualCoordinatesX.get() * zoomStripePositionPercentage), 0);
+            double maxXoffset = modelWidth.get() - visibleVirtualCoordinatesX.get();
+            xOffset = Math.min(maxXoffset, xOffset);
+            if (maxXoffset > 0) {
+                scrollX.set((xOffset / (maxXoffset)) * 100);
+            } else {
+                scrollX.set(0);
+            }
+        }
     }
 
     private void resetPositionalState() {
@@ -95,6 +122,13 @@ public class CanvasPaneModel {
 
     public DoubleProperty getScrollX() {
         return scrollX;
+    }
+
+    public void setScrollX(double updatedScrollX, boolean resetZoomStripe) {
+        if (resetZoomStripe) {
+            getZoomStripeCoordinate().set(-1);
+        }
+        scrollX.set(updatedScrollX);
     }
 
     public DoubleProperty getScrollY() {
@@ -132,6 +166,16 @@ public class CanvasPaneModel {
     @Reference
     public void setSelectionInfoService(SelectionInfoService selectionInfoService) {
         this.selectionInfoService = selectionInfoService;
+    }
+
+    @Reference
+    public void setPrimaryCanvasRegion(PrimaryCanvasRegion primaryCanvasRegion) {
+        this.primaryCanvasRegion = primaryCanvasRegion;
+    }
+
+    @Reference
+    public void setVerticalScrollBar(VerticalScrollBar verticalScrollBar) {
+        this.verticalScrollBar = verticalScrollBar;
     }
 
 }

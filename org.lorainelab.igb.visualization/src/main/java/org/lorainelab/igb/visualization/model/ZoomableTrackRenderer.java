@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Tooltip;
 import javafx.scene.paint.Color;
@@ -16,7 +17,6 @@ import org.lorainelab.igb.data.model.Track;
 import org.lorainelab.igb.data.model.View;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
 import org.lorainelab.igb.data.model.glyph.Glyph;
-import org.lorainelab.igb.visualization.CanvasPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,15 +39,15 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     private double scrollY;
     private boolean multiSelectModeActive;
 
-    public ZoomableTrackRenderer(CanvasPane canvasPane, Track track, Chromosome chromosome) {
+    public ZoomableTrackRenderer(Canvas canvas, Track track, Chromosome chromosome) {
         multiSelectModeActive = false;
         this.weight = 0;
         this.track = track;
         this.modelWidth = chromosome.getLength();
         view = new View(new Rectangle2D(0, 0, modelWidth, track.getModelHeight()), chromosome);
-        canvasContext = new CanvasContext(canvasPane.getCanvas(), 0, 0);
+        canvasContext = new CanvasContext(canvas, 0, 0);
         trackLabel = new TrackLabel(this, track.getTrackLabel());
-        gc = canvasPane.getCanvas().getGraphicsContext2D();
+        gc = canvas.getGraphicsContext2D();
 
     }
 
@@ -105,7 +105,17 @@ public class ZoomableTrackRenderer implements TrackRenderer {
             double xOffset = Math.round((scrollX / 100) * (modelWidth - visibleVirtualCoordinatesX));
             double yOffset = canvasContext.getRelativeTrackOffset() / view.getYfactor();
             view.setBoundingRect(new Rectangle2D(xOffset, yOffset, visibleVirtualCoordinatesX, visibleVirtualCoordinatesY));
-            render();
+            if (canvasContext.isVisible()) {
+                if (Platform.isFxApplicationThread()) {
+                    clearCanvas();
+                    draw();
+                } else {
+                    Platform.runLater(() -> {
+                        clearCanvas();
+                        draw();
+                    });
+                }
+            }
         }
     }
 
@@ -149,18 +159,9 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         gc.restore();
     }
 
-    private void render() {
-        if (canvasContext.isVisible()) {
-            if (Platform.isFxApplicationThread()) {
-                clearCanvas();
-                draw();
-            } else {
-                Platform.runLater(() -> {
-                    clearCanvas();
-                    draw();
-                });
-            }
-        }
+    public void render(CanvasPaneModel canvasPaneModel) {
+        clearCanvas();
+        scaleCanvas(canvasPaneModel.getxFactor().get(), canvasPaneModel.getScrollX().get(), canvasPaneModel.getScrollY().get());
     }
 
     private void hideTooltip() {
@@ -378,5 +379,10 @@ public class ZoomableTrackRenderer implements TrackRenderer {
 
     public boolean isContained(Point2D point) {
         return canvasContext.getBoundingRect().contains(point);
+    }
+
+    @Override
+    public int getZindex() {
+        return 1;
     }
 }

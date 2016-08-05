@@ -19,8 +19,8 @@ public class OverlayCanvasRegion extends Region {
     public OverlayCanvasRegion() {
         canvas = new Canvas();
         canvas.setMouseTransparent(true);
+        getChildren().add(canvas);
     }
-
 
     @Override
     protected void layoutChildren() {
@@ -40,6 +40,5 @@ public class OverlayCanvasRegion extends Region {
     public Canvas getCanvas() {
         return canvas;
     }
-  
 
 }

@@ -9,6 +9,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import org.lorainelab.igb.visualization.model.CanvasPaneModel;
 import static org.lorainelab.igb.visualization.util.CanvasUtils.exponentialScaleTransform;
+import static org.lorainelab.igb.visualization.util.CanvasUtils.invertExpScaleTransform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +25,7 @@ public class HorizontalZoomSlider extends Slider {
     private double lastHSliderFire;
     private CanvasPaneModel canvasPaneModel;
     private PrimaryCanvasRegion primaryCanvasRegion;
+    private double xFactor;
 
     public HorizontalZoomSlider() {
         HBox.setHgrow(this, Priority.ALWAYS);
@@ -36,20 +38,28 @@ public class HorizontalZoomSlider extends Slider {
         setSnapToTicks(true);
         ignoreHSliderEvent = false;
         lastHSliderFire = -1;
+        xFactor = 1;
     }
 
     @Activate
     public void activate() {
         valueProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-            if (ignoreHSliderEvent) {
-                ignoreHSliderEvent = false;
-                return;
+            if (!ignoreHSliderEvent) {
+                final boolean isSnapEvent = newValue.doubleValue() % getMajorTickUnit() == 0;
+                if (lastHSliderFire < 0 || Math.abs(lastHSliderFire - newValue.doubleValue()) > 1 || isSnapEvent) {
+                    xFactor = exponentialScaleTransform(primaryCanvasRegion.getWidth(), canvasPaneModel.getModelWidth().get(), newValue.doubleValue());
+                    lastHSliderFire = newValue.doubleValue();
+                    canvasPaneModel.getxFactor().set(xFactor);
+                }
             }
-            final boolean isSnapEvent = newValue.doubleValue() % getMajorTickUnit() == 0;
-            if (lastHSliderFire < 0 || Math.abs(lastHSliderFire - newValue.doubleValue()) > 1 || isSnapEvent) {
-                double xFactor = exponentialScaleTransform(primaryCanvasRegion.getWidth(), canvasPaneModel.getModelWidth().get(), newValue.doubleValue());
-                lastHSliderFire = newValue.doubleValue();
-                canvasPaneModel.getxFactor().set(xFactor);
+        });
+        canvasPaneModel.getxFactor().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+            if (xFactor != newValue.doubleValue()) {
+                double updatedHsliderPosition = invertExpScaleTransform(primaryCanvasRegion.getWidth(), canvasPaneModel.getModelWidth().get(), newValue.doubleValue());
+                ignoreHSliderEvent = true;
+                setValue(updatedHsliderPosition);
+                ignoreHSliderEvent = false;
+                xFactor = newValue.doubleValue();
             }
         });
     }

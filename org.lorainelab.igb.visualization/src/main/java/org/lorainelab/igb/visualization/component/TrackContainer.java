@@ -20,7 +20,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.transform.Transform;
 import org.lorainelab.igb.visualization.component.api.Component;
 import org.lorainelab.igb.visualization.model.TrackLabel;
-import org.lorainelab.igb.visualization.store.AppStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,28 +101,28 @@ public class TrackContainer extends Component<TrackContainerProps, TrackContaine
                 if (dragboardContent instanceof Double) {
                     double eventTriggerMinY = (Double) dragboardContent;
                     if (dropLocationMinY != eventTriggerMinY) {
-                        Lists.newArrayList(AppStore.getStore().getTrackRenderers()).stream()
-                                .filter(trackRenderer -> trackRenderer.getCanvasContext().isVisible())
-                                .filter(draggedTrackRenderer -> draggedTrackRenderer.getTrackLabel().getContent().getBoundsInParent().getMinY() == eventTriggerMinY)
-                                .findFirst()
-                                .ifPresent(draggedTrackRenderer -> {
-                                    Lists.newArrayList(AppStore.getStore().getTrackRenderers()).stream()
-                                    .filter(trackRenderer -> trackRenderer.getTrackLabel().getContent() == dropLocationLabelNode)
-                                    .findFirst()
-                                    .ifPresent(droppedTrackRenderer -> {
-                                        int droppedIndex = droppedTrackRenderer.getWeight();
-                                        if (droppedAbove) {
-                                            AppStore.getStore().getTrackRenderers().remove(draggedTrackRenderer);
-                                            draggedTrackRenderer.setWeight(droppedIndex - 1);
-                                            AppStore.getStore().getTrackRenderers().add(draggedTrackRenderer);
-                                        } else {
-                                            AppStore.getStore().getTrackRenderers().remove(draggedTrackRenderer);
-                                            draggedTrackRenderer.setWeight(droppedIndex + 1);
-                                            AppStore.getStore().getTrackRenderers().add(draggedTrackRenderer);
-                                        }
-                                        AppStore.getStore().noop();
-                                   });
-                                });
+//                        Lists.newArrayList(AppStore.getStore().getTrackRenderers()).stream()
+//                                .filter(trackRenderer -> trackRenderer.getCanvasContext().isVisible())
+//                                .filter(draggedTrackRenderer -> draggedTrackRenderer.getTrackLabel().getContent().getBoundsInParent().getMinY() == eventTriggerMinY)
+//                                .findFirst()
+//                                .ifPresent(draggedTrackRenderer -> {
+//                                    Lists.newArrayList(AppStore.getStore().getTrackRenderers()).stream()
+//                                    .filter(trackRenderer -> trackRenderer.getTrackLabel().getContent() == dropLocationLabelNode)
+//                                    .findFirst()
+//                                    .ifPresent(droppedTrackRenderer -> {
+//                                        int droppedIndex = droppedTrackRenderer.getWeight();
+//                                        if (droppedAbove) {
+//                                            AppStore.getStore().getTrackRenderers().remove(draggedTrackRenderer);
+//                                            draggedTrackRenderer.setWeight(droppedIndex - 1);
+//                                            AppStore.getStore().getTrackRenderers().add(draggedTrackRenderer);
+//                                        } else {
+//                                            AppStore.getStore().getTrackRenderers().remove(draggedTrackRenderer);
+//                                            draggedTrackRenderer.setWeight(droppedIndex + 1);
+//                                            AppStore.getStore().getTrackRenderers().add(draggedTrackRenderer);
+//                                        }
+//                                        AppStore.getStore().noop();
+//                                   });
+//                                });
                     }
                 }
 

@@ -10,7 +10,6 @@ import aQute.bnd.annotation.component.Reference;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import org.lorainelab.igb.visualization.OverlayCanvasRegion;
-import org.lorainelab.igb.visualization.PrimaryCanvasRegion;
 import org.lorainelab.igb.visualization.model.CanvasPaneModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,32 +18,25 @@ import org.slf4j.LoggerFactory;
  *
  * @author jeckstei
  */
-@aQute.bnd.annotation.component.Component(immediate = true, provide = ZoomStripe.class)
+@aQute.bnd.annotation.component.Component(immediate = true, provide = Widget.class)
 public class ZoomStripe implements Widget {
 
     private static final Logger LOG = LoggerFactory.getLogger(ZoomStripe.class);
-    private CanvasPaneModel canvasPaneModel;
-    private PrimaryCanvasRegion primaryCanvasRegion;
     private OverlayCanvasRegion overlayCanvasRegion;
 
     @Activate
     public void activate() {
     }
 
-    @Reference
-    public void setCanvasPaneModel(CanvasPaneModel canvasPaneModel) {
-        this.canvasPaneModel = canvasPaneModel;
-    }
-
     @Override
-    public void render() {
+    public void render(CanvasPaneModel canvasPaneModel) {
         double zoomStripeCoordinate = canvasPaneModel.getZoomStripeCoordinate().doubleValue();
         if (zoomStripeCoordinate >= 0) {
             double modelWidth = canvasPaneModel.getModelWidth().get();
 
             double xFactor = canvasPaneModel.getxFactor().get();
             double scrollX = canvasPaneModel.getScrollX().get();
-            double canvasWidth = primaryCanvasRegion.getWidth();
+            double canvasWidth = overlayCanvasRegion.getWidth();
             final double visibleVirtualCoordinatesX = Math.floor(canvasWidth / xFactor);
             double xOffset = Math.round((scrollX / 100) * (modelWidth - visibleVirtualCoordinatesX));
             double maxXoffset = modelWidth - visibleVirtualCoordinatesX;
@@ -66,13 +58,13 @@ public class ZoomStripe implements Widget {
     }
 
     @Reference
-    public void setPrimaryCanvasRegion(PrimaryCanvasRegion primaryCanvasRegion) {
-        this.primaryCanvasRegion = primaryCanvasRegion;
-    }
-
-    @Reference
     public void setOverlayCanvasRegion(OverlayCanvasRegion overlayCanvasRegion) {
         this.overlayCanvasRegion = overlayCanvasRegion;
+    }
+
+    @Override
+    public int getZindex() {
+        return 5;
     }
 
 }

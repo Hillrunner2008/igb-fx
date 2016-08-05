@@ -9,12 +9,13 @@ import java.util.Comparator;
 import javafx.geometry.Point2D;
 import org.lorainelab.igb.data.model.CanvasContext;
 import org.lorainelab.igb.data.model.View;
+import org.lorainelab.igb.visualization.component.Widget;
 
 /**
  * = TrackRenderer
  *
  */
-public interface TrackRenderer {
+public interface TrackRenderer extends Widget {
 
     final Comparator<TrackRenderer> SORT_BY_WEIGHT = (TrackRenderer o1, TrackRenderer o2) -> Double.compare(o1.getWeight(), o2.getWeight());
 
@@ -47,10 +48,11 @@ public interface TrackRenderer {
     void setZoomStripeCoordinate(double zoomStripeCoordinate);
 
     void setLastMouseClickedPoint(Point2D point);
+
     void setIsMultiSelectModeActive(boolean multiSelectModeActive);
 
     void setLastMouseDragPoint(Point2D point);
-    
+
     void setMouseDragging(boolean isMouseDragging);
 
 }
