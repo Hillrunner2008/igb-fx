@@ -37,10 +37,8 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     private final GraphicsContext gc;
     private int weight;
     private double scrollY;
-    private boolean multiSelectModeActive;
 
     public ZoomableTrackRenderer(Canvas canvas, Track track, Chromosome chromosome) {
-        multiSelectModeActive = false;
         this.weight = 0;
         this.track = track;
         this.modelWidth = chromosome.getLength();
@@ -51,50 +49,41 @@ public class ZoomableTrackRenderer implements TrackRenderer {
 
     }
 
-    public void setLastMouseClickedPoint(Point2D localPoint) {
-        if (!canvasContext.getBoundingRect().contains(localPoint)) {
+    public void processLastMouseClickedPosition(CanvasPaneModel canvasPaneModel) {
+        boolean multiSelectModeActive = canvasPaneModel.isMultiSelectModeActive().get();
+        canvasPaneModel.getMouseClickLocation().ifPresent(mouseClicked -> {
+            if (!canvasContext.getBoundingRect().contains(mouseClicked)) {
+                if (!multiSelectModeActive) {
+                    clearSelections();
+                }
+                return;
+            }
+            Rectangle2D mouseEventBoundingBox = canvasToViewCoordinates(mouseClicked);
             if (!multiSelectModeActive) {
                 clearSelections();
             }
-            return;
-        }
-        Rectangle2D mouseEventBoundingBox = canvasToViewCoordinates(localPoint);
-        if (!multiSelectModeActive) {
-            clearSelections();
-        }
-        List<CompositionGlyph> selections = track.getSlotMap().values().stream()
-                .filter(glyph -> view.getBoundingRect().intersects(glyph.getRenderBoundingRect()))
-                .filter(glyph -> glyph.getRenderBoundingRect().intersects(mouseEventBoundingBox)).collect(Collectors.toList());
-        if (selections.size() > 1) {
-            selections.forEach(glyph -> glyph.setIsSelected(true));
-        } else {
-            selections.forEach(glyph -> {
-                boolean subSelectionActive = false;
-                for (Glyph g : glyph.getChildren()) {
-                    if (g.isSelectable()) {
-                        if (g.getRenderBoundingRect().intersects(mouseEventBoundingBox)) {
-                            g.setIsSelected(true);
-                            subSelectionActive = true;
-                            break;
+            List<CompositionGlyph> selections = track.getSlotMap().values().stream()
+                    .filter(glyph -> view.getBoundingRect().intersects(glyph.getRenderBoundingRect()))
+                    .filter(glyph -> glyph.getRenderBoundingRect().intersects(mouseEventBoundingBox)).collect(Collectors.toList());
+            if (selections.size() > 1) {
+                selections.forEach(glyph -> glyph.setIsSelected(true));
+            } else {
+                selections.forEach(glyph -> {
+                    boolean subSelectionActive = false;
+                    for (Glyph g : glyph.getChildren()) {
+                        if (g.isSelectable()) {
+                            if (g.getRenderBoundingRect().intersects(mouseEventBoundingBox)) {
+                                g.setIsSelected(true);
+                                subSelectionActive = true;
+                                break;
+                            }
                         }
                     }
-                }
-                glyph.setIsSelected(true);//set this flag regardless of subselection 
-            });
-        }
-    }
+                    glyph.setIsSelected(true);//set this flag regardless of subselection 
+                });
+            }
 
-    public void setLastMouseDragPoint(Point2D point) {
-        if (!canvasContext.getBoundingRect().contains(point)) {
-            return;
-        }
-    }
-
-    public void setMouseDragging(boolean isMouseDragging) {
-        if (!isMouseDragging) {
-//            lastMouseClickX = -1;
-//            lastMouseDragX = -1;
-        }
+        });
     }
 
     @Override
@@ -133,7 +122,6 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         }
     }
 
-    @Override
     public void clearCanvas() {
         gc.save();
         gc.clearRect(
@@ -161,6 +149,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
 
     public void render(CanvasPaneModel canvasPaneModel) {
         clearCanvas();
+        processLastMouseClickedPosition(canvasPaneModel);
         scaleCanvas(canvasPaneModel.getxFactor().get(), canvasPaneModel.getScrollX().get(), canvasPaneModel.getScrollY().get());
     }
 
@@ -370,11 +359,6 @@ public class ZoomableTrackRenderer implements TrackRenderer {
 
     public Track getTrack() {
         return track;
-    }
-
-    @Override
-    public void setIsMultiSelectModeActive(boolean multiSelectModeActive) {
-        this.multiSelectModeActive = multiSelectModeActive;
     }
 
     public boolean isContained(Point2D point) {

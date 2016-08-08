@@ -1,10 +1,8 @@
 package org.lorainelab.igb.visualization;
 
 import aQute.bnd.annotation.component.Component;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
 
@@ -16,14 +14,12 @@ import javafx.scene.layout.Region;
 public class PrimaryCanvasRegion extends Region {
 
     private final Canvas canvas;
-    private boolean multiSelectModeActive;
 
     public PrimaryCanvasRegion() {
         canvas = new Canvas();
         canvas.setFocusTraversable(true);
         canvas.addEventFilter(MouseEvent.ANY, (e) -> canvas.requestFocus());
         getChildren().add(canvas);
-        initailizeKeyListener();
     }
 
     @Override
@@ -44,40 +40,5 @@ public class PrimaryCanvasRegion extends Region {
     public Canvas getCanvas() {
         return canvas;
     }
-
-    public boolean isMultiSelectModeActive() {
-        return multiSelectModeActive;
-    }
-
-    private void initailizeKeyListener() {
-        canvas.setOnKeyPressed(new EventHandler<KeyEvent>() {
-            @Override
-            public void handle(KeyEvent event) {
-                switch (event.getCode()) {
-                    case CONTROL:
-                    case SHIFT:
-                        multiSelectModeActive = true;
-                        break;
-                }
-            }
-        });
-
-        canvas.setOnKeyReleased(new EventHandler<KeyEvent>() {
-            @Override
-            public void handle(KeyEvent event) {
-                switch (event.getCode()) {
-                    case CONTROL:
-                    case SHIFT:
-                        multiSelectModeActive = false;
-                        break;
-                }
-            }
-        });
-    }
-
-//    private void clearCanvas() {
-//         canvas.getGraphicsContext2D().setFill(Color.RED);
-//        canvas.getGraphicsContext2D().fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
-//    }
 
 }

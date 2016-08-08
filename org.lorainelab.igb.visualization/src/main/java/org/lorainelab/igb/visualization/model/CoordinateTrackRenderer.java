@@ -306,7 +306,6 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         }
     }
 
-    @Override
     public void clearCanvas() {
         gc.save();
         double y = canvasContext.getBoundingRect().getMinY();
@@ -360,7 +359,6 @@ public class CoordinateTrackRenderer implements TrackRenderer {
 //        lastMouseDragX = Math.floor(event.getLocal().getX() / xfactor);
 //        render();
 //    }
-    @Override
     public void setLastMouseClickedPoint(Point2D point) {
         if (!canvasContext.getBoundingRect().contains(point)) {
             return;
@@ -368,7 +366,6 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         lastMouseClickX = Math.floor(point.getX() / xfactor);
     }
 
-    @Override
     public void setLastMouseDragPoint(Point2D point) {
         if (point == null || lastMouseClickX < 0) {
             return;
@@ -380,7 +377,6 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         lastMouseDragX = Math.floor(x / xfactor);
     }
 
-    @Override
     public void setMouseDragging(boolean isMouseDragging) {
         if (!isMouseDragging) {
             lastMouseClickX = -1;
@@ -440,11 +436,6 @@ public class CoordinateTrackRenderer implements TrackRenderer {
 
     public TrackLabel getTrackLabel() {
         return trackLabel;
-    }
-
-    @Override
-    public void setIsMultiSelectModeActive(boolean multiSelectModeActive) {
-        //do nothing for now since this may not be a relevant signal for coordinate track
     }
 
     @Override

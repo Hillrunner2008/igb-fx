@@ -6,7 +6,6 @@
 package org.lorainelab.igb.visualization.model;
 
 import java.util.Comparator;
-import javafx.geometry.Point2D;
 import org.lorainelab.igb.data.model.CanvasContext;
 import org.lorainelab.igb.data.model.View;
 import org.lorainelab.igb.visualization.component.Widget;
@@ -42,17 +41,5 @@ public interface TrackRenderer extends Widget {
     int getWeight();
 
     void setWeight(int weight);
-
-    void clearCanvas();
-
-    void setZoomStripeCoordinate(double zoomStripeCoordinate);
-
-    void setLastMouseClickedPoint(Point2D point);
-
-    void setIsMultiSelectModeActive(boolean multiSelectModeActive);
-
-    void setLastMouseDragPoint(Point2D point);
-
-    void setMouseDragging(boolean isMouseDragging);
 
 }

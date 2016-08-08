@@ -6,14 +6,18 @@ import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Range;
 import java.util.Optional;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Point2D;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.selections.SelectionInfoService;
 import org.lorainelab.igb.visualization.PrimaryCanvasRegion;
+import static org.lorainelab.igb.visualization.util.BoundsUtil.enforceRangeBounds;
 import static org.lorainelab.igb.visualization.util.CanvasUtils.exponentialScaleTransform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,12 +43,14 @@ public class CanvasPaneModel {
     private DoubleProperty scrollYVisibleAmount;
     private DoubleProperty hSlider;
     private DoubleProperty vSlider;
-    private Point2D mouseClickLocation;
-    private Point2D localPoint;
-    private Point2D screenPoint;
-    private boolean mouseDragging;
     private SelectionInfoService selectionInfoService;
     private PrimaryCanvasRegion primaryCanvasRegion;
+    //TODO consider moving mouse related content to separate model
+    private Optional<Point2D> mouseClickLocation;
+    private Optional<Point2D> localPoint;
+    private Optional<Point2D> screenPoint;
+    private boolean mouseDragging;
+    private BooleanProperty multiSelectModeActive;
 
     public CanvasPaneModel() {
         modelWidth = new SimpleDoubleProperty(1);
@@ -58,15 +64,21 @@ public class CanvasPaneModel {
         scrollYVisibleAmount = new SimpleDoubleProperty(100);
         hSlider = new SimpleDoubleProperty(0);
         vSlider = new SimpleDoubleProperty(0);
+        mouseClickLocation = Optional.empty();
+        localPoint = Optional.empty();
+        screenPoint = Optional.empty();
         mouseDragging = false;
+        multiSelectModeActive = new SimpleBooleanProperty(false);
+
     }
 
     @Activate
     public void activate() {
         xFactor.addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-            visibleVirtualCoordinatesX.setValue(Math.floor(primaryCanvasRegion.getWidth() / newValue.doubleValue()));
-            updateScrollXPosition();
-            xOffset.setValue(Math.round(scrollX.get() / 100) * (modelWidth.get() - visibleVirtualCoordinatesX.get()));
+            final double previousVisibleCoordinatesX = Math.floor(primaryCanvasRegion.getWidth() / oldValue.doubleValue());
+            final double updatedVisibleCoordinatesX = Math.floor(primaryCanvasRegion.getWidth() / newValue.doubleValue());
+            visibleVirtualCoordinatesX.setValue(updatedVisibleCoordinatesX);
+            updateScrollXPosition(previousVisibleCoordinatesX);
         });
         selectionInfoService.getSelectedChromosome().addListener((ObservableValue<? extends Optional<Chromosome>> observable, Optional<Chromosome> oldValue, Optional<Chromosome> newValue) -> {
             newValue.ifPresent(selectedChromosome -> {
@@ -76,28 +88,37 @@ public class CanvasPaneModel {
                 });
             });
         });
-
+        scrollX.addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+            double xOffset = Math.round((scrollX.get() / 100) * (modelWidth.get() - visibleVirtualCoordinatesX.get()));
+            xOffset = enforceRangeBounds(xOffset, 0, modelWidth.get());
+            this.xOffset.set(xOffset);
+        });
     }
 
     // this method corrects the scrollX position if zoom stripe centering is required
-    private void updateScrollXPosition() {
-        if (zoomStripeCoordinate.get() != -1) {
-            double zoomStripePositionPercentage = (zoomStripeCoordinate.get() - xOffset.get()) / visibleVirtualCoordinatesX.get();
-            double xOffset = Math.max(zoomStripeCoordinate.get() - (visibleVirtualCoordinatesX.get() * zoomStripePositionPercentage), 0);
-            double maxXoffset = modelWidth.get() - visibleVirtualCoordinatesX.get();
+    private void updateScrollXPosition(final double previousVisibleCoordinatesX) {
+        double zoomStripeCoordinate = this.zoomStripeCoordinate.doubleValue();
+        if (zoomStripeCoordinate != -1) {
+            double zoomStripePositionPercentage = (zoomStripeCoordinate - xOffset.doubleValue()) / previousVisibleCoordinatesX;
+            double xOffset = Math.max(zoomStripeCoordinate - (visibleVirtualCoordinatesX.doubleValue() * zoomStripePositionPercentage), 0);
+            double maxXoffset = modelWidth.doubleValue() - visibleVirtualCoordinatesX.doubleValue();
             xOffset = Math.min(maxXoffset, xOffset);
             if (maxXoffset > 0) {
+                this.xOffset.set(xOffset);
                 scrollX.set((xOffset / (maxXoffset)) * 100);
             } else {
+                this.xOffset.set(0);
                 scrollX.set(0);
             }
+        } else {
+            xOffset.setValue(Math.round(scrollX.get() / 100) * (modelWidth.get() - visibleVirtualCoordinatesX.get()));
         }
     }
 
     private void resetPositionalState() {
         xFactor.set(exponentialScaleTransform(primaryCanvasRegion.getWidth(), modelWidth.get(), 0));
         yFactor.set(1);
-        zoomStripeCoordinate.set(-1);
+        resetZoomStripe();
         scrollX.setValue(0);
         scrollY.setValue(0);
         scrollYVisibleAmount.setValue(100);
@@ -125,6 +146,10 @@ public class CanvasPaneModel {
         return zoomStripeCoordinate;
     }
 
+    public void setZoomStripeCoordinate(double zoomStripeCoordinate) {
+        this.zoomStripeCoordinate.set(zoomStripeCoordinate);
+    }
+
     public ReadOnlyDoubleProperty getScrollX() {
         return scrollX;
     }
@@ -135,9 +160,13 @@ public class CanvasPaneModel {
 
     public void setScrollX(double updatedScrollX, boolean resetZoomStripe) {
         if (resetZoomStripe) {
-            zoomStripeCoordinate.set(-1);
+            resetZoomStripe();
         }
         scrollX.set(updatedScrollX);
+    }
+
+    public void resetZoomStripe() {
+        zoomStripeCoordinate.set(-1);
     }
 
     public DoubleProperty getScrollY() {
@@ -156,16 +185,40 @@ public class CanvasPaneModel {
         return vSlider;
     }
 
-    public Point2D getMouseClickLocation() {
+    public ReadOnlyBooleanProperty isMultiSelectModeActive() {
+        return multiSelectModeActive;
+    }
+
+    public void setMultiSelectModeActive(boolean multiSelectModeActive) {
+        this.multiSelectModeActive.set(multiSelectModeActive);
+    }
+
+    public Optional<Point2D> getMouseClickLocation() {
         return mouseClickLocation;
     }
 
-    public Point2D getLocalPoint() {
+    public Optional<Point2D> getLocalPoint() {
         return localPoint;
     }
 
-    public Point2D getScreenPoint() {
+    public Optional<Point2D> getScreenPoint() {
         return screenPoint;
+    }
+
+    public void setMouseClickLocation(Point2D mouseClickLocation) {
+        this.mouseClickLocation = Optional.ofNullable(mouseClickLocation);
+    }
+
+    public void setLocalPoint(Point2D localPoint) {
+        this.localPoint = Optional.ofNullable(localPoint);
+    }
+
+    public void setScreenPoint(Point2D screenPoint) {
+        this.screenPoint = Optional.ofNullable(screenPoint);
+    }
+
+    public void setMouseDragging(boolean mouseDragging) {
+        this.mouseDragging = mouseDragging;
     }
 
     public boolean isMouseDragging() {

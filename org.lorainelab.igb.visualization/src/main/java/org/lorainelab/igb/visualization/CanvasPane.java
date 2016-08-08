@@ -24,7 +24,7 @@ public class CanvasPane extends StackPane {
     public void activate() {
         Platform.runLater(() -> {
             getChildren().add(primaryCanvas);
-            getChildren().add(overlayCanvas);
+//            getChildren().add(overlayCanvas);
         });
     }
 
@@ -33,10 +33,10 @@ public class CanvasPane extends StackPane {
         this.primaryCanvas = primaryCanvas;
     }
 
-    @Reference
-    public void setOverlayCanvas(OverlayCanvasRegion overlayCanvas) {
-        this.overlayCanvas = overlayCanvas;
-    }
+//    @Reference
+//    public void setOverlayCanvas(OverlayCanvasRegion overlayCanvas) {
+//        this.overlayCanvas = overlayCanvas;
+//    }
 
     //TODO remove this compiler hack 
     public Canvas getCanvas() {
