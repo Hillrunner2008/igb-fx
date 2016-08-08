@@ -3,8 +3,6 @@ package org.lorainelab.igb.visualization;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
@@ -31,13 +29,12 @@ public class ZoomSliderWidget extends HBox {
     private Rectangle slider;
     private Rectangle rightThumb;
     double lastDragX;
-    private DoubleProperty scrollX;
     private CanvasPaneModel canvasPaneModel;
     private PrimaryCanvasRegion primaryCanvasRegion;
     double xFactor;
+    double scrollX;
 
     public ZoomSliderWidget() {
-        scrollX = new SimpleDoubleProperty(0);
         lastDragX = 0;
         initializeGuiComponents();
     }
@@ -113,17 +110,19 @@ public class ZoomSliderWidget extends HBox {
                 double maxSlider = xSliderPane.getWidth() - slider.getWidth();
                 double currentSlider = slider.getX();
                 if (maxSlider < 0) {
-                    canvasPaneModel.getScrollX().set(0);
+                    canvasPaneModel.setScrollX(0);
                 } else {
                     double newScrollX = (currentSlider / maxSlider) * 100;
-                    canvasPaneModel.getScrollX().set(Double.isNaN(newScrollX) ? 0 : newScrollX);
+                    scrollX = Double.isNaN(newScrollX) ? 0 : newScrollX;
+                    canvasPaneModel.setScrollX(scrollX, true);
                 }
                 double hSlider = (1 - (current / max)) * 100;
                 xFactor = linearScaleTransform(primaryCanvasRegion.getWidth(), canvasPaneModel.getModelWidth().get(), hSlider);
 
-                canvasPaneModel.getxFactor().set(xFactor);
+                canvasPaneModel.setxFactor(xFactor);
             }
             lastDragX = event.getX();
+            event.consume();
         });
 
         leftThumb.setOnMouseDragged((MouseEvent event) -> {
@@ -154,16 +153,18 @@ public class ZoomSliderWidget extends HBox {
                 double maxSlider = xSliderPane.getWidth() - slider.getWidth();
                 double currentSlider = slider.getX();
                 if (maxSlider < 0) {
-                    canvasPaneModel.getScrollX().set(0);
+                    canvasPaneModel.setScrollX(0);
                 } else {
                     double newScrollX = (currentSlider / maxSlider) * 100;
-                    canvasPaneModel.getScrollX().set(Double.isNaN(newScrollX) ? 0 : newScrollX);
+                    scrollX = Double.isNaN(newScrollX) ? 0 : newScrollX;
+                    canvasPaneModel.setScrollX(scrollX, true);
                 }
                 double hSlider = (1 - (current / max)) * 100;
                 xFactor = linearScaleTransform(primaryCanvasRegion.getWidth(), canvasPaneModel.getModelWidth().get(), hSlider);
-                canvasPaneModel.getxFactor().set(xFactor);
+                canvasPaneModel.setxFactor(xFactor);
             }
             lastDragX = event.getX();
+            event.consume();
         });
 
         slider.setOnMouseDragged((MouseEvent event) -> {
@@ -189,6 +190,7 @@ public class ZoomSliderWidget extends HBox {
             double newScrollX = (current / max) * 100;
             canvasPaneModel.setScrollX(Double.isNaN(newScrollX) ? 0 : newScrollX, true);
             lastDragX = event.getX();
+            event.consume();
         });
     }
 
@@ -196,15 +198,15 @@ public class ZoomSliderWidget extends HBox {
         double minScaleX = canvasPaneModel.getModelWidth().get();
         double maxScaleX = MAX_ZOOM_MODEL_COORDINATES_X - 1;
         final double scaleRange = maxScaleX - minScaleX;
-        final double xFactor = canvasPaneModel.getxFactor().get();
+        xFactor = canvasPaneModel.getxFactor().get();
         final double current = Math.floor(primaryCanvasRegion.getWidth() / xFactor);
         double scaledPercentage = (current - minScaleX) / scaleRange;
 
-        DoubleProperty scrollX = canvasPaneModel.getScrollX();
+        scrollX = canvasPaneModel.getScrollX().get();
         double oldWidth = slider.getWidth();
         double oldX = slider.getX();
         double width = ((1 - scaledPercentage) * (xSliderPane.getWidth() - TOTAL_SLIDER_THUMB_WIDTH)) + TOTAL_SLIDER_THUMB_WIDTH;
-        double x = ((scrollX.getValue() / 100)) * (xSliderPane.getWidth() - width);
+        double x = ((scrollX / 100)) * (xSliderPane.getWidth() - width);
         slider.setX(x);
         leftThumb.setX(x);
         slider.setWidth(width);
@@ -224,6 +226,11 @@ public class ZoomSliderWidget extends HBox {
     private void setupModelListeners() {
         canvasPaneModel.getxFactor().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             if (xFactor != newValue.doubleValue()) {
+                syncWidgetSlider();
+            }
+        });
+        canvasPaneModel.getScrollX().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+            if (scrollX != newValue.doubleValue()) {
                 syncWidgetSlider();
             }
         });

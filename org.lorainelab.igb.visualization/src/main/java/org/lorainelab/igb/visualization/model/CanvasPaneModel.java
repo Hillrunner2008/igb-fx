@@ -3,15 +3,18 @@ package org.lorainelab.igb.visualization.model;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
+import com.google.common.collect.Range;
 import java.util.Optional;
+import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Point2D;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.selections.SelectionInfoService;
 import org.lorainelab.igb.visualization.PrimaryCanvasRegion;
-import org.lorainelab.igb.visualization.VerticalScrollBar;
+import static org.lorainelab.igb.visualization.util.CanvasUtils.exponentialScaleTransform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +43,6 @@ public class CanvasPaneModel {
     private Point2D localPoint;
     private Point2D screenPoint;
     private boolean mouseDragging;
-    private VerticalScrollBar verticalScrollBar;
     private SelectionInfoService selectionInfoService;
     private PrimaryCanvasRegion primaryCanvasRegion;
 
@@ -61,21 +63,20 @@ public class CanvasPaneModel {
 
     @Activate
     public void activate() {
-        verticalScrollBar.valueProperty().bindBidirectional(scrollY);
-        verticalScrollBar.visibleAmountProperty().bindBidirectional(scrollYVisibleAmount);
         xFactor.addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-            LOG.info("Zooming {}", newValue.doubleValue());
             visibleVirtualCoordinatesX.setValue(Math.floor(primaryCanvasRegion.getWidth() / newValue.doubleValue()));
             updateScrollXPosition();
             xOffset.setValue(Math.round(scrollX.get() / 100) * (modelWidth.get() - visibleVirtualCoordinatesX.get()));
-            LOG.info("Results visibleVirtualCoordinatesX {},scrollX {},xOffset {}", visibleVirtualCoordinatesX.get(), scrollX.get(), xOffset.get());
         });
         selectionInfoService.getSelectedChromosome().addListener((ObservableValue<? extends Optional<Chromosome>> observable, Optional<Chromosome> oldValue, Optional<Chromosome> newValue) -> {
             newValue.ifPresent(selectedChromosome -> {
-                modelWidth.set(selectedChromosome.getLength());
-                resetPositionalState();
+                Platform.runLater(() -> {
+                    modelWidth.set(selectedChromosome.getLength());
+                    resetPositionalState();
+                });
             });
         });
+
     }
 
     // this method corrects the scrollX position if zoom stripe centering is required
@@ -94,7 +95,7 @@ public class CanvasPaneModel {
     }
 
     private void resetPositionalState() {
-        xFactor.set(1);
+        xFactor.set(exponentialScaleTransform(primaryCanvasRegion.getWidth(), modelWidth.get(), 0));
         yFactor.set(1);
         zoomStripeCoordinate.set(-1);
         scrollX.setValue(0);
@@ -104,29 +105,37 @@ public class CanvasPaneModel {
         vSlider.setValue(0);
     }
 
-    public DoubleProperty getModelWidth() {
+    public Range<Integer> getCurrentModelCoordinatesInView() {
+        return Range.closedOpen(xOffset.intValue(), xOffset.intValue() + visibleVirtualCoordinatesX.intValue());
+    }
+
+    public ReadOnlyDoubleProperty getModelWidth() {
         return modelWidth;
     }
 
-    public DoubleProperty getxFactor() {
+    public ReadOnlyDoubleProperty getxFactor() {
         return xFactor;
     }
 
-    public DoubleProperty getyFactor() {
+    public ReadOnlyDoubleProperty getyFactor() {
         return yFactor;
     }
 
-    public DoubleProperty getZoomStripeCoordinate() {
+    public ReadOnlyDoubleProperty getZoomStripeCoordinate() {
         return zoomStripeCoordinate;
     }
 
-    public DoubleProperty getScrollX() {
+    public ReadOnlyDoubleProperty getScrollX() {
         return scrollX;
+    }
+
+    public ReadOnlyDoubleProperty getVisibleVirtualCoordinatesX() {
+        return visibleVirtualCoordinatesX;
     }
 
     public void setScrollX(double updatedScrollX, boolean resetZoomStripe) {
         if (resetZoomStripe) {
-            getZoomStripeCoordinate().set(-1);
+            zoomStripeCoordinate.set(-1);
         }
         scrollX.set(updatedScrollX);
     }
@@ -173,9 +182,12 @@ public class CanvasPaneModel {
         this.primaryCanvasRegion = primaryCanvasRegion;
     }
 
-    @Reference
-    public void setVerticalScrollBar(VerticalScrollBar verticalScrollBar) {
-        this.verticalScrollBar = verticalScrollBar;
+    public void setxFactor(double xFactor) {
+        this.xFactor.set(xFactor);
+    }
+
+    public void setScrollX(double scrollX) {
+        this.scrollX.set(scrollX);
     }
 
 }

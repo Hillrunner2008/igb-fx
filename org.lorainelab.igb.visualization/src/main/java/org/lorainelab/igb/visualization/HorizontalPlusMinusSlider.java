@@ -25,8 +25,7 @@ public class HorizontalPlusMinusSlider extends PlusMinusSlider {
             final double updatedScrollXValue = getUpdatedScrollxValue(event.getValue());
             double scrollX = canvasPaneModel.getScrollX().get();
             if (updatedScrollXValue != scrollX) {
-                canvasPaneModel.getScrollX().set(scrollX);
-                canvasPaneModel.getZoomStripeCoordinate().set(-1);
+                canvasPaneModel.setScrollX(updatedScrollXValue, true);
 //                syncWidgetSlider();
             }
         });

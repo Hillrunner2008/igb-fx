@@ -21,6 +21,7 @@ import static org.lorainelab.igb.data.model.glyph.Glyph.MIN_X_COMPARATOR;
  */
 public class DataSet {
 
+    private static final int DEFAULT_STACK_HEIGHT = 10;
     private final Multimap<String, CompositionGlyph> loadedAnnoations;
     private final String trackLabel;
     private Map<String, RangeSet<Integer>> loadedRegions;
@@ -37,9 +38,9 @@ public class DataSet {
         this.trackLabel = trackLabel;
         this.fileTypeHandler = fileTypeHandler;
         loadedRegions = Maps.newHashMap();
-        positiveStrandTrack = new Track(false, trackLabel + " (+)", 5);
-        negativeStrandTrack = new Track(true, trackLabel + " (-)", 5);
-        combinedStrandTrack = new Track(true, trackLabel + " (+/-)", 5);
+        positiveStrandTrack = new Track(false, trackLabel + " (+)", DEFAULT_STACK_HEIGHT);
+        negativeStrandTrack = new Track(true, trackLabel + " (-)", DEFAULT_STACK_HEIGHT);
+        combinedStrandTrack = new Track(true, trackLabel + " (+/-)", DEFAULT_STACK_HEIGHT);
     }
 
     public Track getPositiveStrandTrack(String chrId) {
@@ -51,8 +52,8 @@ public class DataSet {
         positiveStrandTrack.clearGlyphs();
         positiveStrandTrack.getGlyphs().addAll(
                 loadedAnnoations.get(chrId).stream()
-                .filter(g -> g.getTooltipData().get("forward").equals("true"))
-                .collect(Collectors.toList())
+                        .filter(g -> g.getTooltipData().get("forward").equals("true"))
+                        .collect(Collectors.toList())
         );
         positiveStrandTrack.buildSlots();
     }
@@ -66,8 +67,8 @@ public class DataSet {
         negativeStrandTrack.clearGlyphs();
         negativeStrandTrack.getGlyphs().addAll(
                 loadedAnnoations.get(chrId).stream()
-                .filter(g -> g.getTooltipData().get("forward").equals("false"))
-                .collect(Collectors.toList()));
+                        .filter(g -> g.getTooltipData().get("forward").equals("false"))
+                        .collect(Collectors.toList()));
         negativeStrandTrack.buildSlots();
     }
 

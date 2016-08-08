@@ -43,13 +43,14 @@ public class HorizontalZoomSlider extends Slider {
 
     @Activate
     public void activate() {
+        valueProperty().bindBidirectional(canvasPaneModel.gethSlider());
         valueProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             if (!ignoreHSliderEvent) {
                 final boolean isSnapEvent = newValue.doubleValue() % getMajorTickUnit() == 0;
                 if (lastHSliderFire < 0 || Math.abs(lastHSliderFire - newValue.doubleValue()) > 1 || isSnapEvent) {
                     xFactor = exponentialScaleTransform(primaryCanvasRegion.getWidth(), canvasPaneModel.getModelWidth().get(), newValue.doubleValue());
                     lastHSliderFire = newValue.doubleValue();
-                    canvasPaneModel.getxFactor().set(xFactor);
+                    canvasPaneModel.setxFactor(xFactor);
                 }
             }
         });
@@ -61,6 +62,10 @@ public class HorizontalZoomSlider extends Slider {
                 ignoreHSliderEvent = false;
                 xFactor = newValue.doubleValue();
             }
+        });
+        primaryCanvasRegion.widthProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+            xFactor = exponentialScaleTransform(primaryCanvasRegion.getWidth(), canvasPaneModel.getModelWidth().get(), valueProperty().doubleValue());
+            canvasPaneModel.setxFactor(xFactor);
         });
     }
 

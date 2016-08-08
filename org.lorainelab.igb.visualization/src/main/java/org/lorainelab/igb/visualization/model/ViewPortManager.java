@@ -7,7 +7,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.Canvas;
 import org.lorainelab.igb.visualization.PrimaryCanvasRegion;
@@ -28,7 +27,6 @@ public class ViewPortManager {
     private static double MIN_TRACK_HEIGHT = 50;
     private static final int MAX_TRACK_HEIGHT = 1000;
     private static final int COORDINATE_TRACK_HEIGHT = 50;
-    private Set<TrackRenderer> unsortedTrackRenderers;
     private List<TrackRenderer> sortedTrackRenderers;
     private double canvasWidth;
     private double canvasHeight;
@@ -37,30 +35,30 @@ public class ViewPortManager {
     private double trackSize;
     private Canvas canvas;
     private int indexOfCoordinateTrack;
-    private CanvasPaneModel canvasPaneModel;
     private PrimaryCanvasRegion primaryCanvasRegion;
     private TracksModel tracksModel;
     private VerticalScrollBar verticalScrollBar;
+    private CanvasPaneModel canvasPaneModel;
 
     @Activate
     public void activate() {
         this.canvas = primaryCanvasRegion.getCanvas();
-        unsortedTrackRenderers = tracksModel.getTrackRenderers();
-        this.sortedTrackRenderers = Lists.newArrayList(tracksModel.getTrackRenderers());
-        Collections.sort(sortedTrackRenderers, SORT_BY_WEIGHT);
         indexOfCoordinateTrack = -1;
         refresh();
+//        tracksModel.getTrackRenderers().addListener((SetChangeListener.Change<? extends TrackRenderer> change) -> {
+//            refresh();
+//        });
     }
 
     public final void refresh() {
-        sortedTrackRenderers = Lists.newArrayList(unsortedTrackRenderers);
+        sortedTrackRenderers = Lists.newArrayList(tracksModel.getTrackRenderers());
         Collections.sort(sortedTrackRenderers, SORT_BY_WEIGHT);
         updateCoordinateTrackIndex();
         canvasWidth = canvas.getWidth();
         canvasHeight = canvas.getHeight();
-        int trackCountExcludingCoordinates = (int) unsortedTrackRenderers.stream().filter(track -> !(track instanceof CoordinateTrackRenderer)).count();
-        final double vSliderValue = canvasPaneModel.getvSlider().get();
-        trackSize = MIN_TRACK_HEIGHT + (MAX_TRACK_HEIGHT - MIN_TRACK_HEIGHT) * vSliderValue / 100;
+        int trackCountExcludingCoordinates = (int) tracksModel.getTrackRenderers().stream().filter(track -> !(track instanceof CoordinateTrackRenderer)).count();
+        final double vSliderValue = 
+        trackSize = MIN_TRACK_HEIGHT + (MAX_TRACK_HEIGHT - MIN_TRACK_HEIGHT) * canvasPaneModel.getvSlider().doubleValue() / 100;
         totalTrackSize = (trackSize * trackCountExcludingCoordinates) + COORDINATE_TRACK_HEIGHT;
         if (totalTrackSize < canvasHeight) {
             double availableTrackSpace = canvas.getHeight() - COORDINATE_TRACK_HEIGHT;
@@ -140,7 +138,7 @@ public class ViewPortManager {
     }
 
     private boolean coordinateTrackExist() {
-        return unsortedTrackRenderers.stream().anyMatch(t -> t instanceof CoordinateTrackRenderer);
+        return tracksModel.getTrackRenderers().stream().anyMatch(t -> t instanceof CoordinateTrackRenderer);
     }
 
     private void updateCoordinateTrackIndex() {
@@ -177,7 +175,7 @@ public class ViewPortManager {
 
     //TODO move this into the verticalScrollBar component... this breaks encapsulation...
     private void updateYScroller() {
-        double sum = unsortedTrackRenderers.stream()
+        double sum = tracksModel.getTrackRenderers().stream()
                 .map(trackRenderer -> trackRenderer.getCanvasContext())
                 .filter(canvasContext -> canvasContext.isVisible())
                 .mapToDouble(canvasContext -> canvasContext.getBoundingRect().getHeight())
