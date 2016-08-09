@@ -1,7 +1,5 @@
 package org.lorainelab.igb.visualization.ui;
 
-import org.lorainelab.igb.visualization.widget.TrackRenderer;
-import org.lorainelab.igb.visualization.widget.CoordinateTrackRenderer;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
@@ -13,8 +11,8 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.Canvas;
 import org.lorainelab.igb.visualization.model.CanvasModel;
 import org.lorainelab.igb.visualization.model.TracksModel;
-import org.lorainelab.igb.visualization.ui.CanvasRegion;
-import org.lorainelab.igb.visualization.ui.VerticalScrollBar;
+import org.lorainelab.igb.visualization.widget.CoordinateTrackRenderer;
+import org.lorainelab.igb.visualization.widget.TrackRenderer;
 import static org.lorainelab.igb.visualization.widget.TrackRenderer.SORT_BY_WEIGHT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,9 +47,6 @@ public class ViewPortManager {
         this.canvas = canvasRegion.getCanvas();
         indexOfCoordinateTrack = -1;
         refresh();
-//        tracksModel.getTrackRenderers().addListener((SetChangeListener.Change<? extends TrackRenderer> change) -> {
-//            refresh();
-//        });
     }
 
     public final void refresh() {
