@@ -31,7 +31,7 @@ public class ZoomSliderWidget extends HBox {
     private Rectangle rightThumb;
     double lastDragX;
     private CanvasPaneModel canvasPaneModel;
-    private CanvasRegion canvasRegionRegion;
+    private CanvasRegion canvasRegion;
     double xFactor;
     double scrollX;
 
@@ -118,7 +118,7 @@ public class ZoomSliderWidget extends HBox {
                     canvasPaneModel.setScrollX(scrollX, true);
                 }
                 double hSlider = (1 - (current / max)) * 100;
-                xFactor = linearScaleTransform(canvasRegionRegion.getWidth(), canvasPaneModel.getModelWidth().get(), hSlider);
+                xFactor = linearScaleTransform(canvasRegion.getWidth(), canvasPaneModel.getModelWidth().get(), hSlider);
 
                 canvasPaneModel.setxFactor(xFactor);
             }
@@ -161,7 +161,7 @@ public class ZoomSliderWidget extends HBox {
                     canvasPaneModel.setScrollX(scrollX, true);
                 }
                 double hSlider = (1 - (current / max)) * 100;
-                xFactor = linearScaleTransform(canvasRegionRegion.getWidth(), canvasPaneModel.getModelWidth().get(), hSlider);
+                xFactor = linearScaleTransform(canvasRegion.getWidth(), canvasPaneModel.getModelWidth().get(), hSlider);
                 canvasPaneModel.setxFactor(xFactor);
             }
             lastDragX = event.getX();
@@ -200,7 +200,7 @@ public class ZoomSliderWidget extends HBox {
         double maxScaleX = MAX_ZOOM_MODEL_COORDINATES_X - 1;
         final double scaleRange = maxScaleX - minScaleX;
         xFactor = canvasPaneModel.getxFactor().get();
-        final double current = Math.floor(canvasRegionRegion.getWidth() / xFactor);
+        final double current = Math.floor(canvasRegion.getWidth() / xFactor);
         double scaledPercentage = (current - minScaleX) / scaleRange;
 
         scrollX = canvasPaneModel.getScrollX().get();
@@ -220,8 +220,8 @@ public class ZoomSliderWidget extends HBox {
     }
 
     @Reference
-    public void setCanvasRegionRegion(CanvasRegion canvasRegionRegion) {
-        this.canvasRegionRegion = canvasRegionRegion;
+    public void setCanvasRegion(CanvasRegion canvasRegion) {
+        this.canvasRegion = canvasRegion;
     }
 
     private void setupModelListeners() {

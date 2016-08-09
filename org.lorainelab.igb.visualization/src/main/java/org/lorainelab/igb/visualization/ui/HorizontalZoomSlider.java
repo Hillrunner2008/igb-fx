@@ -24,7 +24,7 @@ public class HorizontalZoomSlider extends Slider {
     private boolean ignoreHSliderEvent;
     private double lastHSliderFire;
     private CanvasPaneModel canvasPaneModel;
-    private CanvasRegion canvasRegionRegion;
+    private CanvasRegion canvasRegion;
     private double xFactor;
 
     public HorizontalZoomSlider() {
@@ -48,7 +48,7 @@ public class HorizontalZoomSlider extends Slider {
             if (!ignoreHSliderEvent) {
                 final boolean isSnapEvent = newValue.doubleValue() % getMajorTickUnit() == 0;
                 if (lastHSliderFire < 0 || Math.abs(lastHSliderFire - newValue.doubleValue()) > 1 || isSnapEvent) {
-                    xFactor = exponentialScaleTransform(canvasRegionRegion.getWidth(), canvasPaneModel.getModelWidth().get(), newValue.doubleValue());
+                    xFactor = exponentialScaleTransform(canvasRegion.getWidth(), canvasPaneModel.getModelWidth().get(), newValue.doubleValue());
                     lastHSliderFire = newValue.doubleValue();
                     canvasPaneModel.setxFactor(xFactor);
                 }
@@ -56,15 +56,15 @@ public class HorizontalZoomSlider extends Slider {
         });
         canvasPaneModel.getxFactor().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             if (xFactor != newValue.doubleValue()) {
-                double updatedHsliderPosition = invertExpScaleTransform(canvasRegionRegion.getWidth(), canvasPaneModel.getModelWidth().get(), newValue.doubleValue());
+                double updatedHsliderPosition = invertExpScaleTransform(canvasRegion.getWidth(), canvasPaneModel.getModelWidth().get(), newValue.doubleValue());
                 ignoreHSliderEvent = true;
                 setValue(updatedHsliderPosition);
                 ignoreHSliderEvent = false;
                 xFactor = newValue.doubleValue();
             }
         });
-        canvasRegionRegion.widthProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-            xFactor = exponentialScaleTransform(canvasRegionRegion.getWidth(), canvasPaneModel.getModelWidth().get(), valueProperty().doubleValue());
+        canvasRegion.widthProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+            xFactor = exponentialScaleTransform(canvasRegion.getWidth(), canvasPaneModel.getModelWidth().get(), valueProperty().doubleValue());
             canvasPaneModel.setxFactor(xFactor);
         });
     }
@@ -75,8 +75,8 @@ public class HorizontalZoomSlider extends Slider {
     }
 
     @Reference
-    public void setCanvasRegionRegion(CanvasRegion canvasRegionRegion) {
-        this.canvasRegionRegion = canvasRegionRegion;
+    public void setCanvasRegion(CanvasRegion canvasRegion) {
+        this.canvasRegion = canvasRegion;
     }
 
 }

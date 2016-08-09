@@ -37,14 +37,14 @@ public class ViewPortManager {
     private double trackSize;
     private Canvas canvas;
     private int indexOfCoordinateTrack;
-    private CanvasRegion canvasRegionRegion;
+    private CanvasRegion canvasRegion;
     private TracksModel tracksModel;
     private VerticalScrollBar verticalScrollBar;
     private CanvasPaneModel canvasPaneModel;
 
     @Activate
     public void activate() {
-        this.canvas = canvasRegionRegion.getCanvas();
+        this.canvas = canvasRegion.getCanvas();
         indexOfCoordinateTrack = -1;
         refresh();
 //        tracksModel.getTrackRenderers().addListener((SetChangeListener.Change<? extends TrackRenderer> change) -> {
@@ -161,8 +161,8 @@ public class ViewPortManager {
     }
 
     @Reference
-    public void setCanvasRegionRegion(CanvasRegion canvasRegionRegion) {
-        this.canvasRegionRegion = canvasRegionRegion;
+    public void setCanvasRegion(CanvasRegion canvasRegion) {
+        this.canvasRegion = canvasRegion;
     }
 
     @Reference

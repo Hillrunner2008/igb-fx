@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 public class ZoomStripe implements Widget {
 
     private static final Logger LOG = LoggerFactory.getLogger(ZoomStripe.class);
-    private CanvasRegion canvasRegionRegion;
+    private CanvasRegion canvasRegion;
 
     @Activate
     public void activate() {
@@ -37,12 +37,12 @@ public class ZoomStripe implements Widget {
 
             double xFactor = canvasPaneModel.getxFactor().get();
             double scrollX = canvasPaneModel.getScrollX().get();
-            double canvasWidth = canvasRegionRegion.getWidth();
+            double canvasWidth = canvasRegion.getWidth();
             final double visibleVirtualCoordinatesX = Math.floor(canvasWidth / xFactor);
             double xOffset = Math.round((scrollX / 100) * (modelWidth - visibleVirtualCoordinatesX));
             double maxXoffset = modelWidth - visibleVirtualCoordinatesX;
             xOffset = Math.min(maxXoffset, xOffset);
-            GraphicsContext gc = canvasRegionRegion.getCanvas().getGraphicsContext2D();
+            GraphicsContext gc = canvasRegion.getCanvas().getGraphicsContext2D();
             gc.save();
             gc.setStroke(Color.rgb(0, 0, 0, .3));
             gc.scale(xFactor, 1);
@@ -52,15 +52,15 @@ public class ZoomStripe implements Widget {
                 gc.setLineWidth(width * 0.002);
             }
             if (x >= 0 && x <= width) {
-                gc.strokeLine(x + .5, 0, x + .5, canvasRegionRegion.getCanvas().getHeight());
+                gc.strokeLine(x + .5, 0, x + .5, canvasRegion.getCanvas().getHeight());
             }
             gc.restore();
         }
     }
 
     @Reference
-    public void setOverlayCanvasRegion(CanvasRegion canvasRegionRegion) {
-        this.canvasRegionRegion = canvasRegionRegion;
+    public void setOverlayCanvasRegion(CanvasRegion canvasRegion) {
+        this.canvasRegion = canvasRegion;
     }
 
     @Override

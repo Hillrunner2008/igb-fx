@@ -37,7 +37,7 @@ public class TracksModel {
     private SelectionInfoService selectionInfoService;
     private Chromosome selectedChromosome;
     private GenomeVersion selectedGenomeVersion;
-    private CanvasRegion canvasRegionRegion;
+    private CanvasRegion canvasRegion;
 
     public TracksModel() {
         totalTrackHeight = new SimpleDoubleProperty(0);
@@ -57,7 +57,7 @@ public class TracksModel {
                     selectionInfoService.getSelectedGenomeVersion().get().ifPresent(gv -> {
                         trackRenderers.clear();
                         final Chromosome chromosome = newChromosomeSelection;
-                        CoordinateTrackRenderer coordinateTrackRenderer = new CoordinateTrackRenderer(canvasRegionRegion.getCanvas(), chromosome);
+                        CoordinateTrackRenderer coordinateTrackRenderer = new CoordinateTrackRenderer(canvasRegion.getCanvas(), chromosome);
                         coordinateTrackRenderer.setWeight(getMinWeight());
                         trackRenderers.add(coordinateTrackRenderer);
                         loadDataSets(gv, chromosome);
@@ -105,17 +105,17 @@ public class TracksModel {
     }
 
     @Reference
-    public void setCanvasRegionRegion(CanvasRegion canvasRegionRegion) {
-        this.canvasRegionRegion = canvasRegionRegion;
+    public void setCanvasRegion(CanvasRegion canvasRegion) {
+        this.canvasRegion = canvasRegion;
     }
 
     private void loadDataSets(GenomeVersion gv, Chromosome chromosome) {
         gv.getLoadedDataSets().forEach(dataSet -> {
             Track positiveStrandTrack = dataSet.getPositiveStrandTrack(chromosome.getName());
             Track negativeStrandTrack = dataSet.getNegativeStrandTrack(gv.getSelectedChromosomeProperty().get().get().getName());
-            final ZoomableTrackRenderer positiveStrandTrackRenderer = new ZoomableTrackRenderer(canvasRegionRegion.getCanvas(), positiveStrandTrack, chromosome);
+            final ZoomableTrackRenderer positiveStrandTrackRenderer = new ZoomableTrackRenderer(canvasRegion.getCanvas(), positiveStrandTrack, chromosome);
             positiveStrandTrackRenderer.setWeight(getMinWeight());
-            final ZoomableTrackRenderer negativeStrandTrackRenderer = new ZoomableTrackRenderer(canvasRegionRegion.getCanvas(), negativeStrandTrack, chromosome);
+            final ZoomableTrackRenderer negativeStrandTrackRenderer = new ZoomableTrackRenderer(canvasRegion.getCanvas(), negativeStrandTrack, chromosome);
             negativeStrandTrackRenderer.setWeight(getMaxWeight());
             trackRenderers.add(positiveStrandTrackRenderer);
             trackRenderers.add(negativeStrandTrackRenderer);
@@ -153,9 +153,9 @@ public class TracksModel {
                     final DataSet loadedDataSet = change.getElementAdded();
                     Track positiveStrandTrack = loadedDataSet.getPositiveStrandTrack(selectedChromosome.getName());
                     Track negativeStrandTrack = change.getElementAdded().getNegativeStrandTrack(gv.getSelectedChromosomeProperty().get().get().getName());
-                    final ZoomableTrackRenderer positiveStrandTrackRenderer = new ZoomableTrackRenderer(canvasRegionRegion.getCanvas(), positiveStrandTrack, selectedChromosome);
+                    final ZoomableTrackRenderer positiveStrandTrackRenderer = new ZoomableTrackRenderer(canvasRegion.getCanvas(), positiveStrandTrack, selectedChromosome);
                     positiveStrandTrackRenderer.setWeight(getMinWeight());
-                    final ZoomableTrackRenderer negativeStrandTrackRenderer = new ZoomableTrackRenderer(canvasRegionRegion.getCanvas(), negativeStrandTrack, selectedChromosome);
+                    final ZoomableTrackRenderer negativeStrandTrackRenderer = new ZoomableTrackRenderer(canvasRegion.getCanvas(), negativeStrandTrack, selectedChromosome);
                     negativeStrandTrackRenderer.setWeight(getMaxWeight());
                     trackRenderers.add(positiveStrandTrackRenderer);
                     trackRenderers.add(negativeStrandTrackRenderer);

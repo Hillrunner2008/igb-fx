@@ -47,7 +47,7 @@ public class CanvasPaneModel {
     private DoubleProperty hSlider;
     private DoubleProperty vSlider;
     private SelectionInfoService selectionInfoService;
-    private CanvasRegion canvasRegionRegion;
+    private CanvasRegion canvasRegion;
     //TODO consider moving mouse related content to separate model
     private ObjectProperty<Optional<Point2D>> mouseClickLocation;
     private ObjectProperty<Optional<Point2D>> localPoint;
@@ -80,8 +80,8 @@ public class CanvasPaneModel {
     @Activate
     public void activate() {
         xFactor.addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-            final double previousVisibleCoordinatesX = Math.floor(canvasRegionRegion.getWidth() / oldValue.doubleValue());
-            final double updatedVisibleCoordinatesX = Math.floor(canvasRegionRegion.getWidth() / newValue.doubleValue());
+            final double previousVisibleCoordinatesX = Math.floor(canvasRegion.getWidth() / oldValue.doubleValue());
+            final double updatedVisibleCoordinatesX = Math.floor(canvasRegion.getWidth() / newValue.doubleValue());
             visibleVirtualCoordinatesX.setValue(updatedVisibleCoordinatesX);
             updateScrollXPosition(previousVisibleCoordinatesX);
         });
@@ -121,7 +121,7 @@ public class CanvasPaneModel {
     }
 
     private void resetPositionalState() {
-        xFactor.set(exponentialScaleTransform(canvasRegionRegion.getWidth(), modelWidth.get(), 0));
+        xFactor.set(exponentialScaleTransform(canvasRegion.getWidth(), modelWidth.get(), 0));
         yFactor.set(1);
         resetZoomStripe();
         scrollX.setValue(0);
@@ -244,8 +244,8 @@ public class CanvasPaneModel {
     }
 
     @Reference
-    public void setCanvasRegionRegion(CanvasRegion canvasRegionRegion) {
-        this.canvasRegionRegion = canvasRegionRegion;
+    public void setCanvasRegion(CanvasRegion canvasRegion) {
+        this.canvasRegion = canvasRegion;
     }
 
     public void setxFactor(double xFactor) {

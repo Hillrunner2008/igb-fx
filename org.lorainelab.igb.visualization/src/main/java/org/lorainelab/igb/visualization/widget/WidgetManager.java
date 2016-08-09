@@ -39,7 +39,7 @@ public class WidgetManager {
     private TracksModel tracksModel;
     private ViewPortManager viewPortManager;
     private ChangeListener<Number> refreshViewListener;
-    private CanvasRegion canvasRegionRegion;
+    private CanvasRegion canvasRegion;
     private SelectionInfoService selectionInfoService;
 
     public WidgetManager() {
@@ -76,8 +76,8 @@ public class WidgetManager {
         tracksModel.getTrackRenderers().addListener((SetChangeListener.Change<? extends TrackRenderer> change) -> {
             refreshViewStream.emit(new RenderAction());
         });
-        canvasRegionRegion.widthProperty().addListener(refreshViewListener);
-        canvasRegionRegion.heightProperty().addListener(refreshViewListener);
+        canvasRegion.widthProperty().addListener(refreshViewListener);
+        canvasRegion.heightProperty().addListener(refreshViewListener);
         selectionInfoService.getSelectedGenomeVersion().addListener((ObservableValue<? extends Optional<GenomeVersion>> observable, Optional<GenomeVersion> oldValue, Optional<GenomeVersion> newValue) -> {
             refreshViewStream.emit(new RenderAction());
         });
@@ -103,8 +103,8 @@ public class WidgetManager {
     }
 
     @Reference
-    public void setCanvasRegionRegion(CanvasRegion canvasRegionRegion) {
-        this.canvasRegionRegion = canvasRegionRegion;
+    public void setCanvasRegion(CanvasRegion canvasRegion) {
+        this.canvasRegion = canvasRegion;
     }
 
     @Reference
