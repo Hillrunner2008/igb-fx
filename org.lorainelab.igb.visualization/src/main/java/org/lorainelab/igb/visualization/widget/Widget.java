@@ -1,6 +1,6 @@
 package org.lorainelab.igb.visualization.widget;
 
-import org.lorainelab.igb.visualization.model.CanvasPaneModel;
+import org.lorainelab.igb.visualization.model.CanvasModel;
 
 /**
  *
@@ -10,6 +10,6 @@ public interface Widget {
     
     int getZindex();
 
-    void render(CanvasPaneModel canvasPaneModel);
+    void render(CanvasModel canvasModel);
 
 }

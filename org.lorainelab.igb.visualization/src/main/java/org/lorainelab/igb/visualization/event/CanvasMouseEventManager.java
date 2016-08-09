@@ -16,8 +16,8 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import org.lorainelab.igb.data.model.View;
 import org.lorainelab.igb.selections.SelectionInfoService;
-import org.lorainelab.igb.visualization.model.CanvasPaneModel;
-import static org.lorainelab.igb.visualization.model.CanvasPaneModel.MAX_ZOOM_MODEL_COORDINATES_X;
+import org.lorainelab.igb.visualization.model.CanvasModel;
+import static org.lorainelab.igb.visualization.model.CanvasModel.MAX_ZOOM_MODEL_COORDINATES_X;
 import org.lorainelab.igb.visualization.widget.TrackRenderer;
 import org.lorainelab.igb.visualization.model.TracksModel;
 import org.lorainelab.igb.visualization.widget.ZoomableTrackRenderer;
@@ -39,7 +39,7 @@ public class CanvasMouseEventManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(CanvasMouseEventManager.class);
     private CanvasRegion canvasRegion;
-    private CanvasPaneModel canvasPaneModel;
+    private CanvasModel canvasModel;
     private SelectionInfoService selectionInfoService;
     private TracksModel tracksModel;
     private Canvas canvas;
@@ -55,18 +55,18 @@ public class CanvasMouseEventManager {
         addCanvasScrollEventHandler();
         addHoverEventHandler();
         canvas.setOnMouseDragEntered((MouseEvent event) -> {
-            canvasPaneModel.resetZoomStripe();
+            canvasModel.resetZoomStripe();
         });
         canvas.setOnMouseDragged((MouseEvent event) -> {
-            canvasPaneModel.setLocalPoint(getPoint2dFromMouseEvent(event));
-            canvasPaneModel.setScreenPoint(getScreenPoint2DFromMouseEvent(event));
-            canvasPaneModel.setMouseDragging(true);
+            canvasModel.setLocalPoint(getPoint2dFromMouseEvent(event));
+            canvasModel.setScreenPoint(getScreenPoint2DFromMouseEvent(event));
+            canvasModel.setMouseDragging(true);
         });
         canvas.setOnMousePressed((MouseEvent event) -> {
-            canvasPaneModel.setMouseClickLocation(getPoint2dFromMouseEvent(event));
+            canvasModel.setMouseClickLocation(getPoint2dFromMouseEvent(event));
         });
         canvas.setOnMouseReleased((MouseEvent event) -> {
-            if (canvasPaneModel.isMouseDragging()) {
+            if (canvasModel.isMouseDragging()) {
                 processMouseDragReleased(event);
             } else {
                 processMousePressReleased(event);
@@ -96,17 +96,17 @@ public class CanvasMouseEventManager {
         canvas.setOnScroll(scrollEvent -> {
             final boolean isForwardScroll = scrollEvent.getDeltaY() > 0.0;
             if (isForwardScroll) {
-                canvasPaneModel.gethSlider().add(1);
+                canvasModel.gethSlider().add(1);
             } else {
-                canvasPaneModel.gethSlider().subtract(1);
+                canvasModel.gethSlider().subtract(1);
             }
         });
     }
 
     private void clearMouseEventState() {
-        canvasPaneModel.setLocalPoint(null);
-        canvasPaneModel.setMouseDragging(false);
-        canvasPaneModel.setScreenPoint(null);
+        canvasModel.setLocalPoint(null);
+        canvasModel.setMouseDragging(false);
+        canvasModel.setScreenPoint(null);
     }
 
     private void processMousePressReleased(MouseEvent event) {
@@ -143,12 +143,12 @@ public class CanvasMouseEventManager {
     }
 
     private void processMouseDragReleased(MouseEvent event) {
-        canvasPaneModel.getMouseClickLocation().get().ifPresent(mouseClickLocation -> {
+        canvasModel.getMouseClickLocation().get().ifPresent(mouseClickLocation -> {
             tracksModel.getCoordinateTrackRenderer().ifPresent(tr -> {
                 Rectangle2D boundingRect = tr.getCanvasContext().getBoundingRect();
                 if (boundingRect.contains(mouseClickLocation)) {
                     Point2D lastMouseDragLocation = getPoint2dFromMouseEvent(event);
-                    double xfactor = canvasPaneModel.getxFactor().doubleValue();
+                    double xfactor = canvasModel.getxFactor().doubleValue();
                     double lastMouseDragX = lastMouseDragLocation.getX() / xfactor;
                     double lastMouseClickX = mouseClickLocation.getX() / xfactor;
                     double minX = tr.getView().getBoundingRect().getMinX();
@@ -165,15 +165,15 @@ public class CanvasMouseEventManager {
             });
 
         });
-        canvasPaneModel.setSelectionRectangle(getSelectionRectangle().orElse(null));
+        canvasModel.setSelectionRectangle(getSelectionRectangle().orElse(null));
     }
 
     private Optional<Rectangle2D> getSelectionRectangle() {
         Rectangle2D[] selectionRectangle = new Rectangle2D[1];
-        canvasPaneModel.getMouseClickLocation().get().ifPresent(clickStartPosition -> {
+        canvasModel.getMouseClickLocation().get().ifPresent(clickStartPosition -> {
             tracksModel.getCoordinateTrackRenderer().ifPresent(coordinateTrackRenderer -> {
                 if (!coordinateTrackRenderer.getCanvasContext().getBoundingRect().contains(clickStartPosition)) {
-                    canvasPaneModel.getLocalPoint().get().ifPresent(localPoint -> {
+                    canvasModel.getLocalPoint().get().ifPresent(localPoint -> {
                         double minX;
                         double maxX;
                         double minY;
@@ -208,13 +208,13 @@ public class CanvasMouseEventManager {
     }
 
     private void updateZoomStripe(MouseEvent event) {
-        ReadOnlyDoubleProperty scrollX = canvasPaneModel.getScrollX();
-        ReadOnlyDoubleProperty modelWidth = canvasPaneModel.getModelWidth();
-        ReadOnlyDoubleProperty visibleVirtualCoordinatesX = canvasPaneModel.getVisibleVirtualCoordinatesX();
+        ReadOnlyDoubleProperty scrollX = canvasModel.getScrollX();
+        ReadOnlyDoubleProperty modelWidth = canvasModel.getModelWidth();
+        ReadOnlyDoubleProperty visibleVirtualCoordinatesX = canvasModel.getVisibleVirtualCoordinatesX();
         double xOffset = Math.round((scrollX.get() / 100) * (modelWidth.get() - visibleVirtualCoordinatesX.get()));
         xOffset = enforceRangeBounds(xOffset, 0, modelWidth.get());
-        double zoomStripeCoordinate = Math.floor((event.getX() / canvasPaneModel.getxFactor().doubleValue()) + xOffset);
-        canvasPaneModel.setZoomStripeCoordinate(zoomStripeCoordinate);
+        double zoomStripeCoordinate = Math.floor((event.getX() / canvasModel.getxFactor().doubleValue()) + xOffset);
+        canvasModel.setZoomStripeCoordinate(zoomStripeCoordinate);
     }
 
     private Point2D getRangeBoundedDragEventLocation(MouseEvent event) {
@@ -233,7 +233,7 @@ public class CanvasMouseEventManager {
 
     private void jumpZoom(Rectangle2D focusRect, TrackRenderer eventLocationReference, MouseEvent event) {
         View view = eventLocationReference.getView();
-        double modelWidth = canvasPaneModel.getModelWidth().doubleValue();
+        double modelWidth = canvasModel.getModelWidth().doubleValue();
         double minX = Math.max(focusRect.getMinX(), view.getBoundingRect().getMinX());
         double maxX = Math.min(focusRect.getMaxX(), view.getBoundingRect().getMaxX());
         double width = maxX - minX;
@@ -244,16 +244,16 @@ public class CanvasMouseEventManager {
         final double scaleXalt = eventLocationReference.getCanvasContext().getBoundingRect().getWidth() / width;
         double scrollPosition = (minX / (modelWidth - width)) * 100;
         final double scrollXValue = enforceRangeBounds(scrollPosition, 0, 100);
-        double newHSlider = invertExpScaleTransform(canvasRegion.getCanvas().getWidth(), canvasPaneModel.getModelWidth().get(), scaleXalt);
-        double xFactor = exponentialScaleTransform(canvasRegion.getCanvas().getWidth(), canvasPaneModel.getModelWidth().get(), newHSlider);
-        canvasPaneModel.resetZoomStripe();
-        canvasPaneModel.setxFactor(xFactor);
-        canvasPaneModel.setScrollX(scrollXValue);
+        double newHSlider = invertExpScaleTransform(canvasRegion.getCanvas().getWidth(), canvasModel.getModelWidth().get(), scaleXalt);
+        double xFactor = exponentialScaleTransform(canvasRegion.getCanvas().getWidth(), canvasModel.getModelWidth().get(), newHSlider);
+        canvasModel.resetZoomStripe();
+        canvasModel.setxFactor(xFactor);
+        canvasModel.setScrollX(scrollXValue);
     }
 
     @Reference
-    public void setCanvasPaneModel(CanvasPaneModel canvasPaneModel) {
-        this.canvasPaneModel = canvasPaneModel;
+    public void setCanvasModel(CanvasModel canvasModel) {
+        this.canvasModel = canvasModel;
     }
 
     @Reference
@@ -279,7 +279,7 @@ public class CanvasMouseEventManager {
                 switch (event.getCode()) {
                     case CONTROL:
                     case SHIFT:
-                        canvasPaneModel.setMultiSelectModeActive(true);
+                        canvasModel.setMultiSelectModeActive(true);
                         break;
                 }
             }
@@ -291,7 +291,7 @@ public class CanvasMouseEventManager {
                 switch (event.getCode()) {
                     case CONTROL:
                     case SHIFT:
-                        canvasPaneModel.setMultiSelectModeActive(false);
+                        canvasModel.setMultiSelectModeActive(false);
                         break;
                 }
             }

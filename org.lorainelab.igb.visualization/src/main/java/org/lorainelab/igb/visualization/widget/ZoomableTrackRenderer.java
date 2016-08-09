@@ -17,7 +17,7 @@ import org.lorainelab.igb.data.model.Track;
 import org.lorainelab.igb.data.model.View;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
 import org.lorainelab.igb.data.model.glyph.Glyph;
-import org.lorainelab.igb.visualization.model.CanvasPaneModel;
+import org.lorainelab.igb.visualization.model.CanvasModel;
 import org.lorainelab.igb.visualization.model.TrackLabel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,9 +48,9 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         gc = canvas.getGraphicsContext2D();
     }
 
-    public void processLastMouseClickedPosition(CanvasPaneModel canvasPaneModel) {
-        boolean multiSelectModeActive = canvasPaneModel.isMultiSelectModeActive().get();
-        canvasPaneModel.getMouseClickLocation().get().ifPresent(mouseClicked -> {
+    public void processLastMouseClickedPosition(CanvasModel canvasModel) {
+        boolean multiSelectModeActive = canvasModel.isMultiSelectModeActive().get();
+        canvasModel.getMouseClickLocation().get().ifPresent(mouseClicked -> {
             if (!canvasContext.getBoundingRect().contains(mouseClicked)) {
                 if (!multiSelectModeActive) {
                     clearSelections();
@@ -143,10 +143,10 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         gc.restore();
     }
 
-    public void render(CanvasPaneModel canvasPaneModel) {
+    public void render(CanvasModel canvasModel) {
         clearCanvas();
-        processLastMouseClickedPosition(canvasPaneModel);
-        scaleCanvas(canvasPaneModel.getxFactor().get(), canvasPaneModel.getScrollX().get(), canvasPaneModel.getScrollY().get());
+        processLastMouseClickedPosition(canvasModel);
+        scaleCanvas(canvasModel.getxFactor().get(), canvasModel.getScrollX().get(), canvasModel.getScrollY().get());
     }
 
     private void hideTooltip() {

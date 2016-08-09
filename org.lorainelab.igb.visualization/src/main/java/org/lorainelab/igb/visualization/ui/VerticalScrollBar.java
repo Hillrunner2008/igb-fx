@@ -5,7 +5,7 @@ import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import javafx.geometry.Orientation;
 import javafx.scene.control.ScrollBar;
-import org.lorainelab.igb.visualization.model.CanvasPaneModel;
+import org.lorainelab.igb.visualization.model.CanvasModel;
 
 /**
  *
@@ -14,7 +14,7 @@ import org.lorainelab.igb.visualization.model.CanvasPaneModel;
 @Component(immediate = true, provide = VerticalScrollBar.class)
 public class VerticalScrollBar extends ScrollBar {
 
-    private CanvasPaneModel canvasPaneModel;
+    private CanvasModel canvasModel;
 
     public VerticalScrollBar() {
         setOrientation(Orientation.VERTICAL);
@@ -26,13 +26,13 @@ public class VerticalScrollBar extends ScrollBar {
 
     @Activate
     public void activate() {
-        valueProperty().bindBidirectional(canvasPaneModel.getScrollY());
-        visibleAmountProperty().bindBidirectional(canvasPaneModel.getScrollYVisibleAmount());
+        valueProperty().bindBidirectional(canvasModel.getScrollY());
+        visibleAmountProperty().bindBidirectional(canvasModel.getScrollYVisibleAmount());
     }
 
     @Reference
-    public void setCanvasPaneModel(CanvasPaneModel canvasPaneModel) {
-        this.canvasPaneModel = canvasPaneModel;
+    public void setCanvasModel(CanvasModel canvasModel) {
+        this.canvasModel = canvasModel;
     }
 
 }

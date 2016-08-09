@@ -14,7 +14,7 @@ import javafx.scene.text.FontWeight;
 import org.lorainelab.igb.data.model.CanvasContext;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.View;
-import org.lorainelab.igb.visualization.model.CanvasPaneModel;
+import org.lorainelab.igb.visualization.model.CanvasModel;
 import org.lorainelab.igb.visualization.model.TrackLabel;
 import static org.lorainelab.igb.data.model.sequence.BasePairColorReference.getBaseColor;
 import static org.lorainelab.igb.visualization.util.BoundsUtil.enforceRangeBounds;
@@ -57,20 +57,20 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         gc = canvas.getGraphicsContext2D();
     }
 
-    void draw(CanvasPaneModel canvasPaneModel) {
+    void draw(CanvasModel canvasModel) {
         if (canvasContext.isVisible()) {
             gc.save();
             gc.scale(xfactor, 1);
             drawCoordinateBasePairs();
             drawCoordinateLine();
-            drawClickDrag(canvasPaneModel);
+            drawClickDrag(canvasModel);
             gc.restore();
         }
     }
 
-    private void drawClickDrag(CanvasPaneModel canvasPaneModel) {
-        canvasPaneModel.getMouseClickLocation().get().ifPresent(lastMouseClick -> {
-            canvasPaneModel.getLocalPoint().get().ifPresent(lastMouseDrag -> {
+    private void drawClickDrag(CanvasModel canvasModel) {
+        canvasModel.getMouseClickLocation().get().ifPresent(lastMouseClick -> {
+            canvasModel.getLocalPoint().get().ifPresent(lastMouseDrag -> {
                 if (canvasContext.getBoundingRect().contains(lastMouseClick)) {
                     final double lastMouseClickX = Math.floor(lastMouseClick.getX() / xfactor);
                     final double lastMouseDragX = Math.floor(lastMouseDrag.getX() / xfactor);
@@ -284,9 +284,9 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         gc.restore();
     }
 
-    public void updateView(CanvasPaneModel canvasPaneModel) {
+    public void updateView(CanvasModel canvasModel) {
         if (canvasContext.isVisible()) {
-            double scrollX = canvasPaneModel.getScrollX().doubleValue();
+            double scrollX = canvasModel.getScrollX().doubleValue();
             final double visibleVirtualCoordinatesX = Math.floor(canvasContext.getBoundingRect().getWidth() / xfactor);
             double xOffset = Math.round((scrollX / 100) * (modelWidth - visibleVirtualCoordinatesX));
             xOffset = enforceRangeBounds(xOffset, 0, modelWidth);
@@ -295,24 +295,24 @@ public class CoordinateTrackRenderer implements TrackRenderer {
             if (canvasContext.isVisible()) {
                 if (Platform.isFxApplicationThread()) {
                     clearCanvas();
-                    draw(canvasPaneModel);
+                    draw(canvasModel);
                 } else {
                     Platform.runLater(() -> {
                         clearCanvas();
-                        draw(canvasPaneModel);
+                        draw(canvasModel);
                     });
                 }
             }
         }
     }
 
-    private void scaleCanvas(CanvasPaneModel canvasPaneModel) {
-        this.xfactor = canvasPaneModel.getxFactor().doubleValue();
+    private void scaleCanvas(CanvasModel canvasModel) {
+        this.xfactor = canvasModel.getxFactor().doubleValue();
         if (canvasContext.isVisible()) {
             gc.save();
             gc.scale(xfactor, 1);
             gc.restore();
-            updateView(canvasPaneModel);
+            updateView(canvasModel);
         }
     }
 
@@ -373,9 +373,9 @@ public class CoordinateTrackRenderer implements TrackRenderer {
 //        }
 //        lastMouseClickX = Math.floor(event.getLocal().getX() / xfactor);
 //    }
-    public void render(CanvasPaneModel canvasPaneModel) {
+    public void render(CanvasModel canvasModel) {
         clearCanvas();
-        scaleCanvas(canvasPaneModel);
+        scaleCanvas(canvasModel);
     }
 
     public void setZoomStripeCoordinate(double zoomStripeCoordinate) {

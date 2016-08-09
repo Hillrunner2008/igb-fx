@@ -6,7 +6,7 @@ import aQute.bnd.annotation.component.Reference;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.control.Slider;
-import org.lorainelab.igb.visualization.model.CanvasPaneModel;
+import org.lorainelab.igb.visualization.model.CanvasModel;
 
 /**
  *
@@ -15,7 +15,7 @@ import org.lorainelab.igb.visualization.model.CanvasPaneModel;
 @Component(immediate = true, provide = VerticalZoomSlider.class)
 public class VerticalZoomSlider extends Slider {
 
-    private CanvasPaneModel canvasPaneModel;
+    private CanvasModel canvasModel;
 
     public VerticalZoomSlider() {
         setOrientation(Orientation.VERTICAL);
@@ -29,12 +29,12 @@ public class VerticalZoomSlider extends Slider {
     
     @Activate
     public void activate() {
-        valueProperty().bindBidirectional(canvasPaneModel.getvSlider());
+        valueProperty().bindBidirectional(canvasModel.getvSlider());
     }
 
     @Reference
-    public void setCanvasPaneModel(CanvasPaneModel canvasPaneModel) {
-        this.canvasPaneModel = canvasPaneModel;
+    public void setCanvasModel(CanvasModel canvasModel) {
+        this.canvasModel = canvasModel;
     }
 
 }

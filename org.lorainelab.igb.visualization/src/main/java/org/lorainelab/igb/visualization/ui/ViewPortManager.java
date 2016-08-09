@@ -1,4 +1,4 @@
-package org.lorainelab.igb.visualization.model;
+package org.lorainelab.igb.visualization.ui;
 
 import org.lorainelab.igb.visualization.widget.TrackRenderer;
 import org.lorainelab.igb.visualization.widget.CoordinateTrackRenderer;
@@ -11,6 +11,8 @@ import java.util.Collections;
 import java.util.List;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.Canvas;
+import org.lorainelab.igb.visualization.model.CanvasModel;
+import org.lorainelab.igb.visualization.model.TracksModel;
 import org.lorainelab.igb.visualization.ui.CanvasRegion;
 import org.lorainelab.igb.visualization.ui.VerticalScrollBar;
 import static org.lorainelab.igb.visualization.widget.TrackRenderer.SORT_BY_WEIGHT;
@@ -40,7 +42,7 @@ public class ViewPortManager {
     private CanvasRegion canvasRegion;
     private TracksModel tracksModel;
     private VerticalScrollBar verticalScrollBar;
-    private CanvasPaneModel canvasPaneModel;
+    private CanvasModel canvasModel;
 
     @Activate
     public void activate() {
@@ -60,7 +62,7 @@ public class ViewPortManager {
         canvasHeight = canvas.getHeight();
         int trackCountExcludingCoordinates = (int) tracksModel.getTrackRenderers().stream().filter(track -> !(track instanceof CoordinateTrackRenderer)).count();
         final double vSliderValue = 
-        trackSize = MIN_TRACK_HEIGHT + (MAX_TRACK_HEIGHT - MIN_TRACK_HEIGHT) * canvasPaneModel.getvSlider().doubleValue() / 100;
+        trackSize = MIN_TRACK_HEIGHT + (MAX_TRACK_HEIGHT - MIN_TRACK_HEIGHT) * canvasModel.getvSlider().doubleValue() / 100;
         totalTrackSize = (trackSize * trackCountExcludingCoordinates) + COORDINATE_TRACK_HEIGHT;
         if (totalTrackSize < canvasHeight) {
             double availableTrackSpace = canvas.getHeight() - COORDINATE_TRACK_HEIGHT;
@@ -156,8 +158,8 @@ public class ViewPortManager {
     }
 
     @Reference
-    public void setCanvasPaneModel(CanvasPaneModel canvasPaneModel) {
-        this.canvasPaneModel = canvasPaneModel;
+    public void setCanvasModel(CanvasModel canvasModel) {
+        this.canvasModel = canvasModel;
     }
 
     @Reference

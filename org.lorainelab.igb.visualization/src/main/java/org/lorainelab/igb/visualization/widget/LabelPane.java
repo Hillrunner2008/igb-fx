@@ -15,7 +15,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.transform.Transform;
 import org.lorainelab.igb.visualization.widget.Widget;
-import org.lorainelab.igb.visualization.model.CanvasPaneModel;
+import org.lorainelab.igb.visualization.model.CanvasModel;
 import org.lorainelab.igb.visualization.model.TrackLabel;
 import org.lorainelab.igb.visualization.model.TracksModel;
 
@@ -31,7 +31,7 @@ public class LabelPane extends Pane implements Widget {
     public LabelPane() {
     }
 
-    public void render(CanvasPaneModel canvasPaneModel) {
+    public void render(CanvasModel canvasModel) {
         getChildren().clear();
         tracksModel.getTrackRenderers().stream()
                 .filter(trackRenderer -> trackRenderer.getCanvasContext().isVisible())

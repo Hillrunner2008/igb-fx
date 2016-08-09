@@ -11,8 +11,8 @@ import javafx.scene.layout.Priority;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import org.lorainelab.igb.visualization.ui.CanvasRegion;
-import org.lorainelab.igb.visualization.model.CanvasPaneModel;
-import static org.lorainelab.igb.visualization.model.CanvasPaneModel.MAX_ZOOM_MODEL_COORDINATES_X;
+import org.lorainelab.igb.visualization.model.CanvasModel;
+import static org.lorainelab.igb.visualization.model.CanvasModel.MAX_ZOOM_MODEL_COORDINATES_X;
 import static org.lorainelab.igb.visualization.util.CanvasUtils.linearScaleTransform;
 
 /**
@@ -30,7 +30,7 @@ public class ZoomSliderWidget extends HBox {
     private Rectangle slider;
     private Rectangle rightThumb;
     double lastDragX;
-    private CanvasPaneModel canvasPaneModel;
+    private CanvasModel canvasModel;
     private CanvasRegion canvasRegion;
     double xFactor;
     double scrollX;
@@ -111,16 +111,16 @@ public class ZoomSliderWidget extends HBox {
                 double maxSlider = xSliderPane.getWidth() - slider.getWidth();
                 double currentSlider = slider.getX();
                 if (maxSlider < 0) {
-                    canvasPaneModel.setScrollX(0);
+                    canvasModel.setScrollX(0);
                 } else {
                     double newScrollX = (currentSlider / maxSlider) * 100;
                     scrollX = Double.isNaN(newScrollX) ? 0 : newScrollX;
-                    canvasPaneModel.setScrollX(scrollX, true);
+                    canvasModel.setScrollX(scrollX, true);
                 }
                 double hSlider = (1 - (current / max)) * 100;
-                xFactor = linearScaleTransform(canvasRegion.getWidth(), canvasPaneModel.getModelWidth().get(), hSlider);
+                xFactor = linearScaleTransform(canvasRegion.getWidth(), canvasModel.getModelWidth().get(), hSlider);
 
-                canvasPaneModel.setxFactor(xFactor);
+                canvasModel.setxFactor(xFactor);
             }
             lastDragX = event.getX();
             event.consume();
@@ -154,15 +154,15 @@ public class ZoomSliderWidget extends HBox {
                 double maxSlider = xSliderPane.getWidth() - slider.getWidth();
                 double currentSlider = slider.getX();
                 if (maxSlider < 0) {
-                    canvasPaneModel.setScrollX(0);
+                    canvasModel.setScrollX(0);
                 } else {
                     double newScrollX = (currentSlider / maxSlider) * 100;
                     scrollX = Double.isNaN(newScrollX) ? 0 : newScrollX;
-                    canvasPaneModel.setScrollX(scrollX, true);
+                    canvasModel.setScrollX(scrollX, true);
                 }
                 double hSlider = (1 - (current / max)) * 100;
-                xFactor = linearScaleTransform(canvasRegion.getWidth(), canvasPaneModel.getModelWidth().get(), hSlider);
-                canvasPaneModel.setxFactor(xFactor);
+                xFactor = linearScaleTransform(canvasRegion.getWidth(), canvasModel.getModelWidth().get(), hSlider);
+                canvasModel.setxFactor(xFactor);
             }
             lastDragX = event.getX();
             event.consume();
@@ -189,21 +189,21 @@ public class ZoomSliderWidget extends HBox {
             double max = xSliderPane.getWidth() - slider.getWidth();
             double current = slider.getX();
             double newScrollX = (current / max) * 100;
-            canvasPaneModel.setScrollX(Double.isNaN(newScrollX) ? 0 : newScrollX, true);
+            canvasModel.setScrollX(Double.isNaN(newScrollX) ? 0 : newScrollX, true);
             lastDragX = event.getX();
             event.consume();
         });
     }
 
     private void syncWidgetSlider() {
-        double minScaleX = canvasPaneModel.getModelWidth().get();
+        double minScaleX = canvasModel.getModelWidth().get();
         double maxScaleX = MAX_ZOOM_MODEL_COORDINATES_X - 1;
         final double scaleRange = maxScaleX - minScaleX;
-        xFactor = canvasPaneModel.getxFactor().get();
+        xFactor = canvasModel.getxFactor().get();
         final double current = Math.floor(canvasRegion.getWidth() / xFactor);
         double scaledPercentage = (current - minScaleX) / scaleRange;
 
-        scrollX = canvasPaneModel.getScrollX().get();
+        scrollX = canvasModel.getScrollX().get();
         double oldWidth = slider.getWidth();
         double oldX = slider.getX();
         double width = ((1 - scaledPercentage) * (xSliderPane.getWidth() - TOTAL_SLIDER_THUMB_WIDTH)) + TOTAL_SLIDER_THUMB_WIDTH;
@@ -215,8 +215,8 @@ public class ZoomSliderWidget extends HBox {
     }
 
     @Reference
-    public void setCanvasPaneModel(CanvasPaneModel canvasPaneModel) {
-        this.canvasPaneModel = canvasPaneModel;
+    public void setCanvasModel(CanvasModel canvasModel) {
+        this.canvasModel = canvasModel;
     }
 
     @Reference
@@ -225,12 +225,12 @@ public class ZoomSliderWidget extends HBox {
     }
 
     private void setupModelListeners() {
-        canvasPaneModel.getxFactor().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+        canvasModel.getxFactor().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             if (xFactor != newValue.doubleValue()) {
                 syncWidgetSlider();
             }
         });
-        canvasPaneModel.getScrollX().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+        canvasModel.getScrollX().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             if (scrollX != newValue.doubleValue()) {
                 syncWidgetSlider();
             }

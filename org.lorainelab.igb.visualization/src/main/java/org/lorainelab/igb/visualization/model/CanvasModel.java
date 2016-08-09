@@ -29,10 +29,10 @@ import org.slf4j.LoggerFactory;
  *
  * @author dcnorris
  */
-@Component(immediate = true, provide = CanvasPaneModel.class)
-public class CanvasPaneModel {
+@Component(immediate = true, provide = CanvasModel.class)
+public class CanvasModel {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CanvasPaneModel.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CanvasModel.class);
     public static final int MAX_ZOOM_MODEL_COORDINATES_X = 120;
     public static final int MAX_ZOOM_MODEL_COORDINATES_Y = 50;
     private DoubleProperty modelWidth;
@@ -56,7 +56,7 @@ public class CanvasPaneModel {
     private boolean mouseDragging;
     private BooleanProperty multiSelectModeActive;
 
-    public CanvasPaneModel() {
+    public CanvasModel() {
         modelWidth = new SimpleDoubleProperty(1);
         xFactor = new SimpleDoubleProperty(1);
         yFactor = new SimpleDoubleProperty(1);

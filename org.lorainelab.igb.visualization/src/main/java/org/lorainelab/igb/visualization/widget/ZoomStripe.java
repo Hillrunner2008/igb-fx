@@ -11,7 +11,7 @@ import aQute.bnd.annotation.component.Reference;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import org.lorainelab.igb.visualization.ui.CanvasRegion;
-import org.lorainelab.igb.visualization.model.CanvasPaneModel;
+import org.lorainelab.igb.visualization.model.CanvasModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,13 +30,13 @@ public class ZoomStripe implements Widget {
     }
 
     @Override
-    public void render(CanvasPaneModel canvasPaneModel) {
-        double zoomStripeCoordinate = canvasPaneModel.getZoomStripeCoordinate().doubleValue();
+    public void render(CanvasModel canvasModel) {
+        double zoomStripeCoordinate = canvasModel.getZoomStripeCoordinate().doubleValue();
         if (zoomStripeCoordinate >= 0) {
-            double modelWidth = canvasPaneModel.getModelWidth().get();
+            double modelWidth = canvasModel.getModelWidth().get();
 
-            double xFactor = canvasPaneModel.getxFactor().get();
-            double scrollX = canvasPaneModel.getScrollX().get();
+            double xFactor = canvasModel.getxFactor().get();
+            double scrollX = canvasModel.getScrollX().get();
             double canvasWidth = canvasRegion.getWidth();
             final double visibleVirtualCoordinatesX = Math.floor(canvasWidth / xFactor);
             double xOffset = Math.round((scrollX / 100) * (modelWidth - visibleVirtualCoordinatesX));
@@ -46,7 +46,7 @@ public class ZoomStripe implements Widget {
             gc.save();
             gc.setStroke(Color.rgb(0, 0, 0, .3));
             gc.scale(xFactor, 1);
-            double x = (canvasPaneModel.getZoomStripeCoordinate().doubleValue()) - xOffset;
+            double x = (canvasModel.getZoomStripeCoordinate().doubleValue()) - xOffset;
             double width = canvasWidth / xFactor;
             if (width > 500) {
                 gc.setLineWidth(width * 0.002);

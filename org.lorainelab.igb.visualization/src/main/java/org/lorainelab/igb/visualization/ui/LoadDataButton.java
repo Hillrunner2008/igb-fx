@@ -7,7 +7,7 @@ import java.util.concurrent.CompletableFuture;
 import javafx.application.Platform;
 import javafx.scene.control.Button;
 import org.lorainelab.igb.selections.SelectionInfoService;
-import org.lorainelab.igb.visualization.model.CanvasPaneModel;
+import org.lorainelab.igb.visualization.model.CanvasModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +20,7 @@ public class LoadDataButton extends Button {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoadDataButton.class);
     private SelectionInfoService selectionInfoService;
-    private CanvasPaneModel canvasPaneModel;
+    private CanvasModel canvasModel;
 
     public LoadDataButton() {
         setText("Load Data");
@@ -33,11 +33,11 @@ public class LoadDataButton extends Button {
                 selectionInfoService.getSelectedChromosome().get().ifPresent(selectedChromosome -> {
                     selectedGenomeVersion.getLoadedDataSets().forEach(dataSet -> {
                         CompletableFuture.supplyAsync(() -> {
-                            dataSet.loadRegion(selectedChromosome.getName(), canvasPaneModel.getCurrentModelCoordinatesInView());
+                            dataSet.loadRegion(selectedChromosome.getName(), canvasModel.getCurrentModelCoordinatesInView());
                             return null;
                         }).thenRun(() -> {
                             Platform.runLater(() -> {
-                              canvasPaneModel.setxFactor(canvasPaneModel.getxFactor().doubleValue());//refresh hack
+                              canvasModel.setxFactor(canvasModel.getxFactor().doubleValue());//refresh hack
                             });
                         });
                     });
@@ -47,8 +47,8 @@ public class LoadDataButton extends Button {
     }
 
     @Reference
-    public void setCanvasPaneModel(CanvasPaneModel canvasPaneModel) {
-        this.canvasPaneModel = canvasPaneModel;
+    public void setCanvasModel(CanvasModel canvasModel) {
+        this.canvasModel = canvasModel;
     }
 
     @Reference(unbind = "removeSelectionInfoService")

@@ -4,7 +4,7 @@ import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import org.controlsfx.control.PlusMinusSlider;
-import org.lorainelab.igb.visualization.model.CanvasPaneModel;
+import org.lorainelab.igb.visualization.model.CanvasModel;
 import static org.lorainelab.igb.visualization.util.BoundsUtil.enforceRangeBounds;
 
 /**
@@ -14,7 +14,7 @@ import static org.lorainelab.igb.visualization.util.BoundsUtil.enforceRangeBound
 @Component(immediate = true, provide = HorizontalPlusMinusSlider.class)
 public class HorizontalPlusMinusSlider extends PlusMinusSlider {
 
-    private CanvasPaneModel canvasPaneModel;
+    private CanvasModel canvasModel;
 
     public HorizontalPlusMinusSlider() {
     }
@@ -23,16 +23,16 @@ public class HorizontalPlusMinusSlider extends PlusMinusSlider {
     public void activate() {
         setOnValueChanged((PlusMinusEvent event) -> {
             final double updatedScrollXValue = getUpdatedScrollxValue(event.getValue());
-            double scrollX = canvasPaneModel.getScrollX().get();
+            double scrollX = canvasModel.getScrollX().get();
             if (updatedScrollXValue != scrollX) {
-                canvasPaneModel.setScrollX(updatedScrollXValue, true);
+                canvasModel.setScrollX(updatedScrollXValue, true);
 //                syncWidgetSlider();
             }
         });
     }
 
     private double getUpdatedScrollxValue(double eventValue) {
-        double updatedScrollXValue = canvasPaneModel.getScrollX().get() + getAdjustedScrollValue(eventValue);
+        double updatedScrollXValue = canvasModel.getScrollX().get() + getAdjustedScrollValue(eventValue);
         updatedScrollXValue = enforceRangeBounds(updatedScrollXValue, 0, 100);
         return updatedScrollXValue;
     }
@@ -49,8 +49,8 @@ public class HorizontalPlusMinusSlider extends PlusMinusSlider {
     }
 
     @Reference
-    public void setCanvasPaneModel(CanvasPaneModel canvasPaneModel) {
-        this.canvasPaneModel = canvasPaneModel;
+    public void setCanvasModel(CanvasModel canvasModel) {
+        this.canvasModel = canvasModel;
     }
 
 }

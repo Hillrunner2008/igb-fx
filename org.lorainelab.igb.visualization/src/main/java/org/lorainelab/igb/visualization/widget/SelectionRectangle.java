@@ -8,7 +8,7 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import org.lorainelab.igb.visualization.ui.CanvasRegion;
-import org.lorainelab.igb.visualization.model.CanvasPaneModel;
+import org.lorainelab.igb.visualization.model.CanvasModel;
 import org.lorainelab.igb.visualization.model.TracksModel;
 import org.lorainelab.igb.visualization.util.BoundsUtil;
 import org.slf4j.Logger;
@@ -23,14 +23,14 @@ public class SelectionRectangle implements Widget {
 
     private static final Logger LOG = LoggerFactory.getLogger(SelectionRectangle.class);
     private CanvasRegion canvasRegion;
-    private CanvasPaneModel canvasPaneModel;
+    private CanvasModel canvasModel;
     private TracksModel tracksModel;
 
     public SelectionRectangle() {
     }
 
     @Override
-    public void render(CanvasPaneModel canvasPaneModel) {
+    public void render(CanvasModel canvasModel) {
         GraphicsContext gc = canvasRegion.getCanvas().getGraphicsContext2D();
         try {
             gc.save();
@@ -51,10 +51,10 @@ public class SelectionRectangle implements Widget {
 
     private Optional<Rectangle2D> getSelectionRectangle() {
         Rectangle2D[] selectionRectangle = new Rectangle2D[1];
-        canvasPaneModel.getMouseClickLocation().get().ifPresent(clickStartPosition -> {
+        canvasModel.getMouseClickLocation().get().ifPresent(clickStartPosition -> {
             tracksModel.getCoordinateTrackRenderer().ifPresent(coordinateTrackRenderer -> {
                 if (!coordinateTrackRenderer.getCanvasContext().getBoundingRect().contains(clickStartPosition)) {
-                    canvasPaneModel.getLocalPoint().get().ifPresent(localPoint -> {
+                    canvasModel.getLocalPoint().get().ifPresent(localPoint -> {
                         double minX;
                         double maxX;
                         double minY;
@@ -88,8 +88,8 @@ public class SelectionRectangle implements Widget {
     }
 
     @Reference
-    public void setCanvasPaneModel(CanvasPaneModel canvasPaneModel) {
-        this.canvasPaneModel = canvasPaneModel;
+    public void setCanvasModel(CanvasModel canvasModel) {
+        this.canvasModel = canvasModel;
     }
 
     @Reference
