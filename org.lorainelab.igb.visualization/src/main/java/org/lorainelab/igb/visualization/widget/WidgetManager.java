@@ -1,5 +1,6 @@
-package org.lorainelab.igb.visualization.model;
+package org.lorainelab.igb.visualization.widget;
 
+import org.lorainelab.igb.visualization.widget.TrackRenderer;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
@@ -15,8 +16,11 @@ import javafx.collections.SetChangeListener;
 import javafx.geometry.Point2D;
 import org.lorainelab.igb.data.model.GenomeVersion;
 import org.lorainelab.igb.selections.SelectionInfoService;
-import org.lorainelab.igb.visualization.PrimaryCanvasRegion;
-import org.lorainelab.igb.visualization.component.Widget;
+import org.lorainelab.igb.visualization.ui.CanvasRegion;
+import org.lorainelab.igb.visualization.model.CanvasPaneModel;
+import org.lorainelab.igb.visualization.model.TracksModel;
+import org.lorainelab.igb.visualization.model.ViewPortManager;
+import org.lorainelab.igb.visualization.widget.Widget;
 import org.reactfx.EventSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,20 +29,20 @@ import org.slf4j.LoggerFactory;
  *
  * @author dcnorris
  */
-@Component(immediate = true, provide = RenderManager.class)
-public class RenderManager {
+@Component(immediate = true, provide = WidgetManager.class)
+public class WidgetManager {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RenderManager.class);
+    private static final Logger LOG = LoggerFactory.getLogger(WidgetManager.class);
     private EventSource<RenderAction> refreshViewStream;
     private List<Widget> widgets;
     private CanvasPaneModel canvasPaneModel;
     private TracksModel tracksModel;
     private ViewPortManager viewPortManager;
     private ChangeListener<Number> refreshViewListener;
-    private PrimaryCanvasRegion primaryCanvasRegion;
+    private CanvasRegion canvasRegionRegion;
     private SelectionInfoService selectionInfoService;
 
-    public RenderManager() {
+    public WidgetManager() {
         refreshViewStream = new EventSource<>();
         widgets = Lists.newArrayList();
         refreshViewListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
@@ -72,8 +76,8 @@ public class RenderManager {
         tracksModel.getTrackRenderers().addListener((SetChangeListener.Change<? extends TrackRenderer> change) -> {
             refreshViewStream.emit(new RenderAction());
         });
-        primaryCanvasRegion.widthProperty().addListener(refreshViewListener);
-        primaryCanvasRegion.heightProperty().addListener(refreshViewListener);
+        canvasRegionRegion.widthProperty().addListener(refreshViewListener);
+        canvasRegionRegion.heightProperty().addListener(refreshViewListener);
         selectionInfoService.getSelectedGenomeVersion().addListener((ObservableValue<? extends Optional<GenomeVersion>> observable, Optional<GenomeVersion> oldValue, Optional<GenomeVersion> newValue) -> {
             refreshViewStream.emit(new RenderAction());
         });
@@ -99,8 +103,8 @@ public class RenderManager {
     }
 
     @Reference
-    public void setPrimaryCanvasRegion(PrimaryCanvasRegion primaryCanvasRegion) {
-        this.primaryCanvasRegion = primaryCanvasRegion;
+    public void setCanvasRegionRegion(CanvasRegion canvasRegionRegion) {
+        this.canvasRegionRegion = canvasRegionRegion;
     }
 
     @Reference

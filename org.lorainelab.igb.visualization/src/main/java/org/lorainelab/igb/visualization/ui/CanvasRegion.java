@@ -1,4 +1,4 @@
-package org.lorainelab.igb.visualization;
+package org.lorainelab.igb.visualization.ui;
 
 import aQute.bnd.annotation.component.Component;
 import javafx.geometry.Insets;
@@ -10,12 +10,12 @@ import javafx.scene.layout.Region;
  *
  * @author dcnorris
  */
-@Component(immediate = true, provide = PrimaryCanvasRegion.class)
-public class PrimaryCanvasRegion extends Region {
+@Component(immediate = true, provide = CanvasRegion.class)
+public class CanvasRegion extends Region {
 
     private final Canvas canvas;
 
-    public PrimaryCanvasRegion() {
+    public CanvasRegion() {
         canvas = new Canvas();
         canvas.setFocusTraversable(true);
         canvas.addEventFilter(MouseEvent.ANY, (e) -> canvas.requestFocus());

@@ -1,4 +1,4 @@
-package org.lorainelab.igb.visualization.component;
+package org.lorainelab.igb.visualization.widget;
 
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
@@ -7,7 +7,7 @@ import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import org.lorainelab.igb.visualization.PrimaryCanvasRegion;
+import org.lorainelab.igb.visualization.ui.CanvasRegion;
 import org.lorainelab.igb.visualization.model.CanvasPaneModel;
 import org.lorainelab.igb.visualization.model.TracksModel;
 import org.lorainelab.igb.visualization.util.BoundsUtil;
@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 public class SelectionRectangle implements Widget {
 
     private static final Logger LOG = LoggerFactory.getLogger(SelectionRectangle.class);
-    private PrimaryCanvasRegion primaryCanvas;
+    private CanvasRegion canvasRegion;
     private CanvasPaneModel canvasPaneModel;
     private TracksModel tracksModel;
 
@@ -31,7 +31,7 @@ public class SelectionRectangle implements Widget {
 
     @Override
     public void render(CanvasPaneModel canvasPaneModel) {
-        GraphicsContext gc = primaryCanvas.getCanvas().getGraphicsContext2D();
+        GraphicsContext gc = canvasRegion.getCanvas().getGraphicsContext2D();
         try {
             gc.save();
             getSelectionRectangle().ifPresent(selectionRectangle -> {
@@ -44,8 +44,8 @@ public class SelectionRectangle implements Widget {
     }
 
     private Point2D getRangeBoundedDragEventLocation(Point2D localPoint) {
-        double boundedEventX = BoundsUtil.enforceRangeBounds(localPoint.getX(), 0, primaryCanvas.getCanvas().getWidth());
-        double boundedEventY = BoundsUtil.enforceRangeBounds(localPoint.getY(), 0, primaryCanvas.getCanvas().getHeight());
+        double boundedEventX = BoundsUtil.enforceRangeBounds(localPoint.getX(), 0, canvasRegion.getCanvas().getWidth());
+        double boundedEventY = BoundsUtil.enforceRangeBounds(localPoint.getY(), 0, canvasRegion.getCanvas().getHeight());
         return new Point2D(boundedEventX, boundedEventY);
     }
 
@@ -93,8 +93,8 @@ public class SelectionRectangle implements Widget {
     }
 
     @Reference
-    public void setPrimaryCanvas(PrimaryCanvasRegion primaryCanvas) {
-        this.primaryCanvas = primaryCanvas;
+    public void setCanvasRegion(CanvasRegion canvasRegion) {
+        this.canvasRegion = canvasRegion;
     }
 
     @Override

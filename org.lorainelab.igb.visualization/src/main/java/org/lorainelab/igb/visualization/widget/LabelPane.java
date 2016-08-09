@@ -1,4 +1,4 @@
-package org.lorainelab.igb.visualization;
+package org.lorainelab.igb.visualization.widget;
 
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
@@ -14,7 +14,7 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.transform.Transform;
-import org.lorainelab.igb.visualization.component.Widget;
+import org.lorainelab.igb.visualization.widget.Widget;
 import org.lorainelab.igb.visualization.model.CanvasPaneModel;
 import org.lorainelab.igb.visualization.model.TrackLabel;
 import org.lorainelab.igb.visualization.model.TracksModel;

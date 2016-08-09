@@ -3,12 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.lorainelab.igb.visualization.model;
+package org.lorainelab.igb.visualization.widget;
 
 import java.util.Comparator;
 import org.lorainelab.igb.data.model.CanvasContext;
 import org.lorainelab.igb.data.model.View;
-import org.lorainelab.igb.visualization.component.Widget;
+import org.lorainelab.igb.visualization.model.TrackLabel;
+import org.lorainelab.igb.visualization.widget.Widget;
 
 /**
  * = TrackRenderer

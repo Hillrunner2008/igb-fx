@@ -1,4 +1,4 @@
-package org.lorainelab.igb.visualization.model;
+package org.lorainelab.igb.visualization.widget;
 
 import com.google.common.collect.Range;
 import com.sun.javafx.tk.FontMetrics;
@@ -14,6 +14,8 @@ import javafx.scene.text.FontWeight;
 import org.lorainelab.igb.data.model.CanvasContext;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.View;
+import org.lorainelab.igb.visualization.model.CanvasPaneModel;
+import org.lorainelab.igb.visualization.model.TrackLabel;
 import static org.lorainelab.igb.data.model.sequence.BasePairColorReference.getBaseColor;
 import static org.lorainelab.igb.visualization.util.BoundsUtil.enforceRangeBounds;
 import org.slf4j.Logger;

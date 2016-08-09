@@ -1,5 +1,7 @@
-package org.lorainelab.igb.visualization;
+package org.lorainelab.igb.visualization.ui;
 
+import org.lorainelab.igb.visualization.widget.LabelPane;
+import org.lorainelab.igb.visualization.widget.ZoomSliderWidget;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
@@ -20,11 +22,11 @@ public class MainViewerSplitPane extends SplitPane {
     private HBox rightSide;
     private VBox rightSideVbox;
     private VerticalZoomSlider verticalZoomSlider;
-    private CanvasPane canvasStackPane;
     private HorizontalPlusMinusSlider horizontalPlusMinusSlider;
     private ZoomSliderWidget zoomSliderWidget;
     private VerticalScrollBar verticalScrollBar;
     private LabelPane labelPane;
+    private CanvasRegion canvasRegion;
 
     public MainViewerSplitPane() {
         setDividerPositions(0.1);
@@ -39,12 +41,12 @@ public class MainViewerSplitPane extends SplitPane {
     @Activate
     public void activate() {
         HBox.setHgrow(rightSideVbox, Priority.ALWAYS);
-        VBox.setVgrow(canvasStackPane, Priority.ALWAYS);
+        VBox.setVgrow(canvasRegion, Priority.ALWAYS);
         HBox.setHgrow(labelPane, Priority.ALWAYS);
         Platform.runLater(() -> {
             leftSide.getChildren().add(verticalZoomSlider);
             leftSide.getChildren().add(labelPane);
-            rightSideVbox.getChildren().add(canvasStackPane);
+            rightSideVbox.getChildren().add(canvasRegion);
             rightSideVbox.getChildren().add(zoomSliderWidget);
             rightSideVbox.getChildren().add(horizontalPlusMinusSlider);
             rightSide.getChildren().add(verticalScrollBar);
@@ -58,8 +60,8 @@ public class MainViewerSplitPane extends SplitPane {
     }
 
     @Reference
-    public void setCanvasStackPane(CanvasPane canvasStackPane) {
-        this.canvasStackPane = canvasStackPane;
+    public void setCanvasRegion(CanvasRegion canvasRegion) {
+        this.canvasRegion = canvasRegion;
     }
 
     @Reference

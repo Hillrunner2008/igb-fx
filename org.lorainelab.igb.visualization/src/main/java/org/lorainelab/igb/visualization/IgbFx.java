@@ -10,18 +10,16 @@ import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.lorainelab.igb.stage.provider.api.StageProvider;
+import org.lorainelab.igb.visualization.ui.Root;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component(immediate = true)
-public class MainWindow {
+public class IgbFx {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MainWindow.class);
+    private static final Logger LOG = LoggerFactory.getLogger(IgbFx.class);
     private Stage stage;
     private Root root;
-
-    public MainWindow() {
-    }
 
     @Activate
     public void activate() {
@@ -30,7 +28,7 @@ public class MainWindow {
         initializeFxRuntime();
         Platform.runLater(() -> {
             Scene scene = new Scene(root);
-            stage.setTitle("JavaFx IGB");
+            stage.setTitle("IGBfx");
             stage.setScene(scene);
             stage.show();
         });

@@ -1,5 +1,7 @@
 package org.lorainelab.igb.visualization.model;
 
+import org.lorainelab.igb.visualization.widget.TrackRenderer;
+import org.lorainelab.igb.visualization.widget.ZoomableTrackRenderer;
 import com.google.common.base.CharMatcher;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import java.io.IOException;

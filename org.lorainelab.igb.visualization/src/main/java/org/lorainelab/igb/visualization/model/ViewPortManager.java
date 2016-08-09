@@ -1,5 +1,7 @@
 package org.lorainelab.igb.visualization.model;
 
+import org.lorainelab.igb.visualization.widget.TrackRenderer;
+import org.lorainelab.igb.visualization.widget.CoordinateTrackRenderer;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
@@ -9,9 +11,9 @@ import java.util.Collections;
 import java.util.List;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.Canvas;
-import org.lorainelab.igb.visualization.PrimaryCanvasRegion;
-import org.lorainelab.igb.visualization.VerticalScrollBar;
-import static org.lorainelab.igb.visualization.model.TrackRenderer.SORT_BY_WEIGHT;
+import org.lorainelab.igb.visualization.ui.CanvasRegion;
+import org.lorainelab.igb.visualization.ui.VerticalScrollBar;
+import static org.lorainelab.igb.visualization.widget.TrackRenderer.SORT_BY_WEIGHT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,14 +37,14 @@ public class ViewPortManager {
     private double trackSize;
     private Canvas canvas;
     private int indexOfCoordinateTrack;
-    private PrimaryCanvasRegion primaryCanvasRegion;
+    private CanvasRegion canvasRegionRegion;
     private TracksModel tracksModel;
     private VerticalScrollBar verticalScrollBar;
     private CanvasPaneModel canvasPaneModel;
 
     @Activate
     public void activate() {
-        this.canvas = primaryCanvasRegion.getCanvas();
+        this.canvas = canvasRegionRegion.getCanvas();
         indexOfCoordinateTrack = -1;
         refresh();
 //        tracksModel.getTrackRenderers().addListener((SetChangeListener.Change<? extends TrackRenderer> change) -> {
@@ -159,8 +161,8 @@ public class ViewPortManager {
     }
 
     @Reference
-    public void setPrimaryCanvasRegion(PrimaryCanvasRegion primaryCanvasRegion) {
-        this.primaryCanvasRegion = primaryCanvasRegion;
+    public void setCanvasRegionRegion(CanvasRegion canvasRegionRegion) {
+        this.canvasRegionRegion = canvasRegionRegion;
     }
 
     @Reference

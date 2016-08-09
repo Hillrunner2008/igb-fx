@@ -1,4 +1,4 @@
-package org.lorainelab.igb.visualization;
+package org.lorainelab.igb.visualization.ui;
 
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;

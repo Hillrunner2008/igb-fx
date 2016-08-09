@@ -1,4 +1,4 @@
-package org.lorainelab.igb.visualization.model;
+package org.lorainelab.igb.visualization.widget;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +17,8 @@ import org.lorainelab.igb.data.model.Track;
 import org.lorainelab.igb.data.model.View;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
 import org.lorainelab.igb.data.model.glyph.Glyph;
+import org.lorainelab.igb.visualization.model.CanvasPaneModel;
+import org.lorainelab.igb.visualization.model.TrackLabel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

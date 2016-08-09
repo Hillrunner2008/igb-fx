@@ -1,4 +1,4 @@
-package org.lorainelab.igb.visualization.component;
+package org.lorainelab.igb.visualization.widget;
 
 import org.lorainelab.igb.visualization.model.CanvasPaneModel;
 

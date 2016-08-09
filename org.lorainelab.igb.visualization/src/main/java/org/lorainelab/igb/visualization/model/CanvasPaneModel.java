@@ -16,9 +16,10 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Point2D;
+import javafx.geometry.Rectangle2D;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.selections.SelectionInfoService;
-import org.lorainelab.igb.visualization.PrimaryCanvasRegion;
+import org.lorainelab.igb.visualization.ui.CanvasRegion;
 import static org.lorainelab.igb.visualization.util.BoundsUtil.enforceRangeBounds;
 import static org.lorainelab.igb.visualization.util.CanvasUtils.exponentialScaleTransform;
 import org.slf4j.Logger;
@@ -46,11 +47,12 @@ public class CanvasPaneModel {
     private DoubleProperty hSlider;
     private DoubleProperty vSlider;
     private SelectionInfoService selectionInfoService;
-    private PrimaryCanvasRegion primaryCanvasRegion;
+    private CanvasRegion canvasRegionRegion;
     //TODO consider moving mouse related content to separate model
     private ObjectProperty<Optional<Point2D>> mouseClickLocation;
     private ObjectProperty<Optional<Point2D>> localPoint;
     private ObjectProperty<Optional<Point2D>> screenPoint;
+    private ObjectProperty<Optional<Rectangle2D>> selectionRectangle;
     private boolean mouseDragging;
     private BooleanProperty multiSelectModeActive;
 
@@ -69,6 +71,7 @@ public class CanvasPaneModel {
         mouseClickLocation = new SimpleObjectProperty<>(Optional.empty());
         localPoint = new SimpleObjectProperty<>(Optional.empty());
         screenPoint = new SimpleObjectProperty<>(Optional.empty());
+        selectionRectangle = new SimpleObjectProperty<>(Optional.empty());
         mouseDragging = false;
         multiSelectModeActive = new SimpleBooleanProperty(false);
 
@@ -77,8 +80,8 @@ public class CanvasPaneModel {
     @Activate
     public void activate() {
         xFactor.addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-            final double previousVisibleCoordinatesX = Math.floor(primaryCanvasRegion.getWidth() / oldValue.doubleValue());
-            final double updatedVisibleCoordinatesX = Math.floor(primaryCanvasRegion.getWidth() / newValue.doubleValue());
+            final double previousVisibleCoordinatesX = Math.floor(canvasRegionRegion.getWidth() / oldValue.doubleValue());
+            final double updatedVisibleCoordinatesX = Math.floor(canvasRegionRegion.getWidth() / newValue.doubleValue());
             visibleVirtualCoordinatesX.setValue(updatedVisibleCoordinatesX);
             updateScrollXPosition(previousVisibleCoordinatesX);
         });
@@ -118,7 +121,7 @@ public class CanvasPaneModel {
     }
 
     private void resetPositionalState() {
-        xFactor.set(exponentialScaleTransform(primaryCanvasRegion.getWidth(), modelWidth.get(), 0));
+        xFactor.set(exponentialScaleTransform(canvasRegionRegion.getWidth(), modelWidth.get(), 0));
         yFactor.set(1);
         resetZoomStripe();
         scrollX.setValue(0);
@@ -207,6 +210,14 @@ public class CanvasPaneModel {
         return screenPoint;
     }
 
+    public ObjectProperty<Optional<Rectangle2D>> getSelectionRectangle() {
+        return selectionRectangle;
+    }
+
+    public void setSelectionRectangle(Rectangle2D selectionRectangle) {
+        this.selectionRectangle.set(Optional.ofNullable(selectionRectangle));
+    }
+
     public void setMouseClickLocation(Point2D mouseClickLocation) {
         this.mouseClickLocation.set(Optional.ofNullable(mouseClickLocation));
     }
@@ -233,8 +244,8 @@ public class CanvasPaneModel {
     }
 
     @Reference
-    public void setPrimaryCanvasRegion(PrimaryCanvasRegion primaryCanvasRegion) {
-        this.primaryCanvasRegion = primaryCanvasRegion;
+    public void setCanvasRegionRegion(CanvasRegion canvasRegionRegion) {
+        this.canvasRegionRegion = canvasRegionRegion;
     }
 
     public void setxFactor(double xFactor) {

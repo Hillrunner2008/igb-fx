@@ -11,12 +11,12 @@ import javafx.geometry.Point2D;
  *
  * @author jeckstei
  */
-public class MouseEvent {
+public class MouseHoverEvent {
 
     protected Point2D local;
     protected Point2D screen;
 
-    public MouseEvent(Point2D local, Point2D screen) {
+    public MouseHoverEvent(Point2D local, Point2D screen) {
         this.local = local;
         this.screen = screen;
     }
