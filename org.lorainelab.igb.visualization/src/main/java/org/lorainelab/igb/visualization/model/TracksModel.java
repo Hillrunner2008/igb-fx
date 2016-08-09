@@ -4,6 +4,7 @@ import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Sets;
+import java.util.Optional;
 import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
@@ -86,6 +87,13 @@ public class TracksModel {
 
     public ObservableSet<TrackRenderer> getTrackRenderers() {
         return trackRenderers;
+    }
+
+    public Optional<CoordinateTrackRenderer> getCoordinateTrackRenderer() {
+        return trackRenderers.stream()
+                .filter(tr -> tr instanceof CoordinateTrackRenderer)
+                .map(tr -> CoordinateTrackRenderer.class.cast(tr))
+                .findFirst();
     }
 
     @Reference

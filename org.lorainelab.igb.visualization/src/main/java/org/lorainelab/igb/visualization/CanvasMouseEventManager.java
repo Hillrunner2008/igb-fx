@@ -19,7 +19,6 @@ import org.lorainelab.igb.data.model.View;
 import org.lorainelab.igb.selections.SelectionInfoService;
 import org.lorainelab.igb.visualization.model.CanvasPaneModel;
 import static org.lorainelab.igb.visualization.model.CanvasPaneModel.MAX_ZOOM_MODEL_COORDINATES_X;
-import org.lorainelab.igb.visualization.model.CoordinateTrackRenderer;
 import org.lorainelab.igb.visualization.model.TrackRenderer;
 import org.lorainelab.igb.visualization.model.TracksModel;
 import org.lorainelab.igb.visualization.model.ZoomableTrackRenderer;
@@ -50,6 +49,10 @@ public class CanvasMouseEventManager {
     @Activate
     public void activate() {
         initailizeKeyListener();
+        initializeMouseEventHandlers();
+    }
+
+    private void initializeMouseEventHandlers() {
         Canvas canvas = primaryCanvas.getCanvas();
         canvas.setOnScroll(scrollEvent -> {
             final boolean isForwardScroll = scrollEvent.getDeltaY() > 0.0;
@@ -98,7 +101,7 @@ public class CanvasMouseEventManager {
             final Point2D screenPoint2DFromMouseEvent = getScreenPoint2DFromMouseEvent(event);
             if (types.contains(MouseEvent.MOUSE_DRAGGED)) {
                 //Rectangle2D selectionRectangle = getSelectionRectangle(event);
-                tracksModel.getTrackRenderers().stream().filter(tr -> tr instanceof CoordinateTrackRenderer).findFirst().ifPresent(tr -> {
+                tracksModel.getCoordinateTrackRenderer().ifPresent(tr -> {
                     canvasPaneModel.getMouseClickLocation().get().ifPresent(mouseClickLocation -> {
                         Point2D point = getLocalPoint2DFromMouseEvent(event);
                         Rectangle2D boundingRect = tr.getCanvasContext().getBoundingRect();
@@ -119,6 +122,7 @@ public class CanvasMouseEventManager {
                             jumpZoom(zoomFocus, tr, event);
                         }
                     });
+
                 });
 
 //                if (types.contains(MouseEvent.MOUSE_EXITED)) {

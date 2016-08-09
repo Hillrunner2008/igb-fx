@@ -6,6 +6,7 @@
 package org.lorainelab.igb.visualization.component;
 
 import aQute.bnd.annotation.component.Activate;
+import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
@@ -18,7 +19,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author jeckstei
  */
-@aQute.bnd.annotation.component.Component(immediate = true, provide = Widget.class)
+@Component(immediate = true, provide = Widget.class)
 public class ZoomStripe implements Widget {
 
     private static final Logger LOG = LoggerFactory.getLogger(ZoomStripe.class);

@@ -69,17 +69,19 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     private void drawClickDrag(CanvasPaneModel canvasPaneModel) {
         canvasPaneModel.getMouseClickLocation().get().ifPresent(lastMouseClick -> {
             canvasPaneModel.getLocalPoint().get().ifPresent(lastMouseDrag -> {
-                final double lastMouseClickX = Math.floor(lastMouseClick.getX() / xfactor);
-                final double lastMouseDragX = Math.floor(lastMouseDrag.getX() / xfactor);
-                if (lastMouseClickX >= 0 && lastMouseDragX >= 0) {
-                    gc.save();
-                    gc.setFill(CLICK_DRAG_HIGHLIGHT);
-                    if (lastMouseClickX < lastMouseDragX) {
-                        gc.fillRect(lastMouseClickX, viewBoundingRectangle.getMinY(), lastMouseDragX - lastMouseClickX, COORDINATE_CENTER_LINE + 2);
-                    } else {
-                        gc.fillRect(lastMouseClickX, viewBoundingRectangle.getMinY(), lastMouseClickX - lastMouseDragX, COORDINATE_CENTER_LINE + 2);
+                if (canvasContext.getBoundingRect().contains(lastMouseClick)) {
+                    final double lastMouseClickX = Math.floor(lastMouseClick.getX() / xfactor);
+                    final double lastMouseDragX = Math.floor(lastMouseDrag.getX() / xfactor);
+                    if (lastMouseClickX >= 0 && lastMouseDragX >= 0) {
+                        gc.save();
+                        gc.setFill(CLICK_DRAG_HIGHLIGHT);
+                        if (lastMouseClickX < lastMouseDragX) {
+                            gc.fillRect(lastMouseClickX, viewBoundingRectangle.getMinY(), lastMouseDragX - lastMouseClickX, COORDINATE_CENTER_LINE + 2);
+                        } else {
+                            gc.fillRect(lastMouseDragX, viewBoundingRectangle.getMinY(), lastMouseClickX - lastMouseDragX, COORDINATE_CENTER_LINE + 2);
+                        }
+                        gc.restore();
                     }
-                    gc.restore();
                 }
             });
         });
