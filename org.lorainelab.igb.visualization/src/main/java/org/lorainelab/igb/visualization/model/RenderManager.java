@@ -61,15 +61,12 @@ public class RenderManager {
         canvasPaneModel.getVisibleVirtualCoordinatesX().addListener(refreshViewListener);
         canvasPaneModel.getvSlider().addListener(refreshViewListener);
         canvasPaneModel.getMouseClickLocation().addListener((ObservableValue<? extends Optional<Point2D>> observable, Optional<Point2D> oldValue, Optional<Point2D> newValue) -> {
-            LOG.info("mouseClickLocation {}", newValue);
             refreshViewStream.emit(new RenderAction());
         });
         canvasPaneModel.getLocalPoint().addListener((ObservableValue<? extends Optional<Point2D>> observable, Optional<Point2D> oldValue, Optional<Point2D> newValue) -> {
-            LOG.info("getLocalPoint {}", newValue);
             refreshViewStream.emit(new RenderAction());
         });
         canvasPaneModel.getScreenPoint().addListener((ObservableValue<? extends Optional<Point2D>> observable, Optional<Point2D> oldValue, Optional<Point2D> newValue) -> {
-            LOG.info("getScreenPoint {}", newValue);
             refreshViewStream.emit(new RenderAction());
         });
         tracksModel.getTrackRenderers().addListener((SetChangeListener.Change<? extends TrackRenderer> change) -> {
