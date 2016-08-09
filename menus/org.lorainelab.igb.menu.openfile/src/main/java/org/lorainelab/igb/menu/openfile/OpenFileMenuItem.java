@@ -24,6 +24,7 @@ import org.lorainelab.igb.menu.api.model.ParentMenu;
 import org.lorainelab.igb.menu.api.model.WeightedMenuEntry;
 import org.lorainelab.igb.menu.api.model.WeightedMenuItem;
 import org.lorainelab.igb.preferences.SessionPreferences;
+import org.lorainelab.igb.recentfiles.registry.api.RecentFilesRegistry;
 import org.lorainelab.igb.search.api.SearchService;
 import org.lorainelab.igb.search.api.model.IndexIdentity;
 import org.lorainelab.igb.selections.SelectionInfoService;
@@ -48,6 +49,7 @@ public class OpenFileMenuItem implements MenuBarEntryProvider, ToolbarButtonProv
     private FileTypeHandlerRegistry fileTypeHandlerRegistry;
     private SelectionInfoService selectionInfoService;
     private SearchService searchService;
+    private RecentFilesRegistry recentFilesRegistry;
 
     @Activate
     public void activate() {
@@ -69,6 +71,7 @@ public class OpenFileMenuItem implements MenuBarEntryProvider, ToolbarButtonProv
                     return f.getSupportedExtensions().contains(Files.getFileExtension(file.getPath()));
                 }).findFirst().ifPresent(fileTypeHandler -> {
                     selectionInfoService.getSelectedGenomeVersion().get().ifPresent(gv -> {
+                        recentFilesRegistry.getRecentFiles().add(file.getPath());
                         DataSourceReference dataSourceReference = new DataSourceReference(file.getPath(), dataSource);
                         gv.getLoadedDataSets().add(new DataSet(file.getName(), dataSourceReference, fileTypeHandler));
                         indexDataSetForSearch(fileTypeHandler, dataSourceReference);
@@ -149,6 +152,11 @@ public class OpenFileMenuItem implements MenuBarEntryProvider, ToolbarButtonProv
     @Reference
     public void setSearchService(SearchService searchService) {
         this.searchService = searchService;
+    }
+
+    @Reference
+    public void setRecentFilesRegistry(RecentFilesRegistry recentFilesRegistry) {
+        this.recentFilesRegistry = recentFilesRegistry;
     }
 
     private void addFileExtensionFilters(FileChooser fileChooser) {
