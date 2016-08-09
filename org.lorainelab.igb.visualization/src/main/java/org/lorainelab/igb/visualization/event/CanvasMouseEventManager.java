@@ -1,6 +1,5 @@
 package org.lorainelab.igb.visualization.event;
 
-import org.lorainelab.igb.visualization.ui.CanvasRegion;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
@@ -18,13 +17,14 @@ import org.lorainelab.igb.data.model.View;
 import org.lorainelab.igb.selections.SelectionInfoService;
 import org.lorainelab.igb.visualization.model.CanvasModel;
 import static org.lorainelab.igb.visualization.model.CanvasModel.MAX_ZOOM_MODEL_COORDINATES_X;
-import org.lorainelab.igb.visualization.widget.TrackRenderer;
 import org.lorainelab.igb.visualization.model.TracksModel;
-import org.lorainelab.igb.visualization.widget.ZoomableTrackRenderer;
+import org.lorainelab.igb.visualization.ui.CanvasRegion;
 import org.lorainelab.igb.visualization.util.BoundsUtil;
 import static org.lorainelab.igb.visualization.util.BoundsUtil.enforceRangeBounds;
 import static org.lorainelab.igb.visualization.util.CanvasUtils.exponentialScaleTransform;
 import static org.lorainelab.igb.visualization.util.CanvasUtils.invertExpScaleTransform;
+import org.lorainelab.igb.visualization.widget.TrackRenderer;
+import org.lorainelab.igb.visualization.widget.ZoomableTrackRenderer;
 import org.reactfx.EventStream;
 import org.reactfx.EventStreams;
 import org.slf4j.Logger;
@@ -54,24 +54,25 @@ public class CanvasMouseEventManager {
     private void initializeMouseEventHandlers() {
         addCanvasScrollEventHandler();
         addHoverEventHandler();
-        canvas.setOnMouseDragEntered((MouseEvent event) -> {
-            canvasModel.resetZoomStripe();
-        });
-        canvas.setOnMouseDragged((MouseEvent event) -> {
+        canvas.setOnMouseDragEntered(e -> canvasModel.resetZoomStripe());
+
+        canvas.setOnMouseDragged(event -> {
             canvasModel.setLocalPoint(getPoint2dFromMouseEvent(event));
             canvasModel.setScreenPoint(getScreenPoint2DFromMouseEvent(event));
             canvasModel.setMouseDragging(true);
         });
-        canvas.setOnMousePressed((MouseEvent event) -> {
+        canvas.setOnMousePressed(event -> {
             canvasModel.setMouseClickLocation(getPoint2dFromMouseEvent(event));
         });
         canvas.setOnMouseReleased((MouseEvent event) -> {
             if (canvasModel.isMouseDragging()) {
                 processMouseDragReleased(event);
             } else {
-                processMousePressReleased(event);
+                processMouseClicked(event);
             }
-            clearMouseEventState();
+            canvasModel.setLocalPoint(null);
+            canvasModel.setScreenPoint(null);
+            canvasModel.setMouseDragging(false);
         });
 
     }
@@ -103,13 +104,7 @@ public class CanvasMouseEventManager {
         });
     }
 
-    private void clearMouseEventState() {
-        canvasModel.setLocalPoint(null);
-        canvasModel.setMouseDragging(false);
-        canvasModel.setScreenPoint(null);
-    }
-
-    private void processMousePressReleased(MouseEvent event) {
+    private void processMouseClicked(MouseEvent event) {
         if (event.getClickCount() >= 2) {
             selectionInfoService.getSelectedGlyphs().clear();
             tracksModel.getTrackRenderers().stream()
@@ -272,7 +267,6 @@ public class CanvasMouseEventManager {
     }
 
     private void initailizeKeyListener() {
-        Canvas canvas = canvasRegion.getCanvas();
         canvas.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent event) {
