@@ -27,6 +27,7 @@ import org.lorainelab.igb.visualization.widget.TrackRenderer;
 import org.lorainelab.igb.visualization.widget.ZoomableTrackRenderer;
 import org.reactfx.EventStream;
 import org.reactfx.EventStreams;
+import org.reactfx.util.Either;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,18 +80,44 @@ public class CanvasMouseEventManager {
 
     private void addHoverEventHandler() {
         EventStream<MouseEvent> mouseEventsStream = EventStreams.eventsOf(canvas, MouseEvent.ANY);
-        EventStream<org.lorainelab.igb.visualization.event.MouseHoverEvent> stationaryPositions = mouseEventsStream
+        EventStream<MouseHoverEvent> stationaryPositions = mouseEventsStream
                 .successionEnds(Duration.ofSeconds(1))
                 .filter(e -> e.getEventType() == MouseEvent.MOUSE_MOVED)
                 .map(e -> {
-                    return new org.lorainelab.igb.visualization.event.MouseHoverEvent(
+                    return new MouseHoverEvent(
                             new Point2D(e.getX(), e.getY()),
                             new Point2D(e.getScreenX(), e.getScreenY())
                     );
                 });
-        stationaryPositions.subscribe(hoverEvent -> {
+        EventStream<MouseHoverEvent> stoppers = mouseEventsStream.supply((MouseHoverEvent) null);
 
+        EventStream<Either<MouseHoverEvent, MouseHoverEvent>> stationaryEvents
+                = stationaryPositions.or(stoppers)
+                        .distinct();
+
+        stationaryEvents.<MouseHoverEvent>map(either -> {
+            return either.unify(
+                    pos -> pos,
+                    stop -> null
+            );
+        }).subscribe(hoverEvent -> {
+            if (hoverEvent != null) {
+                tracksModel.getTrackRenderers().stream()
+                        .filter(tr -> tr instanceof ZoomableTrackRenderer)
+                        .map(tr -> ZoomableTrackRenderer.class.cast(tr))
+                        .filter(tr -> tr.isContained(hoverEvent.getLocal()))
+                        .findFirst()
+                        .ifPresent(tr -> tr.showToolTip(hoverEvent));
+            } else {
+                tracksModel.getTrackRenderers().stream()
+                        .filter(tr -> tr instanceof ZoomableTrackRenderer)
+                        .map(tr -> ZoomableTrackRenderer.class.cast(tr))
+                        .forEach(tr -> {
+                            tr.hideTooltip();
+                        });
+            }
         });
+
     }
 
     private void addCanvasScrollEventHandler() {

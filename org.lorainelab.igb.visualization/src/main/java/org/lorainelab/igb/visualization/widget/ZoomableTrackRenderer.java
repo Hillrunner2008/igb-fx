@@ -17,6 +17,7 @@ import org.lorainelab.igb.data.model.Track;
 import org.lorainelab.igb.data.model.View;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
 import org.lorainelab.igb.data.model.glyph.Glyph;
+import org.lorainelab.igb.visualization.event.MouseHoverEvent;
 import org.lorainelab.igb.visualization.model.CanvasModel;
 import org.lorainelab.igb.visualization.model.TrackLabel;
 import org.slf4j.Logger;
@@ -33,7 +34,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     final int modelWidth;
     final Track track;
     private final View view;
-    private final Tooltip tooltip = new Tooltip();
+    private final Tooltip tooltip;
     private final CanvasContext canvasContext;
     private final GraphicsContext gc;
     private int weight;
@@ -46,9 +47,10 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         canvasContext = new CanvasContext(canvas, 0, 0);
         trackLabel = new TrackLabel(this, track.getTrackLabel());
         gc = canvas.getGraphicsContext2D();
+        tooltip = new Tooltip();
     }
 
-    public void processLastMouseClickedPosition(CanvasModel canvasModel) {
+    private void processLastMouseClickedPosition(CanvasModel canvasModel) {
         boolean multiSelectModeActive = canvasModel.isMultiSelectModeActive().get();
         canvasModel.getMouseClickLocation().get().ifPresent(mouseClicked -> {
             if (!canvasContext.getBoundingRect().contains(mouseClicked)) {
@@ -85,7 +87,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         });
     }
 
-    public void updateView(double scrollX, double scrollY) {
+    private void updateView(double scrollX, double scrollY) {
         if (canvasContext.isVisible()) {
             final double visibleVirtualCoordinatesX = Math.floor(canvasContext.getBoundingRect().getWidth() / view.getXfactor());
             final double visibleVirtualCoordinatesY = Math.floor(canvasContext.getBoundingRect().getHeight() / view.getYfactor());
@@ -106,7 +108,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         }
     }
 
-    public void scaleCanvas(double xFactor, double scrollX, double scrollY) {
+    private void scaleCanvas(double xFactor, double scrollX, double scrollY) {
         view.setXfactor(xFactor);
         if (canvasContext.isVisible()) {
             double scaleToY = canvasContext.getTrackHeight() / track.getModelHeight();
@@ -118,7 +120,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         }
     }
 
-    public void clearCanvas() {
+    private void clearCanvas() {
         gc.save();
         gc.clearRect(
                 0,
@@ -149,20 +151,22 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         scaleCanvas(canvasModel.getxFactor().get(), canvasModel.getScrollX().get(), canvasModel.getScrollY().get());
     }
 
-    private void hideTooltip() {
+    public void hideTooltip() {
         Platform.runLater(() -> {
             tooltip.hide();
         });
     }
 
-    private void showToolTip(Point2D local, Point2D screen) {
-
+    public void showToolTip(MouseHoverEvent hoverEvent) {
+        Point2D local = hoverEvent.getLocal();
+        Point2D screen = hoverEvent.getScreen();
         Rectangle2D modelCoordinateBoundingBox = canvasToViewCoordinates(local);
-        Optional<CompositionGlyph> intersect = track.getSlotMap().values().stream().filter(glyph -> glyph.getRenderBoundingRect().intersects(modelCoordinateBoundingBox))
+        Optional<CompositionGlyph> intersect = track.getSlotMap().values()
+                .stream().filter(glyph -> glyph.getRenderBoundingRect()
+                .intersects(modelCoordinateBoundingBox))
                 .findFirst();
 
         if (intersect.isPresent()) {
-
             Platform.runLater(() -> {
                 CompositionGlyph cg = intersect.get();
                 StringBuilder sb = new StringBuilder();
