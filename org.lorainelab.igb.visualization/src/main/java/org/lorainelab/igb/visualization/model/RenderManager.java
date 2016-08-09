@@ -12,11 +12,14 @@ import java.util.Optional;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.SetChangeListener;
+import javafx.geometry.Point2D;
 import org.lorainelab.igb.data.model.GenomeVersion;
 import org.lorainelab.igb.selections.SelectionInfoService;
 import org.lorainelab.igb.visualization.PrimaryCanvasRegion;
 import org.lorainelab.igb.visualization.component.Widget;
 import org.reactfx.EventSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -25,6 +28,7 @@ import org.reactfx.EventSource;
 @Component(immediate = true, provide = RenderManager.class)
 public class RenderManager {
 
+    private static final Logger LOG = LoggerFactory.getLogger(RenderManager.class);
     private EventSource<RenderAction> refreshViewStream;
     private List<Widget> widgets;
     private CanvasPaneModel canvasPaneModel;
@@ -56,13 +60,25 @@ public class RenderManager {
         canvasPaneModel.getScrollYVisibleAmount().addListener(refreshViewListener);
         canvasPaneModel.getVisibleVirtualCoordinatesX().addListener(refreshViewListener);
         canvasPaneModel.getvSlider().addListener(refreshViewListener);
+        canvasPaneModel.getMouseClickLocation().addListener((ObservableValue<? extends Optional<Point2D>> observable, Optional<Point2D> oldValue, Optional<Point2D> newValue) -> {
+            LOG.info("mouseClickLocation {}", newValue);
+            refreshViewStream.emit(new RenderAction());
+        });
+        canvasPaneModel.getLocalPoint().addListener((ObservableValue<? extends Optional<Point2D>> observable, Optional<Point2D> oldValue, Optional<Point2D> newValue) -> {
+            LOG.info("getLocalPoint {}", newValue);
+            refreshViewStream.emit(new RenderAction());
+        });
+        canvasPaneModel.getScreenPoint().addListener((ObservableValue<? extends Optional<Point2D>> observable, Optional<Point2D> oldValue, Optional<Point2D> newValue) -> {
+            LOG.info("getScreenPoint {}", newValue);
+            refreshViewStream.emit(new RenderAction());
+        });
         tracksModel.getTrackRenderers().addListener((SetChangeListener.Change<? extends TrackRenderer> change) -> {
             refreshViewStream.emit(new RenderAction());
         });
         primaryCanvasRegion.widthProperty().addListener(refreshViewListener);
         primaryCanvasRegion.heightProperty().addListener(refreshViewListener);
         selectionInfoService.getSelectedGenomeVersion().addListener((ObservableValue<? extends Optional<GenomeVersion>> observable, Optional<GenomeVersion> oldValue, Optional<GenomeVersion> newValue) -> {
-               refreshViewStream.emit(new RenderAction());
+            refreshViewStream.emit(new RenderAction());
         });
     }
 

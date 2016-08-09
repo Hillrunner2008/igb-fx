@@ -21,7 +21,7 @@ import static org.lorainelab.igb.data.model.glyph.Glyph.MIN_X_COMPARATOR;
  */
 public class DataSet {
 
-    private static final int DEFAULT_STACK_HEIGHT = 10;
+    private static final int DEFAULT_STACK_HEIGHT = 5;
     private final Multimap<String, CompositionGlyph> loadedAnnoations;
     private final String trackLabel;
     private Map<String, RangeSet<Integer>> loadedRegions;

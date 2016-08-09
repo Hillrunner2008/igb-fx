@@ -22,10 +22,6 @@ public interface TrackRenderer extends Widget {
 
     TrackLabel getTrackLabel();
 
-    void scaleCanvas(double xFactor, double scrollX, double scrollY);
-
-    void updateView(double scrollX, double scrollY);
-
     CanvasContext getCanvasContext();
 
     View getView();

@@ -8,10 +8,12 @@ import java.util.Optional;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Point2D;
 import org.lorainelab.igb.data.model.Chromosome;
@@ -46,9 +48,9 @@ public class CanvasPaneModel {
     private SelectionInfoService selectionInfoService;
     private PrimaryCanvasRegion primaryCanvasRegion;
     //TODO consider moving mouse related content to separate model
-    private Optional<Point2D> mouseClickLocation;
-    private Optional<Point2D> localPoint;
-    private Optional<Point2D> screenPoint;
+    private ObjectProperty<Optional<Point2D>> mouseClickLocation;
+    private ObjectProperty<Optional<Point2D>> localPoint;
+    private ObjectProperty<Optional<Point2D>> screenPoint;
     private boolean mouseDragging;
     private BooleanProperty multiSelectModeActive;
 
@@ -64,9 +66,9 @@ public class CanvasPaneModel {
         scrollYVisibleAmount = new SimpleDoubleProperty(100);
         hSlider = new SimpleDoubleProperty(0);
         vSlider = new SimpleDoubleProperty(0);
-        mouseClickLocation = Optional.empty();
-        localPoint = Optional.empty();
-        screenPoint = Optional.empty();
+        mouseClickLocation = new SimpleObjectProperty<>(Optional.empty());
+        localPoint = new SimpleObjectProperty<>(Optional.empty());
+        screenPoint = new SimpleObjectProperty<>(Optional.empty());
         mouseDragging = false;
         multiSelectModeActive = new SimpleBooleanProperty(false);
 
@@ -193,28 +195,28 @@ public class CanvasPaneModel {
         this.multiSelectModeActive.set(multiSelectModeActive);
     }
 
-    public Optional<Point2D> getMouseClickLocation() {
+    public ObjectProperty<Optional<Point2D>> getMouseClickLocation() {
         return mouseClickLocation;
     }
 
-    public Optional<Point2D> getLocalPoint() {
+    public ObjectProperty<Optional<Point2D>> getLocalPoint() {
         return localPoint;
     }
 
-    public Optional<Point2D> getScreenPoint() {
+    public ObjectProperty<Optional<Point2D>> getScreenPoint() {
         return screenPoint;
     }
 
     public void setMouseClickLocation(Point2D mouseClickLocation) {
-        this.mouseClickLocation = Optional.ofNullable(mouseClickLocation);
+        this.mouseClickLocation.set(Optional.ofNullable(mouseClickLocation));
     }
 
     public void setLocalPoint(Point2D localPoint) {
-        this.localPoint = Optional.ofNullable(localPoint);
+        this.localPoint.set(Optional.ofNullable(localPoint));
     }
 
     public void setScreenPoint(Point2D screenPoint) {
-        this.screenPoint = Optional.ofNullable(screenPoint);
+        this.screenPoint.set(Optional.ofNullable(screenPoint));
     }
 
     public void setMouseDragging(boolean mouseDragging) {

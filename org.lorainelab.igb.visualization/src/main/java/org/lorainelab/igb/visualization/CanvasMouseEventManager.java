@@ -99,7 +99,7 @@ public class CanvasMouseEventManager {
             if (types.contains(MouseEvent.MOUSE_DRAGGED)) {
                 //Rectangle2D selectionRectangle = getSelectionRectangle(event);
                 tracksModel.getTrackRenderers().stream().filter(tr -> tr instanceof CoordinateTrackRenderer).findFirst().ifPresent(tr -> {
-                    canvasPaneModel.getMouseClickLocation().ifPresent(mouseClickLocation -> {
+                    canvasPaneModel.getMouseClickLocation().get().ifPresent(mouseClickLocation -> {
                         Point2D point = getLocalPoint2DFromMouseEvent(event);
                         Rectangle2D boundingRect = tr.getCanvasContext().getBoundingRect();
                         if (boundingRect.contains(mouseClickLocation)) {
