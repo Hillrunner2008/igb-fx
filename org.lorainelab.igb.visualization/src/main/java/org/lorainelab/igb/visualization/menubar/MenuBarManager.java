@@ -4,7 +4,9 @@ import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
+import com.google.common.collect.Multimaps;
 import com.google.common.collect.Ordering;
+import com.google.common.collect.SortedSetMultimap;
 import com.google.common.collect.TreeMultimap;
 import java.util.EnumMap;
 import javafx.application.Platform;
@@ -29,7 +31,7 @@ public class MenuBarManager {
     private final MenuBar menuBar;
     private final EnumMap<ParentMenu, Menu> parentMenuReference;
     private final TreeMultimap<Integer, Menu> parentMenuEntries;
-    private final EnumMap<ParentMenu, TreeMultimap<Integer, MenuItem>> menuBarMenuContainer;
+    private final EnumMap<ParentMenu, SortedSetMultimap<Integer, MenuItem>> menuBarMenuContainer;
     private final TreeMultimap<Integer, MenuItem> fileMenuEntries;
     private final TreeMultimap<Integer, MenuItem> editMenuEntries;
     private final TreeMultimap<Integer, MenuItem> viewMenuEntries;
@@ -55,12 +57,12 @@ public class MenuBarManager {
         genomeMenuEntries = TreeMultimap.create(Ordering.natural(), Ordering.arbitrary());
         parentMenuEntries = TreeMultimap.create(Ordering.natural(), Ordering.arbitrary());
         menuBarMenuContainer = new EnumMap<>(ParentMenu.class);
-        menuBarMenuContainer.put(ParentMenu.FILE, fileMenuEntries);
-        menuBarMenuContainer.put(ParentMenu.EDIT, editMenuEntries);
-        menuBarMenuContainer.put(ParentMenu.TOOLS, toolsMenuEntries);
-        menuBarMenuContainer.put(ParentMenu.VIEW, viewMenuEntries);
-        menuBarMenuContainer.put(ParentMenu.GENOME, genomeMenuEntries);
-        menuBarMenuContainer.put(ParentMenu.HELP, helpMenuEntries);
+        menuBarMenuContainer.put(ParentMenu.FILE, Multimaps.synchronizedSortedSetMultimap(fileMenuEntries));
+        menuBarMenuContainer.put(ParentMenu.EDIT, Multimaps.synchronizedSortedSetMultimap(editMenuEntries));
+        menuBarMenuContainer.put(ParentMenu.TOOLS, Multimaps.synchronizedSortedSetMultimap(toolsMenuEntries));
+        menuBarMenuContainer.put(ParentMenu.VIEW, Multimaps.synchronizedSortedSetMultimap(viewMenuEntries));
+        menuBarMenuContainer.put(ParentMenu.GENOME, Multimaps.synchronizedSortedSetMultimap(genomeMenuEntries));
+        menuBarMenuContainer.put(ParentMenu.HELP, Multimaps.synchronizedSortedSetMultimap(helpMenuEntries));
         parentMenuReference = new EnumMap<>(ParentMenu.class);
         initializeMenus();
         initializeParentMenuReference();
@@ -256,9 +258,11 @@ public class MenuBarManager {
 
     private void rebuildFileMenu() {
         fileMenu.getItems().clear();
-        fileMenuEntries.keySet().stream().forEach(key -> {
-            fileMenuEntries.get(key).forEach(menuItem -> fileMenu.getItems().add(menuItem));
-        });
+        synchronized (fileMenuEntries) {
+            fileMenuEntries.keySet().stream().forEach(key -> {
+                fileMenuEntries.get(key).forEach(menuItem -> fileMenu.getItems().add(menuItem));
+            });
+        }
     }
 
     private void rebuildGenomeMenu() {

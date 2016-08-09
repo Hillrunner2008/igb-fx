@@ -5,12 +5,13 @@
  */
 package org.lorainelab.igb.visualization.component;
 
-import com.google.common.collect.Lists;
-import java.util.List;
-import javafx.geometry.Rectangle2D;
+import aQute.bnd.annotation.component.Activate;
+import aQute.bnd.annotation.component.Component;
+import aQute.bnd.annotation.component.Reference;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import org.lorainelab.igb.visualization.component.api.Component;
+import org.lorainelab.igb.visualization.PrimaryCanvasRegion;
+import org.lorainelab.igb.visualization.model.CanvasPaneModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,44 +19,53 @@ import org.slf4j.LoggerFactory;
  *
  * @author jeckstei
  */
-public class ZoomStripe extends Component<ZoomStripeProps, ZoomStripeState> {
+@Component(immediate = true, provide = Widget.class)
+public class ZoomStripe implements Widget {
 
     private static final Logger LOG = LoggerFactory.getLogger(ZoomStripe.class);
+    private PrimaryCanvasRegion primaryCanvasRegion;
 
-    @Override
-    public Component beforeComponentReady() {
-        //
-        return this;
+    @Activate
+    public void activate() {
     }
 
     @Override
-    public List<Component> render() {
-        //LOG.info("render zoomstrip");
-        double zoomStripeCoordinate = this.getProps().getZoomStripeCoordinate();
+    public void render(CanvasPaneModel canvasPaneModel) {
+        double zoomStripeCoordinate = canvasPaneModel.getZoomStripeCoordinate().doubleValue();
         if (zoomStripeCoordinate >= 0) {
-            double modelWidth = this.getProps().getModelWidth();
-            double modelHeight = this.getProps().getModelHeight();
-            double xFactor = this.getProps().getxFactor();
-            double scrollX = this.getProps().getScrollX();
-            final double visibleVirtualCoordinatesX = Math.floor(this.getProps().getCanvasWidth() / xFactor);
+            double modelWidth = canvasPaneModel.getModelWidth().get();
+
+            double xFactor = canvasPaneModel.getxFactor().get();
+            double scrollX = canvasPaneModel.getScrollX().get();
+            double canvasWidth = primaryCanvasRegion.getWidth();
+            final double visibleVirtualCoordinatesX = Math.floor(canvasWidth / xFactor);
             double xOffset = Math.round((scrollX / 100) * (modelWidth - visibleVirtualCoordinatesX));
             double maxXoffset = modelWidth - visibleVirtualCoordinatesX;
             xOffset = Math.min(maxXoffset, xOffset);
-            GraphicsContext gc = this.getProps().getCanvas().getGraphicsContext2D();
+            GraphicsContext gc = primaryCanvasRegion.getCanvas().getGraphicsContext2D();
             gc.save();
             gc.setStroke(Color.rgb(0, 0, 0, .3));
             gc.scale(xFactor, 1);
-            double x = (this.getProps().getZoomStripeCoordinate()) - xOffset;
-            double width = this.getProps().getCanvas().getWidth() / xFactor;
+            double x = (canvasPaneModel.getZoomStripeCoordinate().doubleValue()) - xOffset;
+            double width = canvasWidth / xFactor;
             if (width > 500) {
                 gc.setLineWidth(width * 0.002);
             }
             if (x >= 0 && x <= width) {
-                gc.strokeLine(x + .5, 0, x + .5, this.getProps().getCanvas().getHeight());
+                gc.strokeLine(x + .5, 0, x + .5, primaryCanvasRegion.getCanvas().getHeight());
             }
             gc.restore();
         }
-        return Lists.newArrayList();
+    }
+
+    @Reference
+    public void setOverlayCanvasRegion(PrimaryCanvasRegion primaryCanvasRegion) {
+        this.primaryCanvasRegion = primaryCanvasRegion;
+    }
+
+    @Override
+    public int getZindex() {
+        return 5;
     }
 
 }

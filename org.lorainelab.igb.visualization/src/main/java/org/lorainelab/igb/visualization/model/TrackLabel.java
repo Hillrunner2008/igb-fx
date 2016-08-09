@@ -27,7 +27,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import net.miginfocom.layout.CC;
 import static org.lorainelab.igb.data.model.util.ColorUtils.colorToWebStyle;
-import org.lorainelab.igb.visualization.store.AppStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tbee.javafx.scene.layout.MigPane;
@@ -142,7 +141,7 @@ public class TrackLabel {
                 if (ke.getCode().equals(KeyCode.ENTER)) {
                     Platform.runLater(() -> {
                         zoomableTrackRenderer.getTrack().setMaxStackHeight(Integer.parseInt(stackHeightEntryField.getText()));
-                        AppStore.getStore().noop();
+//                        AppStore.getStore().noop();
                         stage.hide();
                     });
                 }
@@ -151,7 +150,7 @@ public class TrackLabel {
             okBtn.setOnAction(event -> {
                 Platform.runLater(() -> {
                     zoomableTrackRenderer.getTrack().setMaxStackHeight(Integer.parseInt(stackHeightEntryField.getText()));
-                    AppStore.getStore().noop();
+//                    AppStore.getStore().noop();
                     stage.hide();
                 });
             });

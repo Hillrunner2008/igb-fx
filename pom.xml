@@ -280,6 +280,11 @@
                 <artifactId>org.lorainelab.igb.filehandler.registry</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.lorainelab</groupId>
+                <artifactId>org.lorainelab.igb.recentfiles.registry</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>
@@ -324,6 +329,7 @@
         
         <module>org.lorainelab.igb.selections</module>
         <module>org.lorainelab.igb.filehandler.registry</module>
+	<module>org.lorainelab.igb.recentfiles.registry</module>
         
         <module>filetypeHandlers/org.lorainelab.igb.filehandler.bed</module>
         <module>filetypeHandlers/org.lorainelab.igb.filehandler.bam</module>

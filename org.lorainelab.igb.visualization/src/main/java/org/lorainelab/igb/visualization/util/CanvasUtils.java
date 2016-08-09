@@ -1,7 +1,6 @@
 package org.lorainelab.igb.visualization.util;
 
-import org.lorainelab.igb.visualization.CanvasPane;
-import static org.lorainelab.igb.visualization.model.TrackRenderer.MAX_ZOOM_MODEL_COORDINATES_X;
+import static org.lorainelab.igb.visualization.model.CanvasPaneModel.MAX_ZOOM_MODEL_COORDINATES_X;
 
 /**
  *
@@ -9,23 +8,23 @@ import static org.lorainelab.igb.visualization.model.TrackRenderer.MAX_ZOOM_MODE
  */
 public class CanvasUtils {
 
-    public static double exponentialScaleTransform(CanvasPane pane, double value) {
-        double minScaleX = pane.getWidth() / pane.getModelWidth();
-        double maxScaleX = pane.getWidth() / MAX_ZOOM_MODEL_COORDINATES_X;
+    public static double exponentialScaleTransform(double canvasWidth, double modelWidth, double value) {
+        double minScaleX = canvasWidth / modelWidth;
+        double maxScaleX = canvasWidth / MAX_ZOOM_MODEL_COORDINATES_X;
         ExponentialTransform transform = new ExponentialTransform(minScaleX, maxScaleX);
         return transform.transform(value);
     }
 
-    public static double invertExpScaleTransform(CanvasPane pane, double value) {
-        double minScaleX = pane.getWidth() / pane.getModelWidth();
-        double maxScaleX = pane.getWidth() / MAX_ZOOM_MODEL_COORDINATES_X;
+    public static double invertExpScaleTransform(double canvasWidth, double modelWidth, double value) {
+        double minScaleX = canvasWidth / modelWidth;
+        double maxScaleX = canvasWidth / MAX_ZOOM_MODEL_COORDINATES_X;
         ExponentialTransform transform = new ExponentialTransform(minScaleX, maxScaleX);
         return transform.inverseTransform(value);
     }
 
-    public static double linearScaleTransform(CanvasPane pane, double value) {
-        double minScaleX = pane.getModelWidth();
+    public static double linearScaleTransform(double canvasWidth, double modelWidth, double value) {
+        double minScaleX = modelWidth;
         double maxScaleX = MAX_ZOOM_MODEL_COORDINATES_X;
-        return pane.getWidth() / (maxScaleX + (minScaleX - maxScaleX) * (1 - (value / 100)));
+        return canvasWidth / (maxScaleX + (minScaleX - maxScaleX) * (1 - (value / 100)));
     }
 }
