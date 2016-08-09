@@ -9,10 +9,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -30,6 +27,7 @@ import org.lorainelab.igb.data.model.sequence.ReferenceSequenceProvider;
 import org.lorainelab.igb.data.model.util.TwoBitParser;
 import org.lorainelab.igb.menu.api.MenuBarEntryProvider;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
+import org.lorainelab.igb.menu.api.model.WeightedMenuEntry;
 import org.lorainelab.igb.menu.api.model.WeightedMenuItem;
 import org.lorainelab.igb.preferences.SessionPreferences;
 import org.lorainelab.igb.selections.SelectionInfoService;
@@ -221,8 +219,8 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
 
     @Override
 
-    public Optional<List<WeightedMenuItem>> getMenuItems() {
-        final List<WeightedMenuItem> menuItems = Lists.newArrayList(menuItem);
+    public Optional<List<WeightedMenuEntry>> getMenuItems() {
+        final List<WeightedMenuEntry> menuItems = Lists.newArrayList(menuItem);
         return Optional.of(menuItems);
     }
 

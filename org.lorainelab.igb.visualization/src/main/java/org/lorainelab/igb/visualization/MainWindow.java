@@ -5,13 +5,9 @@ import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
 import java.awt.SplashScreen;
-import java.io.IOException;
-import java.net.URL;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.lorainelab.igb.stage.provider.api.StageProvider;
 import org.slf4j.Logger;
@@ -21,44 +17,30 @@ import org.slf4j.LoggerFactory;
 public class MainWindow {
 
     private static final Logger LOG = LoggerFactory.getLogger(MainWindow.class);
-    private MainController controller;
     private Stage stage;
-    private VBox root;
+    private Root root;
 
     public MainWindow() {
     }
 
     @Activate
     public void activate() {
-        try {
-            initiailize();
-        } catch (IOException ex) {
-            LOG.error(ex.getMessage(), ex);
-        }
+        LOG.info("MainWindow activate");
+        closeSplashScreen();
+        initializeFxRuntime();
+        Platform.runLater(() -> {
+            Scene scene = new Scene(root);
+            stage.setTitle("JavaFx IGB");
+            stage.setScene(scene);
+            stage.show();
+        });
     }
 
-    private void initiailize() throws IOException {
+    private void closeSplashScreen() throws IllegalStateException {
         SplashScreen splashScreen = SplashScreen.getSplashScreen();
         if (splashScreen != null) {
             splashScreen.close();
         }
-
-        initializeFxRuntime();
-        Platform.runLater(() -> {
-            try {
-                final URL resource = MainWindow.class.getClassLoader().getResource("main.fxml");
-                FXMLLoader loader = new FXMLLoader(resource);
-                loader.setClassLoader(this.getClass().getClassLoader());
-                loader.setController(controller);
-                root = loader.load();
-                Scene scene = new Scene(root);
-                stage.setTitle("JavaFx IGB");
-                stage.setScene(scene);
-                stage.show();
-            } catch (IOException ex) {
-                LOG.error(ex.getMessage(), ex);
-            }
-        });
     }
 
     private void initializeFxRuntime() {
@@ -68,6 +50,7 @@ public class MainWindow {
 
     @Deactivate
     public void deactivate() {
+        LOG.info("MainWindow deactivate");
         Platform.runLater(() -> {
             try {
                 stage.hide();
@@ -84,7 +67,8 @@ public class MainWindow {
     }
 
     @Reference
-    public void setController(MainController controller) {
-        this.controller = controller;
+    public void setRoot(Root root) {
+        this.root = root;
     }
+
 }

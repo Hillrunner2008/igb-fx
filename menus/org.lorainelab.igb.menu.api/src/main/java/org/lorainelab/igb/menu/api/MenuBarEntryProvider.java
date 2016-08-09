@@ -8,7 +8,7 @@ package org.lorainelab.igb.menu.api;
 import java.util.List;
 import java.util.Optional;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
-import org.lorainelab.igb.menu.api.model.WeightedMenuItem;
+import org.lorainelab.igb.menu.api.model.WeightedMenuEntry;
 
 /**
  * This interface allows implementors to provide extentions to the IGB MenuBar menus.
@@ -28,7 +28,7 @@ public interface MenuBarEntryProvider {
      * an empty list.
      *
      */
-    public Optional<List<WeightedMenuItem>> getMenuItems();
+    public Optional<List<WeightedMenuEntry>> getMenuItems();
 
     /**
      * @return the ParentMenu this app will extend

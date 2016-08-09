@@ -17,11 +17,14 @@ import org.lorainelab.igb.data.model.DataSet;
 import org.lorainelab.igb.data.model.GenomeVersion;
 import org.lorainelab.igb.data.model.datasource.DataSource;
 import org.lorainelab.igb.data.model.datasource.DataSourceReference;
+import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandler;
 import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandlerRegistry;
 import org.lorainelab.igb.menu.api.MenuBarEntryProvider;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
+import org.lorainelab.igb.menu.api.model.WeightedMenuEntry;
 import org.lorainelab.igb.menu.api.model.WeightedMenuItem;
 import org.lorainelab.igb.preferences.SessionPreferences;
+import org.lorainelab.igb.recentfiles.registry.api.RecentFilesRegistry;
 import org.lorainelab.igb.search.api.SearchService;
 import org.lorainelab.igb.search.api.model.IndexIdentity;
 import org.lorainelab.igb.selections.SelectionInfoService;
@@ -38,12 +41,15 @@ import org.slf4j.LoggerFactory;
 public class OpenFileMenuItem implements MenuBarEntryProvider, ToolbarButtonProvider {
 
     private static final Logger LOG = LoggerFactory.getLogger(OpenFileMenuItem.class);
+    private static final String DEFAULT_FILE_EXTENSION_FILTER_NAME = "All Supported Formats";
+
     private DataSource dataSource;
     private WeightedMenuItem menuItem;
     private WeightedButton openFileButton;
     private FileTypeHandlerRegistry fileTypeHandlerRegistry;
     private SelectionInfoService selectionInfoService;
     private SearchService searchService;
+    private RecentFilesRegistry recentFilesRegistry;
 
     @Activate
     public void activate() {
@@ -58,6 +64,24 @@ public class OpenFileMenuItem implements MenuBarEntryProvider, ToolbarButtonProv
     }
 
     private void openFileAction() {
+        FileChooser fileChooser = getFileChooser();
+        Optional.ofNullable(fileChooser.showOpenMultipleDialog(null)).ifPresent(selectedFiles -> {
+            selectedFiles.forEach(file -> {
+                fileTypeHandlerRegistry.getFileTypeHandlers().stream().filter(f -> {
+                    return f.getSupportedExtensions().contains(Files.getFileExtension(file.getPath()));
+                }).findFirst().ifPresent(fileTypeHandler -> {
+                    selectionInfoService.getSelectedGenomeVersion().get().ifPresent(gv -> {
+                        recentFilesRegistry.getRecentFiles().add(file.getPath());
+                        DataSourceReference dataSourceReference = new DataSourceReference(file.getPath(), dataSource);
+                        gv.getLoadedDataSets().add(new DataSet(file.getName(), dataSourceReference, fileTypeHandler));
+                        indexDataSetForSearch(fileTypeHandler, dataSourceReference);
+                    });
+                });
+            });
+        });
+    }
+
+    private FileChooser getFileChooser() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Load File");
         File homeDirectory;
@@ -70,47 +94,38 @@ public class OpenFileMenuItem implements MenuBarEntryProvider, ToolbarButtonProv
         }
         fileChooser.setInitialDirectory(homeDirectory);
         addFileExtensionFilters(fileChooser);
-        Optional.ofNullable(fileChooser.showOpenMultipleDialog(null)).ifPresent(selectedFiles -> {
-            selectedFiles.forEach(file -> {
-                fileTypeHandlerRegistry.getFileTypeHandlers().stream().filter(f -> {
-                    return f.getSupportedExtensions().contains(Files.getFileExtension(file.getPath()));
-                }).findFirst().ifPresent(fileTypeHandler -> {
-                    selectionInfoService.getSelectedGenomeVersion().get().ifPresent(gv -> {
-                        DataSourceReference dataSourceReference = new DataSourceReference(file.getPath(), dataSource);
-                        gv.getLoadedDataSets().add(new DataSet(file.getName(), dataSourceReference, fileTypeHandler));
-                        CompletableFuture<Void> indexTask = CompletableFuture.runAsync(() -> {
-                            try {
-                                Optional<GenomeVersion> genomeVersion = selectionInfoService.getSelectedGenomeVersion().getValue();
-                                if (genomeVersion.isPresent()) {
-                                    String speciesName = genomeVersion.get().getSpeciesName();
-                                    Optional<IndexIdentity> resourceIndexIdentity = searchService.getResourceIndexIdentity(speciesName);
-                                    if (!resourceIndexIdentity.isPresent()) {
-                                        LOG.info("index doesnt exist, so create it");
-                                        IndexIdentity indexIdentity = searchService.generateIndexIndentity();
-                                        searchService.setResourceIndexIdentity(speciesName, indexIdentity);
-                                        fileTypeHandler.createIndex(indexIdentity, dataSourceReference);
-                                    } else {
-                                        fileTypeHandler.createIndex(resourceIndexIdentity.get(), dataSourceReference);
-                                    }
-                                }
-                            } catch (Exception ex) {
-                                LOG.error(ex.getMessage(), ex);
-                            }
-                        }).whenComplete((result, ex) -> {
-                            if (ex != null) {
-                                LOG.error(ex.getMessage(), ex);
-                            }
-                        });
+        return fileChooser;
+    }
 
-                    });
-                });
-            });
+    private void indexDataSetForSearch(FileTypeHandler fileTypeHandler, DataSourceReference dataSourceReference) {
+        CompletableFuture<Void> indexTask = CompletableFuture.runAsync(() -> {
+            try {
+                Optional<GenomeVersion> genomeVersion = selectionInfoService.getSelectedGenomeVersion().getValue();
+                if (genomeVersion.isPresent()) {
+                    String speciesName = genomeVersion.get().getSpeciesName();
+                    Optional<IndexIdentity> resourceIndexIdentity = searchService.getResourceIndexIdentity(speciesName);
+                    if (!resourceIndexIdentity.isPresent()) {
+                        LOG.info("index doesnt exist, so create it");
+                        IndexIdentity indexIdentity = searchService.generateIndexIndentity();
+                        searchService.setResourceIndexIdentity(speciesName, indexIdentity);
+                        fileTypeHandler.createIndex(indexIdentity, dataSourceReference);
+                    } else {
+                        fileTypeHandler.createIndex(resourceIndexIdentity.get(), dataSourceReference);
+                    }
+                }
+            } catch (Exception ex) {
+                LOG.error(ex.getMessage(), ex);
+            }
+        }).whenComplete((result, ex) -> {
+            if (ex != null) {
+                LOG.error(ex.getMessage(), ex);
+            }
         });
     }
 
     @Override
-    public Optional<List<WeightedMenuItem>> getMenuItems() {
-        final List<WeightedMenuItem> menuItems = Lists.newArrayList(menuItem);
+    public Optional<List<WeightedMenuEntry>> getMenuItems() {
+        final List<WeightedMenuEntry> menuItems = Lists.newArrayList(menuItem);
         return Optional.of(menuItems);
     }
 
@@ -139,12 +154,22 @@ public class OpenFileMenuItem implements MenuBarEntryProvider, ToolbarButtonProv
         this.searchService = searchService;
     }
 
+    @Reference
+    public void setRecentFilesRegistry(RecentFilesRegistry recentFilesRegistry) {
+        this.recentFilesRegistry = recentFilesRegistry;
+    }
+
     private void addFileExtensionFilters(FileChooser fileChooser) {
         fileTypeHandlerRegistry.getFileTypeHandlers().stream()
                 .map(fileTypeHandler -> {
                     return new FileChooser.ExtensionFilter(fileTypeHandler.getName(), fileTypeHandler.getSupportedExtensions().stream().map(ext -> "*." + ext).collect(Collectors.toList()));
                 })
                 .forEach(extensionFilter -> fileChooser.getExtensionFilters().add(extensionFilter));
+        List<String> allSupportedFileExtensions = fileTypeHandlerRegistry.getFileTypeHandlers().stream().flatMap(fileTypeHandler -> fileTypeHandler.getSupportedExtensions().stream().map(ext -> "*." + ext))
+                .collect(Collectors.toList());
+        final FileChooser.ExtensionFilter defaultExtensionFilter = new FileChooser.ExtensionFilter(DEFAULT_FILE_EXTENSION_FILTER_NAME, allSupportedFileExtensions);
+        fileChooser.getExtensionFilters().add(defaultExtensionFilter);
+        fileChooser.setSelectedExtensionFilter(defaultExtensionFilter);
     }
 
     @Override

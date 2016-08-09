@@ -56,6 +56,10 @@
             <artifactId>org.lorainelab.igb.preferences</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.lorainelab.igb.recentfiles.registry</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

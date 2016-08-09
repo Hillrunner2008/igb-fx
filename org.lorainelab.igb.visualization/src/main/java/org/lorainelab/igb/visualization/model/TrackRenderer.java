@@ -8,27 +8,19 @@ package org.lorainelab.igb.visualization.model;
 import java.util.Comparator;
 import org.lorainelab.igb.data.model.CanvasContext;
 import org.lorainelab.igb.data.model.View;
+import org.lorainelab.igb.visualization.component.Widget;
 
 /**
  * = TrackRenderer
  *
  */
-public interface TrackRenderer {
+public interface TrackRenderer extends Widget {
 
     final Comparator<TrackRenderer> SORT_BY_WEIGHT = (TrackRenderer o1, TrackRenderer o2) -> Double.compare(o1.getWeight(), o2.getWeight());
-
-    final int MAX_ZOOM_MODEL_COORDINATES_X = 85;
-    final int MAX_ZOOM_MODEL_COORDINATES_Y = 50;
 
     String getTrackLabelText();
 
     TrackLabel getTrackLabel();
-
-    void render();
-
-    void scaleCanvas(double xFactor, double scrollX, double scrollY);
-
-    void updateView(double scrollX, double scrollY);
 
     CanvasContext getCanvasContext();
 
@@ -39,7 +31,8 @@ public interface TrackRenderer {
     double getModelHeight();
 
     /**
-     *@return the weight that will be used for sorting tracks. Lower weights will be
+     * @return the weight that will be used for sorting tracks. Lower weights
+     * will be
      */
     int getWeight();
 

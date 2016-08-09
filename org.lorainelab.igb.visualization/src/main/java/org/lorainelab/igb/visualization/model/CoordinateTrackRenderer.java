@@ -1,14 +1,12 @@
 package org.lorainelab.igb.visualization.model;
 
 import com.google.common.collect.Range;
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 import com.sun.javafx.tk.FontMetrics;
 import com.sun.javafx.tk.Toolkit;
 import java.text.DecimalFormat;
 import javafx.application.Platform;
-import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -17,14 +15,6 @@ import org.lorainelab.igb.data.model.CanvasContext;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.View;
 import static org.lorainelab.igb.data.model.sequence.BasePairColorReference.getBaseColor;
-import org.lorainelab.igb.visualization.CanvasPane;
-import org.lorainelab.igb.visualization.event.ClickDragCancelEvent;
-import org.lorainelab.igb.visualization.event.ClickDragEndEvent;
-import org.lorainelab.igb.visualization.event.ClickDragStartEvent;
-import org.lorainelab.igb.visualization.event.ClickDragZoomEvent;
-import org.lorainelab.igb.visualization.event.ClickDraggingEvent;
-import org.lorainelab.igb.visualization.event.RefreshTrackEvent;
-import org.lorainelab.igb.visualization.event.ZoomStripeEvent;
 import static org.lorainelab.igb.visualization.util.BoundsUtil.enforceRangeBounds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +26,7 @@ import org.slf4j.LoggerFactory;
 public class CoordinateTrackRenderer implements TrackRenderer {
 
     private static final Logger LOG = LoggerFactory.getLogger(CoordinateTrackRenderer.class);
+    private static final Color CLICK_DRAG_HIGHLIGHT = Color.rgb(33, 150, 243, .3);
     private static final String COORDINATES_TRACK_LABEL = "Coordinates";
     private static final int COORDINATE_CENTER_LINE = 20;
 
@@ -44,8 +35,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     private Rectangle2D viewBoundingRectangle;
     private Range<Double> viewYcoordinateRange;
     private double xfactor = 1;
-    double zoomStripeCoordinate = -1;
-    protected EventBus eventBus;
+    //protected EventBus eventBus;
     private final CanvasContext canvasContext;
     private final GraphicsContext gc;
     private int weight;
@@ -53,42 +43,49 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     private final Chromosome chromosome;
     private final Range<Integer> validViewRange;
 
-    public CoordinateTrackRenderer(CanvasPane canvasPane, Chromosome chromosome) {
+    public CoordinateTrackRenderer(Canvas canvas, Chromosome chromosome) {
         weight = 0;
-        this.eventBus = canvasPane.getEventBus();
-        eventBus.register(this);
         this.chromosome = chromosome;
         this.modelWidth = chromosome.getLength();
         this.modelHeight = 50;
         validViewRange = Range.closedOpen(0, modelWidth);
         viewBoundingRectangle = new Rectangle2D(0, 0, modelWidth, modelHeight);
-        canvasContext = new CanvasContext(canvasPane.getCanvas(), 0, 0);
+        canvasContext = new CanvasContext(canvas, 0, 0);
         trackLabel = new TrackLabel(this, COORDINATES_TRACK_LABEL);
-        gc = canvasPane.getCanvas().getGraphicsContext2D();
+        gc = canvas.getGraphicsContext2D();
     }
 
-    void draw() {
+    void draw(CanvasPaneModel canvasPaneModel) {
         if (canvasContext.isVisible()) {
             gc.save();
             gc.scale(xfactor, 1);
             drawCoordinateBasePairs();
             drawCoordinateLine();
-            drawClickDrag();
+            drawClickDrag(canvasPaneModel);
             gc.restore();
         }
     }
 
-    private void drawClickDrag() {
-        if (lastMouseClickX >= 0 && lastMouseDragX >= 0) {
-            gc.save();
-            gc.setFill(Color.rgb(33, 150, 243, .3));
-            if (lastMouseClickX < lastMouseDragX) {
-                gc.fillRect(lastMouseClickX, viewBoundingRectangle.getMinY(), lastMouseDragX - lastMouseClickX, COORDINATE_CENTER_LINE + 2);
-            } else {
-                gc.fillRect(lastMouseDragX, viewBoundingRectangle.getMinY(), lastMouseClickX - lastMouseDragX, COORDINATE_CENTER_LINE + 2);
-            }
-            gc.restore();
-        }
+    private void drawClickDrag(CanvasPaneModel canvasPaneModel) {
+        canvasPaneModel.getMouseClickLocation().get().ifPresent(lastMouseClick -> {
+            canvasPaneModel.getLocalPoint().get().ifPresent(lastMouseDrag -> {
+                if (canvasContext.getBoundingRect().contains(lastMouseClick)) {
+                    final double lastMouseClickX = Math.floor(lastMouseClick.getX() / xfactor);
+                    final double lastMouseDragX = Math.floor(lastMouseDrag.getX() / xfactor);
+                    if (lastMouseClickX >= 0 && lastMouseDragX >= 0) {
+                        gc.save();
+                        gc.setFill(CLICK_DRAG_HIGHLIGHT);
+                        if (lastMouseClickX < lastMouseDragX) {
+                            gc.fillRect(lastMouseClickX, viewBoundingRectangle.getMinY(), lastMouseDragX - lastMouseClickX, COORDINATE_CENTER_LINE + 2);
+                        } else {
+                            gc.fillRect(lastMouseDragX, viewBoundingRectangle.getMinY(), lastMouseClickX - lastMouseDragX, COORDINATE_CENTER_LINE + 2);
+                        }
+                        gc.restore();
+                    }
+                }
+            });
+        });
+
     }
 
     double round(double num, int multipleOf) {
@@ -224,7 +221,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
 
     private void drawCoordinateBasePairs() {
         gc.save();
-        gc.setFont(Font.font("Monospaced", FontWeight.BOLD, 25));
+        gc.setFont(Font.font("Monospaced", FontWeight.MEDIUM, 25));
         final int basePairPadding = 50;
         if (viewBoundingRectangle.getWidth() < 1500) {
             double textScale = .5;
@@ -264,7 +261,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
                         y2 -= yOffset;
                     }
                     gc.scale(textScale, textScale);
-                    if (viewBoundingRectangle.getWidth() < 100) {
+                    if (viewBoundingRectangle.getWidth() < 125) {
                         gc.setFill(Color.BLACK);
                         gc.fillText("" + base, index * 2 + .5, y2, 1);
                     }
@@ -285,36 +282,39 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         gc.restore();
     }
 
-    @Override
-    public void updateView(double scrollX, double scrollY) {
+    public void updateView(CanvasPaneModel canvasPaneModel) {
         if (canvasContext.isVisible()) {
+            double scrollX = canvasPaneModel.getScrollX().doubleValue();
             final double visibleVirtualCoordinatesX = Math.floor(canvasContext.getBoundingRect().getWidth() / xfactor);
             double xOffset = Math.round((scrollX / 100) * (modelWidth - visibleVirtualCoordinatesX));
-            if (zoomStripeCoordinate != -1) {
-                double zoomStripePositionPercentage = (zoomStripeCoordinate - viewBoundingRectangle.getMinX()) / viewBoundingRectangle.getWidth();
-                xOffset = Math.max(zoomStripeCoordinate - (visibleVirtualCoordinatesX * zoomStripePositionPercentage), 0);
-                double maxXoffset = modelWidth - visibleVirtualCoordinatesX;
-                xOffset = Math.min(maxXoffset, xOffset);
-            }
             xOffset = enforceRangeBounds(xOffset, 0, modelWidth);
             viewBoundingRectangle = new Rectangle2D(xOffset, canvasContext.getBoundingRect().getMinY(), visibleVirtualCoordinatesX, canvasContext.getBoundingRect().getHeight());
             viewYcoordinateRange = Range.<Double>closed(viewBoundingRectangle.getMinY(), viewBoundingRectangle.getMaxY());
-            render();
+            if (canvasContext.isVisible()) {
+                if (Platform.isFxApplicationThread()) {
+                    clearCanvas();
+                    draw(canvasPaneModel);
+                } else {
+                    Platform.runLater(() -> {
+                        clearCanvas();
+                        draw(canvasPaneModel);
+                    });
+                }
+            }
         }
     }
 
-    @Override
-    public void scaleCanvas(double xFactor, double scrollX, double scrollY) {
+    private void scaleCanvas(CanvasPaneModel canvasPaneModel) {
+        this.xfactor = canvasPaneModel.getxFactor().doubleValue();
         if (canvasContext.isVisible()) {
             gc.save();
-            gc.scale(xFactor, 1);
-            xfactor = xFactor;
+            gc.scale(xfactor, 1);
             gc.restore();
-            updateView(scrollX, scrollY);
+            updateView(canvasPaneModel);
         }
     }
 
-    private void clearCanvas() {
+    public void clearCanvas() {
         gc.save();
         double y = canvasContext.getBoundingRect().getMinY();
         final double height = canvasContext.getBoundingRect().getHeight();
@@ -324,83 +324,59 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         gc.restore();
     }
 
-    private double lastMouseClickX = -1;
-    private double lastMouseDragX = -1;
-
-    @Subscribe
-    private void handleClickDragCancelEvent(ClickDragCancelEvent event) {
-        lastMouseClickX = -1;
-        lastMouseDragX = -1;
-        render();
+//    @Subscribe
+//    private void handleClickDragCancelEvent(ClickDragCancelEvent event) {
+//        lastMouseClickX = -1;
+//        lastMouseDragX = -1;
+//        render();
+//    }
+//    @Subscribe
+//    public void handleClickDragEndEvent(ClickDragEndEvent mouseEvent) {
+//        LOG.info("handleClickDragEndEvent method called");
+//        if (lastMouseClickX == -1
+//                || !canvasContext.getBoundingRect().contains(new Point2D(mouseEvent.getLocal().getX(), canvasContext.getBoundingRect().getMinY()))) {
+//            render();
+//            return;
+//        }
+//        final double visibleVirtualCoordinatesX = viewBoundingRectangle.getWidth();
+//        double xOffset = viewBoundingRectangle.getMinX();
+//        Range<Double> currentRange = Range.closedOpen(xOffset, xOffset + visibleVirtualCoordinatesX);
+//
+//        lastMouseDragX = Math.floor(mouseEvent.getLocal().getX() / xfactor);
+//        ClickDragZoomEvent event;
+//        double x1 = viewBoundingRectangle.getMinX() + lastMouseClickX;
+//        double x2 = viewBoundingRectangle.getMinX() + lastMouseDragX;
+//        if (lastMouseDragX > lastMouseClickX) {
+//            event = new ClickDragZoomEvent(x1, x2);
+//        } else {
+//            event = new ClickDragZoomEvent(x2, x1);
+//        }
+////        eventBus.post(event);
+//        lastMouseClickX = -1;
+//        lastMouseDragX = -1;
+//        render();
+//    }
+//    @Subscribe
+//    public void handleClickDraggingEvent(ClickDraggingEvent event) {
+//        if (!canvasContext.getBoundingRect().contains(new Point2D(event.getLocal().getX(), event.getLocal().getY()))) {
+//            return;
+//        }
+//        lastMouseDragX = Math.floor(event.getLocal().getX() / xfactor);
+//        render();
+//    }
+//    @Subscribe
+//    public void handleClickDragStartEvent(ClickDragStartEvent event) {
+//        if (!canvasContext.getBoundingRect().contains(event.getLocal())) {
+//            return;
+//        }
+//        lastMouseClickX = Math.floor(event.getLocal().getX() / xfactor);
+//    }
+    public void render(CanvasPaneModel canvasPaneModel) {
+        clearCanvas();
+        scaleCanvas(canvasPaneModel);
     }
 
-    @Subscribe
-    public void handleClickDragEndEvent(ClickDragEndEvent mouseEvent) {
-        LOG.info("handleClickDragEndEvent method called");
-        if (lastMouseClickX == -1
-                || !canvasContext.getBoundingRect().contains(new Point2D(mouseEvent.getLocal().getX(), canvasContext.getBoundingRect().getMinY()))) {
-            render();
-            return;
-        }
-        final double visibleVirtualCoordinatesX = viewBoundingRectangle.getWidth();
-        double xOffset = viewBoundingRectangle.getMinX();
-        Range<Double> currentRange = Range.closedOpen(xOffset, xOffset + visibleVirtualCoordinatesX);
-
-        lastMouseDragX = Math.floor(mouseEvent.getLocal().getX() / xfactor);
-        ClickDragZoomEvent event;
-        double x1 = viewBoundingRectangle.getMinX() + lastMouseClickX;
-        double x2 = viewBoundingRectangle.getMinX() + lastMouseDragX;
-        if (lastMouseDragX > lastMouseClickX) {
-            event = new ClickDragZoomEvent(x1, x2);
-        } else {
-            event = new ClickDragZoomEvent(x2, x1);
-        }
-        eventBus.post(event);
-        lastMouseClickX = -1;
-        lastMouseDragX = -1;
-        render();
-    }
-
-    @Subscribe
-    public void handleClickDraggingEvent(ClickDraggingEvent event) {
-        if (!canvasContext.getBoundingRect().contains(new Point2D(event.getLocal().getX(), event.getLocal().getY()))) {
-            return;
-        }
-        lastMouseDragX = Math.floor(event.getLocal().getX() / xfactor);
-        render();
-    }
-
-    @Subscribe
-    public void handleClickDragStartEvent(ClickDragStartEvent event) {
-        if (!canvasContext.getBoundingRect().contains(event.getLocal())) {
-            return;
-        }
-        lastMouseClickX = Math.floor(event.getLocal().getX() / xfactor);
-    }
-
-    @Subscribe
-    private void handleRefreshTrackEvent(RefreshTrackEvent event) {
-        render();
-    }
-
-    @Override
-    public void render() {
-        if (canvasContext.isVisible()) {
-            if (Platform.isFxApplicationThread()) {
-                clearCanvas();
-                draw();
-            } else {
-                Platform.runLater(() -> {
-                    clearCanvas();
-                    draw();
-                });
-            }
-        }
-    }
-
-    @Subscribe
-    private void zoomStripeListener(ZoomStripeEvent event) {
-        zoomStripeCoordinate = event.getZoomStripeCoordinate();
+    public void setZoomStripeCoordinate(double zoomStripeCoordinate) {
     }
 
     @Override
@@ -440,6 +416,11 @@ public class CoordinateTrackRenderer implements TrackRenderer {
 
     public TrackLabel getTrackLabel() {
         return trackLabel;
+    }
+
+    @Override
+    public int getZindex() {
+        return 1;
     }
 
 }

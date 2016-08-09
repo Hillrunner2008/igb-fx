@@ -2,12 +2,15 @@ package org.lorainelab.igb.visualization.tabs;
 
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
+import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
 import javafx.application.Platform;
 import javafx.geometry.Side;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.AnchorPane;
 import org.lorainelab.igb.tabs.api.TabProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -16,6 +19,7 @@ import org.lorainelab.igb.tabs.api.TabProvider;
 @Component(immediate = true, provide = TabPaneManager.class)
 public class TabPaneManager {
 
+    private static final Logger LOG = LoggerFactory.getLogger(TabPaneManager.class);
     private final TabPane rightTabPane;
     private final TabPane bottomTabPane;
 
@@ -72,5 +76,10 @@ public class TabPaneManager {
         AnchorPane.setTopAnchor(pane, anchor);
         AnchorPane.setRightAnchor(pane, anchor);
         AnchorPane.setLeftAnchor(pane, anchor);
+    }
+
+    @Deactivate
+    public void deactivate() {
+        LOG.info("TabPaneManager deactivated");
     }
 }

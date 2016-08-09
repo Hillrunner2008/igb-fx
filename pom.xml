@@ -121,7 +121,7 @@
             <dependency>
                 <groupId>org.controlsfx</groupId>
                 <artifactId>controlsfx</artifactId>
-                <version>8.40.10</version>
+                <version>8.40.11</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
@@ -212,6 +212,18 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.preferencemanager.api</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.persistencemanager</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>org.lorainelab.igb.menu.about</artifactId>
                 <version>${project.version}</version>
                 <scope>provided</scope>
@@ -268,6 +280,11 @@
                 <artifactId>org.lorainelab.igb.filehandler.registry</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.lorainelab</groupId>
+                <artifactId>org.lorainelab.igb.recentfiles.registry</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>
@@ -312,6 +329,7 @@
         
         <module>org.lorainelab.igb.selections</module>
         <module>org.lorainelab.igb.filehandler.registry</module>
+	<module>org.lorainelab.igb.recentfiles.registry</module>
         
         <module>filetypeHandlers/org.lorainelab.igb.filehandler.bed</module>
         <module>filetypeHandlers/org.lorainelab.igb.filehandler.bam</module>
@@ -328,6 +346,8 @@
         <module>org.lorainelab.igb.feature</module>
         <module>org.lorainelab.igb.search.lucene</module>
         <module>org.lorainelab.igb.search.api</module>
+        <module>preferences/org.lorainelab.igb.preferencemanager.api</module>
+        <module>org.lorainelab.igb.persistencemanager</module>
         <module>org.lorainelab.igb.kar</module>
     </modules>
     <properties>
