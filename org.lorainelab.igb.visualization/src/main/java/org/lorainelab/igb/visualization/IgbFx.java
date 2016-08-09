@@ -23,7 +23,6 @@ public class IgbFx {
 
     @Activate
     public void activate() {
-        LOG.info("MainWindow activate");
         closeSplashScreen();
         initializeFxRuntime();
         Platform.runLater(() -> {
@@ -48,7 +47,6 @@ public class IgbFx {
 
     @Deactivate
     public void deactivate() {
-        LOG.info("MainWindow deactivate");
         Platform.runLater(() -> {
             try {
                 stage.hide();
