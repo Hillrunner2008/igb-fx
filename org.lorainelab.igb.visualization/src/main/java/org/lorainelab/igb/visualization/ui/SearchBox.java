@@ -54,7 +54,7 @@ public class SearchBox extends TextField {
                             List<Document> searchResult = new LinkedList<>();
                             Optional<IndexIdentity> resourceIndexIdentity
                                     = searchService.getResourceIndexIdentity(
-                                            selectedGenomeVersion.getSpeciesName());
+                                            selectedGenomeVersion.getSpeciesName().get());
                             if (resourceIndexIdentity.isPresent()) {
                                 //TODO: refactor to boolean queries in search module
                                 searchService.search("(chromosomeId:" + selectedChromosome.getName() + ") AND (id:" + getText() + "*)",

@@ -19,10 +19,10 @@ import org.lorainelab.igb.data.model.sequence.ReferenceSequenceProvider;
 public class GenomeVersion {
 
     private StringProperty name;
-    private String speciesName;
-    private String description;
+    private StringProperty speciesName;
+    private StringProperty description;
     private final UUID uuid;
-    private final ReferenceSequenceProvider referenceSequenceProvider;
+    private ReferenceSequenceProvider referenceSequenceProvider;
     private ObjectProperty<Optional<Chromosome>> selectedChromosomeProperty;
     private ObservableSet<DataSet> loadedDataSets;
 
@@ -36,8 +36,8 @@ public class GenomeVersion {
 
     public GenomeVersion(String name, String speciesName, ReferenceSequenceProvider referenceSequenceProvider, String description, UUID uuid) {
         this.name = new SimpleStringProperty(name);
-        this.speciesName = speciesName;
-        this.description = description;
+        this.speciesName = new SimpleStringProperty(speciesName);
+        this.description = new SimpleStringProperty(description);
         this.referenceSequenceProvider = referenceSequenceProvider;
         if (uuid == null) {
             uuid = UUID.randomUUID();
@@ -63,11 +63,14 @@ public class GenomeVersion {
         return uuid;
     }
 
-    public String getSpeciesName() {
+    public StringProperty getSpeciesName() {
         return speciesName;
     }
 
-    public Optional<String> getDescription() {
+    public void setSpeciesName(String speciesName) {
+        this.speciesName.set(speciesName);
+    }
+    public Optional<StringProperty> getDescription() {
         return Optional.ofNullable(description);
     }
 
@@ -90,9 +93,6 @@ public class GenomeVersion {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 31 * hash + Objects.hashCode(this.name);
-        hash = 31 * hash + Objects.hashCode(this.speciesName);
-        hash = 31 * hash + Objects.hashCode(this.description);
         hash = 31 * hash + Objects.hashCode(uuid);
         return hash;
     }
