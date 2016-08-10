@@ -86,7 +86,7 @@ public class CustomGenomePersistenceManager {
     }
 
     void persistCustomGenome(GenomeVersion customGenome) {
-        String speciesName = customGenome.getSpeciesName();
+        String speciesName = customGenome.getSpeciesName().get();
         String versionName = customGenome.getName().get();
         String sequenceFileUrl = customGenome.getReferenceSequenceProvider().getPath();
         String uuid = customGenome.getUuid().toString();
