@@ -8,7 +8,7 @@ package org.lorainelab.igb.preferences;
 import java.io.File;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
-import org.lorainelab.igb.menu.about.IgbVersion;
+import org.lorainelab.igb.version.IgbVersion;
 import org.slf4j.LoggerFactory;
 
 /**
