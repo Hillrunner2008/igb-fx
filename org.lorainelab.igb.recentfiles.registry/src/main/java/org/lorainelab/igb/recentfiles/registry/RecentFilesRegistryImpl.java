@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.prefs.BackingStoreException;
@@ -26,6 +27,7 @@ public class RecentFilesRegistryImpl implements RecentFilesRegistry {
 
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(RecentFilesRegistryImpl.class);
     private static final String FILE_NAME = "fileName";
+    private static final String TIME_STAMP = "timeStamp";
     private ObservableSet<String> recentFiles;
     private Preferences modulePreferencesNode;
     private HashFunction md5HashFunction;
@@ -41,7 +43,7 @@ public class RecentFilesRegistryImpl implements RecentFilesRegistry {
     private void initializeRecentFilesChangeListener() {
         recentFiles.addListener((SetChangeListener.Change<? extends String> change) -> {
             if (change.wasAdded()) {
-                addRecentFileToPreferences(change.getElementAdded());
+                addRecentFileToPreferences(change.getElementAdded(),LocalDateTime.now());
             } else if (change.wasRemoved()) {
                 removeRecentFileFromPreferences(change.getElementRemoved());
             }
@@ -57,8 +59,9 @@ public class RecentFilesRegistryImpl implements RecentFilesRegistry {
         }
     }
 
-    private void addRecentFileToPreferences(String recentFile) {
+    private void addRecentFileToPreferences(String recentFile,LocalDateTime timeStamp ) {
         Preferences node = getPreferenceNode(recentFile);
+        node.put(TIME_STAMP, timeStamp.toString());
         node.put(FILE_NAME, recentFile);
     }
 

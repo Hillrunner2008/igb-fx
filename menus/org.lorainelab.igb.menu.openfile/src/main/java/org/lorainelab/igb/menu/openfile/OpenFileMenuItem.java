@@ -73,12 +73,12 @@ public class OpenFileMenuItem implements MenuBarEntryProvider, ToolbarButtonProv
                 fileTypeHandlerRegistry.getFileTypeHandlers().stream().filter(f -> {
                     return f.getSupportedExtensions().contains(Files.getFileExtension(file.getPath()));
                 }).findFirst().ifPresent(fileTypeHandler -> {
-                    OpenRecentFiles openRecentFiles = new OpenRecentFiles();
-                    try {
-                        openRecentFiles.StoreRecentFiles(file.getPath());
-                    } catch (BackingStoreException ex) {
-                        java.util.logging.Logger.getLogger(OpenFileMenuItem.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+//                    OpenRecentFiles openRecentFiles = new OpenRecentFiles();
+//                    try {
+//                        openRecentFiles.StoreRecentFiles(file.getPath());
+//                    } catch (BackingStoreException ex) {
+//                        java.util.logging.Logger.getLogger(OpenFileMenuItem.class.getName()).log(Level.SEVERE, null, ex);
+//                    }
                     selectionInfoService.getSelectedGenomeVersion().get().ifPresent(gv -> {
                         recentFilesRegistry.getRecentFiles().add(file.getPath());
                         DataSourceReference dataSourceReference = new DataSourceReference(file.getPath(), dataSource);
