@@ -1,6 +1,6 @@
 package org.lorainelab.igb.recentfiles.registry.api;
 
-import javafx.collections.ObservableSet;
+import javafx.beans.property.ReadOnlyListWrapper;
 
 /**
  *
@@ -8,5 +8,7 @@ import javafx.collections.ObservableSet;
  */
 public interface RecentFilesRegistry {
 
-    ObservableSet<String> getRecentFiles();
+    ReadOnlyListWrapper<String> getRecentFiles();
+    void addRecentFile(String recentFile);
+    void clearRecentFiles();
 }

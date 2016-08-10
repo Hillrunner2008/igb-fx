@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import java.util.List;
 import java.util.Optional;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
 import javafx.scene.control.MenuItem;
@@ -39,28 +40,27 @@ public class RecentFilesMenuEntry implements MenuBarEntryProvider {
     @Activate
     public void activate() {
         buildRecentFileMenu();
-        recentFilesRegistry.getRecentFiles().addListener((SetChangeListener.Change<? extends String> change) -> {
+        recentFilesRegistry.getRecentFiles().addListener((ListChangeListener.Change<? extends String> change) -> {
             buildRecentFileMenu();
         });
         clearMenuItem.setOnAction(action -> {
-            recentFilesRegistry.getRecentFiles().clear();
+            recentFilesRegistry.clearRecentFiles();
             recentFilesMenu.setDisable(true);
         });
     }
 
     private void buildRecentFileMenu() {
         recentFilesMenu.getItems().clear();
-//        for (int recentFilesIter = 0; recentFilesIter < RECENT_FILE_COUNT && recentFilesIter < recentFilesRegistry.getRecentFiles().size(); recentFilesIter++) {
-            recentFilesRegistry.getRecentFiles()
-                    .stream().map(recentFile -> createRecentFileMenuItem(recentFile))
-                    .forEach(menuItem -> recentFilesMenu.getItems().add(menuItem));
-            if (recentFilesMenu.getItems().isEmpty()) {
-                recentFilesMenu.setDisable(true);
-            }else{
-                recentFilesMenu.getItems().add(clearMenuItem);
-            }
+        recentFilesRegistry.getRecentFiles()
+                .stream().map(recentFile -> createRecentFileMenuItem(recentFile))
+                .forEach(menuItem -> recentFilesMenu.getItems().add(menuItem));
+        if (recentFilesMenu.getItems().isEmpty()) {
+            recentFilesMenu.setDisable(true);
+        } else {
+            recentFilesMenu.setDisable(false);
+            recentFilesMenu.getItems().add(clearMenuItem);
         }
-//    }
+    }
 
     private static MenuItem createRecentFileMenuItem(String recentFile) {
         final MenuItem menuItem = new MenuItem(Files.getNameWithoutExtension(recentFile) + "." + Files.getFileExtension(recentFile));

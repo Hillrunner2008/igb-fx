@@ -25,7 +25,6 @@ import org.lorainelab.igb.menu.api.MenuBarEntryProvider;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
 import org.lorainelab.igb.menu.api.model.WeightedMenuEntry;
 import org.lorainelab.igb.menu.api.model.WeightedMenuItem;
-import org.lorainelab.igb.menu.recentfilemenu.OpenRecentFiles;
 import org.lorainelab.igb.preferences.SessionPreferences;
 import org.lorainelab.igb.recentfiles.registry.api.RecentFilesRegistry;
 import org.lorainelab.igb.search.api.SearchService;
@@ -73,14 +72,8 @@ public class OpenFileMenuItem implements MenuBarEntryProvider, ToolbarButtonProv
                 fileTypeHandlerRegistry.getFileTypeHandlers().stream().filter(f -> {
                     return f.getSupportedExtensions().contains(Files.getFileExtension(file.getPath()));
                 }).findFirst().ifPresent(fileTypeHandler -> {
-//                    OpenRecentFiles openRecentFiles = new OpenRecentFiles();
-//                    try {
-//                        openRecentFiles.StoreRecentFiles(file.getPath());
-//                    } catch (BackingStoreException ex) {
-//                        java.util.logging.Logger.getLogger(OpenFileMenuItem.class.getName()).log(Level.SEVERE, null, ex);
-//                    }
                     selectionInfoService.getSelectedGenomeVersion().get().ifPresent(gv -> {
-                        recentFilesRegistry.getRecentFiles().add(file.getPath());
+                        recentFilesRegistry.addRecentFile(file.getPath());
                         DataSourceReference dataSourceReference = new DataSourceReference(file.getPath(), dataSource);
                         gv.getLoadedDataSets().add(new DataSet(file.getName(), dataSourceReference, fileTypeHandler));
                         indexDataSetForSearch(fileTypeHandler, dataSourceReference);
