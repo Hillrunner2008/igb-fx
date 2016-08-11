@@ -70,7 +70,7 @@ public class Track {
 
     }
 
-    private double getSlotOffset(int slot) {
+    public double getSlotOffset(int slot) {
         if (slot >= stackHeight && stackHeight != 0) {
             //add to slop row
             slot = stackHeight - 1;

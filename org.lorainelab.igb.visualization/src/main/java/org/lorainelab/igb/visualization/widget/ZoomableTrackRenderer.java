@@ -1,8 +1,10 @@
 package org.lorainelab.igb.visualization.widget;
 
+import com.google.common.collect.Range;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import static java.util.stream.Collectors.toList;
+import java.util.stream.Stream;
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
@@ -64,9 +66,16 @@ public class ZoomableTrackRenderer implements TrackRenderer {
                 clearSelections();
             }
             Rectangle2D viewBoundingRect = view.getBoundingRect();
-            List<CompositionGlyph> selections = track.getSlotMap().values().stream()
-                    .flatMap(glyphBin -> glyphBin.getGlyphsInView(view).stream())
-                    .filter(glyph -> glyph.getBoundingRect().intersects(mouseEventBoundingBox)).collect(Collectors.toList());
+            List<CompositionGlyph> selections = track.getSlotMap().entrySet().stream().flatMap(entry -> {
+                double slotOffset = track.getSlotOffset(entry.getKey());
+                final Range<Double> mouseEventXrange = Range.closed(mouseEventBoundingBox.getMinX(), mouseEventBoundingBox.getMaxX());
+                final Stream<CompositionGlyph> glyphsInXRange = entry.getValue().getGlyphsInXrange(mouseEventXrange).stream();
+                return glyphsInXRange.filter(glyph -> {
+                    final Range<Double> mouseEventYrange = Range.closed(mouseEventBoundingBox.getMinY(), mouseEventBoundingBox.getMaxY());
+                    return Range.closed(glyph.getBoundingRect().getMinY() + slotOffset, glyph.getBoundingRect().getMaxY() + slotOffset).isConnected(mouseEventYrange);
+                });
+            }).collect(toList());
+//
             if (selections.size() > 1) {
                 selections.forEach(glyph -> glyph.setIsSelected(true));
             } else {

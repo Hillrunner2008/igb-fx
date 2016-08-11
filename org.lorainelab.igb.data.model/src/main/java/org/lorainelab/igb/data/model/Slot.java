@@ -33,7 +33,7 @@ public class Slot {
 
     //subRangeMap returns in O(1) time, and the RangeMap it returns has O(log n) additive cost for each of its query operations 
     //that is, all of its operations still take O(log n), just with a higher constant factor.
-    private Collection<CompositionGlyph> getGlyphsInXrange(Range<Double> queryRange) {
+    public Collection<CompositionGlyph> getGlyphsInXrange(Range<Double> queryRange) {
         return glyphs.subRangeMap(queryRange).asMapOfRanges().values();
     }
 
@@ -43,7 +43,7 @@ public class Slot {
     public Set<CompositionGlyph> getGlyphsInView(View view) {
         final Collection<CompositionGlyph> glyphsInXRange = getGlyphsInXrange(view.getXrange());
         return glyphsInXRange.stream()
-//                .filter(glyph -> view.getBoundingRect().intersects(glyph.getRenderBoundingRect()))
+                //                .filter(glyph -> view.getBoundingRect().intersects(glyph.getRenderBoundingRect()))
                 .collect(toSet());
 
     }
