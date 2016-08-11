@@ -88,7 +88,6 @@ public class CanvasMouseEventManager {
                             new Point2D(e.getScreenX(), e.getScreenY())
                     );
                 });
-
         stationaryPositions.or(allMouseEvents).distinct()
                 .map(either -> either.asLeft())
                 .subscribe(hoverEvent -> {
@@ -108,7 +107,6 @@ public class CanvasMouseEventManager {
                                 });
                     }
                 });
-
     }
 
     private void addCanvasScrollEventHandler() {
@@ -135,7 +133,7 @@ public class CanvasMouseEventManager {
                             .stream()
                             .filter(glyph -> glyph.isSelected())
                             .findFirst().ifPresent(glyphToJumpZoom -> {
-                                jumpZoom(glyphToJumpZoom.getRenderBoundingRect(), tr, event);
+                                jumpZoom(glyphToJumpZoom.getBoundingRect(), tr, event);
                                 selectionInfoService.getSelectedGlyphs().add(glyphToJumpZoom);
                             }));
         } else {

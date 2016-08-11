@@ -63,9 +63,10 @@ public class ZoomableTrackRenderer implements TrackRenderer {
             if (!multiSelectModeActive) {
                 clearSelections();
             }
+            Rectangle2D viewBoundingRect = view.getBoundingRect();
             List<CompositionGlyph> selections = track.getSlotMap().values().stream()
-                    .filter(glyph -> view.getBoundingRect().intersects(glyph.getRenderBoundingRect()))
-                    .filter(glyph -> glyph.getRenderBoundingRect().intersects(mouseEventBoundingBox)).collect(Collectors.toList());
+                    .flatMap(glyphBin -> glyphBin.getGlyphsInView(view).stream())
+                    .filter(glyph -> glyph.getBoundingRect().intersects(mouseEventBoundingBox)).collect(Collectors.toList());
             if (selections.size() > 1) {
                 selections.forEach(glyph -> glyph.setIsSelected(true));
             } else {
@@ -73,7 +74,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
                     boolean subSelectionActive = false;
                     for (Glyph g : glyph.getChildren()) {
                         if (g.isSelectable()) {
-                            if (g.getRenderBoundingRect().intersects(mouseEventBoundingBox)) {
+                            if (g.getBoundingRect().intersects(mouseEventBoundingBox)) {
                                 g.setIsSelected(true);
                                 subSelectionActive = true;
                                 break;
@@ -161,9 +162,9 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         Point2D local = hoverEvent.getLocal();
         Point2D screen = hoverEvent.getScreen();
         Rectangle2D modelCoordinateBoundingBox = canvasToViewCoordinates(local);
-        Optional<CompositionGlyph> intersect = track.getSlotMap().values()
-                .stream().filter(glyph -> glyph.getRenderBoundingRect()
-                .intersects(modelCoordinateBoundingBox))
+        Optional<CompositionGlyph> intersect = track.getSlotMap().values().stream()
+                .flatMap(glyphBin -> glyphBin.getGlyphsInView(view).stream())
+                .filter(glyph -> glyph.getBoundingRect().intersects(modelCoordinateBoundingBox))
                 .findFirst();
 
         if (intersect.isPresent()) {
@@ -195,12 +196,14 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     }
 
     private void clearSelections() {
-        track.getSlotMap().values().stream().forEach(glyph -> {
-            glyph.setIsSelected(false);
-            for (Glyph g : glyph.getChildren()) {
-                g.setIsSelected(false);
-            }
-        });
+        track.getSlotMap().values().stream()
+                .flatMap(glyphBin -> glyphBin.getAllGlyphs().stream())
+                .forEach(glyph -> {
+                    glyph.setIsSelected(false);
+                    for (Glyph g : glyph.getChildren()) {
+                        g.setIsSelected(false);
+                    }
+                });
     }
 
     private Rectangle2D canvasToViewCoordinates(Point2D clickLocation) {

@@ -1,6 +1,10 @@
 package org.lorainelab.igb.data.model.glyph;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Range;
+import com.google.common.collect.RangeMap;
+import com.google.common.collect.TreeRangeMap;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -18,17 +22,19 @@ import org.lorainelab.igb.data.model.View;
  */
 public class CompositionGlyph implements Glyph {
 
-    private final Glyph[] children;
+    private RangeMap<Double, Glyph> xRange;
     private final Map<String, String> tooltipData;
 
     private final String label;
     boolean isSelected = false;
     private Rectangle2D boundingRect;
-    private static final double LABEL_SPACE_SCALER = 2;
     private static final Color DEFAULT_COLOR = Color.web("#3F51B5");
 
     public CompositionGlyph(String label, Map<String, String> tooltipData, List<Glyph> children) {
-        this.children = children.toArray(new Glyph[children.size()]);
+        this.xRange = TreeRangeMap.<Double, Glyph>create();
+        children.stream().forEach(child -> {
+            this.xRange.put(Range.closed(child.getBoundingRect().getMinX(), child.getBoundingRect().getMaxX()), child);
+        });
         this.label = label;
         this.tooltipData = tooltipData;
     }
@@ -64,8 +70,8 @@ public class CompositionGlyph implements Glyph {
         double maxX = Double.MIN_VALUE;
         double minY = Double.MAX_VALUE;
         double maxY = Double.MIN_VALUE;
-        for (Glyph g : children) {
-            Rectangle2D rect = g.getRenderBoundingRect();
+        for (Glyph g : xRange.asMapOfRanges().values()) {
+            Rectangle2D rect = g.getBoundingRect();
             minX = Math.min(minX, rect.getMinX());
             maxX = Math.max(maxX, rect.getMaxX());
             minY = Math.min(minY, rect.getMinY());
@@ -77,50 +83,19 @@ public class CompositionGlyph implements Glyph {
     }
 
     @Override
-    public Optional<Rectangle2D> getViewBoundingRect(Rectangle2D view, double additionalYoffset) {
-        double minX = Double.MAX_VALUE;
-        double maxX = Double.MIN_VALUE;
-        double minY = Double.MAX_VALUE;
-        double maxY = Double.MIN_VALUE;
-        double glyphMinY = Double.MIN_VALUE;
-        double maxGlyphheight = Double.MIN_VALUE;
-        for (Glyph g : children) {
-            if (g.getRenderBoundingRect().intersects(view)) {
-                Optional<Rectangle2D> rect = g.getViewBoundingRect(view, additionalYoffset);
-                if (rect.isPresent()) {
-                    minX = Math.min(minX, rect.get().getMinX());
-                    maxX = Math.max(maxX, rect.get().getMaxX());
-                    maxY = Math.max(maxY, rect.get().getMaxY());
-                    minY = Math.min(minY, rect.get().getMinY());
-                }
-            }
-            //even if part of composition glyph is out of view, we will consider its minY and height
-            Rectangle2D boundingRect = getRenderBoundingRect();
-            double y = boundingRect.getMinY();
-            double height = boundingRect.getHeight();
-            if (y < view.getMinY()) {
-                double offSet = (view.getMinY() - y);
-                height = height - offSet;
-                y = 0;
+    public Optional<Rectangle2D> getViewBoundingRect(View view) {
+        final RangeMap<Double, Glyph> intersectionRangeMapX = xRange.subRangeMap(view.getXrange());
+        if (!intersectionRangeMapX.asMapOfRanges().isEmpty()) {
+            Range<Double> xSpan = intersectionRangeMapX.span();
+            double minX = xSpan.lowerEndpoint() - view.getXrange().lowerEndpoint();
+            double width = xSpan.upperEndpoint() - xSpan.lowerEndpoint();
+            if (isPositiveStrand()) {
+                return Optional.of(new Rectangle2D(minX, 2.5, width, SLOT_HEIGHT));
             } else {
-                y = y - view.getMinY();
+                return Optional.of(new Rectangle2D(minX, 17.5, width, SLOT_HEIGHT));
             }
-            glyphMinY = Math.max(glyphMinY, y);
-            maxGlyphheight = Math.max(maxGlyphheight, height);
-
         }
-        double width = maxX - minX;
-        double height = maxY - minY;
-        if (width <= 0 || height <= 0) {
-            return Optional.empty();
-        }
-        double y;
-        if (isPositiveStrand()) {
-            y = (glyphMinY - maxGlyphheight) + additionalYoffset;
-        } else {
-            y = (glyphMinY) + additionalYoffset;
-        }
-        return Optional.of(new Rectangle2D(minX, y, width, maxGlyphheight * LABEL_SPACE_SCALER));
+        return Optional.empty();
     }
 
     private boolean isPositiveStrand() {
@@ -128,27 +103,26 @@ public class CompositionGlyph implements Glyph {
     }
 
     @Override
-    public void draw(GraphicsContext gc, View view, double additionalYoffset) {
+    public void draw(GraphicsContext gc, View view) {
         Rectangle2D viewBoundingRect = view.getBoundingRect();
-        Optional<Rectangle2D> glyphViewIntersectionBoundsWrapper = getViewBoundingRect(viewBoundingRect, additionalYoffset);
+        Optional<Rectangle2D> glyphViewIntersectionBoundsWrapper = getViewBoundingRect(view);
         if (!glyphViewIntersectionBoundsWrapper.isPresent()) {
             return;
         }
         Rectangle2D glyphViewIntersectionBounds = glyphViewIntersectionBoundsWrapper.get();
-        if (viewBoundingRect.getWidth() < 15_000_000) {
-            drawChildren(viewBoundingRect, gc, view, additionalYoffset);
-            drawLabel(view, viewBoundingRect, gc, glyphViewIntersectionBounds, additionalYoffset);
+        if (viewBoundingRect.getWidth() < view.getChromosome().getLength() * 0.002) {
+            drawChildren(gc, view);
+            drawLabel(view, viewBoundingRect, gc, glyphViewIntersectionBounds);
         } else {
             drawSummaryRectangle(gc, glyphViewIntersectionBounds);
         }
-        drawSelectionRectangle(gc, view, glyphViewIntersectionBounds, additionalYoffset);
+        drawSelectionRectangle(gc, view, glyphViewIntersectionBounds);
     }
 
-    private void drawChildren(Rectangle2D viewBoundingRect, GraphicsContext gc, View view, double additionalYoffset) {
-        for (Glyph glyph : children) {
-            if (viewBoundingRect.intersects(glyph.getRenderBoundingRect())) {
-                glyph.draw(gc, view, additionalYoffset);
-            }
+    private void drawChildren(GraphicsContext gc, View view) {
+        final RangeMap<Double, Glyph> intersectionRangeMapX = xRange.subRangeMap(view.getXrange());
+        for (Glyph glyph : intersectionRangeMapX.asMapOfRanges().values()) {
+            glyph.draw(gc, view);
         }
     }
 
@@ -156,20 +130,17 @@ public class CompositionGlyph implements Glyph {
         gc.save();
         gc.setFill(DEFAULT_COLOR);
         gc.setStroke(DEFAULT_COLOR);
-        gc.fillRect(glyphViewIntersectionBounds.getMinX(), glyphViewIntersectionBounds.getMinY() + (glyphViewIntersectionBounds.getHeight() / 2), glyphViewIntersectionBounds.getWidth(), glyphViewIntersectionBounds.getHeight() / 2);
+        if (isPositiveStrand()) {
+            gc.fillRect(glyphViewIntersectionBounds.getMinX(), glyphViewIntersectionBounds.getMinY() + (glyphViewIntersectionBounds.getHeight() / 2), glyphViewIntersectionBounds.getWidth(), glyphViewIntersectionBounds.getHeight() / 2);
+        } else {
+            gc.fillRect(glyphViewIntersectionBounds.getMinX(), glyphViewIntersectionBounds.getMinY(), glyphViewIntersectionBounds.getWidth(), glyphViewIntersectionBounds.getHeight() / 2);
+
+        }
         gc.restore();
     }
 
-    private void drawLabel(View view, Rectangle2D viewBoundingRect, GraphicsContext gc, Rectangle2D glyphViewIntersectionBounds, double additionalYoffset) {
+    private void drawLabel(View view, Rectangle2D viewBoundingRect, GraphicsContext gc, Rectangle2D glyphViewIntersectionBounds) {
         if (!Strings.isNullOrEmpty(label)) {
-//            double glyphMinY;
-//            final double glyphHeight = glyphViewIntersectionBounds.getHeight() / LABEL_SPACE_SCALER;
-//            if (isPositiveStrand()) {
-//                glyphMinY = -(-(glyphHeight / 2) + additionalYoffset - glyphViewIntersectionBounds.getMinY());
-//            } else {
-//                glyphMinY = -(-glyphViewIntersectionBounds.getMinY() + additionalYoffset);
-//            }
-//            Rectangle2D labelRect = new Rectangle2D(glyphViewIntersectionBounds.getMinX(), glyphViewIntersectionBounds.getMinY(), glyphViewIntersectionBounds.getWidth(), glyphMinY);
             final double fontSize = Math.min((glyphViewIntersectionBounds.getHeight() * view.getYfactor()) * .35, 10);
             if (viewBoundingRect.getWidth() < 100_000 && fontSize > 8) {
                 gc.save();
@@ -201,12 +172,12 @@ public class CompositionGlyph implements Glyph {
         }
     }
 
-    private void drawSelectionRectangle(GraphicsContext gc, View view, Rectangle2D glyphViewIntersectionBounds, double additionalYoffset) {
+    private void drawSelectionRectangle(GraphicsContext gc, View view, Rectangle2D glyphViewIntersectionBounds) {
         if (isSelected()) {
             Rectangle2D drawRect = glyphViewIntersectionBounds;
-            for (Glyph g : children) {
+           for (Glyph g : xRange.asMapOfRanges().values()) {
                 if (g.isSelectable() && g.isSelected()) {
-                    Optional<Rectangle2D> viewBoundingRect = g.getViewBoundingRect(view.getBoundingRect(), additionalYoffset);
+                    Optional<Rectangle2D> viewBoundingRect = g.getViewBoundingRect(view);
                     if (viewBoundingRect.isPresent()) {
                         drawRect = viewBoundingRect.get();
                         break;
@@ -246,8 +217,8 @@ public class CompositionGlyph implements Glyph {
         return isSelected;
     }
 
-    public Glyph[] getChildren() {
-        return children;
+    public Collection<Glyph> getChildren() {
+        return xRange.asMapOfRanges().values();
     }
 
     @Override
@@ -277,20 +248,6 @@ public class CompositionGlyph implements Glyph {
             return false;
         }
         return true;
-    }
-
-    @Override
-    public Rectangle2D getRenderBoundingRect() {
-        return getBoundingRect();
-    }
-
-    @Override
-    public void setRenderBoundingRect(Rectangle2D rectangle2D) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    public void refreshBounds() {
-        boundingRect = calculateBoundingRect();
     }
 
 }

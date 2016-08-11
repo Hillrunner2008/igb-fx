@@ -1,19 +1,20 @@
 package org.lorainelab.igb.data.model;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Multimaps;
 import com.google.common.collect.Ordering;
-import com.google.common.collect.SortedSetMultimap;
-import com.google.common.collect.TreeMultimap;
-import com.google.common.primitives.Ints;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import javafx.geometry.Rectangle2D;
+import java.util.OptionalInt;
+import java.util.concurrent.ConcurrentHashMap;
+import static java.util.stream.Collectors.toList;
 import javafx.scene.canvas.GraphicsContext;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
-import org.lorainelab.igb.data.model.glyph.Glyph;
+import static org.lorainelab.igb.data.model.glyph.Glyph.MIN_OFFSET;
 import static org.lorainelab.igb.data.model.glyph.Glyph.MIN_X_COMPARATOR;
+import static org.lorainelab.igb.data.model.glyph.Glyph.SLOT_HEIGHT;
+import static org.lorainelab.igb.data.model.glyph.RectangleGlyph.THICK_RECTANGLE_HEIGHT;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -21,15 +22,17 @@ import static org.lorainelab.igb.data.model.glyph.Glyph.MIN_X_COMPARATOR;
  */
 public class Track {
 
-    final int SLOT_HEIGHT = 30;
+    private static final Logger LOG = LoggerFactory.getLogger(Track.class);
     private final String trackLabel;
     private List<CompositionGlyph> glyphs;
-    private SortedSetMultimap<Integer, CompositionGlyph> slotMap;
+    //A KD-Tree is something we may consider as an alternative to the Slot classes RangeMap's 
+    //subRangeMap Interval Tree based solution. KD-Tree could handle rectangle's need for 4D search
+    private Map<Integer, Slot> slotMap;
 
     private final boolean isNegative;
     private double modelHeight;
     private int stackHeight;
-    private static final int PADDING = 5;
+    private int slotCount;
 
     public Track(boolean isNegative, String trackLabel, int stackHeight) {
         this.isNegative = isNegative;
@@ -37,7 +40,7 @@ public class Track {
         this.stackHeight = Math.max(stackHeight, 0);
         //handles case when stackHeight is set to 0 i.e. unlimited
         this.modelHeight = Math.max(SLOT_HEIGHT * stackHeight, SLOT_HEIGHT);
-        slotMap = Multimaps.synchronizedSortedSetMultimap(TreeMultimap.create(Ordering.natural(), MIN_X_COMPARATOR));
+        slotMap = new ConcurrentHashMap<>();
         glyphs = Lists.newArrayList();
     }
 
@@ -46,33 +49,38 @@ public class Track {
     }
 
     public void draw(GraphicsContext gc, View view, CanvasContext canvasContext) {
-        final double additionalYOffset = canvasContext.getBoundingRect().getMinY() / view.getYfactor();
+        double additionalYOffset = canvasContext.getBoundingRect().getMinY() / view.getYfactor();
         //TODO look into why concurrency issues are possible at this location during zooming
-        slotMap.values().stream()
-                .filter(glyph -> view.getBoundingRect().intersects(glyph.getRenderBoundingRect()))
-                .forEach(glyph -> glyph.draw(gc, view, additionalYOffset));
+        gc.save();
+        //NOTE: Rounding issues prevent us from using translation to take care of view offsets in the x coordinate system
+        // everything works fine until x coordinates get large, and then the larger numbers don't render correctly on the canvas
+        //i.e. we can't do this gc.translate(-view.getBoundingRect().getMinX(), -view.getBoundingRect().getMinY() + additionalYOffset);
+        gc.translate(0, additionalYOffset);
+        slotMap.entrySet().stream()
+                .forEach(entry -> {
+                    //TODO, could easily filter based on rows y coordinate range if we didn't want to support slop row, just modify getSlotOffset to not fix for slop and then filter on view range
+                    //we may also consider using this approach to create customer slop row visualization
+                    double slotOffset = getSlotOffset(entry.getKey());
+                    gc.save();
+                    gc.translate(0, slotOffset);
+                    entry.getValue().getGlyphsInView(view).stream().forEach(glyph -> glyph.draw(gc, view));
+                    gc.restore();
+                });
+        gc.restore();
 
     }
 
-    private void setGlyphPosition(CompositionGlyph compositionGlyph, int slot, int maxStackHeight) {
-        for (Glyph glyph : compositionGlyph.getChildren()) {
-            Rectangle2D boundingRect = glyph.getBoundingRect();
-            final int modelHeight = SLOT_HEIGHT * maxStackHeight;
-            final double x = boundingRect.getMinX();
-            final double width = boundingRect.getWidth();
-            final double height = boundingRect.getHeight();
-            if (isNegative) {
-                final double MIN_OFFSET = 17.5;
-                final double y = boundingRect.getMinY() - MIN_OFFSET + (slot * SLOT_HEIGHT);
-                glyph.setRenderBoundingRect(new Rectangle2D(x, y, width, height));
-            } else {
-                double slotStartingY = (maxStackHeight - slot) * SLOT_HEIGHT;
-                double originalY = boundingRect.getMinY();
-                final double y = originalY + slotStartingY;
-                glyph.setRenderBoundingRect(new Rectangle2D(x, y, width, height));
-            }
+    private double getSlotOffset(int slot) {
+        if (slot >= stackHeight && stackHeight != 0) {
+            //add to slop row
+            slot = stackHeight - 1;
         }
-        compositionGlyph.refreshBounds();
+        if (isNegative) {
+            return -MIN_OFFSET + (slot * SLOT_HEIGHT);
+        } else {
+            final double minPositiveStrandOffset = -MIN_OFFSET - THICK_RECTANGLE_HEIGHT;
+            return minPositiveStrandOffset + (slotCount - slot) * SLOT_HEIGHT;
+        }
     }
 
     public void buildSlots() {
@@ -80,9 +88,10 @@ public class Track {
                 .sorted(MIN_X_COMPARATOR)
                 .forEachOrdered(glyph -> {
                     int slotToadd = 0;
-                    for (Integer key : slotMap.keySet()) {
-                        double rowMax = slotMap.get(key).last().getBoundingRect().getMaxX();
-                        if (glyph.getBoundingRect().getMinX() > rowMax) {
+                    List<Integer> keys = slotMap.keySet().stream().sorted(Ordering.natural()).collect(toList());
+                    for (int key : keys) {
+                        double max = slotMap.get(key).getMaxX();
+                        if (glyph.getBoundingRect().getMinX() > max) {
                             break;
                         } else {
                             slotToadd++;
@@ -92,30 +101,25 @@ public class Track {
                         }
                     }
                     if (slotToadd <= stackHeight || stackHeight == 0) {
-                        slotMap.put(slotToadd, glyph);
+                        Slot bin = slotMap.computeIfAbsent(slotToadd, e -> {
+                            return new Slot();
+                        });
+                        bin.addGlyph(glyph);
                     }
                 });
 
-        Optional<Integer> max = slotMap.keys().stream().max((x, y) -> Ints.compare(x, y));
-        if (max.isPresent()) {
-            Integer slotCount = max.get();
-            if (isLimitedStackHeight()) {
-                if (stackHeight < max.get()) {
-                    slotCount = stackHeight;
-                }
-            }
-            for (Map.Entry<Integer, CompositionGlyph> entry : slotMap.entries()) {
-                int slotToadd = entry.getKey();
-                if (slotToadd < stackHeight || stackHeight == 0) {
+        updateSlotCount();
+        modelHeight = SLOT_HEIGHT * slotCount + 1;// +1 for slop row
 
-                    setGlyphPosition(entry.getValue(), slotToadd, slotCount);
-                } else {
-                    //add to slop row
-                    setGlyphPosition(entry.getValue(), stackHeight - 1, slotCount);
-                }
+    }
+
+    private void updateSlotCount() {
+        OptionalInt max = slotMap.keySet().stream().mapToInt(key -> key).max();
+        slotCount = max.orElse(0);
+        if (isLimitedStackHeight()) {
+            if (stackHeight < slotCount) {
+                slotCount = stackHeight;
             }
-            slotCount++; // for slop row
-            modelHeight = SLOT_HEIGHT * slotCount;
         }
     }
 
@@ -123,7 +127,7 @@ public class Track {
         return stackHeight != 0;
     }
 
-    public SortedSetMultimap<Integer, CompositionGlyph> getSlotMap() {
+    public Map<Integer, Slot> getSlotMap() {
         return slotMap;
     }
 
