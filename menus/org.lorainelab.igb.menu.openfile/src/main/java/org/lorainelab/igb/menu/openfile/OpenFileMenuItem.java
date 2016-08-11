@@ -102,7 +102,7 @@ public class OpenFileMenuItem implements MenuBarEntryProvider, ToolbarButtonProv
             try {
                 Optional<GenomeVersion> genomeVersion = selectionInfoService.getSelectedGenomeVersion().getValue();
                 if (genomeVersion.isPresent()) {
-                    String speciesName = genomeVersion.get().getSpeciesName();
+                    String speciesName = genomeVersion.get().getSpeciesName().get();
                     Optional<IndexIdentity> resourceIndexIdentity = searchService.getResourceIndexIdentity(speciesName);
                     if (!resourceIndexIdentity.isPresent()) {
                         LOG.info("index doesnt exist, so create it");

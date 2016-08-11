@@ -8,6 +8,7 @@ package org.lorainelab.igb.preferences;
 import java.io.File;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
+import org.lorainelab.igb.version.IgbVersion;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -21,6 +22,8 @@ public class PreferenceUtils {
     private static String DATA_HOME_DIR;
 
     public static Preferences getDefaultPrefsNode() {
+        String prefDirPath = getApplicationDataDirectory().getAbsolutePath() + File.separator + "preferences" + File.separator + IgbVersion.getVersion() + File.separator;
+        System.setProperty("java.util.prefs.userRoot", prefDirPath);
         return Preferences.userRoot().node(ROOT_PREFERENCE_NODE_NAME);
     }
 
