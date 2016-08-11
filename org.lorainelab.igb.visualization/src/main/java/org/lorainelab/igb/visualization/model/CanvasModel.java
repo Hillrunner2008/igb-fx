@@ -55,6 +55,7 @@ public class CanvasModel {
     private ObjectProperty<Optional<Rectangle2D>> selectionRectangle;
     private boolean mouseDragging;
     private BooleanProperty multiSelectModeActive;
+    private BooleanProperty forceRefresh;
 
     public CanvasModel() {
         modelWidth = new SimpleDoubleProperty(1);
@@ -74,7 +75,7 @@ public class CanvasModel {
         selectionRectangle = new SimpleObjectProperty<>(Optional.empty());
         mouseDragging = false;
         multiSelectModeActive = new SimpleBooleanProperty(false);
-
+        forceRefresh = new SimpleBooleanProperty(false);
     }
 
     @Activate
@@ -196,6 +197,15 @@ public class CanvasModel {
 
     public void setMultiSelectModeActive(boolean multiSelectModeActive) {
         this.multiSelectModeActive.set(multiSelectModeActive);
+    }
+
+    public ReadOnlyBooleanProperty isforceRefresh() {
+        return forceRefresh;
+    }
+
+    public void forceRefresh() {
+        this.forceRefresh.set(true);
+        this.forceRefresh.set(false);
     }
 
     public ObjectProperty<Optional<Point2D>> getMouseClickLocation() {

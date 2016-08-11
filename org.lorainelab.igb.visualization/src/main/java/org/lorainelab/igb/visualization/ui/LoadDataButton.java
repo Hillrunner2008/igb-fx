@@ -37,7 +37,7 @@ public class LoadDataButton extends Button {
                             return null;
                         }).thenRun(() -> {
                             Platform.runLater(() -> {
-                              canvasModel.setxFactor(canvasModel.getxFactor().doubleValue());//refresh hack
+                                canvasModel.forceRefresh();
                             });
                         });
                     });
