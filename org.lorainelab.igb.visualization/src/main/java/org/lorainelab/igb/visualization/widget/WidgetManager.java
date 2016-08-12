@@ -50,7 +50,7 @@ public class WidgetManager {
 
     @Activate
     public void activate() {
-        refreshViewStream.successionEnds(Duration.ofMillis(5)).subscribe(e -> {
+        refreshViewStream.successionEnds(Duration.ofMillis(1)).subscribe(e -> {
             renderWidgets();
         });
         canvasModel.getxFactor().addListener(refreshViewListener);
