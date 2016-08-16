@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.lorainelab.igb.openfileImpl;
+package org.lorainelab.igb.datasetloadingImpl;
 
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
@@ -19,7 +19,6 @@ import org.lorainelab.igb.data.model.datasource.DataSource;
 import org.lorainelab.igb.data.model.datasource.DataSourceReference;
 import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandler;
 import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandlerRegistry;
-import org.lorainelab.igb.openfileservice.FileOpener;
 import org.lorainelab.igb.preferences.SessionPreferences;
 import org.lorainelab.igb.recentfiles.registry.api.RecentFilesRegistry;
 import org.lorainelab.igb.search.api.SearchService;
@@ -28,15 +27,16 @@ import org.lorainelab.igb.selections.SelectionInfoService;
 import com.google.common.io.Files;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.lorainelab.igb.datasetloadingservice.OpenDataSet;
 
 /**
  *
  * @author Devdatta Kulkarni
  */
-@Component(immediate = true, provide = FileOpener.class)
-public class OpenFileImpl implements FileOpener {
+@Component(immediate = true, provide = OpenDataSet.class)
+public class OpenDataSetImpl implements OpenDataSet {
 
-    private static final Logger LOG = LoggerFactory.getLogger(OpenFileImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OpenDataSetImpl.class);
     private static final String DEFAULT_FILE_EXTENSION_FILTER_NAME = "All Supported Formats";
 
     private DataSource dataSource;

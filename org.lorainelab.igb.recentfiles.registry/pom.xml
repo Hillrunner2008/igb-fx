@@ -34,18 +34,6 @@
             <groupId>org.lorainelab</groupId>
             <artifactId>org.lorainelab.igb.preferences</artifactId>
         </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>org.lorainelab.igb.data.model</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>org.lorainelab.igb.toolbar.api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>de.jensd</groupId>
-            <artifactId>fontawesomefx</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
@@ -63,10 +51,9 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Export-Package>
-                            ${project.artifactId}.api
-                        </Export-Package>
+                        <Export-Package>org.lorainelab.igb.recentfiles.registry.api</Export-Package>
                         <Service-Component>*</Service-Component>
+                        <Private-Package>org.lorainelab.igb.recentfiles.registry.*</Private-Package>
                     </instructions>
                 </configuration>
             </plugin>  

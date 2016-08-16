@@ -33,7 +33,7 @@ public class RecentFilesRegistryImpl implements RecentFilesRegistry {
     public RecentFilesRegistryImpl() {
         md5HashFunction = Hashing.md5();
         recentFiles = FXCollections.observableSet(Sets.newHashSet());
-        modulePreferencesNode = PreferenceUtils.getPackagePrefsNode(RecentFilesRegistry.class);
+        modulePreferencesNode = PreferenceUtils.getPackagePrefsNode(RecentFilesRegistryImpl.class);
         initializeFromPreferences();
         initializeRecentFilesChangeListener();
     }

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.lorainelab.igb.openfileservice;
+package org.lorainelab.igb.datasetloadingservice;
 
 import java.io.File;
 
@@ -11,7 +11,7 @@ import java.io.File;
  *
  * @author Devdatta Kulkarni
  */
-public interface FileOpener {
+public interface OpenDataSet {
     void openFile();
     void openFile(File file);
 }

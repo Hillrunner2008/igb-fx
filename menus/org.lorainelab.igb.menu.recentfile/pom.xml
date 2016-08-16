@@ -1,25 +1,19 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.lorainelab</groupId>
-    <artifactId>org.lorainelab.igb.openfileservice</artifactId>
-    <version>0.0.1</version>
+    <artifactId>org.lorainelab.igb.menu.recentfile</artifactId>
     <packaging>bundle</packaging>
-    
+
     <parent>
-        <artifactId>org.lorainelab.igb</artifactId>
         <groupId>org.lorainelab</groupId>
+        <artifactId>org.lorainelab.igb</artifactId>
         <version>0.0.1</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
+    
 
     <dependencies>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
-            <version>4.3.0</version>
-            <scope>provided</scope>
-        </dependency>
         <dependency>
             <groupId>biz.aQute.bnd</groupId>
             <artifactId>bndlib</artifactId>
@@ -29,26 +23,23 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.lorainelab</groupId>
-            <artifactId>org.lorainelab.igb.selections</artifactId>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>de.jensd</groupId>
+            <artifactId>fontawesomefx</artifactId>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>org.lorainelab.igb.data.model</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>org.lorainelab.igb.preferences</artifactId>
+            <artifactId>org.lorainelab.igb.menu.api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>org.lorainelab.igb.recentfiles.registry</artifactId>
+            <artifactId>org.lorainelab.igb.openfileservice</artifactId>
+            <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-        </dependency>        
     </dependencies>
 
     <build>
@@ -71,10 +62,9 @@
                             !${project.artifactId},
                             *
                         </Import-Package>
-                        <Export-Package>
-                            ${project.artifactId}
-                        </Export-Package>
+                        <Export-Package></Export-Package>
                         <Service-Component>*</Service-Component>
+                        <Private-Package>org.lorainelab.igb.menu.openrecentfilemenu.*</Private-Package>
                     </instructions>
                 </configuration>
             </plugin>
@@ -84,4 +74,5 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
+    <name>org.lorainelab.igb.menu.recentfile</name>
 </project>
