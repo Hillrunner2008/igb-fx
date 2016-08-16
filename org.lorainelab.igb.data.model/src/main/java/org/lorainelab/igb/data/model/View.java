@@ -17,11 +17,15 @@ public class View {
     private Range<Double> xRange;
     private double xfactor = 1;
     private double yfactor = 1;
+    double xPixelsPerCoordinate;
+    private final CanvasContext canvasContext;
 
-    public View(Rectangle2D boundingRect, Chromosome chromosome) {
+    public View(Rectangle2D boundingRect, CanvasContext canvasContext, Chromosome chromosome) {
         this.boundingRect = boundingRect;
         this.chromosome = chromosome;
+        this.canvasContext = canvasContext;
         xRange = Range.closed(boundingRect.getMinX(), boundingRect.getMaxX());
+        xPixelsPerCoordinate = boundingRect.getWidth() / canvasContext.getBoundingRect().getWidth();
     }
 
     public Rectangle2D getBoundingRect() {
@@ -31,10 +35,15 @@ public class View {
     public Range<Double> getXrange() {
         return xRange;
     }
-    
+
     public void setBoundingRect(Rectangle2D boundingRect) {
         this.boundingRect = boundingRect;
         xRange = Range.closed(boundingRect.getMinX(), boundingRect.getMaxX());
+        xPixelsPerCoordinate = boundingRect.getWidth() / canvasContext.getBoundingRect().getWidth();
+    }
+
+    public double getXpixelsPerCoordinate() {
+        return xPixelsPerCoordinate;
     }
 
     public double getXfactor() {

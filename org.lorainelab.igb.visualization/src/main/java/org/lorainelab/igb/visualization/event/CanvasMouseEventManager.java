@@ -54,12 +54,18 @@ public class CanvasMouseEventManager {
     private void initializeMouseEventHandlers() {
         addCanvasScrollEventHandler();
         addHoverEventHandler();
-        canvas.setOnMouseDragEntered(e -> canvasModel.resetZoomStripe());
+        canvas.setOnDragDetected(event -> {
+            canvasModel.setClickDragStartPosition(getPoint2dFromMouseEvent(event));
+            canvasModel.resetZoomStripe();
+        });
 
         canvas.setOnMouseDragged(event -> {
-            canvasModel.setLocalPoint(getPoint2dFromMouseEvent(event));
+            canvasModel.setLastDragPosition(getPoint2dFromMouseEvent(event));
             canvasModel.setScreenPoint(getScreenPoint2DFromMouseEvent(event));
             canvasModel.setMouseDragging(true);
+        });
+        canvas.setOnMouseExited(event -> {
+            canvasModel.setLastDragPosition(getRangeBoundedDragEventLocation(event));
         });
         canvas.setOnMousePressed(event -> {
             canvasModel.setMouseClickLocation(getPoint2dFromMouseEvent(event));
@@ -70,7 +76,8 @@ public class CanvasMouseEventManager {
             } else {
                 processMouseClicked(event);
             }
-            canvasModel.setLocalPoint(null);
+            canvasModel.setClickDragStartPosition(null);
+            canvasModel.setClickDragStartPosition(null);
             canvasModel.setScreenPoint(null);
             canvasModel.setMouseDragging(false);
         });
@@ -152,14 +159,14 @@ public class CanvasMouseEventManager {
     }
 
     private void processMouseDragReleased(MouseEvent event) {
-        canvasModel.getMouseClickLocation().get().ifPresent(mouseClickLocation -> {
+        canvasModel.getClickDragStartPosition().get().ifPresent(dragStartPoint -> {
             tracksModel.getCoordinateTrackRenderer().ifPresent(tr -> {
                 Rectangle2D boundingRect = tr.getCanvasContext().getBoundingRect();
-                if (boundingRect.contains(mouseClickLocation)) {
+                if (boundingRect.contains(dragStartPoint)) {
                     Point2D lastMouseDragLocation = getPoint2dFromMouseEvent(event);
                     double xfactor = canvasModel.getxFactor().doubleValue();
                     double lastMouseDragX = lastMouseDragLocation.getX() / xfactor;
-                    double lastMouseClickX = mouseClickLocation.getX() / xfactor;
+                    double lastMouseClickX = dragStartPoint.getX() / xfactor;
                     double minX = tr.getView().getBoundingRect().getMinX();
                     double x1 = minX + lastMouseClickX;
                     double x2 = minX + lastMouseDragX;
@@ -182,7 +189,7 @@ public class CanvasMouseEventManager {
         canvasModel.getMouseClickLocation().get().ifPresent(clickStartPosition -> {
             tracksModel.getCoordinateTrackRenderer().ifPresent(coordinateTrackRenderer -> {
                 if (!coordinateTrackRenderer.getCanvasContext().getBoundingRect().contains(clickStartPosition)) {
-                    canvasModel.getLocalPoint().get().ifPresent(localPoint -> {
+                    canvasModel.getClickDragStartPosition().get().ifPresent(localPoint -> {
                         double minX;
                         double maxX;
                         double minY;

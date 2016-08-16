@@ -1,11 +1,9 @@
 package org.lorainelab.igb.data.model;
 
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Ordering;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
-import com.google.common.collect.TreeMultimap;
 import com.google.common.collect.TreeRangeSet;
 import java.util.Map;
 import java.util.Objects;
@@ -13,7 +11,6 @@ import java.util.stream.Collectors;
 import org.lorainelab.igb.data.model.datasource.DataSourceReference;
 import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandler;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
-import static org.lorainelab.igb.data.model.glyph.Glyph.MIN_X_COMPARATOR;
 
 /**
  *
@@ -22,7 +19,7 @@ import static org.lorainelab.igb.data.model.glyph.Glyph.MIN_X_COMPARATOR;
 public class DataSet {
 
     private static final int DEFAULT_STACK_HEIGHT = 5;
-    private final Multimap<String, CompositionGlyph> loadedAnnoations;
+    private final HashMultimap<String, CompositionGlyph> loadedAnnoations;
     private final String trackLabel;
     private Map<String, RangeSet<Integer>> loadedRegions;
     //tracked to prevent duplicate requests
@@ -33,7 +30,7 @@ public class DataSet {
     private Track negativeStrandTrack;
 
     public DataSet(String trackLabel, DataSourceReference dataSourceReference, FileTypeHandler fileTypeHandler) {
-        loadedAnnoations = TreeMultimap.create(Ordering.natural(), MIN_X_COMPARATOR);
+        loadedAnnoations = HashMultimap.create();
         this.dataSourceReference = dataSourceReference;
         this.trackLabel = trackLabel;
         this.fileTypeHandler = fileTypeHandler;

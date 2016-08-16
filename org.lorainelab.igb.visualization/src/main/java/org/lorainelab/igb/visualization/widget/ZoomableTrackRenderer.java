@@ -45,8 +45,8 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         this.weight = 0;
         this.track = track;
         this.modelWidth = chromosome.getLength();
-        view = new View(new Rectangle2D(0, 0, modelWidth, track.getModelHeight()), chromosome);
         canvasContext = new CanvasContext(canvas, 0, 0);
+        view = new View(new Rectangle2D(0, 0, modelWidth, track.getModelHeight()),canvasContext, chromosome);
         trackLabel = new TrackLabel(this, track.getTrackLabel());
         gc = canvas.getGraphicsContext2D();
         tooltip = new Tooltip();
@@ -67,7 +67,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
             }
             Rectangle2D viewBoundingRect = view.getBoundingRect();
             List<CompositionGlyph> selections = track.getSlotMap().entrySet().stream().flatMap(entry -> {
-                double slotOffset = track.getSlotOffset(entry.getKey());
+                double slotOffset = entry.getValue().getSlotYoffset();
                 final Range<Double> mouseEventXrange = Range.closed(mouseEventBoundingBox.getMinX(), mouseEventBoundingBox.getMaxX());
                 final Stream<CompositionGlyph> glyphsInXRange = entry.getValue().getGlyphsInXrange(mouseEventXrange).stream();
                 return glyphsInXRange.filter(glyph -> {
@@ -97,7 +97,8 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         });
     }
 
-    private void updateView(double scrollX, double scrollY) {
+    private void updateView(CanvasModel canvasModel) {
+        double scrollX = canvasModel.getScrollX().get();
         if (canvasContext.isVisible()) {
             final double visibleVirtualCoordinatesX = Math.floor(canvasContext.getBoundingRect().getWidth() / view.getXfactor());
             final double visibleVirtualCoordinatesY = Math.floor(canvasContext.getBoundingRect().getHeight() / view.getYfactor());
@@ -107,18 +108,19 @@ public class ZoomableTrackRenderer implements TrackRenderer {
             if (canvasContext.isVisible()) {
                 if (Platform.isFxApplicationThread()) {
                     clearCanvas();
-                    draw();
+                    draw(canvasModel);
                 } else {
                     Platform.runLater(() -> {
                         clearCanvas();
-                        draw();
+                        draw(canvasModel);
                     });
                 }
             }
         }
     }
 
-    private void scaleCanvas(double xFactor, double scrollX, double scrollY) {
+    private void scaleCanvas(CanvasModel canvasModel) {
+        double xFactor = canvasModel.getxFactor().get();
         view.setXfactor(xFactor);
         if (canvasContext.isVisible()) {
             double scaleToY = canvasContext.getTrackHeight() / track.getModelHeight();
@@ -126,7 +128,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
             gc.scale(xFactor, scaleToY);
             view.setYfactor(scaleToY);
             gc.restore();
-            updateView(scrollX, scrollY);
+            updateView(canvasModel);
         }
     }
 
@@ -148,7 +150,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         gc.restore();
     }
 
-    void draw() {
+    void draw(CanvasModel canvasModel) {
         gc.save();
         gc.scale(view.getXfactor(), view.getYfactor());
         track.draw(gc, view, canvasContext);
@@ -158,7 +160,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     public void render(CanvasModel canvasModel) {
         clearCanvas();
         processLastMouseClickedPosition(canvasModel);
-        scaleCanvas(canvasModel.getxFactor().get(), canvasModel.getScrollX().get(), canvasModel.getScrollY().get());
+        scaleCanvas(canvasModel);
     }
 
     public void hideTooltip() {

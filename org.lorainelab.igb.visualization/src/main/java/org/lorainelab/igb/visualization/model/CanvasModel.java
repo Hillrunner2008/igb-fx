@@ -50,7 +50,8 @@ public class CanvasModel {
     private CanvasRegion canvasRegion;
     //TODO consider moving mouse related content to separate model
     private ObjectProperty<Optional<Point2D>> mouseClickLocation;
-    private ObjectProperty<Optional<Point2D>> localPoint;
+    private ObjectProperty<Optional<Point2D>> clickDragStartPosition;
+    private ObjectProperty<Optional<Point2D>> lastDragPosition;
     private ObjectProperty<Optional<Point2D>> screenPoint;
     private ObjectProperty<Optional<Rectangle2D>> selectionRectangle;
     private boolean mouseDragging;
@@ -70,7 +71,8 @@ public class CanvasModel {
         hSlider = new SimpleDoubleProperty(0);
         vSlider = new SimpleDoubleProperty(0);
         mouseClickLocation = new SimpleObjectProperty<>(Optional.empty());
-        localPoint = new SimpleObjectProperty<>(Optional.empty());
+        clickDragStartPosition = new SimpleObjectProperty<>(Optional.empty());
+        lastDragPosition = new SimpleObjectProperty<>(Optional.empty());
         screenPoint = new SimpleObjectProperty<>(Optional.empty());
         selectionRectangle = new SimpleObjectProperty<>(Optional.empty());
         mouseDragging = false;
@@ -212,8 +214,16 @@ public class CanvasModel {
         return mouseClickLocation;
     }
 
-    public ObjectProperty<Optional<Point2D>> getLocalPoint() {
-        return localPoint;
+    public ObjectProperty<Optional<Point2D>> getLastDragPosition() {
+        return lastDragPosition;
+    }
+
+    public void setLastDragPosition(Point2D lastDragPosition) {
+        this.lastDragPosition.set(Optional.ofNullable(lastDragPosition));
+    }
+
+    public ObjectProperty<Optional<Point2D>> getClickDragStartPosition() {
+        return clickDragStartPosition;
     }
 
     public ObjectProperty<Optional<Point2D>> getScreenPoint() {
@@ -232,8 +242,8 @@ public class CanvasModel {
         this.mouseClickLocation.set(Optional.ofNullable(mouseClickLocation));
     }
 
-    public void setLocalPoint(Point2D localPoint) {
-        this.localPoint.set(Optional.ofNullable(localPoint));
+    public void setClickDragStartPosition(Point2D localPoint) {
+        this.clickDragStartPosition.set(Optional.ofNullable(localPoint));
     }
 
     public void setScreenPoint(Point2D screenPoint) {
