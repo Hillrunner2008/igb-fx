@@ -38,7 +38,7 @@ public class OpenFileImpl implements FileOpener {
 
     private static final Logger LOG = LoggerFactory.getLogger(OpenFileImpl.class);
     private static final String DEFAULT_FILE_EXTENSION_FILTER_NAME = "All Supported Formats";
-    
+
     private DataSource dataSource;
     private FileTypeHandlerRegistry fileTypeHandlerRegistry;
     private SelectionInfoService selectionInfoService;
@@ -48,6 +48,20 @@ public class OpenFileImpl implements FileOpener {
     @Override
     public void openFile() {
         openFileAction();
+    }
+
+    @Override
+    public void openFile(File file) {
+        fileTypeHandlerRegistry.getFileTypeHandlers().stream().filter(f -> {
+            return f.getSupportedExtensions().contains(Files.getFileExtension(file.getPath()));
+        }).findFirst().ifPresent(fileTypeHandler -> {
+            selectionInfoService.getSelectedGenomeVersion().get().ifPresent(gv -> {
+                recentFilesRegistry.getRecentFiles().add(file.getPath());
+                DataSourceReference dataSourceReference = new DataSourceReference(file.getPath(), dataSource);
+                gv.getLoadedDataSets().add(new DataSet(file.getName(), dataSourceReference, fileTypeHandler));
+                indexDataSetForSearch(fileTypeHandler, dataSourceReference);
+            });
+        });
     }
 
     private void openFileAction() {
@@ -132,7 +146,6 @@ public class OpenFileImpl implements FileOpener {
     public void setFileTypeHandlerRegistry(FileTypeHandlerRegistry fileTypeHandlerRegistry) {
         this.fileTypeHandlerRegistry = fileTypeHandlerRegistry;
     }
-
 
     @Reference
     public void setSelectionInfoService(SelectionInfoService selectionInfoService) {

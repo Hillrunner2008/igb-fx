@@ -5,10 +5,13 @@
  */
 package org.lorainelab.igb.openfileservice;
 
+import java.io.File;
+
 /**
  *
  * @author Devdatta Kulkarni
  */
 public interface FileOpener {
     void openFile();
+    void openFile(File file);
 }
