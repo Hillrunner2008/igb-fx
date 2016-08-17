@@ -12,7 +12,7 @@ import org.lorainelab.igb.menu.api.MenuBarEntryProvider;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
 import org.lorainelab.igb.menu.api.model.WeightedMenuEntry;
 import org.lorainelab.igb.menu.api.model.WeightedMenuItem;
-import org.lorainelab.igb.openfileservice.FileOpener;
+import org.lorainelab.igb.datasetloadingservice.DataSetLoadingService;
 import org.lorainelab.igb.selections.SelectionInfoService;
 import org.lorainelab.igb.toolbar.api.ToolbarButtonProvider;
 import org.lorainelab.igb.toolbar.api.WeightedButton;
@@ -28,19 +28,19 @@ public class OpenFileMenuItem implements MenuBarEntryProvider, ToolbarButtonProv
     private WeightedMenuItem menuItem;
     private WeightedButton openFileButton;
 
-    private FileOpener fileOpener;
+    private DataSetLoadingService fileOpener;
     private SelectionInfoService selectionInfoService;
 
     @Activate
     public void activate() {
         menuItem = new WeightedMenuItem(1, "Load File");
         openFileButton = new WeightedButton(0, "", new FontAwesomeIconView(FontAwesomeIcon.FOLDER_OPEN));
-        openFileButton.setOnAction(action -> fileOpener.openFile());
+        openFileButton.setOnAction(action -> fileOpener.openDataSet());
         menuItem.setDisable(!selectionInfoService.getSelectedGenomeVersion().get().isPresent());
         selectionInfoService.getSelectedGenomeVersion().addListener((observable, oldValue, newValue) -> {
             menuItem.setDisable(!selectionInfoService.getSelectedGenomeVersion().get().isPresent());
         });
-        menuItem.setOnAction(action -> fileOpener.openFile());
+        menuItem.setOnAction(action -> fileOpener.openDataSet());
     }
 
     @Override
@@ -65,7 +65,7 @@ public class OpenFileMenuItem implements MenuBarEntryProvider, ToolbarButtonProv
     }
 
     @Reference
-    public void setFileOpener(FileOpener fileOpener) {
+    public void setFileOpener(DataSetLoadingService fileOpener) {
         this.fileOpener = fileOpener;
     }
 

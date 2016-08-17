@@ -27,8 +27,8 @@
             <artifactId>guava</artifactId>
         </dependency>
         <dependency>
-            <groupId>de.jensd</groupId>
-            <artifactId>fontawesomefx</artifactId>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.lorainelab.igb.data.model</artifactId>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -37,7 +37,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>org.lorainelab.igb.openfileservice</artifactId>
+            <artifactId>org.lorainelab.igb.datasetloadingservice</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
@@ -62,9 +62,9 @@
                             !${project.artifactId},
                             *
                         </Import-Package>
-                        <Export-Package></Export-Package>
+                        <Export-Package>org.lorainelab.igb.menu.recentfile</Export-Package>
                         <Service-Component>*</Service-Component>
-                        <Private-Package>org.lorainelab.igb.menu.openrecentfilemenu.*</Private-Package>
+                        <Private-Package>org.lorainelab.igb.menu.recentfile.*</Private-Package>
                     </instructions>
                 </configuration>
             </plugin>

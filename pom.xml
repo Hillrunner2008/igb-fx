@@ -322,6 +322,7 @@
         <module>menus/org.lorainelab.igb.menu.openfile</module>
         <module>menus/org.lorainelab.igb.menu.about</module>
         <module>menus/org.lorainelab.igb.menu.customgenome</module>
+        <module>menus/org.lorainelab.igb.menu.recentfile</module>
         <module>org.lorainelab.igb.data.model</module>
         
         <module>datasources/org.lorainelab.igb.datasource.local</module>
@@ -347,9 +348,8 @@
         <module>org.lorainelab.igb.search.api</module>
         <module>preferences/org.lorainelab.igb.preferencemanager.api</module>
         <module>org.lorainelab.igb.persistencemanager</module>
-        <module>org.lorainelab.igb.kar</module>
-        <module>menus/org.lorainelab.igb.menu.recentfile</module>
         <module>org.lorainelab.igb.datasetloadingservice</module>
+        <module>org.lorainelab.igb.kar</module>
     </modules>
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
