@@ -1,10 +1,11 @@
-package org.lorainelab.igb.recentfiles.registry;
+package org.lorainelab.igb.menu.openrecentfilemenu;
 
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
+import java.io.File;
 import java.util.List;
 import java.util.Optional;
 import javafx.collections.SetChangeListener;
@@ -13,6 +14,7 @@ import org.lorainelab.igb.menu.api.MenuBarEntryProvider;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
 import org.lorainelab.igb.menu.api.model.WeightedMenu;
 import org.lorainelab.igb.menu.api.model.WeightedMenuEntry;
+import org.lorainelab.igb.openfileservice.FileOpener;
 import org.lorainelab.igb.recentfiles.registry.api.RecentFilesRegistry;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +30,7 @@ public class RecentFilesMenuEntry implements MenuBarEntryProvider {
     private RecentFilesRegistry recentFilesRegistry;
     private final WeightedMenu recentFilesMenu;
     private final MenuItem clearMenuItem;
+    private FileOpener fileOpener;
 
     public RecentFilesMenuEntry() {
         recentFilesMenu = new WeightedMenu(RECENT_FILE_MENU_ENTRY_WEIGHT, "Open Recent Files");
@@ -55,11 +58,15 @@ public class RecentFilesMenuEntry implements MenuBarEntryProvider {
         }
     }
 
-    private static MenuItem createRecentFileMenuItem(String recentFile) {
+    private MenuItem createRecentFileMenuItem(String recentFile) {
         final MenuItem menuItem = new MenuItem(Files.getNameWithoutExtension(recentFile) + "." + Files.getFileExtension(recentFile));
-        menuItem.setOnAction(action -> {
-
-        });
+        if (new File(recentFile).exists()) {
+            menuItem.setOnAction(action -> {
+                fileOpener.openFile(new File(recentFile));
+            });
+        }else{
+            //option for user to delete entry
+        }
         return menuItem;
     }
 
@@ -76,6 +83,11 @@ public class RecentFilesMenuEntry implements MenuBarEntryProvider {
     @Reference
     public void setRecentFilesRegistry(RecentFilesRegistry recentFilesRegistry) {
         this.recentFilesRegistry = recentFilesRegistry;
+    }
+
+    @Reference
+    public void setFileOpener(FileOpener fileOpener) {
+        this.fileOpener = fileOpener;
     }
 
 }

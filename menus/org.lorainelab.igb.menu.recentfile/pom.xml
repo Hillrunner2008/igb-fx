@@ -2,37 +2,43 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.lorainelab</groupId>
-    <artifactId>org.lorainelab.igb.recentfiles.registry</artifactId>
+    <artifactId>org.lorainelab.igb.menu.recentfile</artifactId>
     <packaging>bundle</packaging>
 
     <parent>
         <groupId>org.lorainelab</groupId>
         <artifactId>org.lorainelab.igb</artifactId>
         <version>0.0.1</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
     
-    
+
     <dependencies>
         <dependency>
             <groupId>biz.aQute.bnd</groupId>
             <artifactId>bndlib</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.lorainelab</groupId>
-            <artifactId>org.lorainelab.igb.menu.api</artifactId>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.lorainelab</groupId>
-            <artifactId>org.lorainelab.igb.preferences</artifactId>
+            <groupId>de.jensd</groupId>
+            <artifactId>fontawesomefx</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.lorainelab.igb.menu.api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.lorainelab.igb.openfileservice</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
@@ -51,16 +57,22 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Export-Package>org.lorainelab.igb.recentfiles.registry.api</Export-Package>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Import-Package>
+                            !${project.artifactId},
+                            *
+                        </Import-Package>
+                        <Export-Package></Export-Package>
                         <Service-Component>*</Service-Component>
-                        <Private-Package>org.lorainelab.igb.recentfiles.registry.*</Private-Package>
+                        <Private-Package>org.lorainelab.igb.menu.openrecentfilemenu.*</Private-Package>
                     </instructions>
                 </configuration>
-            </plugin>  
+            </plugin>
         </plugins>
     </build>
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
+    <name>org.lorainelab.igb.menu.recentfile</name>
 </project>
