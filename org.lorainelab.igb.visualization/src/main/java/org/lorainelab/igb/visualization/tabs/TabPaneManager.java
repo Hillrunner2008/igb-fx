@@ -38,6 +38,7 @@ public class TabPaneManager {
     @Reference(optional = true, multiple = true, unbind = "removeTab", dynamic = true)
     public void addTab(TabProvider tabProvider) {
         Platform.runLater(() -> {
+            tabProvider.getTab().setClosable(false);
             switch (tabProvider.getTabDockingPosition()) {
                 case BOTTOM:
                     bottomTabPane.getTabs().add(tabProvider.getTab());

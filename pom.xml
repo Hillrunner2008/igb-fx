@@ -212,12 +212,6 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>org.lorainelab.igb.preferencemanager.api</artifactId>
-                <version>${project.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
                 <artifactId>org.lorainelab.igb.persistencemanager</artifactId>
                 <version>${project.version}</version>
                 <scope>provided</scope>
@@ -322,14 +316,14 @@
         <module>menus/org.lorainelab.igb.menu.openfile</module>
         <module>menus/org.lorainelab.igb.menu.about</module>
         <module>menus/org.lorainelab.igb.menu.customgenome</module>
-        
+        <module>menus/org.lorainelab.igb.menu.recentfile</module>
         <module>org.lorainelab.igb.data.model</module>
         
         <module>datasources/org.lorainelab.igb.datasource.local</module>
         
         <module>org.lorainelab.igb.selections</module>
         <module>org.lorainelab.igb.filehandler.registry</module>
-	<module>org.lorainelab.igb.recentfiles.registry</module>
+        <module>org.lorainelab.igb.recentfiles.registry</module>
         
         <module>filetypeHandlers/org.lorainelab.igb.filehandler.bed</module>
         <module>filetypeHandlers/org.lorainelab.igb.filehandler.bam</module>
@@ -348,6 +342,7 @@
         <module>org.lorainelab.igb.search.api</module>
         <module>preferences/org.lorainelab.igb.preferencemanager.api</module>
         <module>org.lorainelab.igb.persistencemanager</module>
+        <module>org.lorainelab.igb.datasetloadingservice</module>
         <module>org.lorainelab.igb.kar</module>
     </modules>
     <properties>
@@ -355,4 +350,3 @@
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 </project>
-

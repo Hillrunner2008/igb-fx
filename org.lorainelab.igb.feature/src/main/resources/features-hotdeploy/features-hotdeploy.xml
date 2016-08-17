@@ -1,17 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
-
-    <feature name="${project.artifactId}-bootstrap" version="${project.version}">	
-        <bundle start-level="70">mvn:${project.groupId}/org.lorainelab.igb.stage.provider.api/${project.version}</bundle>
-        <bundle start-level="70">mvn:${project.groupId}/org.lorainelab.igb.main/${project.version}</bundle>
+    <repository>mvn:org.lorainelab/org.lorainelab.igb.feature/0.0.1/xml/features</repository>
+    <feature name="${project.artifactId}-hotdeploy" version="${project.version}" install="auto">	
+        <feature>org.lorainelab.igb.feature</feature>
     </feature>
-    <feature name="${project.artifactId}-sqlite" version="${project.version}" install="auto">
-        <feature>pax-jdbc</feature>
-        <bundle>wrap:mvn:org.xerial/sqlite-jdbc/3.8.11.2</bundle>
-        <bundle>mvn:org.ops4j.pax.jdbc/pax-jdbc-sqlite/0.8.0</bundle>
-    </feature>
-    <feature name="${project.artifactId}" version="${project.version}" install="auto">	
-        <feature>${project.artifactId}-sqlite</feature>
+    
+    <feature name="${project.artifactId}-test" version="${project.version}">	
         <bundle>wrap:mvn:org.reactfx/reactfx/2.0-M4u1</bundle>
         <bundle>wrap:mvn:com.miglayout/miglayout-core/5.0</bundle>
         <bundle>wrap:mvn:com.miglayout/miglayout-javafx/5.0</bundle>
@@ -37,7 +31,7 @@
            
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.menu.api/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.toolbar.api/${project.version}</bundle>
-     
+        
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.tabs.api/${project.version}</bundle>
 
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.cache.api/${project.version}</bundle>
@@ -51,26 +45,17 @@
         
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.datasource.local/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.menu.about/${project.version}</bundle>
-     
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.menu.openfile/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.menu.recentfile/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.datasetloadingservice/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.menu.customgenome/${project.version}</bundle>
+        <bundle>mvn:${project.groupId}/org.lorainelab.igb.persistencemanager/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.filehandler.registry/${project.version}</bundle>
-	<bundle>mvn:${project.groupId}/org.lorainelab.igb.recentfiles.registry/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.filehandler.bed/${project.version}</bundle>
-        <bundle>mvn:${project.groupId}/org.lorainelab.igb.filehandler.bam/${project.version}</bundle>
 
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.visualization/${project.version}</bundle>
         
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.cache.http/${project.version}</bundle>
-        
-        
-        <bundle>mvn:${project.groupId}/org.lorainelab.igb.tabs.genome/${project.version}</bundle>
-        <bundle>mvn:${project.groupId}/org.lorainelab.igb.tabs.selection/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.preferencemanager.api/${project.version}</bundle>
-        <bundle>mvn:${project.groupId}/org.lorainelab.igb.persistencemanager/${project.version}</bundle>
-        <bundle>mvn:${project.groupId}/org.lorainelab.igb.demo/${project.version}</bundle>
     </feature>
-
 </features>

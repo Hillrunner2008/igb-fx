@@ -38,6 +38,8 @@ public class PreferenceProviderMenuEntry implements MenuBarEntryProvider {
     private PreferencesTabManager preferencesTabManager;
 
     public PreferenceProviderMenuEntry() {
+        menuItem = new WeightedMenuItem(30, "Preferences..");
+
         menuItem = new WeightedMenuItem(30, "Preferences");
     }
 
@@ -46,10 +48,17 @@ public class PreferenceProviderMenuEntry implements MenuBarEntryProvider {
         Platform.runLater(() -> {
             initComponents();
             layoutComponents();
-        });
-        menuItem.setOnAction(event -> {
-            Platform.runLater(() -> {
-                stage.show();
+            menuItem.setOnAction(event -> {
+                Platform.runLater(() -> {
+                    Platform.runLater(() -> {
+                        stage.show();
+                    });
+                });
+            });
+            menuItem.setOnAction(event -> {
+                Platform.runLater(() -> {
+                    stage.show();
+                });
             });
         });
     }

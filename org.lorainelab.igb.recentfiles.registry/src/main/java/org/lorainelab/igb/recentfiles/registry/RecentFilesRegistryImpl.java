@@ -2,17 +2,23 @@ package org.lorainelab.igb.recentfiles.registry;
 
 import aQute.bnd.annotation.component.Component;
 import com.google.common.base.Charsets;
-import com.google.common.collect.Sets;
+import com.google.common.collect.EvictingQueue;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
+import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
+import static java.util.stream.Collectors.toList;
+import javafx.beans.property.ReadOnlyListWrapper;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableSet;
-import javafx.collections.SetChangeListener;
+import javafx.collections.ObservableList;
 import org.lorainelab.igb.preferences.PreferenceUtils;
 import org.lorainelab.igb.recentfiles.registry.api.RecentFilesRegistry;
 import org.slf4j.LoggerFactory;
@@ -26,26 +32,19 @@ public class RecentFilesRegistryImpl implements RecentFilesRegistry {
 
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(RecentFilesRegistryImpl.class);
     private static final String FILE_NAME = "fileName";
-    private ObservableSet<String> recentFiles;
+    private static final String TIME_STAMP = "timeStamp";
+    private Queue<RecentFileEntry> recentFiles;
     private Preferences modulePreferencesNode;
     private HashFunction md5HashFunction;
+    private ObservableList<String> observableRecentFiles;
+    private ReadOnlyListWrapper<String> readOnlySetWrapper;
+    private static final Comparator<? super RecentFileEntry> name = (o1, o2) -> o1.timeStamp.compareTo(o2.timeStamp);
 
     public RecentFilesRegistryImpl() {
         md5HashFunction = Hashing.md5();
-        recentFiles = FXCollections.observableSet(Sets.newHashSet());
-        modulePreferencesNode = PreferenceUtils.getPackagePrefsNode(RecentFilesMenuEntry.class);
+        recentFiles = EvictingQueue.create(5);
+        modulePreferencesNode = PreferenceUtils.getPackagePrefsNode(RecentFilesRegistryImpl.class);
         initializeFromPreferences();
-        initializeRecentFilesChangeListener();
-    }
-
-    private void initializeRecentFilesChangeListener() {
-        recentFiles.addListener((SetChangeListener.Change<? extends String> change) -> {
-            if (change.wasAdded()) {
-                addRecentFileToPreferences(change.getElementAdded());
-            } else if (change.wasRemoved()) {
-                removeRecentFileFromPreferences(change.getElementRemoved());
-            }
-        });
     }
 
     private void removeRecentFileFromPreferences(String recentFile) {
@@ -59,6 +58,7 @@ public class RecentFilesRegistryImpl implements RecentFilesRegistry {
 
     private void addRecentFileToPreferences(String recentFile) {
         Preferences node = getPreferenceNode(recentFile);
+        node.put(TIME_STAMP, LocalDateTime.now().toString());
         node.put(FILE_NAME, recentFile);
     }
 
@@ -73,22 +73,73 @@ public class RecentFilesRegistryImpl implements RecentFilesRegistry {
         return hc.toString();
     }
 
-    @Override
-    public ObservableSet<String> getRecentFiles() {
-        return recentFiles;
-    }
-
     private void initializeFromPreferences() {
         try {
             Arrays.stream(modulePreferencesNode.childrenNames())
                     .map(nodeName -> modulePreferencesNode.node(nodeName))
                     .forEach(node -> {
-                        Optional.ofNullable(node.get(FILE_NAME, null)).ifPresent(recentFiles::add);
+                        Optional.ofNullable(node.get(FILE_NAME, null)).ifPresent(recentFile -> {
+                            Optional.ofNullable(node.get(TIME_STAMP, null)).ifPresent(timeStampString -> {
+                                LocalDateTime timeStamp = LocalDateTime.parse(timeStampString);
+                                recentFiles.add(new RecentFileEntry(recentFile, timeStamp));
+                            });
+                        });
                     });
         } catch (BackingStoreException ex) {
             LOG.error(ex.getMessage(), ex);
         }
 
+        final List<String> collect = recentFiles.stream().sorted(name.reversed()).map(entry -> entry.name).collect(toList());
+        observableRecentFiles = FXCollections.observableArrayList(collect);
+        readOnlySetWrapper = new ReadOnlyListWrapper<>(observableRecentFiles);
     }
 
+    @Override
+    public ReadOnlyListWrapper<String> getRecentFiles() {
+        return readOnlySetWrapper;
+    }
+
+    @Override
+    public void addRecentFile(String recentFile) {
+        recentFiles.add(new RecentFileEntry(recentFile, LocalDateTime.now()));
+        addRecentFileToPreferences(recentFile);
+        observableRecentFiles.clear();
+        recentFiles.stream().sorted(name.reversed()).map(entry -> entry.name).forEach(observableRecentFiles::add);
+    }
+
+    @Override
+    public void clearRecentFiles() {
+        try {
+            recentFiles.clear();
+            observableRecentFiles.clear();
+            Arrays.stream(modulePreferencesNode.childrenNames())
+                    .map(nodeName -> modulePreferencesNode.node(nodeName))
+                    .forEach(node -> {
+                        try {
+                            node.removeNode();
+                        } catch (BackingStoreException ex) {
+                            LOG.error("Error clearing recent files from preferences", ex);
+                        }
+                    });
+        } catch (BackingStoreException ex) {
+            LOG.error("Error clearing recent files from preferences", ex);
+        }
+    }
+
+    private class RecentFileEntry implements Comparator<RecentFileEntry> {
+
+        private String name;
+        private LocalDateTime timeStamp;
+
+        public RecentFileEntry(String name, LocalDateTime timeStamp) {
+            this.name = name;
+            this.timeStamp = timeStamp;
+        }
+
+        @Override
+        public int compare(RecentFileEntry o1, RecentFileEntry o2) {
+            return o1.timeStamp.compareTo(o2.timeStamp);
+        }
+
+    }
 }
