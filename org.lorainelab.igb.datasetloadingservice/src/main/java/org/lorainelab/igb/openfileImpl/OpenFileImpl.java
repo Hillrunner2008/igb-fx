@@ -19,7 +19,6 @@ import org.lorainelab.igb.data.model.datasource.DataSource;
 import org.lorainelab.igb.data.model.datasource.DataSourceReference;
 import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandler;
 import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandlerRegistry;
-import org.lorainelab.igb.openfileservice.FileOpener;
 import org.lorainelab.igb.preferences.SessionPreferences;
 import org.lorainelab.igb.recentfiles.registry.api.RecentFilesRegistry;
 import org.lorainelab.igb.search.api.SearchService;
@@ -28,13 +27,14 @@ import org.lorainelab.igb.selections.SelectionInfoService;
 import com.google.common.io.Files;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.lorainelab.igb.datasetloadingservice.DataSetLoadingService;
 
 /**
  *
  * @author Devdatta Kulkarni
  */
-@Component(immediate = true, provide = FileOpener.class)
-public class OpenFileImpl implements FileOpener {
+@Component(immediate = true, provide = DataSetLoadingService.class)
+public class OpenFileImpl implements DataSetLoadingService {
 
     private static final Logger LOG = LoggerFactory.getLogger(OpenFileImpl.class);
     private static final String DEFAULT_FILE_EXTENSION_FILTER_NAME = "All Supported Formats";
@@ -46,12 +46,12 @@ public class OpenFileImpl implements FileOpener {
     private RecentFilesRegistry recentFilesRegistry;
 
     @Override
-    public void openFile() {
+    public void openDataSet() {
         openFileAction();
     }
 
     @Override
-    public void openFile(File file) {
+    public void openDataSet(File file) {
         fileTypeHandlerRegistry.getFileTypeHandlers().stream().filter(f -> {
             return f.getSupportedExtensions().contains(Files.getFileExtension(file.getPath()));
         }).findFirst().ifPresent(fileTypeHandler -> {

@@ -14,7 +14,7 @@ import org.lorainelab.igb.menu.api.MenuBarEntryProvider;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
 import org.lorainelab.igb.menu.api.model.WeightedMenu;
 import org.lorainelab.igb.menu.api.model.WeightedMenuEntry;
-import org.lorainelab.igb.openfileservice.FileOpener;
+import org.lorainelab.igb.datasetloadingservice.DataSetLoadingService;
 import org.lorainelab.igb.recentfiles.registry.api.RecentFilesRegistry;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +30,7 @@ public class RecentFilesMenuEntry implements MenuBarEntryProvider {
     private RecentFilesRegistry recentFilesRegistry;
     private final WeightedMenu recentFilesMenu;
     private final MenuItem clearMenuItem;
-    private FileOpener fileOpener;
+    private DataSetLoadingService fileOpener;
 
     public RecentFilesMenuEntry() {
         recentFilesMenu = new WeightedMenu(RECENT_FILE_MENU_ENTRY_WEIGHT, "Open Recent Files");
@@ -62,7 +62,7 @@ public class RecentFilesMenuEntry implements MenuBarEntryProvider {
         final MenuItem menuItem = new MenuItem(Files.getNameWithoutExtension(recentFile) + "." + Files.getFileExtension(recentFile));
         if (new File(recentFile).exists()) {
             menuItem.setOnAction(action -> {
-                fileOpener.openFile(new File(recentFile));
+                fileOpener.openDataSet(new File(recentFile));
             });
         }else{
             //option for user to delete entry
@@ -86,7 +86,7 @@ public class RecentFilesMenuEntry implements MenuBarEntryProvider {
     }
 
     @Reference
-    public void setFileOpener(FileOpener fileOpener) {
+    public void setFileOpener(DataSetLoadingService fileOpener) {
         this.fileOpener = fileOpener;
     }
 
