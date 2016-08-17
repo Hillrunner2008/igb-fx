@@ -8,6 +8,17 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.logging.Level;
+import java.util.prefs.BackingStoreException;
+import java.util.stream.Collectors;
+import javafx.stage.FileChooser;
+import org.lorainelab.igb.data.model.DataSet;
+import org.lorainelab.igb.data.model.GenomeVersion;
+import org.lorainelab.igb.data.model.datasource.DataSource;
+import org.lorainelab.igb.data.model.datasource.DataSourceReference;
+import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandler;
+import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandlerRegistry;
 import org.lorainelab.igb.menu.api.MenuBarEntryProvider;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
 import org.lorainelab.igb.menu.api.model.WeightedMenuEntry;
@@ -40,6 +51,7 @@ public class OpenFileMenuItem implements MenuBarEntryProvider, ToolbarButtonProv
         selectionInfoService.getSelectedGenomeVersion().addListener((observable, oldValue, newValue) -> {
             menuItem.setDisable(!selectionInfoService.getSelectedGenomeVersion().get().isPresent());
         });
+
         menuItem.setOnAction(action -> fileOpener.openDataSet());
     }
 

@@ -7,6 +7,12 @@ package org.lorainelab.igb.preferencemanager.api;
 
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
+import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.layout.AnchorPane;
+import javafx.stage.Stage;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;

@@ -212,12 +212,6 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>org.lorainelab.igb.preferencemanager.api</artifactId>
-                <version>${project.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
                 <artifactId>org.lorainelab.igb.persistencemanager</artifactId>
                 <version>${project.version}</version>
                 <scope>provided</scope>

@@ -52,6 +52,16 @@
             <artifactId>org.lorainelab.igb.datasetloadingservice</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.lorainelab.igb.menu.customgenome</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.lorainelab.igb.recentfiles.registry</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
