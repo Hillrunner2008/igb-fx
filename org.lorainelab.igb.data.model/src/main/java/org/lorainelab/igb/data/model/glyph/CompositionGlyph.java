@@ -86,15 +86,48 @@ public class CompositionGlyph implements Glyph {
     public Optional<Rectangle2D> getViewBoundingRect(View view, Rectangle2D slotBoundingViewRect) {
         final RangeMap<Double, Glyph> intersectionRangeMapX = xRange.subRangeMap(view.getXrange());
         if (!intersectionRangeMapX.asMapOfRanges().isEmpty()) {
-            Range<Double> xSpan = intersectionRangeMapX.span();
-            double minX = xSpan.lowerEndpoint() - view.getXrange().lowerEndpoint();
-            double width = xSpan.upperEndpoint() - xSpan.lowerEndpoint();
-            if (isPositiveStrand()) {
-                return Optional.of(new Rectangle2D(minX, 2.5, width, SLOT_HEIGHT));
-            } else {
-                return Optional.of(new Rectangle2D(minX, 17.5, width, SLOT_HEIGHT));
+            double minX = Double.MAX_VALUE;
+            double maxX = Double.MIN_VALUE;
+            double minY = Double.MAX_VALUE;
+            double maxY = Double.MIN_VALUE;
+//            double glyphMinY = Double.MIN_VALUE;
+//            double maxGlyphheight = Double.MIN_VALUE;
+            for (Glyph g : intersectionRangeMapX.asMapOfRanges().values()) {
+                Optional<Rectangle2D> rect = g.getViewBoundingRect(view, slotBoundingViewRect);
+                if (rect.isPresent()) {
+                    minX = Math.min(minX, rect.get().getMinX());
+                    maxX = Math.max(maxX, rect.get().getMaxX());
+                    maxY = Math.max(maxY, rect.get().getMaxY());
+                    minY = Math.min(minY, rect.get().getMinY());
+                }
+                //even if part of composition glyph is out of view, we will consider its minY and height
+//                double y = boundingRect.getMinY();
+//                double height = boundingRect.getHeight();
+//                if (y < view.getBoundingRect().getMinY()) {
+//                    double offSet = (view.getBoundingRect().getMinY() - y);
+//                    height = height - offSet;
+//                    y = 0;
+//                } else {
+//                    y = y - view.getBoundingRect().getMinY();
+//                }
+//                glyphMinY = Math.max(glyphMinY, y);
+//                maxGlyphheight = Math.max(maxGlyphheight, height);
+
             }
+            double width = maxX - minX;
+            double height = maxY - minY;
+            if (width <= 0 || height <= 0) {
+                return Optional.empty();
+            }
+            double y;
+            if (isPositiveStrand()) {
+                y = (minY - height);
+            } else {
+                y = (minY);
+            }
+            return Optional.of(new Rectangle2D(minX, y, width, height * 2));
         }
+
         return Optional.empty();
     }
 

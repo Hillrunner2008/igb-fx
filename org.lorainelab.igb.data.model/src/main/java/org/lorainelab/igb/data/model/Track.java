@@ -10,7 +10,6 @@ import static java.util.stream.Collectors.toList;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
-import static org.lorainelab.igb.data.model.glyph.CompositionGlyph.DEFAULT_COLOR;
 import static org.lorainelab.igb.data.model.glyph.Glyph.MIN_X_COMPARATOR;
 import static org.lorainelab.igb.data.model.glyph.Glyph.MIN_Y_OFFSET;
 import static org.lorainelab.igb.data.model.glyph.Glyph.SLOT_HEIGHT;
@@ -67,7 +66,7 @@ public class Track {
 //                    gc.translate(0, slotYOffset);
 //                    if (!isNegative) {
 //                        if (entry.getKey() == 0) {
-                            Rectangle2D slotBoundingViewRect = entry.getValue().getSlotBoundingViewRect(view);
+                    Rectangle2D slotBoundingViewRect = entry.getValue().getSlotBoundingViewRect(view);
 //                            System.out.println(slotBoundingViewRect.toString());
 //                        }
 //                    }
@@ -78,7 +77,7 @@ public class Track {
 
     }
 
-    private void experimentalOptimizedRender(List<CompositionGlyph> glyphsInView, GraphicsContext gc, View view,Rectangle2D slotBoundingViewRect) {
+    private void experimentalOptimizedRender(List<CompositionGlyph> glyphsInView, GraphicsContext gc, View view, Rectangle2D slotBoundingViewRect) {
         double xPixelsPerCoordinate = view.getBoundingRect().getWidth() / view.getCanvasContext().getBoundingRect().getWidth();
         //combine nearby rectangles to optimize rendering... assuming this will be less expensive, needs testing
         if (xPixelsPerCoordinate < 10_000) {
@@ -101,7 +100,7 @@ public class Track {
                                 maxX = nextRenderRect.getMaxX();
                             } else {
                                 final Rectangle2D drawRect = new Rectangle2D(renderRect.getMinX(), renderRect.getMinY(), maxX - renderRect.getMinX(), renderRect.getHeight());
-                                drawSummaryRectangle(gc, drawRect);
+                                glyph.drawSummaryRectangle(gc, drawRect);
                                 if (isSelected) {
                                     glyph.drawSummarySelectionRectangle(gc, view, drawRect);
                                 }
@@ -117,26 +116,13 @@ public class Track {
         }
     }
 
-    private void drawSummaryRectangle(GraphicsContext gc, Rectangle2D drawRect) {
-        gc.save();
-        gc.setFill(DEFAULT_COLOR);
-        gc.setStroke(DEFAULT_COLOR);
-        if (isNegative) {
-            gc.fillRect(drawRect.getMinX(), drawRect.getMinY(), drawRect.getWidth(), drawRect.getHeight() / 2);
-        } else {
-            gc.fillRect(drawRect.getMinX(), drawRect.getMinY() + (drawRect.getHeight() / 2), drawRect.getWidth(), drawRect.getHeight() / 2);
-
-        }
-        gc.restore();
-    }
-
     private double getSlotOffset(int slot) {
         if (slot >= stackHeight && stackHeight != 0) {
             //add to slop row
             slot = stackHeight - 1;
         }
         if (isNegative) {
-            return -MIN_Y_OFFSET + (slot * SLOT_HEIGHT);
+            return slot * SLOT_HEIGHT;
         } else {
             final double minPositiveStrandOffset = -MIN_Y_OFFSET - THICK_RECTANGLE_HEIGHT;
             return minPositiveStrandOffset + (slotCount - slot) * SLOT_HEIGHT;
@@ -195,7 +181,7 @@ public class Track {
     public boolean isNegative() {
         return isNegative;
     }
-    
+
     public String getTrackLabel() {
         return trackLabel;
     }

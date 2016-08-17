@@ -70,9 +70,14 @@ public class ZoomableTrackRenderer implements TrackRenderer {
                 double slotOffset = entry.getValue().getSlotYoffset();
                 final Range<Double> mouseEventXrange = Range.closed(mouseEventBoundingBox.getMinX(), mouseEventBoundingBox.getMaxX());
                 final Stream<CompositionGlyph> glyphsInXRange = entry.getValue().getGlyphsInXrange(mouseEventXrange).stream();
+                Rectangle2D slotBoundingViewRect = entry.getValue().getSlotBoundingViewRect(view);
                 return glyphsInXRange.filter(glyph -> {
                     final Range<Double> mouseEventYrange = Range.closed(mouseEventBoundingBox.getMinY(), mouseEventBoundingBox.getMaxY());
-                    return Range.closed(glyph.getBoundingRect().getMinY() + slotOffset, glyph.getBoundingRect().getMaxY() + slotOffset).isConnected(mouseEventYrange);
+                    final Rectangle2D glyphViewRect = glyph.getViewBoundingRect(view, slotBoundingViewRect).orElse(null);
+                    if (glyphViewRect == null) {
+                        return false;
+                    }
+                    return Range.closed(glyphViewRect.getMinY() + slotOffset, glyphViewRect.getMaxY() + slotOffset).isConnected(mouseEventYrange);
                 });
             }).collect(toList());
 //

@@ -72,6 +72,7 @@ public interface Glyph {
             y = y - viewRect.getMinY();
             if (view.isIsNegative()) {
                 height = height - cutOff;
+                y -= 17.5;
             } else {
                 y -= cutOff;
             }

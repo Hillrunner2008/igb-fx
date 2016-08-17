@@ -42,7 +42,7 @@ public class RectangleGlyph implements Glyph {
     boolean colorByBase;
     private final boolean isSelectable;
     private boolean isSelected;
-    private boolean maskMatches;
+    private boolean maskBasePairMatches;
 
     public RectangleGlyph(Rectangle rectShape) {
         int height = 10;
@@ -59,7 +59,7 @@ public class RectangleGlyph implements Glyph {
         colorByBase = rectShape.isMirrorReferenceSequence();
         isSelectable = rectShape.isSelectable();
         isSelected = false;
-        maskMatches = true;
+        maskBasePairMatches = rectShape.isMaskBasePairMatches();
     }
 
     @Override
@@ -164,7 +164,7 @@ public class RectangleGlyph implements Glyph {
                 for (int j = 0; j < innerTextChars.length; j++) {
                     boolean charMatch = false;
                     char c = innerTextChars[j];
-                    if (colorByBase || maskMatches) {
+                    if (colorByBase || maskBasePairMatches) {
                         if (innerTextChars.length == seqChars.length && c == seqChars[j]) {
                             charMatch = true;
                             gc.setFill(fill);

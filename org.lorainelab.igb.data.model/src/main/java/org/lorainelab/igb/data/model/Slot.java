@@ -68,10 +68,15 @@ public class Slot {
     public Rectangle2D getSlotBoundingViewRect(View view) {
         Rectangle2D viewBoundingRect = view.getBoundingRect();
         Range<Double> viewYRange = Range.closed(viewBoundingRect.getMinY(), viewBoundingRect.getMaxY());
-        final Range<Double> slotYrange = Range.closed(slotYoffset, SLOT_HEIGHT + slotYoffset);
+        final Range<Double> slotYrange;
+        if (view.isIsNegative()) {
+            slotYrange = Range.closed(slotYoffset, SLOT_HEIGHT + slotYoffset);
+        } else {
+            slotYrange = Range.closed(slotYoffset, SLOT_HEIGHT + slotYoffset);
+        }
         if (slotYrange.isConnected(viewYRange)) {
             Range<Double> intersection = slotYrange.intersection(viewYRange);
-            return new Rectangle2D(viewBoundingRect.getMinX(), intersection.lowerEndpoint(), viewBoundingRect.getWidth(), intersection.upperEndpoint()-intersection.lowerEndpoint());
+            return new Rectangle2D(viewBoundingRect.getMinX(), intersection.lowerEndpoint(), viewBoundingRect.getWidth(), intersection.upperEndpoint() - intersection.lowerEndpoint());
         } else {
             return Rectangle2D.EMPTY;
         }

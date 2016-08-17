@@ -34,6 +34,7 @@ public class Rectangle<T extends Feature> implements Shape {
     private Color color;
     private boolean mirrorReferenceSequence;
     private boolean isSelectable;
+    private boolean maskBasePairMatches;
 
     public Rectangle() {
         attributes = Lists.newArrayList();
@@ -104,6 +105,10 @@ public class Rectangle<T extends Feature> implements Shape {
         return isSelectable;
     }
 
+    public boolean isMaskBasePairMatches() {
+        return maskBasePairMatches;
+    }
+
     public enum Attribute {
 
         THICK,
@@ -123,6 +128,8 @@ public class Rectangle<T extends Feature> implements Shape {
         Build setMirrorReferenceSequence(boolean mirrorReferenceSequence);
 
         Build setIsSelectable(boolean isSelectable);
+
+        Build setIsMaskBasePairMatches(boolean maskBasePairMatches);
 
         Build linkToModel(Feature model);
 
@@ -190,6 +197,12 @@ public class Rectangle<T extends Feature> implements Shape {
         @Override
         public Build setIsSelectable(boolean isSelectable) {
             instance.isSelectable = isSelectable;
+            return this;
+        }
+
+        @Override
+        public Build setIsMaskBasePairMatches(boolean maskBasePairMatches) {
+            instance.maskBasePairMatches = maskBasePairMatches;
             return this;
         }
 
