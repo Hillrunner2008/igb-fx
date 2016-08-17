@@ -28,7 +28,7 @@ public class CompositionGlyph implements Glyph {
     private final String label;
     boolean isSelected = false;
     private Rectangle2D boundingRect;
-    private static final Color DEFAULT_COLOR = Color.web("#3F51B5");
+    public static final Color DEFAULT_COLOR = Color.web("#3F51B5");
 
     public CompositionGlyph(String label, Map<String, String> tooltipData, List<Glyph> children) {
         this.xRange = TreeRangeMap.<Double, Glyph>create();
@@ -110,12 +110,8 @@ public class CompositionGlyph implements Glyph {
             return;
         }
         Rectangle2D glyphViewIntersectionBounds = glyphViewIntersectionBoundsWrapper.get();
-        if (viewBoundingRect.getWidth() < view.getChromosome().getLength() * 0.002) {
-            drawChildren(gc, view);
-            drawLabel(view, viewBoundingRect, gc, glyphViewIntersectionBounds);
-        } else {
-            drawSummaryRectangle(gc, glyphViewIntersectionBounds);
-        }
+        drawChildren(gc, view);
+        drawLabel(view, viewBoundingRect, gc, glyphViewIntersectionBounds);
         drawSelectionRectangle(gc, view, glyphViewIntersectionBounds);
     }
 
@@ -126,7 +122,7 @@ public class CompositionGlyph implements Glyph {
         }
     }
 
-    private void drawSummaryRectangle(GraphicsContext gc, Rectangle2D glyphViewIntersectionBounds) {
+    public void drawSummaryRectangle(GraphicsContext gc, Rectangle2D glyphViewIntersectionBounds) {
         gc.save();
         gc.setFill(DEFAULT_COLOR);
         gc.setStroke(DEFAULT_COLOR);
@@ -175,7 +171,7 @@ public class CompositionGlyph implements Glyph {
     private void drawSelectionRectangle(GraphicsContext gc, View view, Rectangle2D glyphViewIntersectionBounds) {
         if (isSelected()) {
             Rectangle2D drawRect = glyphViewIntersectionBounds;
-           for (Glyph g : xRange.asMapOfRanges().values()) {
+            for (Glyph g : xRange.asMapOfRanges().values()) {
                 if (g.isSelectable() && g.isSelected()) {
                     Optional<Rectangle2D> viewBoundingRect = g.getViewBoundingRect(view);
                     if (viewBoundingRect.isPresent()) {
@@ -200,6 +196,25 @@ public class CompositionGlyph implements Glyph {
             gc.fillRect(minX, maxY, width, rectWidth);//bottom
             gc.restore();
         }
+    }
+
+    public void drawSummarySelectionRectangle(GraphicsContext gc, View view, Rectangle2D glyphViewIntersectionBounds) {
+        Rectangle2D drawRect = glyphViewIntersectionBounds;
+        gc.save();
+        gc.setFill(Color.RED);
+        double rectWidth = 0.25;
+        double xToYRatio = view.getXfactor() / view.getYfactor();
+        double minY = drawRect.getMinY();
+        double minX = drawRect.getMinX();
+        double maxX = drawRect.getMaxX();
+        double maxY = drawRect.getMaxY();
+        double width = drawRect.getWidth();
+        double height = drawRect.getHeight();
+        gc.fillRect(minX, minY, width, rectWidth); //top
+        gc.fillRect(minX, minY, rectWidth / xToYRatio, height); //left
+        gc.fillRect(maxX, minY, rectWidth / xToYRatio, height + rectWidth);//right
+        gc.fillRect(minX, maxY, width, rectWidth);//bottom
+        gc.restore();
     }
 
     @Override

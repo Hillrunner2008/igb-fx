@@ -1,10 +1,10 @@
 package org.lorainelab.igb.data.model;
 
-import org.lorainelab.igb.data.model.sequence.ReferenceSequenceProvider;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
 import com.google.common.collect.TreeRangeSet;
 import java.util.Arrays;
+import org.lorainelab.igb.data.model.sequence.ReferenceSequenceProvider;
 import org.lorainelab.igb.data.model.util.AlphanumComparator;
 
 /**
@@ -27,10 +27,10 @@ public class Chromosome implements Comparable<Chromosome> {
         loadedRegions = TreeRangeSet.create();
     }
 
-    public void setLastName(String name) {
-        this.name = name;
+    public ReferenceSequenceProvider getReferenceSequenceProvider() {
+        return referenceSequenceProvider;
     }
-
+    
     public String getName() {
         return name;
     }

@@ -348,8 +348,8 @@
         <module>org.lorainelab.igb.search.api</module>
         <module>preferences/org.lorainelab.igb.preferencemanager.api</module>
         <module>org.lorainelab.igb.persistencemanager</module>
-        <module>org.lorainelab.igb.kar</module>
         <module>org.lorainelab.igb.datasetloadingservice</module>
+        <module>org.lorainelab.igb.kar</module>
     </modules>
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>

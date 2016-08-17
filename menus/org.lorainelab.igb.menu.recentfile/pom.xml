@@ -62,10 +62,9 @@
                             !${project.artifactId},
                             *
                         </Import-Package>
-                        <Export-Package>
-                            ${project.artifactId}
-                        </Export-Package>
+                        <Export-Package>org.lorainelab.igb.menu.recentfile</Export-Package>
                         <Service-Component>*</Service-Component>
+                        <Private-Package>org.lorainelab.igb.menu.recentfile.*</Private-Package>
                     </instructions>
                 </configuration>
             </plugin>

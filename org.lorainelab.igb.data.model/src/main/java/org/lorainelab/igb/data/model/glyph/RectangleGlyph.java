@@ -42,6 +42,7 @@ public class RectangleGlyph implements Glyph {
     boolean colorByBase;
     private final boolean isSelectable;
     private boolean isSelected;
+    private boolean maskMatches;
 
     public RectangleGlyph(Rectangle rectShape) {
         int height = 10;
@@ -58,6 +59,7 @@ public class RectangleGlyph implements Glyph {
         colorByBase = rectShape.isMirrorReferenceSequence();
         isSelectable = rectShape.isSelectable();
         isSelected = false;
+        maskMatches = true;
     }
 
     @Override
@@ -116,7 +118,6 @@ public class RectangleGlyph implements Glyph {
     private void drawText(View view, Rectangle2D viewRect, GraphicsContext gc, final double y, Optional<Rectangle2D> viewBoundingRect) {
         innerTextRefSeqTranslator.ifPresent(translationFunction -> {
             Chromosome chromosome = view.getChromosome();
-            String sequence;
             String innerText;
             double startOffset = 0;
             double endOffset = 0;
@@ -128,21 +129,19 @@ public class RectangleGlyph implements Glyph {
                 //right side is cut off
                 endOffset = boundingRect.getMaxX() - viewRect.getMaxX();
             }
+            int startPos = (int) startOffset;
+            int endPos = (int) (startPos + boundingRect.getWidth() - (int) startOffset - endOffset);
             Range<Integer> basePairRange = Range.closed((int) boundingRect.getMinX() + (int) startOffset, (int) boundingRect.getMaxX() - (int) endOffset);
+            String sequence = new String(chromosome.getSequence(basePairRange.lowerEndpoint(), basePairRange.upperEndpoint() - basePairRange.lowerEndpoint()));
             if (innerTextReferenceSequenceRange.isPresent()) {
                 //TODO handle offsets
-                sequence = new String(chromosome.getSequence(innerTextReferenceSequenceRange.get().lowerEndpoint(),
+                String requestedSequence = new String(chromosome.getSequence(innerTextReferenceSequenceRange.get().lowerEndpoint(),
                         innerTextReferenceSequenceRange.get().upperEndpoint() - innerTextReferenceSequenceRange.get().lowerEndpoint()));
-                innerText = translationFunction.apply(sequence);
-//                            int diff = innerText.length() - sequence.length();
-                int startPos = (int) startOffset;
-                int endPos = (int) (startPos + boundingRect.getWidth() - (int) startOffset - endOffset);
-                innerText = innerText.substring(startPos, endPos);
+                innerText = translationFunction.apply(requestedSequence);
             } else {
-                sequence = new String(chromosome.getSequence(basePairRange.lowerEndpoint(), basePairRange.upperEndpoint() - basePairRange.lowerEndpoint()));
                 innerText = translationFunction.apply(sequence);
             }
-
+            innerText = innerText.substring(startPos, endPos);
             int size = (int) boundingRect.getHeight();
             synchronized (gc) {// should not be needed, but I am currently seeing rendering issues that appear directly related to race conditions on this function
                 gc.save();
@@ -158,9 +157,18 @@ public class RectangleGlyph implements Glyph {
                 double i = 0;
                 double minX = viewBoundingRect.get().getMinX();
                 int baseWidth = 1;
-                for (char c : innerText.toUpperCase().toCharArray()) {
-                    if (colorByBase) {
-                        gc.setFill(getBaseColor(c));
+                final char[] innerTextChars = innerText.toUpperCase().toCharArray();
+                final char[] seqChars = sequence.toUpperCase().toCharArray();
+                for (int j = 0; j < innerTextChars.length; j++) {
+                    boolean charMatch = false;
+                    char c = innerTextChars[j];
+                    if (colorByBase || maskMatches) {
+                        if (innerTextChars.length == seqChars.length && c == seqChars[j]) {
+                            charMatch = true;
+                            gc.setFill(fill);
+                        } else {
+                            gc.setFill(getBaseColor(c));
+                        }
                     } else {
                         gc.setFill(fill);
                     }
@@ -171,16 +179,18 @@ public class RectangleGlyph implements Glyph {
                     } else {
                         gc.fillRect(minX + i, y, 1, viewBoundingRect.get().getHeight());
                     }
-                    if (colorByBase) {
-                        gc.setFill(Color.BLACK);
-                    } else {
-                        gc.setFill(ColorUtils.getEffectiveContrastColor(fill));
+                    if (!charMatch) {
+                        if (colorByBase) {
+                            gc.setFill(Color.BLACK);
+                        } else {
+                            gc.setFill(ColorUtils.getEffectiveContrastColor(fill));
+                        }
+                        gc.scale(textScale, textScale);
+                        double x = ((minX + i) / textScale) + (1 / textScale) * .1;
+                        double maxWidth = (1 / textScale) * .8;
+                        gc.fillText("" + c, x, textYPosition, maxWidth);
+                        gc.scale(1 / textScale, 1 / textScale);
                     }
-                    gc.scale(textScale, textScale);
-                    double x = ((minX + i) / textScale) + (1 / textScale) * .1;
-                    double maxWidth = (1 / textScale) * .8;
-                    gc.fillText("" + c, x, textYPosition, maxWidth);
-                    gc.scale(1 / textScale, 1 / textScale);
                     i++;
                 }
                 gc.restore();

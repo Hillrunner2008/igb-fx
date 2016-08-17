@@ -30,7 +30,7 @@ public class BamRenderer implements Renderer<BamFeature> {
                 layer(
                         0,
                         bamFeature.getAnnotationBlocks().stream()
-                                .map(alignmentBlock -> convertAlignmentBlockToRect(alignmentBlock))
+                                .map(alignmentBlock -> convertAlignmentBlockToRect(alignmentBlock, bamFeature))
                                 .filter(optionalShape -> optionalShape.isPresent())
                                 .map(shape -> shape.get())
                 ),
@@ -44,7 +44,7 @@ public class BamRenderer implements Renderer<BamFeature> {
         );
     }
 
-    private Optional<Shape> convertAlignmentBlockToRect(AlignmentBlock alignmentBlock) {
+    private Optional<Shape> convertAlignmentBlockToRect(AlignmentBlock alignmentBlock, BamFeature bamFeature) {
         switch (alignmentBlock.getAlignmentType()) {
             case DELETION:
                 return Optional.of(Rectangle.start(alignmentBlock.getRange().lowerEndpoint(), alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint())
@@ -56,8 +56,8 @@ public class BamRenderer implements Renderer<BamFeature> {
                         alignmentBlock.getRange().lowerEndpoint(),
                         alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint()
                 )
-                        .setMirrorReferenceSequence(true)
-                        .setInnerTextRefSeqTranslator(seq -> seq)
+                        .setMirrorReferenceSequence(alignmentBlock.isExactRefMatch())
+                        .setInnerTextRefSeqTranslator(seq -> alignmentBlock.isExactRefMatch() ? seq : alignmentBlock.getSeqString())
                         .build());
             case PADDING:
                 return Optional.of(Rectangle.start(alignmentBlock.getRange().lowerEndpoint(), alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint()).build());

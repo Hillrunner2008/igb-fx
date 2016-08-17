@@ -10,6 +10,8 @@ public class AlignmentBlock {
 
     private final Range<Integer> range;
     private final AlignmentType alignmentType;
+    private final String seqString;
+    private final boolean exactRefMatch;
 
     public enum AlignmentType {
         INSERTION,
@@ -19,9 +21,11 @@ public class AlignmentBlock {
         PADDING
     }
 
-    public AlignmentBlock(Range<Integer> range, AlignmentType alignmentType) {
+    public AlignmentBlock(Range<Integer> range, AlignmentType alignmentType, boolean exactRefMatch, String seqString) {
         this.range = range;
         this.alignmentType = alignmentType;
+        this.seqString = seqString;
+        this.exactRefMatch = exactRefMatch;
     }
 
     public Range<Integer> getRange() {
@@ -30,6 +34,14 @@ public class AlignmentBlock {
 
     public AlignmentType getAlignmentType() {
         return alignmentType;
+    }
+
+    public String getSeqString() {
+        return seqString;
+    }
+
+    public boolean isExactRefMatch() {
+        return exactRefMatch;
     }
 
 }

@@ -11,9 +11,8 @@ import org.lorainelab.igb.menu.api.model.ParentMenu;
 import org.lorainelab.igb.menu.api.model.WeightedMenuEntry;
 
 /**
- * This interface allows implementors to provide extentions to the IGB MenuBar menus.
+ * This interface allows implementors to provide extentions to the MenuBar menus.
  *
- * @module.info context-menu-api
  * @author dcnorris
  */
 public interface MenuBarEntryProvider {

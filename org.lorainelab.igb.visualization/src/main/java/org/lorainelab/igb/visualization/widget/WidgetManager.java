@@ -65,7 +65,7 @@ public class WidgetManager {
         canvasModel.getMouseClickLocation().addListener((ObservableValue<? extends Optional<Point2D>> observable, Optional<Point2D> oldValue, Optional<Point2D> newValue) -> {
             refreshViewStream.emit(new RenderAction());
         });
-        canvasModel.getLocalPoint().addListener((ObservableValue<? extends Optional<Point2D>> observable, Optional<Point2D> oldValue, Optional<Point2D> newValue) -> {
+        canvasModel.getClickDragStartPosition().addListener((ObservableValue<? extends Optional<Point2D>> observable, Optional<Point2D> oldValue, Optional<Point2D> newValue) -> {
             refreshViewStream.emit(new RenderAction());
         });
         canvasModel.getScreenPoint().addListener((ObservableValue<? extends Optional<Point2D>> observable, Optional<Point2D> oldValue, Optional<Point2D> newValue) -> {
@@ -101,6 +101,7 @@ public class WidgetManager {
         tracksModel.getTrackRenderers().stream().forEach(widget -> sortedWidgets.put(widget.getZindex(), widget));
         viewPortManager.refresh();
         sortedWidgets.entries().forEach(entry -> entry.getValue().render(canvasModel));
+        canvasModel.setMouseClickLocation(null);
     }
 
     @Reference
