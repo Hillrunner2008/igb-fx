@@ -388,7 +388,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
 
     @Override
     public View getView() {
-        View toReturn = new View(viewBoundingRectangle, canvasContext, chromosome);
+        View toReturn = new View(viewBoundingRectangle, canvasContext, chromosome, false);
         toReturn.setXfactor(xfactor);
         return toReturn;
     }

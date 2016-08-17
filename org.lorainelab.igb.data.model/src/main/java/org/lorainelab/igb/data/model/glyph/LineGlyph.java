@@ -45,8 +45,8 @@ public class LineGlyph implements Glyph {
     }
 
     @Override
-    public void draw(GraphicsContext gc, View view) {
-        getViewBoundingRect(view).ifPresent(drawRect -> {
+    public void draw(GraphicsContext gc, View view, Rectangle2D slotBoundingViewRect) {
+        getViewBoundingRect(view, slotBoundingViewRect).ifPresent(drawRect -> {
             double x = drawRect.getMinX();
             double y = drawRect.getMinY();
             double width = drawRect.getWidth();

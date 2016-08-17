@@ -18,14 +18,18 @@ public class View {
     private double xfactor = 1;
     private double yfactor = 1;
     double xPixelsPerCoordinate;
+    private double scrollYOffset;
     private final CanvasContext canvasContext;
+    private final boolean isNegative;
 
-    public View(Rectangle2D boundingRect, CanvasContext canvasContext, Chromosome chromosome) {
+    public View(Rectangle2D boundingRect, CanvasContext canvasContext, Chromosome chromosome, boolean isNegative) {
         this.boundingRect = boundingRect;
         this.chromosome = chromosome;
         this.canvasContext = canvasContext;
+        this.isNegative = isNegative;
         xRange = Range.closed(boundingRect.getMinX(), boundingRect.getMaxX());
         xPixelsPerCoordinate = boundingRect.getWidth() / canvasContext.getBoundingRect().getWidth();
+        scrollYOffset = canvasContext.getRelativeTrackOffset() / xfactor;
     }
 
     public Rectangle2D getBoundingRect() {
@@ -40,10 +44,19 @@ public class View {
         this.boundingRect = boundingRect;
         xRange = Range.closed(boundingRect.getMinX(), boundingRect.getMaxX());
         xPixelsPerCoordinate = boundingRect.getWidth() / canvasContext.getBoundingRect().getWidth();
+        scrollYOffset = boundingRect.getMinY();
+    }
+
+    public CanvasContext getCanvasContext() {
+        return canvasContext;
     }
 
     public double getXpixelsPerCoordinate() {
         return xPixelsPerCoordinate;
+    }
+
+    public double getScrollYOffset() {
+        return scrollYOffset;
     }
 
     public double getXfactor() {
@@ -56,6 +69,10 @@ public class View {
 
     public double getYfactor() {
         return yfactor;
+    }
+
+    public boolean isIsNegative() {
+        return isNegative;
     }
 
     public void setYfactor(double yfactor) {

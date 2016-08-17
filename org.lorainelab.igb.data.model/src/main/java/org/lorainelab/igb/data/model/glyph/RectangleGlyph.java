@@ -49,7 +49,7 @@ public class RectangleGlyph implements Glyph {
         double y = 20;
         if (rectShape.getAttributes().contains(org.lorainelab.igb.data.model.shapes.Rectangle.Attribute.THICK)) {
             height = THICK_RECTANGLE_HEIGHT;
-            y = MIN_OFFSET;
+            y = MIN_Y_OFFSET;
         } else if (rectShape.getAttributes().contains(org.lorainelab.igb.data.model.shapes.Rectangle.Attribute.INSERTION)) {
             height = 3;
         }
@@ -101,9 +101,9 @@ public class RectangleGlyph implements Glyph {
     }
 
     @Override
-    public void draw(GraphicsContext gc, View view) {
+    public void draw(GraphicsContext gc, View view, Rectangle2D slotBoundingViewRect) {
         Rectangle2D viewRect = view.getBoundingRect();
-        Optional<Rectangle2D> viewBoundingRect = getViewBoundingRect(view);
+        Optional<Rectangle2D> viewBoundingRect = getViewBoundingRect(view, slotBoundingViewRect);
         if (viewBoundingRect.isPresent()) {
             gc.setFill(fill);
             gc.setStroke(strokeColor);
@@ -141,7 +141,9 @@ public class RectangleGlyph implements Glyph {
             } else {
                 innerText = translationFunction.apply(sequence);
             }
-            innerText = innerText.substring(startPos, endPos);
+            if (innerText.length() > sequence.length()) {
+                innerText = innerText.substring(startPos, endPos);
+            }
             int size = (int) boundingRect.getHeight();
             synchronized (gc) {// should not be needed, but I am currently seeing rendering issues that appear directly related to race conditions on this function
                 gc.save();

@@ -46,7 +46,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         this.track = track;
         this.modelWidth = chromosome.getLength();
         canvasContext = new CanvasContext(canvas, 0, 0);
-        view = new View(new Rectangle2D(0, 0, modelWidth, track.getModelHeight()),canvasContext, chromosome);
+        view = new View(new Rectangle2D(0, 0, modelWidth, track.getModelHeight()), canvasContext, chromosome, track.isNegative());
         trackLabel = new TrackLabel(this, track.getTrackLabel());
         gc = canvas.getGraphicsContext2D();
         tooltip = new Tooltip();

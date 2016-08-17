@@ -11,8 +11,8 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
 import static org.lorainelab.igb.data.model.glyph.CompositionGlyph.DEFAULT_COLOR;
-import static org.lorainelab.igb.data.model.glyph.Glyph.MIN_OFFSET;
 import static org.lorainelab.igb.data.model.glyph.Glyph.MIN_X_COMPARATOR;
+import static org.lorainelab.igb.data.model.glyph.Glyph.MIN_Y_OFFSET;
 import static org.lorainelab.igb.data.model.glyph.Glyph.SLOT_HEIGHT;
 import static org.lorainelab.igb.data.model.glyph.RectangleGlyph.THICK_RECTANGLE_HEIGHT;
 import org.slf4j.Logger;
@@ -51,56 +51,64 @@ public class Track {
     }
 
     public void draw(GraphicsContext gc, View view, CanvasContext canvasContext) {
-        double additionalYOffset = canvasContext.getBoundingRect().getMinY() / view.getYfactor();
+        double trackPositionOffset = canvasContext.getBoundingRect().getMinY() / view.getYfactor();
         //TODO look into why concurrency issues are possible at this location during zooming
         gc.save();
         //NOTE: Rounding issues prevent us from using translation to take care of view offsets in the x coordinate system
         // everything works fine until x coordinate get large, and then the larger numbers don't render correctly on the canvas
         //i.e. we can't do this gc.translate(-view.getBoundingRect().getMinX(), -view.getBoundingRect().getMinY() + additionalYOffset);
-        gc.translate(0, additionalYOffset);
+        gc.translate(0, trackPositionOffset);
         slotMap.entrySet().stream()
                 .forEach(entry -> {
                     //TODO, could easily filter based on rows y coordinate range if we didn't want to support slop row, just modify getSlotOffset to not fix for slop and then filter on view range
                     //we may also consider using this approach to create customer slop row visualization
                     double slotYOffset = entry.getValue().getSlotYoffset();
                     gc.save();
-                    gc.translate(0, slotYOffset);
-                    experimentalOptimizedRender(entry.getValue().getGlyphsInView(view), gc, view, canvasContext);
+//                    gc.translate(0, slotYOffset);
+//                    if (!isNegative) {
+//                        if (entry.getKey() == 0) {
+                            Rectangle2D slotBoundingViewRect = entry.getValue().getSlotBoundingViewRect(view);
+//                            System.out.println(slotBoundingViewRect.toString());
+//                        }
+//                    }
+                    experimentalOptimizedRender(entry.getValue().getGlyphsInView(view), gc, view, slotBoundingViewRect);
                     gc.restore();
                 });
         gc.restore();
 
     }
 
-    private void experimentalOptimizedRender(List<CompositionGlyph> glyphsInView, GraphicsContext gc, View view, CanvasContext canvasContext) {
-        double xPixelsPerCoordinate = view.getBoundingRect().getWidth() / canvasContext.getBoundingRect().getWidth();
+    private void experimentalOptimizedRender(List<CompositionGlyph> glyphsInView, GraphicsContext gc, View view,Rectangle2D slotBoundingViewRect) {
+        double xPixelsPerCoordinate = view.getBoundingRect().getWidth() / view.getCanvasContext().getBoundingRect().getWidth();
         //combine nearby rectangles to optimize rendering... assuming this will be less expensive, needs testing
         if (xPixelsPerCoordinate < 10_000) {
-            glyphsInView.stream().forEach(glyph -> glyph.draw(gc, view));
+            glyphsInView.stream().forEach(glyph -> glyph.draw(gc, view, slotBoundingViewRect));
         } else {
             for (int i = 0; i < glyphsInView.size();) {
                 CompositionGlyph glyph = glyphsInView.get(i);
                 boolean isSelected = glyph.isSelected();
-                Rectangle2D renderRect = glyph.getViewBoundingRect(view).get();// get() call is not unsafe in this instance, and breaking would be preferred if assumption not met
-                if (renderRect.getWidth() / xPixelsPerCoordinate > 10) {
-                    glyph.draw(gc, view);
-                } else {
-                    double maxX = renderRect.getMaxX();
-                    while (i + 1 < glyphsInView.size()) {
-                        final CompositionGlyph nextGlyph = glyphsInView.get(i + 1);
-                        isSelected = isSelected | nextGlyph.isSelected();
-                        Rectangle2D nextRenderRect = nextGlyph.getViewBoundingRect(view).get();
-                        if (nextRenderRect.getMinX() / xPixelsPerCoordinate < (renderRect.getMaxX() / xPixelsPerCoordinate) + 1) {
-                            maxX = nextRenderRect.getMaxX();
-                        } else {
-                            final Rectangle2D drawRect = new Rectangle2D(renderRect.getMinX(), renderRect.getMinY(), maxX - renderRect.getMinX(), renderRect.getHeight());
-                            drawSummaryRectangle(gc, drawRect);
-                            if (isSelected) {
-                                glyph.drawSummarySelectionRectangle(gc, view, drawRect);
+                Rectangle2D renderRect = glyph.getViewBoundingRect(view, slotBoundingViewRect).orElse(null);
+                if (renderRect != null) {
+                    if (renderRect.getWidth() / xPixelsPerCoordinate > 10) {
+                        glyph.draw(gc, view, slotBoundingViewRect);
+                    } else {
+                        double maxX = renderRect.getMaxX();
+                        while (i + 1 < glyphsInView.size()) {
+                            final CompositionGlyph nextGlyph = glyphsInView.get(i + 1);
+                            isSelected = isSelected | nextGlyph.isSelected();
+                            Rectangle2D nextRenderRect = nextGlyph.getViewBoundingRect(view, slotBoundingViewRect).get();
+                            if (nextRenderRect.getMinX() / xPixelsPerCoordinate < (renderRect.getMaxX() / xPixelsPerCoordinate) + 1) {
+                                maxX = nextRenderRect.getMaxX();
+                            } else {
+                                final Rectangle2D drawRect = new Rectangle2D(renderRect.getMinX(), renderRect.getMinY(), maxX - renderRect.getMinX(), renderRect.getHeight());
+                                drawSummaryRectangle(gc, drawRect);
+                                if (isSelected) {
+                                    glyph.drawSummarySelectionRectangle(gc, view, drawRect);
+                                }
+                                break;
                             }
-                            break;
+                            i++;
                         }
-                        i++;
                     }
                 }
                 i++;
@@ -116,7 +124,7 @@ public class Track {
         if (isNegative) {
             gc.fillRect(drawRect.getMinX(), drawRect.getMinY(), drawRect.getWidth(), drawRect.getHeight() / 2);
         } else {
-            gc.fillRect(drawRect.getMinX(), drawRect.getMinY()+ (drawRect.getHeight() / 2), drawRect.getWidth(), drawRect.getHeight() / 2);
+            gc.fillRect(drawRect.getMinX(), drawRect.getMinY() + (drawRect.getHeight() / 2), drawRect.getWidth(), drawRect.getHeight() / 2);
 
         }
         gc.restore();
@@ -128,9 +136,9 @@ public class Track {
             slot = stackHeight - 1;
         }
         if (isNegative) {
-            return -MIN_OFFSET + (slot * SLOT_HEIGHT);
+            return -MIN_Y_OFFSET + (slot * SLOT_HEIGHT);
         } else {
-            final double minPositiveStrandOffset = -MIN_OFFSET - THICK_RECTANGLE_HEIGHT;
+            final double minPositiveStrandOffset = -MIN_Y_OFFSET - THICK_RECTANGLE_HEIGHT;
             return minPositiveStrandOffset + (slotCount - slot) * SLOT_HEIGHT;
         }
     }
@@ -184,6 +192,10 @@ public class Track {
         return slotMap;
     }
 
+    public boolean isNegative() {
+        return isNegative;
+    }
+    
     public String getTrackLabel() {
         return trackLabel;
     }

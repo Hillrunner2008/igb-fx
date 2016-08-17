@@ -18,8 +18,10 @@ import org.lorainelab.igb.data.model.View;
  * @author jeckstei
  */
 public interface Glyph {
+
     static final int SLOT_HEIGHT = 30;
-    static final double MIN_OFFSET = 17.5;
+    static final double MIN_Y_OFFSET = 17.5;
+    static final double MAX_SHAPE_HEIGHT = 15;
 
     Color getFill();
 
@@ -39,26 +41,55 @@ public interface Glyph {
         //do nothing
     }
 
-    void draw(GraphicsContext gc, View view);
+    void draw(GraphicsContext gc, View view, Rectangle2D slotBoundingViewRect);
 
-    default Optional<Rectangle2D> getViewBoundingRect(View view) {
+    default Optional<Rectangle2D> getViewBoundingRect(View view, Rectangle2D slotBoundingViewRect) {
+        double cutOff = SLOT_HEIGHT - slotBoundingViewRect.getHeight();
+        Rectangle2D viewRect = view.getBoundingRect();
         Rectangle2D boundingRect = getBoundingRect();
-        Rectangle2D viewBoundingRect = view.getBoundingRect();
-        if (boundingRect.intersects(viewBoundingRect)) {
-            double x = Math.max(boundingRect.getMinX(), viewBoundingRect.getMinX());
-            double y = Math.max(boundingRect.getMinY(), viewBoundingRect.getMinY());
-            double maxx = Math.min(boundingRect.getMaxX(), viewBoundingRect.getMaxX());
-            double maxy = Math.min(boundingRect.getMaxY(), viewBoundingRect.getMaxY());
-            return Optional.of(new Rectangle2D(x - viewBoundingRect.getMinX(), y, maxx - x, maxy - y));
+        double x = boundingRect.getMinX();
+        double maxX = boundingRect.getMaxX();
+        double y = boundingRect.getMinY() + slotBoundingViewRect.getMinY();
+        double width = boundingRect.getWidth();
+        double height = boundingRect.getHeight();
+
+        if (x < viewRect.getMinX()) {
+            double offSet = viewRect.getMinX() - x;
+            width = width - offSet;
+            x = 0;
+        } else {
+            x = x - viewRect.getMinX();
         }
-        return Optional.empty();
+        if (maxX > viewRect.getMaxX()) {
+            int offSet = (int) (maxX - viewRect.getMaxX());
+            width = width - offSet;
+        }
+        if (y < viewRect.getMinY()) {
+            double offSet = (viewRect.getMinY() - y - cutOff);
+            height = height - offSet;
+            y = 0;
+        } else {
+            y = y - viewRect.getMinY();
+            if (view.isIsNegative()) {
+                height = height - cutOff;
+            } else {
+                y -= cutOff;
+            }
+        }
+        if (width <= 0 || height <= 0) {
+            return Optional.empty();
+        }
+        return Optional.of(new Rectangle2D(x, y, width, height));
     }
 
-    static Rectangle2D intersect(Rectangle2D src1, Rectangle2D src2) {
+    public static Rectangle2D intersect(Rectangle2D src1, Rectangle2D src2) {
         double x = Math.max(src1.getMinX(), src2.getMinX());
         double y = Math.max(src1.getMinY(), src2.getMinY());
         double maxx = Math.min(src1.getMaxX(), src2.getMaxX());
         double maxy = Math.min(src1.getMaxY(), src2.getMaxY());
+        if (maxx - x <= 0 || maxy - y <= 0) {
+            return null;
+        }
         return new Rectangle2D(x, y, maxx - x, maxy - y);
     }
     static Comparator<CompositionGlyph> MIN_X_COMPARATOR
