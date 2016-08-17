@@ -95,8 +95,8 @@ public class Track {
                         while (i + 1 < glyphsInView.size()) {
                             final CompositionGlyph nextGlyph = glyphsInView.get(i + 1);
                             isSelected = isSelected | nextGlyph.isSelected();
-                            Rectangle2D nextRenderRect = nextGlyph.getViewBoundingRect(view, slotBoundingViewRect).get();
-                            if (nextRenderRect.getMinX() / xPixelsPerCoordinate < (renderRect.getMaxX() / xPixelsPerCoordinate) + 1) {
+                            Rectangle2D nextRenderRect = nextGlyph.getViewBoundingRect(view, slotBoundingViewRect).orElse(null);
+                            if (nextRenderRect != null && nextRenderRect.getMinX() / xPixelsPerCoordinate < (renderRect.getMaxX() / xPixelsPerCoordinate) + 1) {
                                 maxX = nextRenderRect.getMaxX();
                             } else {
                                 final Rectangle2D drawRect = new Rectangle2D(renderRect.getMinX(), renderRect.getMinY(), maxX - renderRect.getMinX(), renderRect.getHeight());
