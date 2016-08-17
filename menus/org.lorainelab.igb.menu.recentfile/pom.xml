@@ -2,7 +2,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.lorainelab</groupId>
-    <artifactId>org.lorainelab.igb.menu.openrecentfilemenu</artifactId>
+    <artifactId>org.lorainelab.igb.menu.recentfile</artifactId>
     <packaging>bundle</packaging>
 
     <parent>
@@ -83,4 +83,5 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
+    <name>org.lorainelab.igb.menu.recentfile</name>
 </project>

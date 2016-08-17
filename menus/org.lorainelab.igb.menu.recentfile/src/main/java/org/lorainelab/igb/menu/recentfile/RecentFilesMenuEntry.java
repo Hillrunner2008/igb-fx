@@ -1,4 +1,4 @@
-package org.lorainelab.igb.menu.openrecentfilemenu;
+package org.lorainelab.igb.menu.recentfile;
 
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
