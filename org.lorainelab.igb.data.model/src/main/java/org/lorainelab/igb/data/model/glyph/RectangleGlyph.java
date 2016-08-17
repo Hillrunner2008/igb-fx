@@ -31,24 +31,25 @@ import org.slf4j.LoggerFactory;
 public class RectangleGlyph implements Glyph {
 
     private static final Logger LOG = LoggerFactory.getLogger(RectangleGlyph.class);
+    public static final int THICK_RECTANGLE_HEIGHT = 15;
     private Color fill = Color.WHITE;
 
     private Color strokeColor = Color.BLACK;
 
     private final Rectangle2D boundingRect;
-    private Rectangle2D renderBoundingRect;
     private final Optional<Function<String, String>> innerTextRefSeqTranslator;
     private final Optional<Range<Integer>> innerTextReferenceSequenceRange;
     boolean colorByBase;
     private final boolean isSelectable;
     private boolean isSelected;
+    private boolean maskMatches;
 
     public RectangleGlyph(Rectangle rectShape) {
         int height = 10;
         double y = 20;
         if (rectShape.getAttributes().contains(org.lorainelab.igb.data.model.shapes.Rectangle.Attribute.THICK)) {
-            height = 15;
-            y = 17.5;
+            height = THICK_RECTANGLE_HEIGHT;
+            y = MIN_OFFSET;
         } else if (rectShape.getAttributes().contains(org.lorainelab.igb.data.model.shapes.Rectangle.Attribute.INSERTION)) {
             height = 3;
         }
@@ -58,6 +59,7 @@ public class RectangleGlyph implements Glyph {
         colorByBase = rectShape.isMirrorReferenceSequence();
         isSelectable = rectShape.isSelectable();
         isSelected = false;
+        maskMatches = true;
     }
 
     @Override
@@ -99,94 +101,101 @@ public class RectangleGlyph implements Glyph {
     }
 
     @Override
-    public void draw(GraphicsContext gc, View view, double additionalYoffset) {
-        try {
-            Rectangle2D viewRect = view.getBoundingRect();
-            Optional<Rectangle2D> viewBoundingRect = getViewBoundingRect(viewRect, additionalYoffset);
-            if (viewBoundingRect.isPresent()) {
-                gc.setFill(fill);
-                gc.setStroke(strokeColor);
-                final double y = viewBoundingRect.get().getMinY();
-                gc.fillRect(viewBoundingRect.get().getMinX(), y, viewBoundingRect.get().getWidth(), viewBoundingRect.get().getHeight());
-                if (view.getBoundingRect().getWidth() < 150) {
-                    innerTextRefSeqTranslator.ifPresent(translationFunction -> {
-                        Chromosome chromosome = view.getChromosome();
-
-                        String sequence;
-                        String innerText;
-                        double startOffset = 0;
-                        double endOffset = 0;
-                        if (boundingRect.getMinX() < viewRect.getMinX()) {
-                            //left side is cut off
-                            startOffset = viewRect.getMinX() - boundingRect.getMinX();
-                        }
-                        if ((int) boundingRect.getMaxX() > viewRect.getMaxX()) {
-                            //right side is cut off
-                            endOffset = boundingRect.getMaxX() - viewRect.getMaxX();
-                        }
-                        Range<Integer> basePairRange = Range.closed((int) boundingRect.getMinX() + (int) startOffset, (int) boundingRect.getMaxX() - (int) endOffset);
-                        if (innerTextReferenceSequenceRange.isPresent()) {
-                            //TODO handle offsets
-                            sequence = new String(chromosome.getSequence(innerTextReferenceSequenceRange.get().lowerEndpoint(),
-                                    innerTextReferenceSequenceRange.get().upperEndpoint() - innerTextReferenceSequenceRange.get().lowerEndpoint()));
-                            innerText = translationFunction.apply(sequence);
-//                            int diff = innerText.length() - sequence.length();
-                            int startPos = (int) startOffset;
-                            int endPos = (int) (startPos + boundingRect.getWidth() - (int) startOffset - endOffset);
-                            innerText = innerText.substring(startPos, endPos);
-                        } else {
-                            sequence = new String(chromosome.getSequence(basePairRange.lowerEndpoint(), basePairRange.upperEndpoint() - basePairRange.lowerEndpoint()));
-                            innerText = translationFunction.apply(sequence);
-                        }
-
-                        int size = (int) boundingRect.getHeight();
-                        synchronized (gc) {// should not be needed, but I am currently seeing rendering issues that appear directly related to race conditions on this function
-                            gc.save();
-                            double textScale = .5;
-                            gc.scale(textScale, textScale);
-                            gc.setFont(Font.font("Monospaced", FontWeight.MEDIUM, size));
-                            FontMetrics fm = Toolkit.getToolkit().getFontLoader().getFontMetrics(gc.getFont());
-                            double textHeight = fm.getAscent();
-                            double textYPosition = (y / textScale) + textHeight;
-                            double textYOffset = (viewBoundingRect.get().getHeight() / textScale - fm.getLineHeight()) / 2;
-                            textYPosition += textYOffset;
-                            gc.scale(1 / textScale, 1 / textScale);
-                            double i = 0;
-                            double minX = viewBoundingRect.get().getMinX();
-                            int baseWidth = 1;
-                            for (char c : innerText.toUpperCase().toCharArray()) {
-                                if (colorByBase) {
-                                    gc.setFill(getBaseColor(c));
-                                } else {
-                                    gc.setFill(fill);
-                                }
-                                if (startOffset % 1 > 0 && i == 0) {
-                                    gc.fillRect(minX, y, 1 - startOffset % 1, viewBoundingRect.get().getHeight());
-                                    i += (1 - startOffset % 1);
-                                    continue;
-                                } else {
-                                    gc.fillRect(minX + i, y, 1, viewBoundingRect.get().getHeight());
-                                }
-                                if (colorByBase) {
-                                    gc.setFill(Color.BLACK);
-                                } else {
-                                   gc.setFill(ColorUtils.getEffectiveContrastColor(fill));
-                                }
-                                gc.scale(textScale, textScale);
-                                double x = ((minX + i) / textScale) + (1 / textScale) * .1;
-                                double maxWidth = (1 / textScale) * .8;
-                                gc.fillText("" + c, x, textYPosition, maxWidth);
-                                gc.scale(1 / textScale, 1 / textScale);
-                                i++;
-                            }
-                            gc.restore();
-                        }
-                    });
-                }
+    public void draw(GraphicsContext gc, View view) {
+        Rectangle2D viewRect = view.getBoundingRect();
+        Optional<Rectangle2D> viewBoundingRect = getViewBoundingRect(view);
+        if (viewBoundingRect.isPresent()) {
+            gc.setFill(fill);
+            gc.setStroke(strokeColor);
+            final double y = viewBoundingRect.get().getMinY();
+            gc.fillRect(viewBoundingRect.get().getMinX(), y, viewBoundingRect.get().getWidth(), viewBoundingRect.get().getHeight());
+            if (view.getBoundingRect().getWidth() < 150) {
+                drawText(view, viewRect, gc, y, viewBoundingRect);
             }
-        } catch (Exception ex) {
-            LOG.error(ex.getMessage(), ex);
         }
+    }
+
+    private void drawText(View view, Rectangle2D viewRect, GraphicsContext gc, final double y, Optional<Rectangle2D> viewBoundingRect) {
+        innerTextRefSeqTranslator.ifPresent(translationFunction -> {
+            Chromosome chromosome = view.getChromosome();
+            String innerText;
+            double startOffset = 0;
+            double endOffset = 0;
+            if (boundingRect.getMinX() < viewRect.getMinX()) {
+                //left side is cut off
+                startOffset = viewRect.getMinX() - boundingRect.getMinX();
+            }
+            if ((int) boundingRect.getMaxX() > viewRect.getMaxX()) {
+                //right side is cut off
+                endOffset = boundingRect.getMaxX() - viewRect.getMaxX();
+            }
+            int startPos = (int) startOffset;
+            int endPos = (int) (startPos + boundingRect.getWidth() - (int) startOffset - endOffset);
+            Range<Integer> basePairRange = Range.closed((int) boundingRect.getMinX() + (int) startOffset, (int) boundingRect.getMaxX() - (int) endOffset);
+            String sequence = new String(chromosome.getSequence(basePairRange.lowerEndpoint(), basePairRange.upperEndpoint() - basePairRange.lowerEndpoint()));
+            if (innerTextReferenceSequenceRange.isPresent()) {
+                //TODO handle offsets
+                String requestedSequence = new String(chromosome.getSequence(innerTextReferenceSequenceRange.get().lowerEndpoint(),
+                        innerTextReferenceSequenceRange.get().upperEndpoint() - innerTextReferenceSequenceRange.get().lowerEndpoint()));
+                innerText = translationFunction.apply(requestedSequence);
+            } else {
+                innerText = translationFunction.apply(sequence);
+            }
+            innerText = innerText.substring(startPos, endPos);
+            int size = (int) boundingRect.getHeight();
+            synchronized (gc) {// should not be needed, but I am currently seeing rendering issues that appear directly related to race conditions on this function
+                gc.save();
+                double textScale = .5;
+                gc.scale(textScale, textScale);
+                gc.setFont(Font.font("Monospaced", FontWeight.MEDIUM, size));
+                FontMetrics fm = Toolkit.getToolkit().getFontLoader().getFontMetrics(gc.getFont());
+                double textHeight = fm.getAscent();
+                double textYPosition = (y / textScale) + textHeight;
+                double textYOffset = (viewBoundingRect.get().getHeight() / textScale - fm.getLineHeight()) / 2;
+                textYPosition += textYOffset;
+                gc.scale(1 / textScale, 1 / textScale);
+                double i = 0;
+                double minX = viewBoundingRect.get().getMinX();
+                int baseWidth = 1;
+                final char[] innerTextChars = innerText.toUpperCase().toCharArray();
+                final char[] seqChars = sequence.toUpperCase().toCharArray();
+                for (int j = 0; j < innerTextChars.length; j++) {
+                    boolean charMatch = false;
+                    char c = innerTextChars[j];
+                    if (colorByBase || maskMatches) {
+                        if (innerTextChars.length == seqChars.length && c == seqChars[j]) {
+                            charMatch = true;
+                            gc.setFill(fill);
+                        } else {
+                            gc.setFill(getBaseColor(c));
+                        }
+                    } else {
+                        gc.setFill(fill);
+                    }
+                    if (startOffset % 1 > 0 && i == 0) {
+                        gc.fillRect(minX, y, 1 - startOffset % 1, viewBoundingRect.get().getHeight());
+                        i += (1 - startOffset % 1);
+                        continue;
+                    } else {
+                        gc.fillRect(minX + i, y, 1, viewBoundingRect.get().getHeight());
+                    }
+                    if (!charMatch) {
+                        if (colorByBase) {
+                            gc.setFill(Color.BLACK);
+                        } else {
+                            gc.setFill(ColorUtils.getEffectiveContrastColor(fill));
+                        }
+                        gc.scale(textScale, textScale);
+                        double x = ((minX + i) / textScale) + (1 / textScale) * .1;
+                        double maxWidth = (1 / textScale) * .8;
+                        gc.fillText("" + c, x, textYPosition, maxWidth);
+                        gc.scale(1 / textScale, 1 / textScale);
+                    }
+                    i++;
+                }
+                gc.restore();
+            }
+        });
     }
 
     @Override
@@ -220,19 +229,6 @@ public class RectangleGlyph implements Glyph {
             return false;
         }
         return true;
-    }
-
-    @Override
-    public Rectangle2D getRenderBoundingRect() {
-        if (renderBoundingRect == null) {
-            return boundingRect;
-        }
-        return renderBoundingRect;
-    }
-
-    @Override
-    public void setRenderBoundingRect(Rectangle2D renderBoundingRect) {
-        this.renderBoundingRect = renderBoundingRect;
     }
 
 }

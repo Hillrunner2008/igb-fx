@@ -1,19 +1,25 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.lorainelab</groupId>
-    <artifactId>org.lorainelab.igb.menu.openfile</artifactId>
+    <artifactId>org.lorainelab.igb.datasetloadingservice</artifactId>
+    <version>0.0.1</version>
     <packaging>bundle</packaging>
-
+    
     <parent>
-        <groupId>org.lorainelab</groupId>
         <artifactId>org.lorainelab.igb</artifactId>
+        <groupId>org.lorainelab</groupId>
         <version>0.0.1</version>
-        <relativePath>../../pom.xml</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
-    
-    
+
     <dependencies>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <version>4.3.0</version>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>biz.aQute.bnd</groupId>
             <artifactId>bndlib</artifactId>
@@ -22,18 +28,9 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
-        
         <dependency>
             <groupId>org.lorainelab</groupId>
             <artifactId>org.lorainelab.igb.selections</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.lorainelab</groupId>
-            <artifactId>org.lorainelab.igb.menu.api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -41,27 +38,17 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>org.lorainelab.igb.toolbar.api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>de.jensd</groupId>
-            <artifactId>fontawesomefx</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>org.lorainelab.igb.datasetloadingservice</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>org.lorainelab.igb.menu.customgenome</artifactId>
+            <artifactId>org.lorainelab.igb.preferences</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.lorainelab.igb.recentfiles.registry</artifactId>
-            <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>        
     </dependencies>
 
     <build>
@@ -84,17 +71,17 @@
                             !${project.artifactId},
                             *
                         </Import-Package>
-                        <Export-Package>
-                            ${project.artifactId}
-                        </Export-Package>
+                        <Export-Package>org.lorainelab.igb.datasetloadingservice</Export-Package>
                         <Service-Component>*</Service-Component>
+                        <Private-Package>org.lorainelab.igb.datasetloadingservice.*,org.lorainelab.igb.openfileImpl.*</Private-Package>
                     </instructions>
                 </configuration>
-            </plugin>  
+            </plugin>
         </plugins>
     </build>
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
+    <name>org.lorainelab.igb.datasetloadingservice</name>
 </project>

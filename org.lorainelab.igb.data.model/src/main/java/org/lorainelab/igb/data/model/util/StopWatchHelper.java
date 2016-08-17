@@ -1,4 +1,4 @@
-package org.lorainelab.igb.visualization.util;
+package org.lorainelab.igb.data.model.util;
 
 import com.google.common.base.Stopwatch;
 import java.util.function.Function;
@@ -14,9 +14,9 @@ public class StopWatchHelper {
     private static final Logger LOG = LoggerFactory.getLogger(StopWatchHelper.class);
     public static Function<Function<Void, String>, Void> RECORD_METRICS = (Function<Void, String> t) -> {
         final Stopwatch stopwatch = Stopwatch.createStarted();
-        String methodName = t.apply(null);
+        String metricName = t.apply(null);
         stopwatch.stop();
-        LOG.info("STOPWATCH METRICS for {} {}", methodName, stopwatch);
+        LOG.info("STOPWATCH METRICS for {} {}", metricName, stopwatch);
         return null;
     };
 }

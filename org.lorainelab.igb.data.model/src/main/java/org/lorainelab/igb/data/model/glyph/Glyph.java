@@ -18,16 +18,14 @@ import org.lorainelab.igb.data.model.View;
  * @author jeckstei
  */
 public interface Glyph {
+    static final int SLOT_HEIGHT = 30;
+    static final double MIN_OFFSET = 17.5;
 
     Color getFill();
 
     Color getStrokeColor();
 
     Rectangle2D getBoundingRect();
-
-    Rectangle2D getRenderBoundingRect();
-
-    void setRenderBoundingRect(Rectangle2D rectangle2D);
 
     default boolean isSelectable() {
         return false;
@@ -41,45 +39,34 @@ public interface Glyph {
         //do nothing
     }
 
-    void draw(GraphicsContext gc, View view, double additionalYoffset);
+    void draw(GraphicsContext gc, View view);
 
-    default Optional<Rectangle2D> getViewBoundingRect(Rectangle2D view, double additionalYoffset) {
-        Rectangle2D boundingRect = getRenderBoundingRect();
-        double x = boundingRect.getMinX();
-        double maxX = boundingRect.getMaxX();
-        double y = boundingRect.getMinY();
-        double width = boundingRect.getWidth();
-        double height = boundingRect.getHeight();
-        if (x < view.getMinX()) {
-            double offSet = view.getMinX() - x;
-            width = width - offSet;
-            x = 0;
-        } else {
-            x = x - view.getMinX();
+    default Optional<Rectangle2D> getViewBoundingRect(View view) {
+        Rectangle2D boundingRect = getBoundingRect();
+        Rectangle2D viewBoundingRect = view.getBoundingRect();
+        if (boundingRect.intersects(viewBoundingRect)) {
+            double x = Math.max(boundingRect.getMinX(), viewBoundingRect.getMinX());
+            double y = Math.max(boundingRect.getMinY(), viewBoundingRect.getMinY());
+            double maxx = Math.min(boundingRect.getMaxX(), viewBoundingRect.getMaxX());
+            double maxy = Math.min(boundingRect.getMaxY(), viewBoundingRect.getMaxY());
+            return Optional.of(new Rectangle2D(x - viewBoundingRect.getMinX(), y, maxx - x, maxy - y));
         }
-        if (maxX > view.getMaxX()) {
-            int offSet = (int) (maxX - view.getMaxX());
-            width = width - offSet;
-        }
-        if (y < view.getMinY()) {
-            double offSet = (view.getMinY() - y);
-            height = height - offSet;
-            y = 0;
-        } else {
-            y = y - view.getMinY();
-        }
-        if (width <= 0 || height <= 0) {
-            return Optional.empty();
-        }
-        return Optional.of(new Rectangle2D(x, y + additionalYoffset, width, height));
+        return Optional.empty();
     }
 
+    static Rectangle2D intersect(Rectangle2D src1, Rectangle2D src2) {
+        double x = Math.max(src1.getMinX(), src2.getMinX());
+        double y = Math.max(src1.getMinY(), src2.getMinY());
+        double maxx = Math.min(src1.getMaxX(), src2.getMaxX());
+        double maxy = Math.min(src1.getMaxY(), src2.getMaxY());
+        return new Rectangle2D(x, y, maxx - x, maxy - y);
+    }
     static Comparator<CompositionGlyph> MIN_X_COMPARATOR
             = (glyph1, glyph2) -> {
                 return ComparisonChain.start()
-                .compare(glyph1.getBoundingRect().getMinX(), glyph2.getBoundingRect().getMinX())
-                .compare(glyph1.getBoundingRect().getWidth(), glyph2.getBoundingRect().getWidth())
-                .compare(glyph1.getLabel(), glyph2.getLabel())
-                .result();
+                        .compare(glyph1.getBoundingRect().getMinX(), glyph2.getBoundingRect().getMinX())
+                        .compare(glyph1.getBoundingRect().getWidth(), glyph2.getBoundingRect().getWidth())
+                        .compare(glyph1.getLabel(), glyph2.getLabel())
+                        .result();
             };
 }

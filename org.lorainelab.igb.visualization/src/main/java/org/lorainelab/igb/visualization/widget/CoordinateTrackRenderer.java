@@ -14,9 +14,9 @@ import javafx.scene.text.FontWeight;
 import org.lorainelab.igb.data.model.CanvasContext;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.View;
+import static org.lorainelab.igb.data.model.sequence.BasePairColorReference.getBaseColor;
 import org.lorainelab.igb.visualization.model.CanvasModel;
 import org.lorainelab.igb.visualization.model.TrackLabel;
-import static org.lorainelab.igb.data.model.sequence.BasePairColorReference.getBaseColor;
 import static org.lorainelab.igb.visualization.util.BoundsUtil.enforceRangeBounds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,10 +69,10 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     }
 
     private void drawClickDrag(CanvasModel canvasModel) {
-        canvasModel.getMouseClickLocation().get().ifPresent(lastMouseClick -> {
-            canvasModel.getLocalPoint().get().ifPresent(lastMouseDrag -> {
-                if (canvasContext.getBoundingRect().contains(lastMouseClick)) {
-                    final double lastMouseClickX = Math.floor(lastMouseClick.getX() / xfactor);
+        canvasModel.getClickDragStartPosition().get().ifPresent(clickDragStartPosition -> {
+            canvasModel.getLastDragPosition().get().ifPresent(lastMouseDrag -> {
+                if (canvasContext.getBoundingRect().contains(clickDragStartPosition)) {
+                    final double lastMouseClickX = Math.floor(clickDragStartPosition.getX() / xfactor);
                     final double lastMouseDragX = Math.floor(lastMouseDrag.getX() / xfactor);
                     if (lastMouseClickX >= 0 && lastMouseDragX >= 0) {
                         gc.save();
@@ -388,7 +388,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
 
     @Override
     public View getView() {
-        View toReturn = new View(viewBoundingRectangle, chromosome);
+        View toReturn = new View(viewBoundingRectangle, canvasContext, chromosome);
         toReturn.setXfactor(xfactor);
         return toReturn;
     }

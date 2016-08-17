@@ -54,7 +54,7 @@ public class SelectionRectangle implements Widget {
         canvasModel.getMouseClickLocation().get().ifPresent(clickStartPosition -> {
             tracksModel.getCoordinateTrackRenderer().ifPresent(coordinateTrackRenderer -> {
                 if (!coordinateTrackRenderer.getCanvasContext().getBoundingRect().contains(clickStartPosition)) {
-                    canvasModel.getLocalPoint().get().ifPresent(localPoint -> {
+                    canvasModel.getClickDragStartPosition().get().ifPresent(localPoint -> {
                         double minX;
                         double maxX;
                         double minY;

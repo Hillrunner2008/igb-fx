@@ -1,8 +1,5 @@
 package org.lorainelab.igb.visualization.model;
 
-import org.lorainelab.igb.visualization.widget.TrackRenderer;
-import org.lorainelab.igb.visualization.widget.ZoomableTrackRenderer;
-import org.lorainelab.igb.visualization.widget.CoordinateTrackRenderer;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
@@ -21,6 +18,9 @@ import org.lorainelab.igb.data.model.GenomeVersion;
 import org.lorainelab.igb.data.model.Track;
 import org.lorainelab.igb.selections.SelectionInfoService;
 import org.lorainelab.igb.visualization.ui.CanvasRegion;
+import org.lorainelab.igb.visualization.widget.CoordinateTrackRenderer;
+import org.lorainelab.igb.visualization.widget.TrackRenderer;
+import org.lorainelab.igb.visualization.widget.ZoomableTrackRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

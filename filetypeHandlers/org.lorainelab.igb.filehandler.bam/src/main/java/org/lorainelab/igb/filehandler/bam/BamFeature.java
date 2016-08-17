@@ -25,8 +25,9 @@ public class BamFeature implements Feature {
     private String cigarString;
     private int mappingQuality;
     Set<AlignmentBlock> alignMentBlocks;
+    private String featureSequence;
 
-    public BamFeature(SAMRecord samRecord) {
+    public BamFeature(SAMRecord samRecord, String refSeqString) {
         this.readName = samRecord.getReadName();
         this.chromosomeId = samRecord.getReferenceName();
         this.mappingQuality = samRecord.getMappingQuality();
@@ -35,12 +36,11 @@ public class BamFeature implements Feature {
         alignmentEnd = samRecord.getAlignmentEnd() - 1;
         if (!samRecord.getReadNegativeStrandFlag()) {
             strand = Strand.POSITIVE;
-            range = Range.closedOpen(alignmentStart, alignmentEnd);
         } else {
             strand = Strand.NEGATIVE;
-            range = Range.closedOpen(alignmentStart, alignmentEnd);
         }
-        alignMentBlocks = setAnnotationBlocks(samRecord);
+        range = Range.closedOpen(alignmentStart, alignmentEnd);
+        alignMentBlocks = setAnnotationBlocks(samRecord, refSeqString);
     }
 
     @Override
@@ -64,7 +64,7 @@ public class BamFeature implements Feature {
     }
 
     public Optional<String> getReadSequence() {
-        return Optional.ofNullable("");
+        return Optional.ofNullable(featureSequence);
     }
 
     public int getMappingQuality() {
@@ -75,12 +75,6 @@ public class BamFeature implements Feature {
         return cigarString;
     }
 
-//    public String getAlignmentBlockSequence(AlignmentBlock alignmentBlock) {
-//        Range<Integer> alignmentBlockRange = alignmentBlock.getRange();
-//        final int sequenceStartPos = alignmentBlockRange.lowerEndpoint() - alignmentStart;
-//        final int sequenceEndPos = sequenceStartPos + alignmentBlockRange.upperEndpoint() - alignmentBlockRange.lowerEndpoint();
-//        return samRecord.getReadString().substring(sequenceStartPos, sequenceEndPos);
-//    }
     public Map<String, String> getTooltipData() {
         HashMap<String, String> tooltipData = Maps.newHashMap();
         tooltipData.put("forward", strand == Strand.POSITIVE ? "true" : "false");
@@ -96,25 +90,30 @@ public class BamFeature implements Feature {
         return alignMentBlocks;
     }
 
-    private Set<AlignmentBlock> setAnnotationBlocks(SAMRecord samRecord) {
+    private Set<AlignmentBlock> setAnnotationBlocks(SAMRecord samRecord, String refSeqString) {
         Set<AlignmentBlock> blocks = Sets.newLinkedHashSet();
         Cigar cigar = samRecord.getCigar();
         int start = alignmentStart;
+        int insertionOffset = 0;
         for (CigarElement cigarElement : cigar.getCigarElements()) {
             switch (cigarElement.getOperator()) {
                 case D:
-                    blocks.add(new AlignmentBlock(Range.closedOpen(start, start + cigarElement.getLength()), AlignmentType.DELETION));
+                    blocks.add(new AlignmentBlock(Range.closedOpen(start, start + cigarElement.getLength()), AlignmentType.DELETION, false, null));
                     start += cigarElement.getLength();
                     break;
                 case I:
-                    blocks.add(new AlignmentBlock(Range.closedOpen(start, start + cigarElement.getLength()), AlignmentType.INSERTION));
+                    blocks.add(new AlignmentBlock(Range.closedOpen(start, start + cigarElement.getLength()), AlignmentType.INSERTION, false, null));
                     break;
                 case M:
-                    blocks.add(new AlignmentBlock(Range.closedOpen(start, start + cigarElement.getLength()), AlignmentType.MATCH));
+                    final int startPosition = insertionOffset;
+                    final String refBlockSequence = refSeqString.substring(startPosition, startPosition + cigarElement.getLength());
+                    final String recordBlockSequence = samRecord.getReadString().substring(Math.max(startPosition - 1, 0), Math.max(startPosition - 1, 0) + cigarElement.getLength());
+                    boolean exactMatch = refBlockSequence.equalsIgnoreCase(recordBlockSequence);
+                    blocks.add(new AlignmentBlock(Range.closedOpen(start, start + cigarElement.getLength()), AlignmentType.MATCH, exactMatch, exactMatch ? null : recordBlockSequence));
                     start += cigarElement.getLength();
                     break;
                 case N:
-                    blocks.add(new AlignmentBlock(Range.closedOpen(start, start + cigarElement.getLength()), AlignmentType.GAP));
+                    blocks.add(new AlignmentBlock(Range.closedOpen(start, start + cigarElement.getLength()), AlignmentType.GAP, false, null));
                     start += cigarElement.getLength();
                     break;
                 case P:

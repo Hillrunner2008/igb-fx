@@ -209,7 +209,7 @@ public class MenuBarManager {
         }
     }
 
-    private void rebuildMenus() {
+    private synchronized void rebuildMenus() {
         Platform.runLater(() -> {
             rebuildFileMenu();
             rebuildEditMenu();

@@ -43,7 +43,7 @@ public class RecentFilesRegistryImpl implements RecentFilesRegistry {
     public RecentFilesRegistryImpl() {
         md5HashFunction = Hashing.md5();
         recentFiles = EvictingQueue.create(5);
-        modulePreferencesNode = PreferenceUtils.getPackagePrefsNode(RecentFilesMenuEntry.class);
+        modulePreferencesNode = PreferenceUtils.getPackagePrefsNode(RecentFilesRegistryImpl.class);
         initializeFromPreferences();
     }
 
