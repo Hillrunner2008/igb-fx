@@ -51,7 +51,6 @@ public class Track {
 
     public void draw(GraphicsContext gc, View view, CanvasContext canvasContext) {
         double trackPositionOffset = canvasContext.getBoundingRect().getMinY() / view.getYfactor();
-        //TODO look into why concurrency issues are possible at this location during zooming
         gc.save();
         //NOTE: Rounding issues prevent us from using translation to take care of view offsets in the x coordinate system
         // everything works fine until x coordinate get large, and then the larger numbers don't render correctly on the canvas
@@ -148,10 +147,9 @@ public class Track {
                     }
                     if (slotToadd <= stackHeight || stackHeight == 0) {
                         final int slot = slotToadd;
-                        Slot bin = slotMap.computeIfAbsent(slotToadd, e -> {
+                       slotMap.computeIfAbsent(slotToadd, e -> {
                             return new Slot();
-                        });
-                        bin.addGlyph(glyph);
+                        }).addGlyph(glyph);
                     }
                 });
         updateSlotCount();

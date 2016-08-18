@@ -40,14 +40,20 @@ public class Slot {
     }
 
     public void addGlyph(CompositionGlyph glyph) {
-        glyphs.put(Range.closed(glyph.getBoundingRect().getMinX(), glyph.getBoundingRect().getMaxX()), glyph);
-        maxX = glyph.getBoundingRect().getMaxX();
+        synchronized (glyphs) {
+            glyphs.put(Range.closed(glyph.getBoundingRect().getMinX(), glyph.getBoundingRect().getMaxX()), glyph);
+            maxX = glyph.getBoundingRect().getMaxX();
+        }
     }
 
     //subRangeMap returns in O(1) time, and the RangeMap it returns has O(log n) additive cost for each of its query operations 
     //that is, all of its operations still take O(log n), just with a higher constant factor.
     public List<CompositionGlyph> getGlyphsInXrange(Range<Double> queryRange) {
-        return Lists.newArrayList(glyphs.subRangeMap(queryRange).asMapOfRanges().values());
+        final List<CompositionGlyph> newArrayList;
+        synchronized (glyphs) {
+            newArrayList = Lists.newArrayList(glyphs.subRangeMap(queryRange).asMapOfRanges().values());
+        }
+        return newArrayList;
     }
 
     //complexity is O(log n) in x dimension, but linear in y

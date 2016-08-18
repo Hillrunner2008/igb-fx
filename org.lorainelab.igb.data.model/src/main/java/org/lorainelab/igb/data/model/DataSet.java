@@ -22,7 +22,6 @@ public class DataSet {
     private final HashMultimap<String, CompositionGlyph> loadedAnnoations;
     private final String trackLabel;
     private Map<String, RangeSet<Integer>> loadedRegions;
-    //tracked to prevent duplicate requests
     private final FileTypeHandler fileTypeHandler;
     private final DataSourceReference dataSourceReference;
     private Track positiveStrandTrack;
@@ -80,10 +79,10 @@ public class DataSet {
     }
 
     public void loadRegion(String chrId, Range<Integer> requestRange) {
-        if (!loadedRegions.containsKey(chrId)) {
-            loadedRegions.put(chrId, TreeRangeSet.create());
-        }
-        if (!loadedRegions.get(chrId).encloses(requestRange)) {
+        RangeSet<Integer> loadedChromosomeRegions = loadedRegions.computeIfAbsent(chrId, e -> {
+            return TreeRangeSet.create();
+        });
+        if (!loadedChromosomeRegions.encloses(requestRange)) {
             RangeSet<Integer> connectedRanges = loadedRegions.get(chrId).subRangeSet(requestRange);
             TreeRangeSet<Integer> updatedRequestRange = TreeRangeSet.create(connectedRanges);
             updatedRequestRange.add(requestRange);
