@@ -23,7 +23,7 @@
         <pluginRepository>
             <id>public</id>
             <url>http://eos.transvar.org/nexus/content/groups/public</url>
-        </pluginRepository>
+        </pluginRepository> 
     </pluginRepositories>
     
     <distributionManagement>
@@ -188,6 +188,12 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.filehandler.bigwig</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>org.lorainelab.igb.menu.api</artifactId>
                 <version>${project.version}</version>
                 <scope>provided</scope>
@@ -326,6 +332,7 @@
         <module>org.lorainelab.igb.recentfiles.registry</module>
         
         <module>filetypeHandlers/org.lorainelab.igb.filehandler.bed</module>
+        <module>filetypeHandlers/org.lorainelab.igb.filehandler.bigwig</module>
         <module>filetypeHandlers/org.lorainelab.igb.filehandler.bam</module>
         
         <module>org.lorainelab.igb.visualization</module>

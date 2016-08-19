@@ -173,12 +173,12 @@ public class BedParser implements FileTypeHandler {
                     .stream().forEach((Layer layer) -> {
                         getShapes(layer).forEach(shape -> {
                             if (Rectangle.class
-                            .isAssignableFrom(shape.getClass())) {
+                                    .isAssignableFrom(shape.getClass())) {
                                 children.add(GlyphFactory.generateRectangleGlyph((Rectangle) shape));
 
                             }
                             if (Line.class
-                            .isAssignableFrom(shape.getClass())) {
+                                    .isAssignableFrom(shape.getClass())) {
                                 children.add(GlyphFactory.generateLine((Line) shape));
                             }
                         });
@@ -226,6 +226,11 @@ public class BedParser implements FileTypeHandler {
     @Override
     public String getName() {
         return "Bed File";
+    }
+
+    @Override
+    public boolean isGraphType() {
+        return false;
     }
 
     @Override

@@ -34,7 +34,7 @@ public class SelectionInfoServiceImpl implements SelectionInfoService {
         selectedChromosomeProperty = new SimpleObjectProperty<>(Optional.empty());
         selectedGlyphs = FXCollections.observableSet(Sets.<CompositionGlyph>newTreeSet((glyph1, glyph2) -> {
             return ComparisonChain.start()
-                    .compare(glyph1.getLabel(), glyph2.getLabel())
+                    .compare(Optional.ofNullable(glyph1.getLabel()).orElse(""), Optional.ofNullable(glyph2.getLabel()).orElse(""))
                     .compare(glyph1.getBoundingRect().getMinX(), glyph2.getBoundingRect().getMinX())
                     .compare(glyph1.getBoundingRect().getWidth(), glyph2.getBoundingRect().getWidth())
                     .result();

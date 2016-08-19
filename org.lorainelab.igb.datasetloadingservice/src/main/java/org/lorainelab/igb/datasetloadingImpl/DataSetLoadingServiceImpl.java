@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.lorainelab.igb.openfileImpl;
+package org.lorainelab.igb.datasetloadingImpl;
 
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
@@ -20,7 +20,7 @@ import org.lorainelab.igb.data.model.datasource.DataSource;
 import org.lorainelab.igb.data.model.datasource.DataSourceReference;
 import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandler;
 import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandlerRegistry;
-import org.lorainelab.igb.datasetloadingservice.DataSetLoadingService;
+import org.lorainelab.igb.datasetloadingservice.api.DataSetLoadingService;
 import org.lorainelab.igb.preferences.SessionPreferences;
 import org.lorainelab.igb.recentfiles.registry.api.RecentFilesRegistry;
 import org.lorainelab.igb.search.api.SearchService;
@@ -33,10 +33,10 @@ import org.slf4j.LoggerFactory;
  *
  * @author Devdatta Kulkarni
  */
-@Component(immediate = true, provide = DataSetLoadingService.class)
-public class OpenFileImpl implements DataSetLoadingService {
+@Component(immediate = true)
+public class DataSetLoadingServiceImpl implements DataSetLoadingService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(OpenFileImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DataSetLoadingServiceImpl.class);
     private static final String DEFAULT_FILE_EXTENSION_FILTER_NAME = "All Supported Formats";
 
     private DataSource dataSource;
@@ -72,7 +72,7 @@ public class OpenFileImpl implements DataSetLoadingService {
                     return f.getSupportedExtensions().contains(Files.getFileExtension(file.getPath()));
                 }).findFirst().ifPresent(fileTypeHandler -> {
                     selectionInfoService.getSelectedGenomeVersion().get().ifPresent(gv -> {
-                        recentFilesRegistry.addRecentFile(file.getPath());
+                        recentFilesRegistry.getRecentFiles().add(file.getPath());
                         DataSourceReference dataSourceReference = new DataSourceReference(file.getPath(), dataSource);
                         gv.getLoadedDataSets().add(new DataSet(file.getName(), dataSourceReference, fileTypeHandler));
                         indexDataSetForSearch(fileTypeHandler, dataSourceReference);

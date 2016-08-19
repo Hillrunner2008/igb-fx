@@ -216,4 +216,9 @@ public class BamParser implements FileTypeHandler {
         this.selectionInfoService = selectionInfoService;
     }
 
+    @Override
+    public boolean isGraphType() {
+        return false;
+    }
+
 }

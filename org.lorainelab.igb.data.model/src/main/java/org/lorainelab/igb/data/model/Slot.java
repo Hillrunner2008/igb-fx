@@ -71,11 +71,10 @@ public class Slot {
         return glyphs.asMapOfRanges().values();
     }
 
-    public Rectangle2D getSlotBoundingViewRect(View view) {
-        Rectangle2D viewBoundingRect = view.getBoundingRect();
+    public Rectangle2D getSlotBoundingViewRect(Rectangle2D viewBoundingRect, boolean isNegative) {
         Range<Double> viewYRange = Range.closed(viewBoundingRect.getMinY(), viewBoundingRect.getMaxY());
         final Range<Double> slotYrange;
-        if (view.isIsNegative()) {
+        if (isNegative) {
             slotYrange = Range.closed(slotYoffset, SLOT_HEIGHT + slotYoffset);
         } else {
             slotYrange = Range.closed(slotYoffset, SLOT_HEIGHT + slotYoffset);

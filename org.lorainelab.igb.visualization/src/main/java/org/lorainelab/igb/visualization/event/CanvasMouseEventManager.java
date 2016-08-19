@@ -5,7 +5,6 @@ import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import java.time.Duration;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
@@ -128,9 +127,8 @@ public class CanvasMouseEventManager {
         if (event.getClickCount() >= 2) {
             selectionInfoService.getSelectedGlyphs().clear();
             getTrackRendererContainingPoint(mousePoint).ifPresent(tr -> {
-                tr.getTrack().getSlotMap().entrySet().stream()
-                        .flatMap(entry -> entry.getValue().getAllGlyphs().stream())
-                        .filter(glyph -> glyph.isSelected())
+                
+                tr.getTrack().getSelectedGlyphs().stream()
                         .findFirst().ifPresent(glyphToJumpZoom -> {
                             jumpZoom(glyphToJumpZoom.getBoundingRect(), tr, event);
                             selectionInfoService.getSelectedGlyphs().add(glyphToJumpZoom);
@@ -140,10 +138,7 @@ public class CanvasMouseEventManager {
             selectionInfoService.getSelectedGlyphs().clear();
             getTrackRendererContainingPoint(mousePoint).ifPresent(tr -> {
                 selectionInfoService.getSelectedGlyphs().addAll(
-                        tr.getTrack().getSlotMap().entrySet().stream()
-                                .flatMap(entry -> entry.getValue().getAllGlyphs().stream())
-                                .filter(glyph -> glyph.isSelected())
-                                .collect(Collectors.toList())
+                         tr.getTrack().getSelectedGlyphs()
                 );
             });
         }

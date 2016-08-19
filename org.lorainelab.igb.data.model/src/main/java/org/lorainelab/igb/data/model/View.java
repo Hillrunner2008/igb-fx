@@ -1,7 +1,10 @@
 package org.lorainelab.igb.data.model;
 
 import com.google.common.collect.Range;
+import java.util.Optional;
 import javafx.geometry.Rectangle2D;
+import static org.lorainelab.igb.data.model.glyph.Glyph.MIN_Y_OFFSET;
+import static org.lorainelab.igb.data.model.glyph.Glyph.SLOT_HEIGHT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,6 +88,45 @@ public class View {
 
     public Chromosome getChromosome() {
         return chromosome;
+    }
+
+    public Optional<Rectangle2D> getViewBoundingRect(Rectangle2D rect, Rectangle2D slotBoundingViewRect) {
+        double cutOff = SLOT_HEIGHT - slotBoundingViewRect.getHeight();
+        Rectangle2D viewRect = boundingRect;
+        double x = rect.getMinX();
+        double maxX = rect.getMaxX();
+        double y = rect.getMinY() + slotBoundingViewRect.getMinY();
+        double width = rect.getWidth();
+        double height = rect.getHeight();
+
+        if (x < viewRect.getMinX()) {
+            double offSet = viewRect.getMinX() - x;
+            width = width - offSet;
+            x = 0;
+        } else {
+            x = x - viewRect.getMinX();
+        }
+        if (maxX > viewRect.getMaxX()) {
+            int offSet = (int) (maxX - viewRect.getMaxX());
+            width = width - offSet;
+        }
+        if (y < viewRect.getMinY()) {
+            double offSet = (viewRect.getMinY() - y - cutOff);
+            height = height - offSet;
+            y = 0;
+        } else {
+            y = y - viewRect.getMinY();
+            if (isIsNegative()) {
+                height = height - cutOff;
+                y -= MIN_Y_OFFSET;
+            } else {
+                y -= cutOff;
+            }
+        }
+        if (width <= 0 || height <= 0) {
+            return Optional.empty();
+        }
+        return Optional.of(new Rectangle2D(x, y, width, height));
     }
 
 }

@@ -59,6 +59,7 @@
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.filehandler.registry/${project.version}</bundle>
 	<bundle>mvn:${project.groupId}/org.lorainelab.igb.recentfiles.registry/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.filehandler.bed/${project.version}</bundle>
+        <bundle>mvn:${project.groupId}/org.lorainelab.igb.filehandler.bigwig/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.filehandler.bam/${project.version}</bundle>
 
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.visualization/${project.version}</bundle>

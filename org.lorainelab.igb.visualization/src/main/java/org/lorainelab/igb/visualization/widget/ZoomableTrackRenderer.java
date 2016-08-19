@@ -1,10 +1,5 @@
 package org.lorainelab.igb.visualization.widget;
 
-import com.google.common.collect.Range;
-import java.util.List;
-import java.util.Optional;
-import static java.util.stream.Collectors.toList;
-import java.util.stream.Stream;
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
@@ -12,12 +7,10 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Tooltip;
 import javafx.scene.paint.Color;
-import org.apache.commons.lang3.text.WordUtils;
 import org.lorainelab.igb.data.model.CanvasContext;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.Track;
 import org.lorainelab.igb.data.model.View;
-import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
 import org.lorainelab.igb.data.model.glyph.Glyph;
 import org.lorainelab.igb.visualization.event.MouseHoverEvent;
 import org.lorainelab.igb.visualization.model.CanvasModel;
@@ -65,40 +58,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
             if (!multiSelectModeActive) {
                 clearSelections();
             }
-            Rectangle2D viewBoundingRect = view.getBoundingRect();
-            List<CompositionGlyph> selections = track.getSlotMap().entrySet().stream().flatMap(entry -> {
-                double slotOffset = entry.getValue().getSlotYoffset();
-                final Range<Double> mouseEventXrange = Range.closed(mouseEventBoundingBox.getMinX(), mouseEventBoundingBox.getMaxX());
-                final Stream<CompositionGlyph> glyphsInXRange = entry.getValue().getGlyphsInXrange(mouseEventXrange).stream();
-                Rectangle2D slotBoundingViewRect = entry.getValue().getSlotBoundingViewRect(view);
-                return glyphsInXRange.filter(glyph -> {
-                    final Range<Double> mouseEventYrange = Range.closed(mouseEventBoundingBox.getMinY(), mouseEventBoundingBox.getMaxY());
-                    final Rectangle2D glyphViewRect = glyph.getViewBoundingRect(view, slotBoundingViewRect).orElse(null);
-                    if (glyphViewRect == null) {
-                        return false;
-                    }
-                    return Range.closed(glyphViewRect.getMinY() + slotOffset, glyphViewRect.getMaxY() + slotOffset).isConnected(mouseEventYrange);
-                });
-            }).collect(toList());
-//
-            if (selections.size() > 1) {
-                selections.forEach(glyph -> glyph.setIsSelected(true));
-            } else {
-                selections.forEach(glyph -> {
-                    boolean subSelectionActive = false;
-                    for (Glyph g : glyph.getChildren()) {
-                        if (g.isSelectable()) {
-                            if (g.getBoundingRect().intersects(mouseEventBoundingBox)) {
-                                g.setIsSelected(true);
-                                subSelectionActive = true;
-                                break;
-                            }
-                        }
-                    }
-                    glyph.setIsSelected(true);//set this flag regardless of subselection 
-                });
-            }
-
+            track.processSelectionRectangle(mouseEventBoundingBox, view.getBoundingRect());
         });
     }
 
@@ -175,45 +135,44 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     }
 
     public void showToolTip(MouseHoverEvent hoverEvent) {
-        Point2D local = hoverEvent.getLocal();
-        Point2D screen = hoverEvent.getScreen();
-        Rectangle2D modelCoordinateBoundingBox = canvasToViewCoordinates(local);
-        Optional<CompositionGlyph> intersect = track.getSlotMap().values().stream()
-                .flatMap(glyphBin -> glyphBin.getGlyphsInView(view).stream())
-                .filter(glyph -> glyph.getBoundingRect().intersects(modelCoordinateBoundingBox))
-                .findFirst();
-
-        if (intersect.isPresent()) {
-            Platform.runLater(() -> {
-                CompositionGlyph cg = intersect.get();
-                StringBuilder sb = new StringBuilder();
-                sb.append("id: ");
-                sb.append(cg.getTooltipData().get("id"));
-                sb.append("\n");
-                sb.append("description: \n");
-                sb.append(WordUtils.wrap(cg.getTooltipData().get("description"), 30, "\n", true));
-                sb.append("\n");
-                sb.append("--------------\n");
-                cg.getTooltipData().keySet().stream()
-                        .filter(key -> !key.equals("id") && !key.equals("description"))
-                        .forEach(key -> {
-                            sb.append(key);
-                            sb.append(": ");
-                            sb.append(cg.getTooltipData().get(key));
-                            sb.append("\n");
-                        });
-
-                tooltip.setText(sb.toString());
-                double newX = screen.getX() + 10;
-                double newY = screen.getY() + 10;
-                tooltip.show(gc.getCanvas(), newX, newY);
-            });
-        }
+//        Point2D local = hoverEvent.getLocal();
+//        Point2D screen = hoverEvent.getScreen();
+//        Rectangle2D modelCoordinateBoundingBox = canvasToViewCoordinates(local);
+//        Optional<CompositionGlyph> intersect = track.getSlotMap().values().stream()
+//                .flatMap(glyphBin -> glyphBin.getGlyphsInView(view).stream())
+//                .filter(glyph -> glyph.getBoundingRect().intersects(modelCoordinateBoundingBox))
+//                .findFirst();
+//
+//        if (intersect.isPresent()) {
+//            Platform.runLater(() -> {
+//                CompositionGlyph cg = intersect.get();
+//                StringBuilder sb = new StringBuilder();
+//                sb.append("id: ");
+//                sb.append(cg.getTooltipData().get("id"));
+//                sb.append("\n");
+//                sb.append("description: \n");
+//                sb.append(WordUtils.wrap(cg.getTooltipData().get("description"), 30, "\n", true));
+//                sb.append("\n");
+//                sb.append("--------------\n");
+//                cg.getTooltipData().keySet().stream()
+//                        .filter(key -> !key.equals("id") && !key.equals("description"))
+//                        .forEach(key -> {
+//                            sb.append(key);
+//                            sb.append(": ");
+//                            sb.append(cg.getTooltipData().get(key));
+//                            sb.append("\n");
+//                        });
+//
+//                tooltip.setText(sb.toString());
+//                double newX = screen.getX() + 10;
+//                double newY = screen.getY() + 10;
+//                tooltip.show(gc.getCanvas(), newX, newY);
+//            });
+//        }
     }
 
     private void clearSelections() {
-        track.getSlotMap().values().stream()
-                .flatMap(glyphBin -> glyphBin.getAllGlyphs().stream())
+        track.getGlyphs().stream()
                 .forEach(glyph -> {
                     glyph.setIsSelected(false);
                     for (Glyph g : glyph.getChildren()) {

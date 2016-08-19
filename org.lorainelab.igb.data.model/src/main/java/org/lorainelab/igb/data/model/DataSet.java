@@ -24,9 +24,10 @@ public class DataSet {
     private Map<String, RangeSet<Integer>> loadedRegions;
     private final FileTypeHandler fileTypeHandler;
     private final DataSourceReference dataSourceReference;
-    private Track positiveStrandTrack;
-    private Track combinedStrandTrack;
-    private Track negativeStrandTrack;
+    private StackedGlyphTrack positiveStrandTrack;
+    private StackedGlyphTrack combinedStrandTrack;
+    private StackedGlyphTrack negativeStrandTrack;
+    private GraphTrack graphTrack;
 
     public DataSet(String trackLabel, DataSourceReference dataSourceReference, FileTypeHandler fileTypeHandler) {
         loadedAnnoations = HashMultimap.create();
@@ -34,11 +35,19 @@ public class DataSet {
         this.trackLabel = trackLabel;
         this.fileTypeHandler = fileTypeHandler;
         loadedRegions = Maps.newHashMap();
-        positiveStrandTrack = new Track(false, trackLabel + " (+)", DEFAULT_STACK_HEIGHT);
-        negativeStrandTrack = new Track(true, trackLabel + " (-)", DEFAULT_STACK_HEIGHT);
-        combinedStrandTrack = new Track(true, trackLabel + " (+/-)", DEFAULT_STACK_HEIGHT);
+        if (fileTypeHandler.isGraphType()) {
+            graphTrack = new GraphTrack();
+        } else {
+            positiveStrandTrack = new StackedGlyphTrack(false, trackLabel + " (+)", DEFAULT_STACK_HEIGHT);
+            negativeStrandTrack = new StackedGlyphTrack(true, trackLabel + " (-)", DEFAULT_STACK_HEIGHT);
+            combinedStrandTrack = new StackedGlyphTrack(true, trackLabel + " (+/-)", DEFAULT_STACK_HEIGHT);
+        }
     }
 
+    public boolean isGraphType() {
+        return fileTypeHandler.isGraphType();
+    }
+    
     public Track getPositiveStrandTrack(String chrId) {
         refreshPositiveStrandTrack(chrId);
         return positiveStrandTrack;
@@ -54,7 +63,7 @@ public class DataSet {
         positiveStrandTrack.buildSlots();
     }
 
-    public Track getNegativeStrandTrack(String chrId) {
+    public StackedGlyphTrack getNegativeStrandTrack(String chrId) {
         refreshNegativeStrandTrack(chrId);
         return negativeStrandTrack;
     }
@@ -68,7 +77,7 @@ public class DataSet {
         negativeStrandTrack.buildSlots();
     }
 
-    public Track getCombinedStrandTrack(String chrId, int stackHeight) {
+    public StackedGlyphTrack getCombinedStrandTrack(String chrId, int stackHeight) {
         refreshCombinedTrack(chrId);
         return combinedStrandTrack;
     }
