@@ -1,5 +1,6 @@
 package org.lorainelab.igb.visualization.widget;
 
+import java.util.Optional;
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
@@ -7,11 +8,12 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Tooltip;
 import javafx.scene.paint.Color;
+import org.apache.commons.lang3.text.WordUtils;
 import org.lorainelab.igb.data.model.CanvasContext;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.Track;
 import org.lorainelab.igb.data.model.View;
-import org.lorainelab.igb.data.model.glyph.Glyph;
+import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
 import org.lorainelab.igb.visualization.event.MouseHoverEvent;
 import org.lorainelab.igb.visualization.model.CanvasModel;
 import org.lorainelab.igb.visualization.model.TrackLabel;
@@ -50,15 +52,15 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         canvasModel.getMouseClickLocation().get().ifPresent(mouseClicked -> {
             if (!canvasContext.getBoundingRect().contains(mouseClicked)) {
                 if (!multiSelectModeActive) {
-                    clearSelections();
+                    track.clearSelections();
                 }
                 return;
             }
             Rectangle2D mouseEventBoundingBox = canvasToViewCoordinates(mouseClicked);
             if (!multiSelectModeActive) {
-                clearSelections();
+                track.clearSelections();
             }
-            track.processSelectionRectangle(mouseEventBoundingBox, view.getBoundingRect());
+            track.processSelectionRectangle(mouseEventBoundingBox, view);
         });
     }
 
@@ -135,50 +137,39 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     }
 
     public void showToolTip(MouseHoverEvent hoverEvent) {
-//        Point2D local = hoverEvent.getLocal();
-//        Point2D screen = hoverEvent.getScreen();
-//        Rectangle2D modelCoordinateBoundingBox = canvasToViewCoordinates(local);
-//        Optional<CompositionGlyph> intersect = track.getSlotMap().values().stream()
-//                .flatMap(glyphBin -> glyphBin.getGlyphsInView(view).stream())
-//                .filter(glyph -> glyph.getBoundingRect().intersects(modelCoordinateBoundingBox))
-//                .findFirst();
-//
-//        if (intersect.isPresent()) {
-//            Platform.runLater(() -> {
-//                CompositionGlyph cg = intersect.get();
-//                StringBuilder sb = new StringBuilder();
-//                sb.append("id: ");
-//                sb.append(cg.getTooltipData().get("id"));
-//                sb.append("\n");
-//                sb.append("description: \n");
-//                sb.append(WordUtils.wrap(cg.getTooltipData().get("description"), 30, "\n", true));
-//                sb.append("\n");
-//                sb.append("--------------\n");
-//                cg.getTooltipData().keySet().stream()
-//                        .filter(key -> !key.equals("id") && !key.equals("description"))
-//                        .forEach(key -> {
-//                            sb.append(key);
-//                            sb.append(": ");
-//                            sb.append(cg.getTooltipData().get(key));
-//                            sb.append("\n");
-//                        });
-//
-//                tooltip.setText(sb.toString());
-//                double newX = screen.getX() + 10;
-//                double newY = screen.getY() + 10;
-//                tooltip.show(gc.getCanvas(), newX, newY);
-//            });
-//        }
-    }
+        Point2D local = hoverEvent.getLocal();
+        Point2D screen = hoverEvent.getScreen();
+        Rectangle2D modelCoordinateBoundingBox = canvasToViewCoordinates(local);
+        Optional<CompositionGlyph> intersect = track.getGlyphsInView(view).stream()
+                .filter(glyph -> glyph.getBoundingRect().intersects(modelCoordinateBoundingBox))
+                .findFirst();
 
-    private void clearSelections() {
-        track.getGlyphs().stream()
-                .forEach(glyph -> {
-                    glyph.setIsSelected(false);
-                    for (Glyph g : glyph.getChildren()) {
-                        g.setIsSelected(false);
-                    }
-                });
+        if (intersect.isPresent()) {
+            Platform.runLater(() -> {
+                CompositionGlyph cg = intersect.get();
+                StringBuilder sb = new StringBuilder();
+                sb.append("id: ");
+                sb.append(cg.getTooltipData().get("id"));
+                sb.append("\n");
+                sb.append("description: \n");
+                sb.append(WordUtils.wrap(cg.getTooltipData().get("description"), 30, "\n", true));
+                sb.append("\n");
+                sb.append("--------------\n");
+                cg.getTooltipData().keySet().stream()
+                        .filter(key -> !key.equals("id") && !key.equals("description"))
+                        .forEach(key -> {
+                            sb.append(key);
+                            sb.append(": ");
+                            sb.append(cg.getTooltipData().get(key));
+                            sb.append("\n");
+                        });
+
+                tooltip.setText(sb.toString());
+                double newX = screen.getX() + 10;
+                double newY = screen.getY() + 10;
+                tooltip.show(gc.getCanvas(), newX, newY);
+            });
+        }
     }
 
     private Rectangle2D canvasToViewCoordinates(Point2D clickLocation) {

@@ -223,51 +223,49 @@ public class MenuBarManager {
 
     private void rebuildParentMenus() {
         menuBar.getMenus().clear();
-        parentMenuEntries.keySet().stream().forEach(key -> {
+        parentMenuEntries.keySet().iterator().forEachRemaining(key -> {
             parentMenuEntries.get(key).forEach(menu -> menuBar.getMenus().add(menu));
         });
     }
 
     private void rebuildHelpMenu() {
         helpMenu.getItems().clear();
-        helpMenuEntries.keySet().stream().forEach(key -> {
+        helpMenuEntries.keySet().iterator().forEachRemaining(key -> {
             helpMenuEntries.get(key).forEach(menuItem -> helpMenu.getItems().add(menuItem));
         });
     }
 
     private void rebuildToolsMenu() {
         toolsMenu.getItems().clear();
-        toolsMenuEntries.keySet().stream().forEach(key -> {
+        toolsMenuEntries.keySet().iterator().forEachRemaining(key -> {
             toolsMenuEntries.get(key).forEach(menuItem -> toolsMenu.getItems().add(menuItem));
         });
     }
 
     private void rebuildViewMenu() {
         viewMenu.getItems().clear();
-        viewMenuEntries.keySet().stream().forEach(key -> {
+        viewMenuEntries.keySet().iterator().forEachRemaining(key -> {
             viewMenuEntries.get(key).forEach(menuItem -> viewMenu.getItems().add(menuItem));
         });
     }
 
     private void rebuildEditMenu() {
         editMenu.getItems().clear();
-        editMenuEntries.keySet().stream().forEach(key -> {
+        editMenuEntries.keySet().iterator().forEachRemaining(key -> {
             editMenuEntries.get(key).forEach(menuItem -> editMenu.getItems().add(menuItem));
         });
     }
 
     private void rebuildFileMenu() {
         fileMenu.getItems().clear();
-        synchronized (fileMenuEntries) {
-            fileMenuEntries.keySet().stream().forEach(key -> {
-                fileMenuEntries.get(key).forEach(menuItem -> fileMenu.getItems().add(menuItem));
-            });
-        }
+        fileMenuEntries.keySet().iterator().forEachRemaining(key -> {
+            fileMenuEntries.get(key).forEach(menuItem -> fileMenu.getItems().add(menuItem));
+        });
     }
 
     private void rebuildGenomeMenu() {
         genomeMenu.getItems().clear();
-        genomeMenuEntries.keySet().stream().forEach(key -> {
+        genomeMenuEntries.keySet().iterator().forEachRemaining(key -> {
             genomeMenuEntries.get(key).forEach(menuItem -> genomeMenu.getItems().add(menuItem));
         });
     }

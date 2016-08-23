@@ -3,10 +3,12 @@ package org.lorainelab.igb.filehandler.bigwig;
 import aQute.bnd.annotation.component.Component;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
+import com.google.common.collect.RangeMap;
 import com.google.common.collect.Sets;
+import com.google.common.collect.TreeRangeMap;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Set;
-import javafx.geometry.Rectangle2D;
 import org.broad.igv.bbfile.BBFileHeader;
 import org.broad.igv.bbfile.BBFileReader;
 import org.broad.igv.bbfile.BigWigIterator;
@@ -70,11 +72,17 @@ public class BigWigParser implements FileTypeHandler {
 
     private Set<CompositionGlyph> convertBigWigFeaturesToCompositionGlyphs(Set<BigWigFeature> features) {
         Set<CompositionGlyph> primaryGlyphs = Sets.newLinkedHashSet();
-        features.forEach(feature -> {
-            final Rectangle2D rectangle2D = new Rectangle2D(feature.getRange().lowerEndpoint(), 0, feature.getRange().upperEndpoint() - feature.getRange().lowerEndpoint(), feature.getyValue());
-            primaryGlyphs.add(new CompositionGlyph(null, feature.getTooltipData(), Lists.newArrayList(new GraphGlyph(rectangle2D))));
-        });
 
+        RangeMap<Double, Double> intervals = TreeRangeMap.create();
+
+        for (BigWigFeature f : features) {
+            final double lowerEndpoint = f.getRange().lowerEndpoint();
+            final double upperEndpoint = f.getRange().upperEndpoint() - 1;
+            intervals.put(Range.<Double>closed(lowerEndpoint, upperEndpoint), f.getyValue());
+        }
+        final HashMap<String, String> toolTip = new HashMap<String, String>();
+        toolTip.put("forward", Boolean.TRUE.toString());
+        primaryGlyphs.add(new CompositionGlyph("Graph", toolTip, Lists.newArrayList(new GraphGlyph(intervals))));
         return primaryGlyphs;
     }
 

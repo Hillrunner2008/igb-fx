@@ -5,6 +5,7 @@
  */
 package org.lorainelab.igb.data.model;
 
+import java.util.Collection;
 import java.util.List;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
@@ -18,14 +19,24 @@ public interface Track {
 
     void draw(GraphicsContext gc, View view, CanvasContext canvasContext);
 
+    void clearGlyphs();
+
+    void addGlyphs(Collection<CompositionGlyph> glyphs);
+
     List<CompositionGlyph> getSelectedGlyphs();
-    List<CompositionGlyph> getGlyphs();
-    void processSelectionRectangle(Rectangle2D selectionRectangle, Rectangle2D viewBoundingRect);
+
+    List<CompositionGlyph> getGlyphsInView(View view);
+
+    void processSelectionRectangle(Rectangle2D selectionRectangle, View view);
+
+    void clearSelections();
 
     double getModelHeight();
 
     String getTrackLabel();
-    
-    default boolean isNegative(){return false;}
-    
+
+    default boolean isNegative() {
+        return false;
+    }
+
 }

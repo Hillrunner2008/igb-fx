@@ -4,7 +4,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeMap;
 import com.google.common.collect.TreeRangeMap;
-import com.sun.javafx.geom.transform.Affine2D;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -30,10 +29,8 @@ public class CompositionGlyph implements Glyph {
     boolean isSelected = false;
     private Rectangle2D boundingRect;
     public static final Color DEFAULT_COLOR = Color.web("#3F51B5");
-    Affine2D transform;
 
     public CompositionGlyph(String label, Map<String, String> tooltipData, List<Glyph> children) {
-        transform = new Affine2D();
         this.xRange = TreeRangeMap.<Double, Glyph>create();
         children.stream().forEach(child -> {
             this.xRange.put(Range.closed(child.getBoundingRect().getMinX(), child.getBoundingRect().getMaxX()), child);
@@ -153,11 +150,13 @@ public class CompositionGlyph implements Glyph {
 
     private void drawChildren(GraphicsContext gc, View view, Rectangle2D slotBoundingViewRect) {
         final RangeMap<Double, Glyph> intersectionRangeMapX = xRange.subRangeMap(view.getXrange());
-        for (Glyph glyph : intersectionRangeMapX.asMapOfRanges().values()) {
-            if (glyph instanceof GraphGlyph) {
-                glyph.draw(gc, view, slotBoundingViewRect);
-            } else {
-                glyph.draw(gc, view, slotBoundingViewRect);
+        if (!intersectionRangeMapX.asMapOfRanges().isEmpty()) {
+            for (Glyph glyph : intersectionRangeMapX.asMapOfRanges().values()) {
+                if (glyph instanceof GraphGlyph) {
+                    glyph.draw(gc, view, slotBoundingViewRect);
+                } else {
+                    glyph.draw(gc, view, slotBoundingViewRect);
+                }
             }
         }
     }
@@ -303,14 +302,6 @@ public class CompositionGlyph implements Glyph {
             return false;
         }
         return true;
-    }
-
-    public void setTransform(Affine2D transform) {
-        this.transform = transform;
-    }
-
-    public Affine2D getTransform() {
-        return transform;
     }
 
 }

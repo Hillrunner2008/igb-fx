@@ -36,7 +36,7 @@ public class DataSet {
         this.fileTypeHandler = fileTypeHandler;
         loadedRegions = Maps.newHashMap();
         if (fileTypeHandler.isGraphType()) {
-            graphTrack = new GraphTrack();
+            graphTrack = new GraphTrack(trackLabel);
         } else {
             positiveStrandTrack = new StackedGlyphTrack(false, trackLabel + " (+)", DEFAULT_STACK_HEIGHT);
             negativeStrandTrack = new StackedGlyphTrack(true, trackLabel + " (-)", DEFAULT_STACK_HEIGHT);
@@ -47,20 +47,24 @@ public class DataSet {
     public boolean isGraphType() {
         return fileTypeHandler.isGraphType();
     }
-    
+
     public Track getPositiveStrandTrack(String chrId) {
         refreshPositiveStrandTrack(chrId);
         return positiveStrandTrack;
     }
 
+    private void refreshGraphTrack(String chrId) {
+        graphTrack.clearGlyphs();
+        graphTrack.addGlyphs(loadedAnnoations.get(chrId));
+    }
+
     private void refreshPositiveStrandTrack(String chrId) {
         positiveStrandTrack.clearGlyphs();
-        positiveStrandTrack.getGlyphs().addAll(
+        positiveStrandTrack.addGlyphs(
                 loadedAnnoations.get(chrId).stream()
                         .filter(g -> g.getTooltipData().get("forward").equals("true"))
                         .collect(Collectors.toList())
         );
-        positiveStrandTrack.buildSlots();
     }
 
     public StackedGlyphTrack getNegativeStrandTrack(String chrId) {
@@ -70,11 +74,10 @@ public class DataSet {
 
     private void refreshNegativeStrandTrack(String chrId) {
         negativeStrandTrack.clearGlyphs();
-        negativeStrandTrack.getGlyphs().addAll(
+        negativeStrandTrack.addGlyphs(
                 loadedAnnoations.get(chrId).stream()
                         .filter(g -> g.getTooltipData().get("forward").equals("false"))
                         .collect(Collectors.toList()));
-        negativeStrandTrack.buildSlots();
     }
 
     public StackedGlyphTrack getCombinedStrandTrack(String chrId, int stackHeight) {
@@ -84,7 +87,6 @@ public class DataSet {
 
     private void refreshCombinedTrack(String chrId) {
 //        combinedStrandTrack.getGlyphs().addAll(loadedAnnoations.get(chrId));
-//        combinedStrandTrack.buildSlots();
     }
 
     public void loadRegion(String chrId, Range<Integer> requestRange) {
@@ -97,9 +99,13 @@ public class DataSet {
             updatedRequestRange.add(requestRange);
             loadedRegions.get(chrId).add(updatedRequestRange.span());
             loadedAnnoations.putAll(chrId, fileTypeHandler.getRegion(dataSourceReference, updatedRequestRange.span(), chrId));
-            refreshPositiveStrandTrack(chrId);
-            refreshNegativeStrandTrack(chrId);
-            refreshCombinedTrack(chrId);
+            if (isGraphType()) {
+                refreshGraphTrack(chrId);
+            } else {
+                refreshPositiveStrandTrack(chrId);
+                refreshNegativeStrandTrack(chrId);
+                refreshCombinedTrack(chrId);
+            }
         }
     }
 
@@ -134,6 +140,10 @@ public class DataSet {
             return false;
         }
         return true;
+    }
+
+    public Track getGraphTrack() {
+        return graphTrack;
     }
 
 }

@@ -2,18 +2,20 @@ package org.lorainelab.igb.data.model;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
+import com.google.common.collect.Range;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.OptionalInt;
 import java.util.concurrent.ConcurrentHashMap;
 import static java.util.stream.Collectors.toList;
+import java.util.stream.Stream;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
+import org.lorainelab.igb.data.model.glyph.Glyph;
 import static org.lorainelab.igb.data.model.glyph.Glyph.MIN_X_COMPARATOR;
-import static org.lorainelab.igb.data.model.glyph.Glyph.MIN_Y_OFFSET;
 import static org.lorainelab.igb.data.model.glyph.Glyph.SLOT_HEIGHT;
-import static org.lorainelab.igb.data.model.glyph.RectangleGlyph.THICK_RECTANGLE_HEIGHT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +29,6 @@ public class StackedGlyphTrack implements Track {
     private final String trackLabel;
     private List<CompositionGlyph> glyphs;
     //A KD-Tree is something we may consider as an alternative to the Slot classes RangeMap's 
-    //subRangeMap Interval Tree based solution. KD-Tree could handle rectangle's need for 4D search
     private Map<Integer, Slot> slotMap;
 
     private final boolean isNegative;
@@ -46,36 +47,22 @@ public class StackedGlyphTrack implements Track {
     }
 
     @Override
-    public List<CompositionGlyph> getGlyphs() {
-        return glyphs;
-    }
-
-    @Override
     public void draw(GraphicsContext gc, View view, CanvasContext canvasContext) {
         double trackPositionOffset = canvasContext.getBoundingRect().getMinY() / view.getYfactor();
         gc.save();
         //NOTE: Rounding issues prevent us from using translation to take care of view offsets in the x coordinate system
         // everything works fine until x coordinate get large, and then the larger numbers don't render correctly on the canvas
-        //i.e. we can't do this gc.translate(-view.getBoundingRect().getMinX(), -view.getBoundingRect().getMinY() + additionalYOffset);
+        //i.e. we can't do this gc.translate(-view.getBoundingRect().getMinX(), trackPositionOffset);
         gc.translate(0, trackPositionOffset);
-        slotMap.entrySet().stream()
-                .forEach(entry -> {
-                    //TODO, could easily filter based on rows y coordinate range if we didn't want to support slop row, just modify getSlotOffset to not fix for slop and then filter on view range
-                    //we may also consider using this approach to create customer slop row visualization
-                    double slotYOffset = entry.getValue().getSlotYoffset();
-                    gc.save();
-//                    gc.translate(0, slotYOffset);
-//                    if (!isNegative) {
-//                        if (entry.getKey() == 0) {
-                    Rectangle2D slotBoundingViewRect = entry.getValue().getSlotBoundingViewRect(view.getBoundingRect(), isNegative);
-                    
-
-//                            System.out.println(slotBoundingViewRect.toString());
-//                        }
-//                    }
-                    experimentalOptimizedRender(entry.getValue().getGlyphsInView(view), gc, view, slotBoundingViewRect);
-                    gc.restore();
-                });
+        for (Map.Entry<Integer, Slot> entry : slotMap.entrySet()) {
+            Rectangle2D slotBoundingViewRect = entry.getValue().getSlotBoundingViewRect(view.getBoundingRect(), isNegative);
+            final List<CompositionGlyph> glyphsInView = entry.getValue().getGlyphsInView(view);
+            if (!glyphsInView.isEmpty()) {
+                experimentalOptimizedRender(glyphsInView, gc, view, slotBoundingViewRect);
+            } else {
+                break;
+            }
+        }
         gc.restore();
 
     }
@@ -127,8 +114,8 @@ public class StackedGlyphTrack implements Track {
         if (isNegative) {
             return slot * SLOT_HEIGHT;
         } else {
-            final double minPositiveStrandOffset = -MIN_Y_OFFSET - THICK_RECTANGLE_HEIGHT;
-            return minPositiveStrandOffset + (slotCount - slot) * SLOT_HEIGHT;
+//            final double minPositiveStrandOffset = -MIN_Y_OFFSET - THICK_RECTANGLE_HEIGHT;
+            return -32.5 + (slotCount - slot) * SLOT_HEIGHT;
         }
     }
 
@@ -198,9 +185,23 @@ public class StackedGlyphTrack implements Track {
         }
     }
 
-    void clearGlyphs() {
+    public void clearGlyphs() {
         glyphs.clear();
         slotMap.clear();
+    }
+
+    public void clearSelections() {
+        glyphs.stream()
+                .forEach(glyph -> {
+                    glyph.setIsSelected(false);
+                    for (Glyph g : glyph.getChildren()) {
+                        g.setIsSelected(false);
+                    }
+                });
+    }
+
+    void addGlyphs(CompositionGlyph glyphs) {
+
     }
 
     public int getStackHeight() {
@@ -213,40 +214,41 @@ public class StackedGlyphTrack implements Track {
     }
 
     @Override
-    public void processSelectionRectangle(Rectangle2D selectionRectangle, Rectangle2D viewBoundingRect) {
-//        List<CompositionGlyph> selections = getSlotMap().entrySet().stream().flatMap(entry -> {
-//            double slotOffset = entry.getValue().getSlotYoffset();
-//            final Range<Double> mouseEventXrange = Range.closed(selectionRectangle.getMinX(), selectionRectangle.getMaxX());
-//            final Stream<CompositionGlyph> glyphsInXRange = entry.getValue().getGlyphsInXrange(mouseEventXrange).stream();
+    public void processSelectionRectangle(Rectangle2D selectionRectangle, View view) {
+        Rectangle2D viewBoundingRect = view.getBoundingRect();
+        List<CompositionGlyph> selections = getSlotMap().entrySet().stream().flatMap(entry -> {
+            double slotOffset = entry.getValue().getSlotYoffset();
+            final Range<Double> mouseEventXrange = Range.closed(selectionRectangle.getMinX(), selectionRectangle.getMaxX());
+            final Stream<CompositionGlyph> glyphsInXRange = entry.getValue().getGlyphsInXrange(mouseEventXrange).stream();
+
+            Rectangle2D slotBoundingViewRect = entry.getValue().getSlotBoundingViewRect(viewBoundingRect, isNegative);
+            return glyphsInXRange.filter(glyph -> {
+                final Range<Double> mouseEventYrange = Range.closed(selectionRectangle.getMinY(), selectionRectangle.getMaxY());
+                final Rectangle2D glyphViewRect = glyph.getViewBoundingRect(view, slotBoundingViewRect).orElse(null);
+                if (glyphViewRect == null) {
+                    return false;
+                }
+                return Range.closed(glyphViewRect.getMinY(), glyphViewRect.getMaxY()).isConnected(mouseEventYrange);
+            });
+        }).collect(toList());
 //
-//            Rectangle2D slotBoundingViewRect = entry.getValue().getSlotBoundingViewRect(viewBoundingRect, isNegative);
-//            return glyphsInXRange.filter(glyph -> {
-//                final Range<Double> mouseEventYrange = Range.closed(selectionRectangle.getMinY(), selectionRectangle.getMaxY());
-//                final Rectangle2D glyphViewRect = glyph.getViewBoundingRect(view, slotBoundingViewRect).orElse(null);
-//                if (glyphViewRect == null) {
-//                    return false;
-//                }
-//                return Range.closed(glyphViewRect.getMinY() + slotOffset, glyphViewRect.getMaxY() + slotOffset).isConnected(mouseEventYrange);
-//            });
-//        }).collect(toList());
-////
-//        if (selections.size() > 1) {
-//            selections.forEach(glyph -> glyph.setIsSelected(true));
-//        } else {
-//            selections.forEach(glyph -> {
-//                boolean subSelectionActive = false;
-//                for (Glyph g : glyph.getChildren()) {
-//                    if (g.isSelectable()) {
-//                        if (g.getBoundingRect().intersects(selectionRectangle)) {
-//                            g.setIsSelected(true);
-//                            subSelectionActive = true;
-//                            break;
-//                        }
-//                    }
-//                }
-//                glyph.setIsSelected(true);//set this flag regardless of subselection 
-//            });
-//        }
+        if (selections.size() > 1) {
+            selections.forEach(glyph -> glyph.setIsSelected(true));
+        } else {
+            selections.forEach(glyph -> {
+                boolean subSelectionActive = false;
+                for (Glyph g : glyph.getChildren()) {
+                    if (g.isSelectable()) {
+                        if (g.getBoundingRect().intersects(selectionRectangle)) {
+                            g.setIsSelected(true);
+                            subSelectionActive = true;
+                            break;
+                        }
+                    }
+                }
+                glyph.setIsSelected(true);//set this flag regardless of subselection 
+            });
+        }
     }
 
     @Override
@@ -254,6 +256,18 @@ public class StackedGlyphTrack implements Track {
         return slotMap.entrySet().stream()
                 .flatMap(entry -> entry.getValue().getAllGlyphs().stream())
                 .filter(glyph -> glyph.isSelected()).collect(toList());
+    }
+
+    @Override
+    public List<CompositionGlyph> getGlyphsInView(View view) {
+        return slotMap.entrySet().stream().flatMap(slot -> slot.getValue().getGlyphsInView(view).stream()).collect(toList());
+    }
+
+    @Override
+    public void addGlyphs(Collection<CompositionGlyph> glyphs) {
+        this.glyphs.addAll(glyphs);
+        slotMap.clear();
+        buildSlots();
     }
 
 }

@@ -10,8 +10,8 @@ import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import org.lorainelab.igb.visualization.ui.CanvasRegion;
 import org.lorainelab.igb.visualization.model.CanvasModel;
+import org.lorainelab.igb.visualization.ui.CanvasRegion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

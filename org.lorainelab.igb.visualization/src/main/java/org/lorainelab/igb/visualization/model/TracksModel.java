@@ -155,6 +155,9 @@ public class TracksModel {
                     Chromosome selectedChromosome = gv.getSelectedChromosomeProperty().get().get();
                     final DataSet loadedDataSet = change.getElementAdded();
                     if (loadedDataSet.isGraphType()) {
+                        
+                         final ZoomableTrackRenderer graphTrackRenderer = new ZoomableTrackRenderer(canvasRegion.getCanvas(), loadedDataSet.getGraphTrack(), selectedChromosome);
+                         trackRenderers.add(graphTrackRenderer);
                     } else {
                         Track positiveStrandTrack = loadedDataSet.getPositiveStrandTrack(selectedChromosome.getName());
                         Track negativeStrandTrack = change.getElementAdded().getNegativeStrandTrack(gv.getSelectedChromosomeProperty().get().get().getName());

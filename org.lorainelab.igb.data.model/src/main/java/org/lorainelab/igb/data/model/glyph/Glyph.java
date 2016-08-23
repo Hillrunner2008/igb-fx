@@ -6,6 +6,7 @@ package org.lorainelab.igb.data.model.glyph;
  * and open the template in the editor.
  */
 import com.google.common.collect.ComparisonChain;
+import java.awt.Rectangle;
 import java.util.Comparator;
 import java.util.Optional;
 import javafx.geometry.Rectangle2D;
@@ -22,6 +23,7 @@ public interface Glyph {
     static final int SLOT_HEIGHT = 30;
     static final double MIN_Y_OFFSET = 17.5;
     static final double MAX_SHAPE_HEIGHT = 15;
+    static Rectangle.Double SHARED_RECT = new Rectangle.Double(0, 0, 0, 0);
 
     Color getFill();
 
