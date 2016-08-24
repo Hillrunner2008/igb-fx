@@ -15,7 +15,9 @@ import javafx.scene.canvas.GraphicsContext;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
 import org.lorainelab.igb.data.model.glyph.Glyph;
 import static org.lorainelab.igb.data.model.glyph.Glyph.MIN_X_COMPARATOR;
+import static org.lorainelab.igb.data.model.glyph.Glyph.SHARED_RECT;
 import static org.lorainelab.igb.data.model.glyph.Glyph.SLOT_HEIGHT;
+import org.lorainelab.igb.data.model.util.DrawUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,10 +91,11 @@ public class StackedGlyphTrack implements Track {
                             if (nextRenderRect != null && nextRenderRect.getMinX() / xPixelsPerCoordinate < (renderRect.getMaxX() / xPixelsPerCoordinate) + 1) {
                                 maxX = nextRenderRect.getMaxX();
                             } else {
-                                final Rectangle2D drawRect = new Rectangle2D(renderRect.getMinX(), renderRect.getMinY(), maxX - renderRect.getMinX(), renderRect.getHeight());
-                                glyph.drawSummaryRectangle(gc, drawRect);
+                                SHARED_RECT.setRect(renderRect.getMinX(), renderRect.getMinY(), maxX - renderRect.getMinX(), renderRect.getHeight());
+                                DrawUtils.scaleToVisibleRec(view, SHARED_RECT);
+                                glyph.drawSummaryRectangle(gc, SHARED_RECT);
                                 if (isSelected) {
-                                    glyph.drawSummarySelectionRectangle(gc, view, drawRect);
+                                    glyph.drawSummarySelectionRectangle(gc, view, SHARED_RECT);
                                 }
                                 break;
                             }

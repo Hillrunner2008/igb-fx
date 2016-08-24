@@ -57,7 +57,7 @@ public class ViewPortManager {
         canvasHeight = canvas.getHeight();
         int trackCountExcludingCoordinates = (int) tracksModel.getTrackRenderers().stream().filter(track -> !(track instanceof CoordinateTrackRenderer)).count();
         final double vSliderValue = 
-        trackSize = .5 + (MAX_TRACK_HEIGHT - .5) * canvasModel.getvSlider().doubleValue() / 100;
+        trackSize = 1 + (MAX_TRACK_HEIGHT - 1) * canvasModel.getvSlider().doubleValue() / 100;
         totalTrackSize = (trackSize * trackCountExcludingCoordinates) + COORDINATE_TRACK_HEIGHT;
         if (totalTrackSize < canvasHeight) {
             double availableTrackSpace = canvas.getHeight() - COORDINATE_TRACK_HEIGHT;

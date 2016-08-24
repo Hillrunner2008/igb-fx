@@ -142,22 +142,22 @@ public class DataSetLoadingServiceImpl implements DataSetLoadingService {
         this.dataSource = dataSource;
     }
 
-    @Reference
+    @Reference(optional = false)
     public void setFileTypeHandlerRegistry(FileTypeHandlerRegistry fileTypeHandlerRegistry) {
         this.fileTypeHandlerRegistry = fileTypeHandlerRegistry;
     }
 
-    @Reference
+    @Reference(optional = false)
     public void setSelectionInfoService(SelectionInfoService selectionInfoService) {
         this.selectionInfoService = selectionInfoService;
     }
 
-    @Reference
+    @Reference(optional = false)
     public void setSearchService(SearchService searchService) {
         this.searchService = searchService;
     }
 
-    @Reference
+    @Reference(optional = false)
     public void setRecentFilesRegistry(RecentFilesRegistry recentFilesRegistry) {
         this.recentFilesRegistry = recentFilesRegistry;
     }

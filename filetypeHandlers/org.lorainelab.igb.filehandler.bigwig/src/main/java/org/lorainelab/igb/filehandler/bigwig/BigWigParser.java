@@ -58,7 +58,9 @@ public class BigWigParser implements FileTypeHandler {
                         if (wigItem == null) {
                             break;
                         }
-                        features.add(new BigWigFeature(chromosomeId, wigItem));
+                        if (wigItem.getWigValue() > 0) { //filter for now, but maybe need to support this in the future
+                            features.add(new BigWigFeature(chromosomeId, wigItem));
+                        }
                     }
                 } catch (Exception ex) {
                     LOG.error(ex.getMessage(), ex);

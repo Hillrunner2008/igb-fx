@@ -1,6 +1,7 @@
 package org.lorainelab.igb.data.model;
 
 import com.google.common.collect.Range;
+import java.awt.Rectangle;
 import java.util.Optional;
 import javafx.geometry.Rectangle2D;
 import static org.lorainelab.igb.data.model.glyph.Glyph.MIN_Y_OFFSET;
@@ -17,6 +18,7 @@ public class View {
     private static final Logger LOG = LoggerFactory.getLogger(View.class);
     private Chromosome chromosome;
     private Rectangle2D boundingRect;
+    private Rectangle.Double mutableBoundingRect;
     private Range<Double> xRange;
     private double xfactor = 1;
     private double yfactor = 1;
@@ -27,6 +29,7 @@ public class View {
 
     public View(Rectangle2D boundingRect, CanvasContext canvasContext, Chromosome chromosome, boolean isNegative) {
         this.boundingRect = boundingRect;
+        this.mutableBoundingRect = new Rectangle.Double(boundingRect.getMinX(), boundingRect.getMinY(), boundingRect.getWidth(), boundingRect.getHeight());
         this.chromosome = chromosome;
         this.canvasContext = canvasContext;
         this.isNegative = isNegative;
@@ -39,12 +42,17 @@ public class View {
         return boundingRect;
     }
 
+    public java.awt.geom.Rectangle2D.Double getMutableBoundingRect() {
+        return mutableBoundingRect;
+    }
+    
     public Range<Double> getXrange() {
         return xRange;
     }
 
     public void setBoundingRect(Rectangle2D boundingRect) {
         this.boundingRect = boundingRect;
+        mutableBoundingRect = new Rectangle.Double(boundingRect.getMinX(), boundingRect.getMinY(), boundingRect.getWidth(), boundingRect.getHeight());
         xRange = Range.closed(boundingRect.getMinX(), boundingRect.getMaxX());
         xPixelsPerCoordinate = boundingRect.getWidth() / canvasContext.getBoundingRect().getWidth();
         scrollYOffset = boundingRect.getMinY();

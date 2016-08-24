@@ -21,6 +21,7 @@ import org.lorainelab.igb.data.model.View;
 import static org.lorainelab.igb.data.model.sequence.BasePairColorReference.getBaseColor;
 import org.lorainelab.igb.data.model.shapes.Rectangle;
 import org.lorainelab.igb.data.model.util.ColorUtils;
+import org.lorainelab.igb.data.model.util.DrawUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,7 +109,9 @@ public class RectangleGlyph implements Glyph {
             gc.setFill(fill);
             gc.setStroke(strokeColor);
             final double y = viewBoundingRect.get().getMinY();
-            gc.fillRect(viewBoundingRect.get().getMinX(), y, viewBoundingRect.get().getWidth(), viewBoundingRect.get().getHeight());
+            SHARED_RECT.setRect(viewBoundingRect.get().getMinX(), y, viewBoundingRect.get().getWidth(), viewBoundingRect.get().getHeight());
+            DrawUtils.scaleToVisibleRec(view, SHARED_RECT);
+            gc.fillRect(SHARED_RECT.x,SHARED_RECT.y,SHARED_RECT.width,SHARED_RECT.height);
             if (view.getBoundingRect().getWidth() < 150) {
                 drawText(view, viewRect, gc, y, viewBoundingRect);
             }

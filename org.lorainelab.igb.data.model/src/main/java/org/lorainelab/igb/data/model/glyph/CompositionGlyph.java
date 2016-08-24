@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeMap;
 import com.google.common.collect.TreeRangeMap;
+import java.awt.Rectangle;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -161,7 +162,7 @@ public class CompositionGlyph implements Glyph {
         }
     }
 
-    public void drawSummaryRectangle(GraphicsContext gc, Rectangle2D glyphViewIntersectionBounds) {
+    public void drawSummaryRectangle(GraphicsContext gc, Rectangle.Double glyphViewIntersectionBounds) {
         gc.save();
         gc.setFill(DEFAULT_COLOR);
         gc.setStroke(DEFAULT_COLOR);
@@ -237,8 +238,7 @@ public class CompositionGlyph implements Glyph {
         }
     }
 
-    public void drawSummarySelectionRectangle(GraphicsContext gc, View view, Rectangle2D glyphViewIntersectionBounds) {
-        Rectangle2D drawRect = glyphViewIntersectionBounds;
+    public void drawSummarySelectionRectangle(GraphicsContext gc, View view, Rectangle.Double drawRect) {
         gc.save();
         gc.setFill(Color.RED);
         double rectWidth = 0.25;

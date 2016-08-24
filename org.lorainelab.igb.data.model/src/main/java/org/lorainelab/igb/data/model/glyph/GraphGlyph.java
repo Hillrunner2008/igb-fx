@@ -10,6 +10,7 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import org.lorainelab.igb.data.model.View;
+import static org.lorainelab.igb.data.model.util.RectangleUtils.intersect;
 
 /**
  *
@@ -60,18 +61,23 @@ public class GraphGlyph implements Glyph {
         gc.setStroke(getStrokeColor());
         for (Map.Entry<Range<Double>, Double> entry : graphIntervals.subRangeMap(view.getXrange()).asMapOfRanges().entrySet()) {
             Range<Double> r = entry.getKey();
-            final double x = r.lowerEndpoint() - viewMinx;
+            final double x = r.lowerEndpoint();
             double height = entry.getValue();
             double width = r.upperEndpoint() - r.lowerEndpoint() + 1;
-
-            if (width > 0 && width < modelCoordinatesPerScreenXPixel) {
-                width = modelCoordinatesPerScreenXPixel;
+            final double y = view.getCanvasContext().getTrackHeight() / view.getYfactor();
+            SHARED_RECT.setRect(x, y - height, width, height);
+            if (SHARED_RECT.intersects(view.getMutableBoundingRect())) {
+                intersect(view.getMutableBoundingRect(), SHARED_RECT, SHARED_RECT);
+                width = SHARED_RECT.width;
+                height = SHARED_RECT.height;
+                if (width > 0 && width < modelCoordinatesPerScreenXPixel) {
+                    width = modelCoordinatesPerScreenXPixel;
+                }
+                if (height > 0 && height < modelCoordinatesPerScreenYPixel) {
+                    height = modelCoordinatesPerScreenYPixel;
+                }
+                gc.fillRect(SHARED_RECT.x - viewMinx, SHARED_RECT.y - viewRect.getMinY(), width, height);
             }
-            if (height > 0 && height < modelCoordinatesPerScreenYPixel) {
-                height = modelCoordinatesPerScreenYPixel;
-            }
-            final double maxY = viewRect.getHeight() - height;
-            gc.fillRect(x, maxY, width, height);
         }
         gc.restore();
 
