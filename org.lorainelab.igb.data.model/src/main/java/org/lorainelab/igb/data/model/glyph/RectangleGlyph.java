@@ -103,22 +103,20 @@ public class RectangleGlyph implements Glyph {
 
     @Override
     public void draw(GraphicsContext gc, View view, Rectangle2D slotBoundingViewRect) {
-        Rectangle2D viewRect = view.getBoundingRect();
-        Optional<Rectangle2D> viewBoundingRect = getViewBoundingRect(view, slotBoundingViewRect);
-        if (viewBoundingRect.isPresent()) {
+        calculateDrawRect(view, slotBoundingViewRect).ifPresent(sharedRect -> {
+            Rectangle2D viewRect = view.getBoundingRect();
             gc.setFill(fill);
             gc.setStroke(strokeColor);
-            final double y = viewBoundingRect.get().getMinY();
-            SHARED_RECT.setRect(viewBoundingRect.get().getMinX(), y, viewBoundingRect.get().getWidth(), viewBoundingRect.get().getHeight());
+            final double y = sharedRect.getMinY();
             DrawUtils.scaleToVisibleRec(view, SHARED_RECT);
-            gc.fillRect(SHARED_RECT.x,SHARED_RECT.y,SHARED_RECT.width,SHARED_RECT.height);
+            gc.fillRect(SHARED_RECT.x, SHARED_RECT.y, SHARED_RECT.width, SHARED_RECT.height);
             if (view.getBoundingRect().getWidth() < 150) {
-                drawText(view, viewRect, gc, y, viewBoundingRect);
+                drawText(view, viewRect, gc, y, sharedRect);
             }
-        }
+        });
     }
 
-    private void drawText(View view, Rectangle2D viewRect, GraphicsContext gc, final double y, Optional<Rectangle2D> viewBoundingRect) {
+    private void drawText(View view, Rectangle2D viewRect, GraphicsContext gc, final double y, java.awt.Rectangle.Double viewBoundingRect) {
         innerTextRefSeqTranslator.ifPresent(translationFunction -> {
             Chromosome chromosome = view.getChromosome();
             String innerText;
@@ -156,11 +154,11 @@ public class RectangleGlyph implements Glyph {
                 FontMetrics fm = Toolkit.getToolkit().getFontLoader().getFontMetrics(gc.getFont());
                 double textHeight = fm.getAscent();
                 double textYPosition = (y / textScale) + textHeight;
-                double textYOffset = (viewBoundingRect.get().getHeight() / textScale - fm.getLineHeight()) / 2;
+                double textYOffset = (viewBoundingRect.getHeight() / textScale - fm.getLineHeight()) / 2;
                 textYPosition += textYOffset;
                 gc.scale(1 / textScale, 1 / textScale);
                 double i = 0;
-                double minX = viewBoundingRect.get().getMinX();
+                double minX = viewBoundingRect.getMinX();
                 int baseWidth = 1;
                 final char[] innerTextChars = innerText.toUpperCase().toCharArray();
                 final char[] seqChars = sequence.toUpperCase().toCharArray();
@@ -178,11 +176,11 @@ public class RectangleGlyph implements Glyph {
                         gc.setFill(fill);
                     }
                     if (startOffset % 1 > 0 && i == 0) {
-                        gc.fillRect(minX, y, 1 - startOffset % 1, viewBoundingRect.get().getHeight());
+                        gc.fillRect(minX, y, 1 - startOffset % 1, viewBoundingRect.getHeight());
                         i += (1 - startOffset % 1);
                         continue;
                     } else {
-                        gc.fillRect(minX + i, y, 1, viewBoundingRect.get().getHeight());
+                        gc.fillRect(minX + i, y, 1, viewBoundingRect.getHeight());
                     }
                     if (!charMatch) {
                         if (colorByBase) {

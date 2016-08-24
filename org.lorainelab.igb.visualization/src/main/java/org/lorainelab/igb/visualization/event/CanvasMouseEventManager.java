@@ -60,7 +60,6 @@ public class CanvasMouseEventManager {
 
         canvas.setOnMouseDragged(event -> {
             canvasModel.setLastDragPosition(getPoint2dFromMouseEvent(event));
-            canvasModel.setScreenPoint(getScreenPoint2DFromMouseEvent(event));
             canvasModel.setMouseDragging(true);
         });
         canvas.setOnMouseExited(event -> {
@@ -72,13 +71,12 @@ public class CanvasMouseEventManager {
         canvas.setOnMouseReleased((MouseEvent event) -> {
             if (canvasModel.isMouseDragging()) {
                 processMouseDragReleased(event);
+                canvasModel.setClickDragStartPosition(null);
+                canvasModel.setClickDragStartPosition(null);
+                canvasModel.setMouseDragging(false);
             } else {
                 processMouseClicked(event);
             }
-            canvasModel.setClickDragStartPosition(null);
-            canvasModel.setClickDragStartPosition(null);
-            canvasModel.setScreenPoint(null);
-            canvasModel.setMouseDragging(false);
         });
 
     }
@@ -123,11 +121,12 @@ public class CanvasMouseEventManager {
     }
 
     private void processMouseClicked(MouseEvent event) {
+        canvasModel.forceRefresh();
         Point2D mousePoint = getPoint2dFromMouseEvent(event);
         if (event.getClickCount() >= 2) {
             selectionInfoService.getSelectedGlyphs().clear();
             getTrackRendererContainingPoint(mousePoint).ifPresent(tr -> {
-                
+
                 tr.getTrack().getSelectedGlyphs().stream()
                         .findFirst().ifPresent(glyphToJumpZoom -> {
                             jumpZoom(glyphToJumpZoom.getBoundingRect(), tr, event);
@@ -138,7 +137,7 @@ public class CanvasMouseEventManager {
             selectionInfoService.getSelectedGlyphs().clear();
             getTrackRendererContainingPoint(mousePoint).ifPresent(tr -> {
                 selectionInfoService.getSelectedGlyphs().addAll(
-                         tr.getTrack().getSelectedGlyphs()
+                        tr.getTrack().getSelectedGlyphs()
                 );
             });
         }
@@ -179,7 +178,7 @@ public class CanvasMouseEventManager {
         canvasModel.setSelectionRectangle(getSelectionRectangle().orElse(null));
     }
 
-     private Optional<Rectangle2D> getSelectionRectangle() {
+    private Optional<Rectangle2D> getSelectionRectangle() {
         Rectangle2D[] selectionRectangle = new Rectangle2D[1];
         tracksModel.getCoordinateTrackRenderer().ifPresent(coordinateTrackRenderer -> {
             canvasModel.getClickDragStartPosition().get().ifPresent(clickDragStartPoint -> {

@@ -73,15 +73,8 @@ public class ZoomableTrackRenderer implements TrackRenderer {
             double yOffset = canvasContext.getRelativeTrackOffset() / view.getYfactor();
             view.setBoundingRect(new Rectangle2D(xOffset, yOffset, visibleVirtualCoordinatesX, visibleVirtualCoordinatesY));
             if (canvasContext.isVisible()) {
-                if (Platform.isFxApplicationThread()) {
-                    clearCanvas();
-                    draw(canvasModel);
-                } else {
-                    Platform.runLater(() -> {
-                        clearCanvas();
-                        draw(canvasModel);
-                    });
-                }
+                clearCanvas();
+                draw(canvasModel);
             }
         }
     }

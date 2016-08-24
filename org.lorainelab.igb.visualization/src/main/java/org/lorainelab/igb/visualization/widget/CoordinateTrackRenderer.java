@@ -4,7 +4,6 @@ import com.google.common.collect.Range;
 import com.sun.javafx.tk.FontMetrics;
 import com.sun.javafx.tk.Toolkit;
 import java.text.DecimalFormat;
-import javafx.application.Platform;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -293,15 +292,8 @@ public class CoordinateTrackRenderer implements TrackRenderer {
             viewBoundingRectangle = new Rectangle2D(xOffset, canvasContext.getBoundingRect().getMinY(), visibleVirtualCoordinatesX, canvasContext.getBoundingRect().getHeight());
             viewYcoordinateRange = Range.<Double>closed(viewBoundingRectangle.getMinY(), viewBoundingRectangle.getMaxY());
             if (canvasContext.isVisible()) {
-                if (Platform.isFxApplicationThread()) {
-                    clearCanvas();
-                    draw(canvasModel);
-                } else {
-                    Platform.runLater(() -> {
-                        clearCanvas();
-                        draw(canvasModel);
-                    });
-                }
+                clearCanvas();
+                draw(canvasModel);
             }
         }
     }
@@ -423,6 +415,11 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     @Override
     public int getZindex() {
         return 1;
+    }
+
+    @Override
+    public boolean isOverlayWidget() {
+        return true;
     }
 
 }

@@ -9,7 +9,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import org.lorainelab.igb.visualization.model.CanvasModel;
 import org.lorainelab.igb.visualization.model.TracksModel;
-import org.lorainelab.igb.visualization.ui.CanvasRegion;
+import org.lorainelab.igb.visualization.ui.OverlayRegion;
 import org.lorainelab.igb.visualization.util.BoundsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 public class SelectionRectangle implements Widget {
 
     private static final Logger LOG = LoggerFactory.getLogger(SelectionRectangle.class);
-    private CanvasRegion canvasRegion;
+    private OverlayRegion overlayRegion;
     private CanvasModel canvasModel;
     private TracksModel tracksModel;
 
@@ -31,7 +31,7 @@ public class SelectionRectangle implements Widget {
 
     @Override
     public void render(CanvasModel canvasModel) {
-        GraphicsContext gc = canvasRegion.getCanvas().getGraphicsContext2D();
+        GraphicsContext gc = overlayRegion.getCanvas().getGraphicsContext2D();
         try {
             gc.save();
             getSelectionRectangle().ifPresent(selectionRectangle -> {
@@ -44,8 +44,8 @@ public class SelectionRectangle implements Widget {
     }
 
     private Point2D getRangeBoundedDragEventLocation(Point2D localPoint) {
-        double boundedEventX = BoundsUtil.enforceRangeBounds(localPoint.getX(), 0, canvasRegion.getCanvas().getWidth());
-        double boundedEventY = BoundsUtil.enforceRangeBounds(localPoint.getY(), 0, canvasRegion.getCanvas().getHeight());
+        double boundedEventX = BoundsUtil.enforceRangeBounds(localPoint.getX(), 0, overlayRegion.getCanvas().getWidth());
+        double boundedEventY = BoundsUtil.enforceRangeBounds(localPoint.getY(), 0, overlayRegion.getCanvas().getHeight());
         return new Point2D(boundedEventX, boundedEventY);
     }
 
@@ -94,13 +94,18 @@ public class SelectionRectangle implements Widget {
     }
 
     @Reference
-    public void setCanvasRegion(CanvasRegion canvasRegion) {
-        this.canvasRegion = canvasRegion;
+    public void setOverlayRegion(OverlayRegion overlayRegion) {
+        this.overlayRegion = overlayRegion;
     }
 
     @Override
     public int getZindex() {
         return 10;
+    }
+
+    @Override
+    public boolean isOverlayWidget() {
+        return true;
     }
 
 }

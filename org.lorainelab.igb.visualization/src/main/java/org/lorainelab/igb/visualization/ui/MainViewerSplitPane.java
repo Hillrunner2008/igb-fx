@@ -1,7 +1,5 @@
 package org.lorainelab.igb.visualization.ui;
 
-import org.lorainelab.igb.visualization.widget.LabelPane;
-import org.lorainelab.igb.visualization.widget.ZoomSliderWidget;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
@@ -9,7 +7,10 @@ import javafx.application.Platform;
 import javafx.scene.control.SplitPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import org.lorainelab.igb.visualization.widget.LabelPane;
+import org.lorainelab.igb.visualization.widget.ZoomSliderWidget;
 
 /**
  *
@@ -26,9 +27,12 @@ public class MainViewerSplitPane extends SplitPane {
     private ZoomSliderWidget zoomSliderWidget;
     private VerticalScrollBar verticalScrollBar;
     private LabelPane labelPane;
+    private StackPane canvasStackPane;
     private CanvasRegion canvasRegion;
+    private OverlayRegion overlayRegion;
 
     public MainViewerSplitPane() {
+        canvasStackPane = new StackPane();
         setDividerPositions(0.1);
         leftSide = new HBox();
         rightSide = new HBox();
@@ -40,13 +44,15 @@ public class MainViewerSplitPane extends SplitPane {
 
     @Activate
     public void activate() {
+        canvasStackPane.getChildren().add(canvasRegion);
+        canvasStackPane.getChildren().add(overlayRegion);
         HBox.setHgrow(rightSideVbox, Priority.ALWAYS);
-        VBox.setVgrow(canvasRegion, Priority.ALWAYS);
+        VBox.setVgrow(canvasStackPane, Priority.ALWAYS);
         HBox.setHgrow(labelPane, Priority.ALWAYS);
         Platform.runLater(() -> {
             leftSide.getChildren().add(verticalZoomSlider);
             leftSide.getChildren().add(labelPane);
-            rightSideVbox.getChildren().add(canvasRegion);
+            rightSideVbox.getChildren().add(canvasStackPane);
             rightSideVbox.getChildren().add(zoomSliderWidget);
             rightSideVbox.getChildren().add(horizontalPlusMinusSlider);
             rightSide.getChildren().add(verticalScrollBar);
@@ -62,6 +68,11 @@ public class MainViewerSplitPane extends SplitPane {
     @Reference
     public void setCanvasRegion(CanvasRegion canvasRegion) {
         this.canvasRegion = canvasRegion;
+    }
+
+    @Reference
+    public void setOverlayRegion(OverlayRegion overlayRegion) {
+        this.overlayRegion = overlayRegion;
     }
 
     @Reference

@@ -25,6 +25,7 @@ public class CompositionGlyph implements Glyph {
 
     private RangeMap<Double, Glyph> xRange;
     private final Map<String, String> tooltipData;
+    private static Rectangle.Double SCRATCH_RECT = new Rectangle.Double(0, 0, 0, 0);
 
     private final String label;
     boolean isSelected = false;
@@ -84,7 +85,7 @@ public class CompositionGlyph implements Glyph {
     }
 
     @Override
-    public Optional<Rectangle2D> getViewBoundingRect(View view, Rectangle2D slotBoundingViewRect) {
+    public Optional<Rectangle.Double> calculateDrawRect(View view, Rectangle2D slotBoundingViewRect) {
         final RangeMap<Double, Glyph> intersectionRangeMapX = xRange.subRangeMap(view.getXrange());
         if (!intersectionRangeMapX.asMapOfRanges().isEmpty()) {
             double minX = Double.MAX_VALUE;
@@ -94,7 +95,7 @@ public class CompositionGlyph implements Glyph {
 //            double glyphMinY = Double.MIN_VALUE;
 //            double maxGlyphheight = Double.MIN_VALUE;
             for (Glyph g : intersectionRangeMapX.asMapOfRanges().values()) {
-                Optional<Rectangle2D> rect = g.getViewBoundingRect(view, slotBoundingViewRect);
+                Optional<Rectangle.Double> rect = g.calculateDrawRect(view, slotBoundingViewRect);
                 if (rect.isPresent()) {
                     minX = Math.min(minX, rect.get().getMinX());
                     maxX = Math.max(maxX, rect.get().getMaxX());
@@ -126,7 +127,8 @@ public class CompositionGlyph implements Glyph {
             } else {
                 y = (minY);
             }
-            return Optional.of(new Rectangle2D(minX, y, width, height * 2));
+            SCRATCH_RECT.setRect(minX, y, width, height * 2);
+            return Optional.of(SCRATCH_RECT);
         }
 
         return Optional.empty();
@@ -139,11 +141,11 @@ public class CompositionGlyph implements Glyph {
     @Override
     public void draw(GraphicsContext gc, View view, Rectangle2D slotBoundingViewRect) {
         Rectangle2D viewBoundingRect = view.getBoundingRect();
-        Optional<Rectangle2D> glyphViewIntersectionBoundsWrapper = getViewBoundingRect(view, slotBoundingViewRect);
+        Optional<Rectangle.Double> glyphViewIntersectionBoundsWrapper = calculateDrawRect(view, slotBoundingViewRect);
         if (!glyphViewIntersectionBoundsWrapper.isPresent()) {
             return;
         }
-        Rectangle2D glyphViewIntersectionBounds = glyphViewIntersectionBoundsWrapper.get();
+        Rectangle.Double glyphViewIntersectionBounds = glyphViewIntersectionBoundsWrapper.get();
         drawChildren(gc, view, slotBoundingViewRect);
         drawLabel(view, viewBoundingRect, gc, glyphViewIntersectionBounds);
         drawSelectionRectangle(gc, view, glyphViewIntersectionBounds, slotBoundingViewRect);
@@ -175,7 +177,7 @@ public class CompositionGlyph implements Glyph {
         gc.restore();
     }
 
-    private void drawLabel(View view, Rectangle2D viewBoundingRect, GraphicsContext gc, Rectangle2D glyphViewIntersectionBounds) {
+    private void drawLabel(View view, Rectangle2D viewBoundingRect, GraphicsContext gc, Rectangle.Double glyphViewIntersectionBounds) {
         if (!Strings.isNullOrEmpty(label)) {
             final double fontSize = Math.min((glyphViewIntersectionBounds.getHeight() * view.getYfactor()) * .35, 10);
             if (viewBoundingRect.getWidth() < 100_000 && fontSize > 8) {
@@ -208,12 +210,12 @@ public class CompositionGlyph implements Glyph {
         }
     }
 
-    private void drawSelectionRectangle(GraphicsContext gc, View view, Rectangle2D glyphViewIntersectionBounds, Rectangle2D slotBoundingViewRect) {
+    private void drawSelectionRectangle(GraphicsContext gc, View view, Rectangle.Double glyphViewIntersectionBounds, Rectangle2D slotBoundingViewRect) {
         if (isSelected()) {
-            Rectangle2D drawRect = glyphViewIntersectionBounds;
+            Rectangle.Double drawRect = glyphViewIntersectionBounds;
             for (Glyph g : xRange.asMapOfRanges().values()) {
                 if (g.isSelectable() && g.isSelected()) {
-                    Optional<Rectangle2D> viewBoundingRect = g.getViewBoundingRect(view, slotBoundingViewRect);
+                    Optional<Rectangle.Double> viewBoundingRect = g.calculateDrawRect(view, slotBoundingViewRect);
                     if (viewBoundingRect.isPresent()) {
                         drawRect = viewBoundingRect.get();
                         break;

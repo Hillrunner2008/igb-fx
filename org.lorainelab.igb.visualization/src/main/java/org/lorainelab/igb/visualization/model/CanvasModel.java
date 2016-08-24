@@ -52,7 +52,6 @@ public class CanvasModel {
     private ObjectProperty<Optional<Point2D>> mouseClickLocation;
     private ObjectProperty<Optional<Point2D>> clickDragStartPosition;
     private ObjectProperty<Optional<Point2D>> lastDragPosition;
-    private ObjectProperty<Optional<Point2D>> screenPoint;
     private ObjectProperty<Optional<Rectangle2D>> selectionRectangle;
     private boolean mouseDragging;
     private BooleanProperty multiSelectModeActive;
@@ -73,7 +72,6 @@ public class CanvasModel {
         mouseClickLocation = new SimpleObjectProperty<>(Optional.empty());
         clickDragStartPosition = new SimpleObjectProperty<>(Optional.empty());
         lastDragPosition = new SimpleObjectProperty<>(Optional.empty());
-        screenPoint = new SimpleObjectProperty<>(Optional.empty());
         selectionRectangle = new SimpleObjectProperty<>(Optional.empty());
         mouseDragging = false;
         multiSelectModeActive = new SimpleBooleanProperty(false);
@@ -226,10 +224,6 @@ public class CanvasModel {
         return clickDragStartPosition;
     }
 
-    public ObjectProperty<Optional<Point2D>> getScreenPoint() {
-        return screenPoint;
-    }
-
     public ObjectProperty<Optional<Rectangle2D>> getSelectionRectangle() {
         return selectionRectangle;
     }
@@ -244,10 +238,6 @@ public class CanvasModel {
 
     public void setClickDragStartPosition(Point2D localPoint) {
         this.clickDragStartPosition.set(Optional.ofNullable(localPoint));
-    }
-
-    public void setScreenPoint(Point2D screenPoint) {
-        this.screenPoint.set(Optional.ofNullable(screenPoint));
     }
 
     public void setMouseDragging(boolean mouseDragging) {

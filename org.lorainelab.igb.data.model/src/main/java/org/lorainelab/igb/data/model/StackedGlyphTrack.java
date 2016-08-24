@@ -3,6 +3,7 @@ package org.lorainelab.igb.data.model;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Range;
+import java.awt.Rectangle;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +16,6 @@ import javafx.scene.canvas.GraphicsContext;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
 import org.lorainelab.igb.data.model.glyph.Glyph;
 import static org.lorainelab.igb.data.model.glyph.Glyph.MIN_X_COMPARATOR;
-import static org.lorainelab.igb.data.model.glyph.Glyph.SHARED_RECT;
 import static org.lorainelab.igb.data.model.glyph.Glyph.SLOT_HEIGHT;
 import org.lorainelab.igb.data.model.util.DrawUtils;
 import org.slf4j.Logger;
@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 public class StackedGlyphTrack implements Track {
 
     private static final Logger LOG = LoggerFactory.getLogger(StackedGlyphTrack.class);
+    private static Rectangle.Double SCRATCH_RECT = new Rectangle.Double(0, 0, 0, 0);
     private final String trackLabel;
     private List<CompositionGlyph> glyphs;
     //A KD-Tree is something we may consider as an alternative to the Slot classes RangeMap's 
@@ -53,7 +54,7 @@ public class StackedGlyphTrack implements Track {
         double trackPositionOffset = canvasContext.getBoundingRect().getMinY() / view.getYfactor();
         gc.save();
         //NOTE: Rounding issues prevent us from using translation to take care of view offsets in the x coordinate system
-        // everything works fine until x coordinate get large, and then the larger numbers don't render correctly on the canvas
+        // everything works fine until x coordinate is large (e.g. > 10_000_000), and then the larger numbers don't render correctly on the canvas
         //i.e. we can't do this gc.translate(-view.getBoundingRect().getMinX(), trackPositionOffset);
         gc.translate(0, trackPositionOffset);
         for (Map.Entry<Integer, Slot> entry : slotMap.entrySet()) {
@@ -61,8 +62,6 @@ public class StackedGlyphTrack implements Track {
             final List<CompositionGlyph> glyphsInView = entry.getValue().getGlyphsInView(view);
             if (!glyphsInView.isEmpty()) {
                 experimentalOptimizedRender(glyphsInView, gc, view, slotBoundingViewRect);
-            } else {
-                break;
             }
         }
         gc.restore();
@@ -71,6 +70,7 @@ public class StackedGlyphTrack implements Track {
 
     private void experimentalOptimizedRender(List<CompositionGlyph> glyphsInView, GraphicsContext gc, View view, Rectangle2D slotBoundingViewRect) {
         double xPixelsPerCoordinate = view.getBoundingRect().getWidth() / view.getCanvasContext().getBoundingRect().getWidth();
+        double modelCoordinatesPerScreenXPixel = view.getBoundingRect().getWidth() / view.getCanvasContext().getBoundingRect().getWidth();
         //combine nearby rectangles to optimize rendering... assuming this will be less expensive, needs testing
         if (xPixelsPerCoordinate < 10_000) {
             glyphsInView.stream().forEach(glyph -> glyph.draw(gc, view, slotBoundingViewRect));
@@ -78,24 +78,31 @@ public class StackedGlyphTrack implements Track {
             for (int i = 0; i < glyphsInView.size();) {
                 CompositionGlyph glyph = glyphsInView.get(i);
                 boolean isSelected = glyph.isSelected();
-                Rectangle2D renderRect = glyph.getViewBoundingRect(view, slotBoundingViewRect).orElse(null);
-                if (renderRect != null) {
-                    if (renderRect.getWidth() / xPixelsPerCoordinate > 10) {
+                Rectangle.Double drawRect = glyph.calculateDrawRect(view, slotBoundingViewRect).orElse(null);
+                if (drawRect != null) {
+                    SCRATCH_RECT.setRect(drawRect);
+                    if (SCRATCH_RECT.getWidth() / xPixelsPerCoordinate > 10) {
                         glyph.draw(gc, view, slotBoundingViewRect);
                     } else {
-                        double maxX = renderRect.getMaxX();
+                        if (drawRect.width < modelCoordinatesPerScreenXPixel) {
+                            drawRect.setRect(drawRect.x, drawRect.y, modelCoordinatesPerScreenXPixel, drawRect.height);
+                        }
+                        double maxX = SCRATCH_RECT.getMaxX();
                         while (i + 1 < glyphsInView.size()) {
                             final CompositionGlyph nextGlyph = glyphsInView.get(i + 1);
                             isSelected = isSelected | nextGlyph.isSelected();
-                            Rectangle2D nextRenderRect = nextGlyph.getViewBoundingRect(view, slotBoundingViewRect).orElse(null);
-                            if (nextRenderRect != null && nextRenderRect.getMinX() / xPixelsPerCoordinate < (renderRect.getMaxX() / xPixelsPerCoordinate) + 1) {
+                            Rectangle.Double nextRenderRect = nextGlyph.calculateDrawRect(view, slotBoundingViewRect).orElse(null);
+                            if (nextRenderRect.width < modelCoordinatesPerScreenXPixel) {
+                                nextRenderRect.setRect(nextRenderRect.x, nextRenderRect.y, modelCoordinatesPerScreenXPixel, nextRenderRect.height);
+                            }
+                            if (nextRenderRect != null && nextRenderRect.getMinX() / xPixelsPerCoordinate < (SCRATCH_RECT.getMaxX() / xPixelsPerCoordinate) + 1) {
                                 maxX = nextRenderRect.getMaxX();
                             } else {
-                                SHARED_RECT.setRect(renderRect.getMinX(), renderRect.getMinY(), maxX - renderRect.getMinX(), renderRect.getHeight());
-                                DrawUtils.scaleToVisibleRec(view, SHARED_RECT);
-                                glyph.drawSummaryRectangle(gc, SHARED_RECT);
+                                SCRATCH_RECT.setRect(SCRATCH_RECT.getMinX(), SCRATCH_RECT.getMinY(), maxX - SCRATCH_RECT.getMinX(), SCRATCH_RECT.getHeight());
+                                DrawUtils.scaleToVisibleRec(view, SCRATCH_RECT);
+                                glyph.drawSummaryRectangle(gc, SCRATCH_RECT);
                                 if (isSelected) {
-                                    glyph.drawSummarySelectionRectangle(gc, view, SHARED_RECT);
+                                    glyph.drawSummarySelectionRectangle(gc, view, SCRATCH_RECT);
                                 }
                                 break;
                             }
@@ -105,7 +112,6 @@ public class StackedGlyphTrack implements Track {
                 }
                 i++;
             }
-
         }
     }
 
@@ -227,7 +233,7 @@ public class StackedGlyphTrack implements Track {
             Rectangle2D slotBoundingViewRect = entry.getValue().getSlotBoundingViewRect(viewBoundingRect, isNegative);
             return glyphsInXRange.filter(glyph -> {
                 final Range<Double> mouseEventYrange = Range.closed(selectionRectangle.getMinY(), selectionRectangle.getMaxY());
-                final Rectangle2D glyphViewRect = glyph.getViewBoundingRect(view, slotBoundingViewRect).orElse(null);
+                final Rectangle.Double glyphViewRect = glyph.calculateDrawRect(view, slotBoundingViewRect).orElse(null);
                 if (glyphViewRect == null) {
                     return false;
                 }
@@ -256,9 +262,15 @@ public class StackedGlyphTrack implements Track {
 
     @Override
     public List<CompositionGlyph> getSelectedGlyphs() {
-        return slotMap.entrySet().stream()
-                .flatMap(entry -> entry.getValue().getAllGlyphs().stream())
-                .filter(glyph -> glyph.isSelected()).collect(toList());
+        List<CompositionGlyph> selectedGlyphs = Lists.newArrayList();
+        slotMap.entrySet().iterator().forEachRemaining(entry -> {
+            entry.getValue().getAllGlyphs().iterator().forEachRemaining(glyph -> {
+                if (glyph.isSelected()) {
+                    selectedGlyphs.add(glyph);
+                }
+            });
+        });
+        return selectedGlyphs;
     }
 
     @Override

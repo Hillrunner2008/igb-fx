@@ -45,7 +45,7 @@ public interface Glyph {
 
     void draw(GraphicsContext gc, View view, Rectangle2D slotBoundingViewRect);
 
-    default Optional<Rectangle2D> getViewBoundingRect(View view, Rectangle2D slotBoundingViewRect) {
+    default Optional<Rectangle.Double> calculateDrawRect(View view, Rectangle2D slotBoundingViewRect) {
         double cutOff = SLOT_HEIGHT - slotBoundingViewRect.getHeight();
         Rectangle2D viewRect = view.getBoundingRect();
         Rectangle2D boundingRect = getBoundingRect();
@@ -82,7 +82,8 @@ public interface Glyph {
         if (width <= 0 || height <= 0) {
             return Optional.empty();
         }
-        return Optional.of(new Rectangle2D(x, y, width, height));
+        SHARED_RECT.setRect(x, y, width, height);
+        return Optional.of(SHARED_RECT);
     }
 
     static Comparator<CompositionGlyph> MIN_X_COMPARATOR

@@ -83,8 +83,9 @@ public class GraphGlyph implements Glyph {
 
     }
 
-    public Optional<Rectangle2D> getViewBoundingRect(View view, Rectangle2D slotBoundingViewRect) {
-        return Optional.of(view.getBoundingRect());
+    public Optional<Rectangle.Double> calculateDrawRect(View view, Rectangle2D slotBoundingViewRect) {
+        SHARED_RECT.setRect(view.getMutableBoundingRect());
+        return Optional.of(SHARED_RECT);
     }
 
 }
