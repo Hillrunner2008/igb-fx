@@ -106,6 +106,7 @@ public class WidgetManager {
     public void renderWidgets() {
         TreeMultimap<Integer, Widget> sortedWidgets = getSortedWidgets();
         viewPortManager.refresh();
+        canvasRegion.clear();
         overlayRegion.clear();
         sortedWidgets.entries().forEach(entry -> entry.getValue().render(canvasModel));
         //TODO consider other ways to handle the need to rest this value

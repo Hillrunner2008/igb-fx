@@ -41,4 +41,8 @@ public class CanvasRegion extends Region {
         return canvas;
     }
 
+    public void clear() {
+         canvas.getGraphicsContext2D().clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+    }
+
 }
