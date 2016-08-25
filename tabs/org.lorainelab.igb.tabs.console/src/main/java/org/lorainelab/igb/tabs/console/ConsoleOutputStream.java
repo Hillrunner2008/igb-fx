@@ -3,6 +3,8 @@ package org.lorainelab.igb.tabs.console;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
+import javafx.application.Platform;
 import javafx.scene.control.TextArea;
 
 /**
@@ -37,10 +39,15 @@ public class ConsoleOutputStream extends OutputStream {
 
     @Override
     public void write(byte b[], int off, int len) throws IOException {
-        ta.selectEnd();
-        ta.appendText(new String(b, off, len, "UTF-8"));
-        if (original != null) {
-            original.write(b, off, len);
-        }
+        Platform.runLater(() -> {
+            try {
+                ta.selectEnd();
+                ta.appendText(new String(b, off, len, "UTF-8"));
+                if (original != null) {
+                    original.write(b, off, len);
+                }
+            } catch (UnsupportedEncodingException ex) {
+            }
+        });
     }
 }

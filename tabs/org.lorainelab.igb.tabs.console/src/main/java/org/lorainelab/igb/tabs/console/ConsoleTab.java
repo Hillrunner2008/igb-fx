@@ -3,6 +3,8 @@ package org.lorainelab.igb.tabs.console;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import javafx.application.Platform;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextArea;
@@ -28,16 +30,25 @@ public class ConsoleTab extends Tab implements TabProvider, PaxAppender {
 
     public ConsoleTab() {
         consoleTextArea = new TextArea();
+        setupLoggingRedirects();
         StackPane pane = new StackPane(consoleTextArea);
         this.setContent(pane);
+    }
+
+    private void setupLoggingRedirects() {
+        try {
+            ConsoleOutputStream cs = new ConsoleOutputStream(consoleTextArea, System.out);
+            System.setOut(new PrintStream(cs, false, "UTF-8"));
+            System.setErr(new PrintStream(new ConsoleOutputStream(consoleTextArea, System.err), false, "UTF-8"));
+        } catch (UnsupportedEncodingException ex) {
+            LOG.error(ex.getMessage(), ex);
+        }
     }
 
     @Activate
     public void activate() {
         logService.addAppender(this);
         LOG.info("Logging GUI Console Initialized");
-        System.out.println("testing system out");
-        System.err.println("testing system err");
     }
 
     @Override
