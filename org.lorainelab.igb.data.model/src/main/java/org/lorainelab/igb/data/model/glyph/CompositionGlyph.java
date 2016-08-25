@@ -92,8 +92,8 @@ public class CompositionGlyph implements Glyph {
             double maxX = Double.MIN_VALUE;
             double minY = Double.MAX_VALUE;
             double maxY = Double.MIN_VALUE;
-//            double glyphMinY = Double.MIN_VALUE;
-//            double maxGlyphheight = Double.MIN_VALUE;
+            double glyphMinY = Double.MIN_VALUE;
+            double maxGlyphheight = Double.MIN_VALUE;
             for (Glyph g : intersectionRangeMapX.asMapOfRanges().values()) {
                 Optional<Rectangle.Double> rect = g.calculateDrawRect(view, slotBoundingViewRect);
                 if (rect.isPresent()) {
@@ -127,6 +127,11 @@ public class CompositionGlyph implements Glyph {
             } else {
                 y = (minY);
             }
+//            if (isPositiveStrand()) {
+//                y = (glyphMinY - maxGlyphheight);
+//            } else {
+//                y = (glyphMinY);
+//            }
             SCRATCH_RECT.setRect(minX, y, width, height * 2);
             return Optional.of(SCRATCH_RECT);
         }
@@ -136,6 +141,20 @@ public class CompositionGlyph implements Glyph {
 
     private boolean isPositiveStrand() {
         return tooltipData.get("forward").equals("true");
+    }
+
+    public void draw(GraphicsContext gc, View view, Rectangle2D slotBoundingViewRect, boolean isSummaryRow) {
+        Rectangle2D viewBoundingRect = view.getBoundingRect();
+        Optional<Rectangle.Double> glyphViewIntersectionBoundsWrapper = calculateDrawRect(view, slotBoundingViewRect);
+        if (!glyphViewIntersectionBoundsWrapper.isPresent()) {
+            return;
+        }
+        Rectangle.Double glyphViewIntersectionBounds = glyphViewIntersectionBoundsWrapper.get();
+        drawChildren(gc, view, slotBoundingViewRect);
+        if (!isSummaryRow) {
+            drawLabel(view, viewBoundingRect, gc, glyphViewIntersectionBounds);
+            drawSelectionRectangle(gc, view, glyphViewIntersectionBounds, slotBoundingViewRect);
+        }
     }
 
     @Override
@@ -180,7 +199,7 @@ public class CompositionGlyph implements Glyph {
     private void drawLabel(View view, Rectangle2D viewBoundingRect, GraphicsContext gc, Rectangle.Double glyphViewIntersectionBounds) {
         if (!Strings.isNullOrEmpty(label)) {
             final double fontSize = Math.min((glyphViewIntersectionBounds.getHeight() * view.getYfactor()) * .35, 10);
-            if (viewBoundingRect.getWidth() < 100_000 && fontSize > 8) {
+            if (viewBoundingRect.getWidth() < 100_000 && fontSize > 2) {
                 gc.save();
                 gc.scale(1 / view.getXfactor(), 1 / view.getYfactor());
                 double textScale = .8;

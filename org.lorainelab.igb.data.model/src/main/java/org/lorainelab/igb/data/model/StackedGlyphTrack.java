@@ -61,19 +61,23 @@ public class StackedGlyphTrack implements Track {
             Rectangle2D slotBoundingViewRect = entry.getValue().getSlotBoundingViewRect(view.getBoundingRect(), isNegative);
             final List<CompositionGlyph> glyphsInView = entry.getValue().getGlyphsInView(view);
             if (!glyphsInView.isEmpty()) {
-                experimentalOptimizedRender(glyphsInView, gc, view, slotBoundingViewRect);
+                experimentalOptimizedRender(glyphsInView, gc, view, slotBoundingViewRect, isSummaryRow(entry));
             }
         }
         gc.restore();
 
     }
 
-    private void experimentalOptimizedRender(List<CompositionGlyph> glyphsInView, GraphicsContext gc, View view, Rectangle2D slotBoundingViewRect) {
+    private boolean isSummaryRow(Map.Entry<Integer, Slot> entry) {
+        return entry.getKey() > stackHeight - 1;
+    }
+
+    private void experimentalOptimizedRender(List<CompositionGlyph> glyphsInView, GraphicsContext gc, View view, Rectangle2D slotBoundingViewRect, boolean isSummaryRow) {
         double xPixelsPerCoordinate = view.getBoundingRect().getWidth() / view.getCanvasContext().getBoundingRect().getWidth();
         double modelCoordinatesPerScreenXPixel = view.getBoundingRect().getWidth() / view.getCanvasContext().getBoundingRect().getWidth();
         //combine nearby rectangles to optimize rendering... assuming this will be less expensive, needs testing
         if (xPixelsPerCoordinate < 10_000) {
-            glyphsInView.stream().forEach(glyph -> glyph.draw(gc, view, slotBoundingViewRect));
+            glyphsInView.stream().forEach(glyph -> glyph.draw(gc, view, slotBoundingViewRect, isSummaryRow));
         } else {
             for (int i = 0; i < glyphsInView.size();) {
                 CompositionGlyph glyph = glyphsInView.get(i);
