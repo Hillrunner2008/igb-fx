@@ -9,12 +9,14 @@ import javafx.application.Platform;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import org.apache.karaf.log.core.LogEventFormatter;
 import org.apache.karaf.log.core.LogService;
 import org.lorainelab.igb.tabs.api.TabDockingPosition;
 import org.lorainelab.igb.tabs.api.TabProvider;
 import org.ops4j.pax.logging.spi.PaxAppender;
 import org.ops4j.pax.logging.spi.PaxLoggingEvent;
+import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +29,12 @@ public class ConsoleTab extends Tab implements TabProvider, PaxAppender {
     private TextArea consoleTextArea;
     private LogService logService;
     private LogEventFormatter eventFormatter;
+    private static final String FATAL = "fatal";
+    private static final String ERROR = "error";
+    private static final String WARN = "warn";
+    private static final String INFO = "info";
+    private static final String DEBUG = "debug";
+    private static final String TRACE = "trace";
 
     public ConsoleTab() {
         consoleTextArea = new TextArea();
@@ -46,9 +54,9 @@ public class ConsoleTab extends Tab implements TabProvider, PaxAppender {
     }
 
     @Activate
-    public void activate() {
+    public void activate(BundleContext bc) {
+        consoleTextArea.getStylesheets().add(bc.getBundle().getEntry("consoleStyle.css").toExternalForm());
         logService.addAppender(this);
-        LOG.info("Logging GUI Console Initialized");
     }
 
     @Override
@@ -69,10 +77,13 @@ public class ConsoleTab extends Tab implements TabProvider, PaxAppender {
 
     @Override
     public void doAppend(PaxLoggingEvent event) {
+//        String lvl = event.getLevel().toString().toLowerCase();
+        final String logLine = eventFormatter.format(event, null, true);
         Platform.runLater(() -> {
             consoleTextArea.selectEnd();
-            consoleTextArea.appendText(eventFormatter.format(event, null, true));
+            consoleTextArea.appendText(logLine);
         });
+
     }
 
     @Reference
@@ -83,6 +94,30 @@ public class ConsoleTab extends Tab implements TabProvider, PaxAppender {
     @Reference
     public void setEventFormatter(LogEventFormatter eventFormatter) {
         this.eventFormatter = eventFormatter;
+    }
+
+    //TODO consider RichTextFX to allow coloring by level 
+    private String getLvlColor(String lvl) {
+        String color = "#BF4040";
+        if (FATAL.equals(lvl)) {
+            color = colorToHex(Color.RED);
+        } else if (ERROR.equals(lvl)) {
+            color = colorToHex(Color.RED);
+        } else if (WARN.equals(lvl)) {
+            color = colorToHex(Color.YELLOW);
+        } else if (INFO.equals(lvl)) {
+            color = "";
+        } else if (DEBUG.equals(lvl)) {
+            color = "#BF4040";
+        } else if (TRACE.equals(lvl)) {
+            color = colorToHex(Color.BLACK);
+        }
+        return color;
+    }
+
+    private String colorToHex(Color color) {
+        String hex2 = "#" + Integer.toHexString(color.hashCode());
+        return hex2;
     }
 
 }
