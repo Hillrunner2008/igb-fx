@@ -59,6 +59,18 @@
                 <scope>provided</scope>
             </dependency>
             <dependency>
+                <groupId>org.ops4j.pax.logging</groupId>
+                <artifactId>pax-logging-api</artifactId>
+                <version>1.8.5</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.log</groupId>
+                <artifactId>org.apache.karaf.log.core</artifactId>
+                <version>${karaf.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
                 <groupId>org.reactfx</groupId>
                 <artifactId>reactfx</artifactId>
                 <version>2.0-M4u1</version>
@@ -260,6 +272,12 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.tabs.console</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>org.lorainelab.igb.tabs.selection</artifactId>
                 <version>${project.version}</version>
                 <scope>provided</scope>
@@ -338,6 +356,7 @@
         <module>org.lorainelab.igb.visualization</module>
         
         <module>tabs/org.lorainelab.igb.tabs.genome</module>
+        <module>tabs/org.lorainelab.igb.tabs.console</module>
         <module>tabs/org.lorainelab.igb.tabs.selection</module>
         
         <module>cache/org.lorainelab.igb.cache.http</module> 
@@ -355,5 +374,6 @@
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <karaf.version>4.0.5</karaf.version>
     </properties>
 </project>
