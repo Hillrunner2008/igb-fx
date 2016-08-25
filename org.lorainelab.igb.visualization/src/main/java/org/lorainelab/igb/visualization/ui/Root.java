@@ -86,7 +86,6 @@ public class Root extends VBox {
     }
 
     public void removeToolbarManager(ToolBarManager toolbarProvider) {
-        LOG.info("removeToolbarManager called");
         Platform.runLater(() -> {
             getChildren().remove(toolbarProvider.getTopToolbar());
         });
@@ -98,7 +97,6 @@ public class Root extends VBox {
     }
 
     public void removeFooter(Footer footer) {
-        LOG.info("removeFooter called");
         try {
             Platform.runLater(() -> {
                 getChildren().remove(footer);
@@ -110,7 +108,6 @@ public class Root extends VBox {
 
     @Deactivate
     private void deactivate() {
-        LOG.info("deactivate called in root");
         try {
             Platform.runLater(() -> {
                 getChildren().clear();
