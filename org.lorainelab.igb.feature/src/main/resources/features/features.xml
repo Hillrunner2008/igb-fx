@@ -70,6 +70,7 @@
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.tabs.genome/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.tabs.selection/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.preferencemanager.api/${project.version}</bundle>
+        <bundle>mvn:${project.groupId}/org.lorainelab.igb.preferences.otheroptions/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.persistencemanager/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.demo/${project.version}</bundle>
     </feature>
