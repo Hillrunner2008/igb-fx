@@ -69,7 +69,7 @@ public class StackedGlyphTrack implements Track {
     }
 
     private boolean isSummaryRow(Map.Entry<Integer, Slot> entry) {
-        return entry.getKey() > stackHeight - 1;
+        return entry.getKey() >= stackHeight - 1;
     }
 
     private void experimentalOptimizedRender(List<CompositionGlyph> glyphsInView, GraphicsContext gc, View view, Rectangle2D slotBoundingViewRect, boolean isSummaryRow) {
