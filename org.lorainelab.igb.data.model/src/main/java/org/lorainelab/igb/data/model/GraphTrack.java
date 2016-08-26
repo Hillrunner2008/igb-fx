@@ -28,7 +28,7 @@ public class GraphTrack implements Track {
     //average height
     private double modelHeight;
 
-    public GraphTrack(String trackLabel) {
+    public GraphTrack(String trackLabel, DataSet dataSet) {
         this.trackLabel = trackLabel;
         this.modelHeight = 10;
         glyphs = Lists.newArrayList();
@@ -98,5 +98,10 @@ public class GraphTrack implements Track {
                         g.setIsSelected(false);
                     }
                 });
+    }
+
+    @Override
+    public DataSet getDataSet() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

@@ -16,6 +16,8 @@ import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
  * @author dcnorris
  */
 public interface Track {
+    
+    DataSet getDataSet();
 
     void draw(GraphicsContext gc, View view, CanvasContext canvasContext);
 

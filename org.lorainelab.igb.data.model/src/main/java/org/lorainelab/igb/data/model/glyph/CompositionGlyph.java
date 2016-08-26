@@ -27,6 +27,7 @@ public class CompositionGlyph implements Glyph {
     private final Map<String, String> tooltipData;
     private static Rectangle.Double SCRATCH_RECT = new Rectangle.Double(0, 0, 0, 0);
 
+    private boolean isNegative;
     private final String label;
     boolean isSelected = false;
     private Rectangle2D boundingRect;
@@ -38,7 +39,12 @@ public class CompositionGlyph implements Glyph {
             this.xRange.put(Range.closed(child.getBoundingRect().getMinX(), child.getBoundingRect().getMaxX()), child);
         });
         this.label = label;
+        isNegative = tooltipData.containsKey("forward") && tooltipData.get("forward").equals("false");
         this.tooltipData = tooltipData;
+    }
+
+    public boolean isNegative() {
+        return isNegative;
     }
 
     public Map<String, String> getTooltipData() {
@@ -122,7 +128,7 @@ public class CompositionGlyph implements Glyph {
                 return Optional.empty();
             }
             double y;
-            if (isPositiveStrand()) {
+            if (!isNegative) {
                 y = (minY - height);
             } else {
                 y = (minY);
@@ -137,10 +143,6 @@ public class CompositionGlyph implements Glyph {
         }
 
         return Optional.empty();
-    }
-
-    private boolean isPositiveStrand() {
-        return tooltipData.get("forward").equals("true");
     }
 
     public void draw(GraphicsContext gc, View view, Rectangle2D slotBoundingViewRect, boolean isSummaryRow) {
@@ -187,7 +189,7 @@ public class CompositionGlyph implements Glyph {
         gc.save();
         gc.setFill(DEFAULT_COLOR);
         gc.setStroke(DEFAULT_COLOR);
-        if (isPositiveStrand()) {
+        if (!isNegative) {
             gc.fillRect(glyphViewIntersectionBounds.getMinX(), glyphViewIntersectionBounds.getMinY() + (glyphViewIntersectionBounds.getHeight() / 2), glyphViewIntersectionBounds.getWidth(), glyphViewIntersectionBounds.getHeight() / 2);
         } else {
             gc.fillRect(glyphViewIntersectionBounds.getMinX(), glyphViewIntersectionBounds.getMinY(), glyphViewIntersectionBounds.getWidth(), glyphViewIntersectionBounds.getHeight() / 2);
@@ -197,7 +199,8 @@ public class CompositionGlyph implements Glyph {
     }
 
     private void drawLabel(View view, Rectangle2D viewBoundingRect, GraphicsContext gc, Rectangle.Double glyphViewIntersectionBounds) {
-        if (!Strings.isNullOrEmpty(label)) {
+        final String labelString = label;
+        if (!Strings.isNullOrEmpty(labelString)) {
             final double fontSize = Math.min((glyphViewIntersectionBounds.getHeight() * view.getYfactor()) * .35, 10);
             if (viewBoundingRect.getWidth() < 100_000 && fontSize > 2) {
                 gc.save();
@@ -211,14 +214,14 @@ public class CompositionGlyph implements Glyph {
                 gc.setFont(Font.font("Monospaced", FontWeight.NORMAL, fontSize));
                 gc.setFill(Color.BLACK);
                 double textHeight = ((com.sun.javafx.tk.Toolkit.getToolkit().getFontLoader().getFontMetrics(gc.getFont()).getLineHeight()));
-                String drawLabel = label;
-                double textWidth = (com.sun.javafx.tk.Toolkit.getToolkit().getFontLoader().computeStringWidth(label, gc.getFont()));
+                String drawLabel = labelString;
+                double textWidth = (com.sun.javafx.tk.Toolkit.getToolkit().getFontLoader().computeStringWidth(labelString, gc.getFont()));
                 while (textWidth > width && drawLabel.length() > 3) {
                     drawLabel = drawLabel.substring(0, drawLabel.length() - 2) + "\u2026";
                     textWidth = (com.sun.javafx.tk.Toolkit.getToolkit().getFontLoader().computeStringWidth(drawLabel, gc.getFont()));
                 }
                 x = (x + (width / 2)) - (textWidth / 2);
-                if (isPositiveStrand()) {
+                if (!isNegative) {
                     y = (y + (textHeight / 2)) + (height / 5);
                 } else {
                     y = (y + (textHeight / 2)) + (height / 5) * 4;

@@ -149,7 +149,12 @@
                 <scope>test</scope>
             </dependency>
             <!--modules-->
-            
+                 <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.utils</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>org.lorainelab.igb.preferences</artifactId>
@@ -328,6 +333,7 @@
     </build>
 
     <modules>
+        <module>org.lorainelab.igb.utils</module>
         <module>org.lorainelab.igb.stage.provider.api</module>
         <module>menus/org.lorainelab.igb.menu.api</module>
         <module>toolbar/org.lorainelab.igb.toolbar.api</module>

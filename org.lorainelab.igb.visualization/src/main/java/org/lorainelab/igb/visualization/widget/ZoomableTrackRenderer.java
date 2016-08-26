@@ -1,5 +1,6 @@
 package org.lorainelab.igb.visualization.widget;
 
+import com.google.common.collect.Range;
 import java.util.Optional;
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
@@ -35,10 +36,12 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     private final CanvasContext canvasContext;
     private final GraphicsContext gc;
     private int weight;
+    private final Chromosome chromosome;
 
     public ZoomableTrackRenderer(Canvas canvas, Track track, Chromosome chromosome) {
         this.weight = 0;
         this.track = track;
+        this.chromosome = chromosome;
         this.modelWidth = chromosome.getLength();
         canvasContext = new CanvasContext(canvas, 0, 0);
         view = new View(new Rectangle2D(0, 0, modelWidth, track.getModelHeight()), canvasContext, chromosome, track.isNegative());
@@ -73,7 +76,6 @@ public class ZoomableTrackRenderer implements TrackRenderer {
             double yOffset = canvasContext.getRelativeTrackOffset() / view.getYfactor();
             view.setBoundingRect(new Rectangle2D(xOffset, yOffset, visibleVirtualCoordinatesX, visibleVirtualCoordinatesY));
             if (canvasContext.isVisible()) {
-                clearCanvas();
                 draw(canvasModel);
             }
         }
@@ -92,33 +94,32 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         }
     }
 
-    private void clearCanvas() {
-        gc.save();
-        gc.clearRect(
-                0,
-                canvasContext.getBoundingRect().getMinY(),
-                canvasContext.getBoundingRect().getWidth(),
-                canvasContext.getBoundingRect().getHeight()
-        );
-        gc.setFill(Color.WHITE);
-        gc.fillRect(
-                0,
-                canvasContext.getBoundingRect().getMinY(),
-                canvasContext.getBoundingRect().getWidth(),
-                canvasContext.getBoundingRect().getHeight()
-        );
-        gc.restore();
-    }
-
     void draw(CanvasModel canvasModel) {
         gc.save();
         gc.scale(view.getXfactor(), view.getYfactor());
+        highlightLoadedRegions();
         track.draw(gc, view, canvasContext);
         gc.restore();
     }
 
+    private void highlightLoadedRegions() {
+        gc.save();
+        gc.setFill(Color.WHITE);
+        track.getDataSet().getLoadedRegions(chromosome.getName()).asRanges().forEach(range -> {
+            if (range.isConnected(Range.closed(view.getXrange().lowerEndpoint().intValue(), view.getXrange().upperEndpoint().intValue()))) {
+                double minX = range.lowerEndpoint() - view.getXrange().lowerEndpoint();
+                gc.fillRect(
+                        minX,
+                        canvasContext.getBoundingRect().getMinY(),
+                        range.upperEndpoint() - range.lowerEndpoint(),
+                        view.getBoundingRect().getHeight()
+                );
+            }
+        });
+        gc.restore();
+    }
+
     public void render(CanvasModel canvasModel) {
-        clearCanvas();
         processLastMouseClickedPosition(canvasModel);
         scaleCanvas(canvasModel);
     }

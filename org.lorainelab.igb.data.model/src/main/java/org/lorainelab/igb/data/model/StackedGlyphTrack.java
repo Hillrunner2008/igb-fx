@@ -38,8 +38,10 @@ public class StackedGlyphTrack implements Track {
     private double modelHeight;
     private int stackHeight;
     private int slotCount;
+    private final DataSet dataSet;
 
-    public StackedGlyphTrack(boolean isNegative, String trackLabel, int stackHeight) {
+    public StackedGlyphTrack(boolean isNegative, String trackLabel, int stackHeight, DataSet dataSet) {
+        this.dataSet = dataSet;
         this.isNegative = isNegative;
         this.trackLabel = trackLabel;
         this.stackHeight = Math.max(stackHeight, 0);
@@ -182,6 +184,10 @@ public class StackedGlyphTrack implements Track {
 
     public boolean isNegative() {
         return isNegative;
+    }
+
+    public DataSet getDataSet() {
+        return dataSet;
     }
 
     @Override

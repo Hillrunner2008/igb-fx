@@ -69,7 +69,9 @@ public class BamParser implements FileTypeHandler {
     public Set<CompositionGlyph> getRegion(DataSourceReference dataSourceReference, Range<Integer> range, String chromosomeId) {
         Set<BamFeature> annotations = Sets.newHashSet();
         selectionInfoService.getSelectedChromosome().get().ifPresent(selectedChromosome -> {
-            String referenceSequence = selectedChromosome.getReferenceSequenceProvider().getSequence(chromosomeId, range.lowerEndpoint(), range.upperEndpoint());
+            selectedChromosome.loadRegion(range);
+            String referenceSequence = new String(selectedChromosome.getSequence(range.lowerEndpoint(), range.upperEndpoint()));
+
             try (SeekableBufferedStream bamSeekableStream = new SeekableBufferedStream(
                     new SeekableFileStream(new File(dataSourceReference.getPath())));
                     SeekableBufferedStream indexSeekableStream = new SeekableBufferedStream(
@@ -114,7 +116,7 @@ public class BamParser implements FileTypeHandler {
         DataSource dataSource = dataSourceReference.getDataSource();
         selectionInfoService.getSelectedChromosome().get().ifPresent(selectedChromosome -> {
             String referenceSequence = selectedChromosome.getReferenceSequenceProvider().getSequence(chromosomeId, 0, selectedChromosome.getLength());
-            
+
             try (SeekableBufferedStream bamSeekableStream = new SeekableBufferedStream(
                     new SeekableFileStream(new File(dataSourceReference.getPath())));
                     SeekableBufferedStream indexSeekableStream = new SeekableBufferedStream(
@@ -133,7 +135,7 @@ public class BamParser implements FileTypeHandler {
                     try (SAMRecordIterator iter = reader.query(record.getSequenceName(), start, end, true)) {
                         while (iter.hasNext()) {
                             SAMRecord samRecord = iter.next();
-                              int alignmentStart = samRecord.getAlignmentStart() - 1; // convert to interbase
+                            int alignmentStart = samRecord.getAlignmentStart() - 1; // convert to interbase
                             int alignmentEnd = samRecord.getAlignmentEnd() - 1;
                             int width = alignmentEnd - alignmentStart;
                             annotations.add(new BamFeature(samRecord, referenceSequence.substring(alignmentStart, alignmentStart + width)));

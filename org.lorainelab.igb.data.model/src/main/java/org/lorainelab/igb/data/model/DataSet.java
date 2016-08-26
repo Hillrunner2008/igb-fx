@@ -17,7 +17,7 @@ import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
  * @author dcnorris
  */
 public class DataSet {
-
+    
     private static final int DEFAULT_STACK_HEIGHT = 5;
     private final HashMultimap<String, CompositionGlyph> loadedAnnoations;
     private final String trackLabel;
@@ -28,7 +28,7 @@ public class DataSet {
     private StackedGlyphTrack combinedStrandTrack;
     private StackedGlyphTrack negativeStrandTrack;
     private GraphTrack graphTrack;
-
+    
     public DataSet(String trackLabel, DataSourceReference dataSourceReference, FileTypeHandler fileTypeHandler) {
         loadedAnnoations = HashMultimap.create();
         this.dataSourceReference = dataSourceReference;
@@ -36,59 +36,59 @@ public class DataSet {
         this.fileTypeHandler = fileTypeHandler;
         loadedRegions = Maps.newHashMap();
         if (fileTypeHandler.isGraphType()) {
-            graphTrack = new GraphTrack(trackLabel);
+            graphTrack = new GraphTrack(trackLabel, this);
         } else {
-            positiveStrandTrack = new StackedGlyphTrack(false, trackLabel + " (+)", DEFAULT_STACK_HEIGHT);
-            negativeStrandTrack = new StackedGlyphTrack(true, trackLabel + " (-)", DEFAULT_STACK_HEIGHT);
-            combinedStrandTrack = new StackedGlyphTrack(true, trackLabel + " (+/-)", DEFAULT_STACK_HEIGHT);
+            positiveStrandTrack = new StackedGlyphTrack(false, trackLabel + " (+)", DEFAULT_STACK_HEIGHT, this);
+            negativeStrandTrack = new StackedGlyphTrack(true, trackLabel + " (-)", DEFAULT_STACK_HEIGHT, this);
+            combinedStrandTrack = new StackedGlyphTrack(true, trackLabel + " (+/-)", DEFAULT_STACK_HEIGHT, this);
         }
     }
-
+    
     public boolean isGraphType() {
         return fileTypeHandler.isGraphType();
     }
-
+    
     public Track getPositiveStrandTrack(String chrId) {
         refreshPositiveStrandTrack(chrId);
         return positiveStrandTrack;
     }
-
+    
     private void refreshGraphTrack(String chrId) {
         graphTrack.clearGlyphs();
         graphTrack.addGlyphs(loadedAnnoations.get(chrId));
     }
-
+    
     private void refreshPositiveStrandTrack(String chrId) {
         positiveStrandTrack.clearGlyphs();
         positiveStrandTrack.addGlyphs(
                 loadedAnnoations.get(chrId).stream()
-                        .filter(g -> g.getTooltipData().get("forward").equals("true"))
+                        .filter(g -> !g.isNegative())
                         .collect(Collectors.toList())
         );
     }
-
+    
     public StackedGlyphTrack getNegativeStrandTrack(String chrId) {
         refreshNegativeStrandTrack(chrId);
         return negativeStrandTrack;
     }
-
+    
     private void refreshNegativeStrandTrack(String chrId) {
         negativeStrandTrack.clearGlyphs();
         negativeStrandTrack.addGlyphs(
                 loadedAnnoations.get(chrId).stream()
-                        .filter(g -> g.getTooltipData().get("forward").equals("false"))
+                        .filter(g -> g.isNegative())
                         .collect(Collectors.toList()));
     }
-
+    
     public StackedGlyphTrack getCombinedStrandTrack(String chrId, int stackHeight) {
         refreshCombinedTrack(chrId);
         return combinedStrandTrack;
     }
-
+    
     private void refreshCombinedTrack(String chrId) {
 //        combinedStrandTrack.getGlyphs().addAll(loadedAnnoations.get(chrId));
     }
-
+    
     public void loadRegion(String chrId, Range<Integer> requestRange) {
         RangeSet<Integer> loadedChromosomeRegions = loadedRegions.computeIfAbsent(chrId, e -> {
             return TreeRangeSet.create();
@@ -108,7 +108,11 @@ public class DataSet {
             }
         }
     }
-
+    
+    public RangeSet<Integer> getLoadedRegions(String chr) {
+        return loadedRegions.getOrDefault(chr, TreeRangeSet.create());
+    }
+    
     @Override
     public int hashCode() {
         int hash = 7;
@@ -117,7 +121,7 @@ public class DataSet {
         hash = 37 * hash + Objects.hashCode(this.dataSourceReference);
         return hash;
     }
-
+    
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -141,9 +145,9 @@ public class DataSet {
         }
         return true;
     }
-
+    
     public Track getGraphTrack() {
         return graphTrack;
     }
-
+    
 }
