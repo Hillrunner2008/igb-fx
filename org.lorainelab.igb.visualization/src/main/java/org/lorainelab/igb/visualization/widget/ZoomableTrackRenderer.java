@@ -86,20 +86,21 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         view.setXfactor(xFactor);
         if (canvasContext.isVisible()) {
             double scaleToY = canvasContext.getTrackHeight() / track.getModelHeight();
-            gc.save();
-            gc.scale(xFactor, scaleToY);
             view.setYfactor(scaleToY);
-            gc.restore();
             updateView(canvasModel);
         }
     }
 
     void draw(CanvasModel canvasModel) {
-        gc.save();
-        gc.scale(view.getXfactor(), view.getYfactor());
-        highlightLoadedRegions();
-        track.draw(gc, view, canvasContext);
-        gc.restore();
+        if (Platform.isFxApplicationThread()) {
+            gc.save();
+            gc.scale(view.getXfactor(), view.getYfactor());
+            highlightLoadedRegions();
+            track.draw(gc, view, canvasContext);
+            gc.restore();
+        } else {
+            LOG.error("Must be on FxApplication thread");
+        }
     }
 
     private void highlightLoadedRegions() {

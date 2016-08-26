@@ -9,7 +9,6 @@ import com.google.common.collect.TreeMultimap;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
-import javafx.animation.AnimationTimer;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.SetChangeListener;
@@ -35,7 +34,6 @@ public class WidgetManager {
     private static final Logger LOG = LoggerFactory.getLogger(WidgetManager.class);
     private EventSource<RenderAction> refreshViewStream;
     private EventSource<OverlayRenderAction> overlayRefreshStream;
-    private EventSource<Void> emptyStream;
     private List<Widget> widgets;
     private CanvasModel canvasModel;
     private TracksModel tracksModel;
@@ -50,29 +48,19 @@ public class WidgetManager {
         isRefreshing = false;
         refreshViewStream = new EventSource<>();
         overlayRefreshStream = new EventSource<>();
-        emptyStream = new EventSource<>();
         widgets = Lists.newArrayList();
         refreshViewListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             refreshViewStream.emit(new RenderAction());
         };
-
     }
 
     @Activate
     public void activate() {
-        overlayRefreshStream.successionEnds(Duration.ofNanos(100)).or(emptyStream).distinct().map(e -> e.asLeft()).subscribe(renderEvent -> {
-            if (renderEvent.isPresent()) {
-                overlayAnimationTimer.start();
-            } else {
-                overlayAnimationTimer.stop();
-            }
+        refreshViewStream.successionEnds(Duration.ofMillis(5)).subscribe(e -> {
+            renderWidgets();
         });
-        refreshViewStream.successionEnds(Duration.ofMillis(4)).or(emptyStream).distinct().map(e -> e.asLeft()).subscribe(renderEvent -> {
-            if (renderEvent.isPresent()) {
-                animationTimer.start();
-            } else {
-                animationTimer.stop();
-            }
+        overlayRefreshStream.subscribe(e -> {
+            renderOverayWidgets();
         });
         canvasModel.getxFactor().addListener(refreshViewListener);
         canvasModel.getScrollX().addListener(refreshViewListener);
@@ -102,22 +90,7 @@ public class WidgetManager {
         canvasModel.isforceRefresh().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
             refreshViewStream.emit(new RenderAction());
         });
-        animationTimer = new AnimationTimer() {
-            @Override
-            public void handle(long now) {
-                renderWidgets();
-            }
-        };
-        overlayAnimationTimer = new AnimationTimer() {
-            @Override
-            public void handle(long now) {
-                renderOverayWidgets();
-            }
-        };
-
     }
-    private AnimationTimer animationTimer;
-    private AnimationTimer overlayAnimationTimer;
 
     @Reference(multiple = true, unbind = "removeWidget", dynamic = true, optional = true)
     public void addWidget(Widget widget) {

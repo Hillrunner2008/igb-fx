@@ -75,7 +75,7 @@ public class ConsoleTab extends Tab implements TabProvider, PaxAppender {
         initializeGuiComponents();
         setupLoggingRedirects();
         initializeBtnActions();
-        updateStream.successionEnds(Duration.ofMillis(50)).subscribe(e -> {
+        updateStream.successionEnds(Duration.ofSeconds(2)).subscribe(e -> {
             final ArrayList<String> logLines = new ArrayList<String>();
             logContent.drainTo(logLines);
             final String joinedLogLines = String.join("", logLines);
