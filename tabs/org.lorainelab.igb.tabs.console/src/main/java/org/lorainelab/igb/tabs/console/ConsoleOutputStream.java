@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-import javafx.application.Platform;
-import javafx.scene.control.TextArea;
+import java.util.concurrent.BlockingDeque;
+import org.reactfx.EventSource;
 
 /**
  *
@@ -13,8 +13,9 @@ import javafx.scene.control.TextArea;
  */
 public class ConsoleOutputStream extends OutputStream {
 
-    TextArea ta;
-    PrintStream original;
+    private EventSource<Void> updateStream;
+    private BlockingDeque<String> logLines;
+    private PrintStream original;
 
     /**
      * Creates an OutputStream that writes to the given TextArea.
@@ -23,8 +24,9 @@ public class ConsoleOutputStream extends OutputStream {
      * will also by written. Thus you can send System.out to a text area and
      * also still send an echo to the original System.out.
      */
-    public ConsoleOutputStream(TextArea t, PrintStream echo) {
-        this.ta = t;
+    public ConsoleOutputStream(BlockingDeque<String> logLines, EventSource<Void> updateStream, PrintStream echo) {
+        this.logLines = logLines;
+        this.updateStream = updateStream;
         this.original = echo;
     }
 
@@ -39,15 +41,13 @@ public class ConsoleOutputStream extends OutputStream {
 
     @Override
     public void write(byte b[], int off, int len) throws IOException {
-        Platform.runLater(() -> {
-            try {
-                ta.selectEnd();
-                ta.appendText(new String(b, off, len, "UTF-8"));
-                if (original != null) {
-                    original.write(b, off, len);
-                }
-            } catch (UnsupportedEncodingException ex) {
+        try {
+            logLines.add(new String(b, off, len, "UTF-8"));
+            updateStream.emit(null);
+            if (original != null) {
+                original.write(b, off, len);
             }
-        });
+        } catch (UnsupportedEncodingException ex) {
+        }
     }
 }

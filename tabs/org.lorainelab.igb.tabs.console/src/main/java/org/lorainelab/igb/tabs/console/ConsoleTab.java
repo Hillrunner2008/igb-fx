@@ -5,6 +5,13 @@ import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
+import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -30,6 +37,7 @@ import org.lorainelab.igb.tabs.api.TabProvider;
 import org.ops4j.pax.logging.spi.PaxAppender;
 import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 import org.osgi.framework.BundleContext;
+import org.reactfx.EventSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,8 +60,12 @@ public class ConsoleTab extends Tab implements TabProvider, PaxAppender {
     private IntegerProperty WARN_COUNTER;
     private Button copyBtn;
     private Button clearBtn;
+    private final BlockingDeque<String> logContent;
+    private EventSource<Void> updateStream;
 
     public ConsoleTab() {
+        updateStream = new EventSource<>();
+        logContent = new LinkedBlockingDeque<>(1000);
         consoleTextArea = new TextArea();
         consoleTextArea.setEditable(false);
         ERROR_COUNTER = new SimpleIntegerProperty();
@@ -63,6 +75,15 @@ public class ConsoleTab extends Tab implements TabProvider, PaxAppender {
         initializeGuiComponents();
         setupLoggingRedirects();
         initializeBtnActions();
+        updateStream.successionEnds(Duration.ofMillis(50)).subscribe(e -> {
+            final ArrayList<String> logLines = new ArrayList<String>();
+            logContent.drainTo(logLines);
+            final String joinedLogLines = String.join("", logLines);
+            Platform.runLater(() -> {
+                consoleTextArea.selectEnd();
+                consoleTextArea.appendText(joinedLogLines);
+            });
+        });
     }
 
     private void initializeGuiComponents() {
@@ -93,9 +114,9 @@ public class ConsoleTab extends Tab implements TabProvider, PaxAppender {
 
     private void setupLoggingRedirects() {
         try {
-            ConsoleOutputStream cs = new ConsoleOutputStream(consoleTextArea, System.out);
+            ConsoleOutputStream cs = new ConsoleOutputStream(logContent, updateStream, System.out);
             System.setOut(new PrintStream(cs, false, "UTF-8"));
-            System.setErr(new PrintStream(new ConsoleOutputStream(consoleTextArea, System.err), false, "UTF-8"));
+            System.setErr(new PrintStream(new ConsoleOutputStream(logContent, updateStream, System.err), false, "UTF-8"));
         } catch (UnsupportedEncodingException ex) {
             LOG.error(ex.getMessage(), ex);
         }
@@ -132,11 +153,8 @@ public class ConsoleTab extends Tab implements TabProvider, PaxAppender {
             WARN_COUNTER.setValue(WARN_COUNTER.add(1).intValue());
         }
         final String logLine = eventFormatter.format(event, null, true);
-        Platform.runLater(() -> {
-            consoleTextArea.selectEnd();
-            consoleTextArea.appendText(logLine);
-        });
-
+        logContent.add(logLine);
+        updateStream.emit(null);
     }
 
     @Reference
@@ -183,6 +201,30 @@ public class ConsoleTab extends Tab implements TabProvider, PaxAppender {
             content.putString(consoleTextArea.getText());
             clipboard.setContent(content);
         });
+    }
+
+    class MessageConsumer extends AnimationTimer {
+
+        private final BlockingQueue<String> messageQueue;
+        private final TextArea textArea;
+        private final int numMessages;
+        private int messagesReceived = 0;
+
+        public MessageConsumer(BlockingQueue<String> messageQueue, TextArea textArea, int numMessages) {
+            this.messageQueue = messageQueue;
+            this.textArea = textArea;
+            this.numMessages = numMessages;
+        }
+
+        @Override
+        public void handle(long now) {
+            List<String> messages = new ArrayList<>();
+            messagesReceived += messageQueue.drainTo(messages);
+            textArea.appendText(String.join("", messages));
+            if (messagesReceived >= numMessages) {
+                stop();
+            }
+        }
     }
 
 }
