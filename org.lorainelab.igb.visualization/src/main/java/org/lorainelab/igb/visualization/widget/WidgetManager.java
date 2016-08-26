@@ -35,6 +35,7 @@ public class WidgetManager {
     private static final Logger LOG = LoggerFactory.getLogger(WidgetManager.class);
     private EventSource<RenderAction> refreshViewStream;
     private EventSource<OverlayRenderAction> overlayRefreshStream;
+    private EventSource<Void> emptyStream;
     private List<Widget> widgets;
     private CanvasModel canvasModel;
     private TracksModel tracksModel;
@@ -49,6 +50,7 @@ public class WidgetManager {
         isRefreshing = false;
         refreshViewStream = new EventSource<>();
         overlayRefreshStream = new EventSource<>();
+        emptyStream = new EventSource<>();
         widgets = Lists.newArrayList();
         refreshViewListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             refreshViewStream.emit(new RenderAction());
@@ -58,10 +60,14 @@ public class WidgetManager {
 
     @Activate
     public void activate() {
-        overlayRefreshStream.subscribe(e -> {
-            renderOverayWidgets();
+        overlayRefreshStream.successionEnds(Duration.ofNanos(100)).or(emptyStream).distinct().map(e -> e.asLeft()).subscribe(renderEvent -> {
+            if (renderEvent.isPresent()) {
+                overlayAnimationTimer.start();
+            } else {
+                overlayAnimationTimer.stop();
+            }
         });
-        refreshViewStream.successionEnds(Duration.ofMillis(4)).or(overlayRefreshStream).distinct().map(e -> e.asLeft()).subscribe(renderEvent -> {
+        refreshViewStream.successionEnds(Duration.ofMillis(4)).or(emptyStream).distinct().map(e -> e.asLeft()).subscribe(renderEvent -> {
             if (renderEvent.isPresent()) {
                 animationTimer.start();
             } else {
@@ -102,9 +108,16 @@ public class WidgetManager {
                 renderWidgets();
             }
         };
+        overlayAnimationTimer = new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                renderOverayWidgets();
+            }
+        };
 
     }
     private AnimationTimer animationTimer;
+    private AnimationTimer overlayAnimationTimer;
 
     @Reference(multiple = true, unbind = "removeWidget", dynamic = true, optional = true)
     public void addWidget(Widget widget) {
