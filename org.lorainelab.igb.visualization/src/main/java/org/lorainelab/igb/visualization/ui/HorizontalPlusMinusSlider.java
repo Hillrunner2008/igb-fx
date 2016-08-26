@@ -3,6 +3,7 @@ package org.lorainelab.igb.visualization.ui;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
+import javafx.event.EventHandler;
 import org.controlsfx.control.PlusMinusSlider;
 import org.lorainelab.igb.visualization.model.CanvasModel;
 import static org.lorainelab.igb.visualization.util.BoundsUtil.enforceRangeBounds;
@@ -21,12 +22,16 @@ public class HorizontalPlusMinusSlider extends PlusMinusSlider {
 
     @Activate
     public void activate() {
-        setOnValueChanged((PlusMinusEvent event) -> {
-            final double updatedScrollXValue = getUpdatedScrollxValue(event.getValue());
-            double scrollX = canvasModel.getScrollX().get();
-            if (updatedScrollXValue != scrollX) {
-                canvasModel.setScrollX(updatedScrollXValue, true);
-//                syncWidgetSlider();
+        setOnValueChanged(new EventHandler<PlusMinusEvent>() {
+            @Override
+            public void handle(PlusMinusEvent event) {
+                if (canvasModel != null) {
+                    final double updatedScrollXValue = getUpdatedScrollxValue(event.getValue());
+                    double scrollX = canvasModel.getScrollX().get();
+                    if (updatedScrollXValue != scrollX) {
+                        canvasModel.setScrollX(updatedScrollXValue, true);
+                    }
+                }
             }
         });
     }
@@ -48,9 +53,13 @@ public class HorizontalPlusMinusSlider extends PlusMinusSlider {
         return value / 50;
     }
 
-    @Reference
+    @Reference(optional = true, unbind = "removeCanvasModel", dynamic = true)
     public void setCanvasModel(CanvasModel canvasModel) {
         this.canvasModel = canvasModel;
+    }
+
+    public void removeCanvasModel(CanvasModel canvasModel) {
+        this.canvasModel = null;
     }
 
 }

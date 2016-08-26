@@ -107,7 +107,7 @@ public class SearchBox extends TextField {
 
     }
 
-    @Reference(unbind = "removeSearchService")
+    @Reference(optional = true, dynamic = true, unbind = "removeSearchService")
     public void setSearchService(SearchService searchService) {
         this.searchService = searchService;
     }
