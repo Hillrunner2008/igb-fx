@@ -147,11 +147,13 @@ public class ConsoleTab extends Tab implements TabProvider, PaxAppender {
     @Override
     public void doAppend(PaxLoggingEvent event) {
         String lvl = event.getLevel().toString().toLowerCase();
-        if (FATAL.equals(lvl) || ERROR.equals(lvl)) {
-            ERROR_COUNTER.setValue(ERROR_COUNTER.add(1).intValue());
-        } else if (WARN.equals(lvl)) {
-            WARN_COUNTER.setValue(WARN_COUNTER.add(1).intValue());
-        }
+        Platform.runLater(() -> {
+            if (FATAL.equals(lvl) || ERROR.equals(lvl)) {
+                ERROR_COUNTER.setValue(ERROR_COUNTER.add(1).intValue());
+            } else if (WARN.equals(lvl)) {
+                WARN_COUNTER.setValue(WARN_COUNTER.add(1).intValue());
+            }
+        });
         final String logLine = eventFormatter.format(event, null, true);
         logContent.add(logLine);
         updateStream.emit(null);

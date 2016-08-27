@@ -35,6 +35,7 @@ public class HorizontalZoomSlider extends Slider {
         setBlockIncrement(2);
         setMajorTickUnit(1);
         setMinorTickCount(0);
+        setSnapToTicks(true);
         ignoreHSliderEvent = false;
         lastHSliderFire = -1;
         xFactor = 1;
@@ -45,9 +46,12 @@ public class HorizontalZoomSlider extends Slider {
         valueProperty().bindBidirectional(canvasModel.gethSlider());
         valueProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             if (!ignoreHSliderEvent) {
-                xFactor = exponentialScaleTransform(canvasRegion.getWidth(), canvasModel.getModelWidth().get(), newValue.doubleValue());
-                lastHSliderFire = newValue.doubleValue();
-                canvasModel.setxFactor(xFactor);
+                final boolean isSnapEvent = newValue.doubleValue() % getMajorTickUnit() == 0;
+                if (lastHSliderFire < 0 || Math.abs(lastHSliderFire - newValue.doubleValue()) > 1 || isSnapEvent) {
+                    xFactor = exponentialScaleTransform(canvasRegion.getWidth(), canvasModel.getModelWidth().get(), newValue.doubleValue());
+                    lastHSliderFire = newValue.doubleValue();
+                    canvasModel.setxFactor(xFactor);
+                }
             }
         });
         canvasModel.getxFactor().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
