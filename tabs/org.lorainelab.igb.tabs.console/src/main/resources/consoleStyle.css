@@ -1,12 +1,13 @@
 .text-area {
-    text-area-background: #002B36 ;
+    /*text-area-background: #002B36 ;*/
+    text-area-background: #0f192a ;
 }
 
 .text-area .content {
     -fx-background-color: text-area-background ;
 }
 .text-input {
-    -fx-text-fill: #839496;
+    -fx-text-fill: #bed8eb;
     -fx-highlight-fill: derive(-fx-control-inner-background,-20%);
     -fx-highlight-text-fill: -fx-text-inner-color;
     -fx-prompt-text-fill: derive(-fx-control-inner-background,-30%);
