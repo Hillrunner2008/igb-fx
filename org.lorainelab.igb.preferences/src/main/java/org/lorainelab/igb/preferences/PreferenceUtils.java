@@ -9,6 +9,7 @@ import java.io.File;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import org.lorainelab.igb.version.IgbVersion;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -17,7 +18,8 @@ import org.slf4j.LoggerFactory;
  */
 public class PreferenceUtils {
 
-    private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(PreferenceUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PreferenceUtils.class);
+    private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("windows");
     private static final String ROOT_PREFERENCE_NODE_NAME = "org/lorainelab/igb";
     private static String DATA_HOME_DIR;
 
@@ -47,7 +49,6 @@ public class PreferenceUtils {
 
     public static File getApplicationDataDirectory() {
         if (DATA_HOME_DIR == null) {
-            boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("windows");
             String igbHomeDirName = ".igbfx";
             if (IS_WINDOWS) {
                 DATA_HOME_DIR = System.getenv("AppData") + File.separator + "IGB_FX";

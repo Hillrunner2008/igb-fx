@@ -71,6 +71,10 @@ public class LuceneSearchService implements SearchService {
     public void activate(Map<String, Object> properties) throws IOException {
         analyzer = new StandardAnalyzer();
         analyzer.setVersion(Version.LUCENE_6_0_0);
+        String indexPathRoot = System.getProperty("karaf.data", "");
+        if (indexPathRoot.isEmpty()) {
+            throw new IllegalStateException("could not find karaf data directory");
+        }
         indexRoot = (String) properties.get("index.path.root") + File.separator + "lucene" + File.separator;
         initDb();
     }

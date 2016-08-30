@@ -1,4 +1,4 @@
-package org.lorainelab.igb.visualization.util;
+package org.lorainelab.igb.utils;
 
 public class ExponentialTransform {
 

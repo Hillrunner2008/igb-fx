@@ -98,7 +98,7 @@ public class StackedGlyphTrack implements Track {
                             final CompositionGlyph nextGlyph = glyphsInView.get(i + 1);
                             isSelected = isSelected | nextGlyph.isSelected();
                             Rectangle.Double nextRenderRect = nextGlyph.calculateDrawRect(view, slotBoundingViewRect).orElse(null);
-                            if (nextRenderRect.width < modelCoordinatesPerScreenXPixel) {
+                            if (nextRenderRect != null && nextRenderRect.width < modelCoordinatesPerScreenXPixel) {
                                 nextRenderRect.setRect(nextRenderRect.x, nextRenderRect.y, modelCoordinatesPerScreenXPixel, nextRenderRect.height);
                             }
                             if (nextRenderRect != null && nextRenderRect.getMinX() / xPixelsPerCoordinate < (SCRATCH_RECT.getMaxX() / xPixelsPerCoordinate) + 1) {
