@@ -163,6 +163,12 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.preferences.otheroptions</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>org.lorainelab.igb.cache.api</artifactId>
                 <version>${project.version}</version>
                 <scope>provided</scope>
@@ -343,6 +349,7 @@
         
         <module>org.lorainelab.igb.main</module>
         
+        <module>org.lorainelab.igb.preferences.otheroptions</module>
         <module>menus/org.lorainelab.igb.menu.openfile</module>
         <module>menus/org.lorainelab.igb.menu.about</module>
         <module>menus/org.lorainelab.igb.menu.customgenome</module>
@@ -376,7 +383,7 @@
         <module>org.lorainelab.igb.persistencemanager</module>
         <module>org.lorainelab.igb.datasetloadingservice</module>
         <module>org.lorainelab.igb.kar</module>
-    </modules>
+  </modules>
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
