@@ -38,10 +38,11 @@ public class RecentFilesRegistryImpl implements RecentFilesRegistry {
     private ObservableList<String> observableRecentFiles;
     private ReadOnlyListWrapper<String> readOnlySetWrapper;
     private static final Comparator<? super RecentFileEntry> name = (o1, o2) -> o1.timeStamp.compareTo(o2.timeStamp);
-
+    private static int oldFileCountLimit = 5;
+    
     public RecentFilesRegistryImpl() {
         md5HashFunction = Hashing.md5();
-        recentFiles = EvictingQueue.create(5);
+        recentFiles = EvictingQueue.create(oldFileCountLimit);
         modulePreferencesNode = PreferenceUtils.getPackagePrefsNode(RecentFilesRegistryImpl.class);
         initializeFromPreferences();
     }
@@ -55,10 +56,10 @@ public class RecentFilesRegistryImpl implements RecentFilesRegistry {
         }
     }
 
-    private void addRecentFileToPreferences(String recentFile) {
-        Preferences node = getPreferenceNode(recentFile);
-        node.put(TIME_STAMP, LocalDateTime.now().toString());
-        node.put(FILE_NAME, recentFile);
+    private void addRecentFileToPreferences(RecentFileEntry recentFile) {
+        Preferences node = getPreferenceNode(recentFile.getName());
+        node.put(TIME_STAMP, recentFile.timeStamp.toString());
+        node.put(FILE_NAME, recentFile.getName());
     }
 
     private Preferences getPreferenceNode(String recentFile) {
@@ -100,8 +101,13 @@ public class RecentFilesRegistryImpl implements RecentFilesRegistry {
 
     @Override
     public void addRecentFile(String recentFile) {
-        recentFiles.add(new RecentFileEntry(recentFile, LocalDateTime.now()));
-        addRecentFileToPreferences(recentFile);
+        recentFiles.removeIf(file -> file.getName().equals(recentFile));
+        if(recentFiles.size() == oldFileCountLimit){
+            removeRecentFileFromPreferences(recentFiles.poll().getName());
+        }
+        RecentFileEntry fileEntry = new RecentFileEntry(recentFile, LocalDateTime.now());
+        recentFiles.add(fileEntry);
+        addRecentFileToPreferences(fileEntry);
         observableRecentFiles.clear();
         recentFiles.stream().sorted(name.reversed()).map(entry -> entry.name).forEach(observableRecentFiles::add);
     }
@@ -130,8 +136,20 @@ public class RecentFilesRegistryImpl implements RecentFilesRegistry {
         private String name;
         private LocalDateTime timeStamp;
 
+        public String getName() {
+            return name;
+        }
+
+        public LocalDateTime getTimeStamp() {
+            return timeStamp;
+        }
+
         public RecentFileEntry(String name, LocalDateTime timeStamp) {
             this.name = name;
+            this.timeStamp = timeStamp;
+        }
+
+        public void setTimeStamp(LocalDateTime timeStamp) {
             this.timeStamp = timeStamp;
         }
 
