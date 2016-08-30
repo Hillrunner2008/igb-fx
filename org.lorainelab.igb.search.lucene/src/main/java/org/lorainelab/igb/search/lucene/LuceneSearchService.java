@@ -80,7 +80,7 @@ public class LuceneSearchService implements SearchService {
     private void initDb() {
         try {
             Properties props = new Properties();
-            final String dataBaseFilePath = indexRoot + "data/search.sqlite";
+            final String dataBaseFilePath = indexRoot + "data" + File.separator + "search.sqlite";
             props.put("databaseName", dataBaseFilePath);
             Files.touch(new File(dataBaseFilePath));
             ds = dataSourceFactory.createDataSource(props);
