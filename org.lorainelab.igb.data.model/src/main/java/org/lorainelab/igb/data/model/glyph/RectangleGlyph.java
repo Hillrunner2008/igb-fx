@@ -21,6 +21,7 @@ import org.lorainelab.igb.data.model.View;
 import static org.lorainelab.igb.data.model.sequence.BasePairColorReference.getBaseColor;
 import org.lorainelab.igb.data.model.shapes.Rectangle;
 import org.lorainelab.igb.data.model.util.ColorUtils;
+import org.lorainelab.igb.data.model.util.DrawUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,14 +43,14 @@ public class RectangleGlyph implements Glyph {
     boolean colorByBase;
     private final boolean isSelectable;
     private boolean isSelected;
-    private boolean maskMatches;
+    private boolean maskBasePairMatches;
 
     public RectangleGlyph(Rectangle rectShape) {
         int height = 10;
         double y = 20;
         if (rectShape.getAttributes().contains(org.lorainelab.igb.data.model.shapes.Rectangle.Attribute.THICK)) {
             height = THICK_RECTANGLE_HEIGHT;
-            y = MIN_OFFSET;
+            y = MIN_Y_OFFSET;
         } else if (rectShape.getAttributes().contains(org.lorainelab.igb.data.model.shapes.Rectangle.Attribute.INSERTION)) {
             height = 3;
         }
@@ -59,7 +60,7 @@ public class RectangleGlyph implements Glyph {
         colorByBase = rectShape.isMirrorReferenceSequence();
         isSelectable = rectShape.isSelectable();
         isSelected = false;
-        maskMatches = true;
+        maskBasePairMatches = rectShape.isMaskBasePairMatches();
     }
 
     @Override
@@ -101,21 +102,21 @@ public class RectangleGlyph implements Glyph {
     }
 
     @Override
-    public void draw(GraphicsContext gc, View view) {
-        Rectangle2D viewRect = view.getBoundingRect();
-        Optional<Rectangle2D> viewBoundingRect = getViewBoundingRect(view);
-        if (viewBoundingRect.isPresent()) {
+    public void draw(GraphicsContext gc, View view, Rectangle2D slotBoundingViewRect) {
+        calculateDrawRect(view, slotBoundingViewRect).ifPresent(sharedRect -> {
+            Rectangle2D viewRect = view.getBoundingRect();
             gc.setFill(fill);
             gc.setStroke(strokeColor);
-            final double y = viewBoundingRect.get().getMinY();
-            gc.fillRect(viewBoundingRect.get().getMinX(), y, viewBoundingRect.get().getWidth(), viewBoundingRect.get().getHeight());
+            final double y = sharedRect.getMinY();
+            DrawUtils.scaleToVisibleRec(view, SHARED_RECT);
+            gc.fillRect(SHARED_RECT.x, SHARED_RECT.y, SHARED_RECT.width, SHARED_RECT.height);
             if (view.getBoundingRect().getWidth() < 150) {
-                drawText(view, viewRect, gc, y, viewBoundingRect);
+                drawText(view, viewRect, gc, y, sharedRect);
             }
-        }
+        });
     }
 
-    private void drawText(View view, Rectangle2D viewRect, GraphicsContext gc, final double y, Optional<Rectangle2D> viewBoundingRect) {
+    private void drawText(View view, Rectangle2D viewRect, GraphicsContext gc, final double y, java.awt.Rectangle.Double viewBoundingRect) {
         innerTextRefSeqTranslator.ifPresent(translationFunction -> {
             Chromosome chromosome = view.getChromosome();
             String innerText;
@@ -141,7 +142,9 @@ public class RectangleGlyph implements Glyph {
             } else {
                 innerText = translationFunction.apply(sequence);
             }
-            innerText = innerText.substring(startPos, endPos);
+            if (innerText.length() > sequence.length()) {
+                innerText = innerText.substring(startPos, endPos);
+            }
             int size = (int) boundingRect.getHeight();
             synchronized (gc) {// should not be needed, but I am currently seeing rendering issues that appear directly related to race conditions on this function
                 gc.save();
@@ -151,18 +154,18 @@ public class RectangleGlyph implements Glyph {
                 FontMetrics fm = Toolkit.getToolkit().getFontLoader().getFontMetrics(gc.getFont());
                 double textHeight = fm.getAscent();
                 double textYPosition = (y / textScale) + textHeight;
-                double textYOffset = (viewBoundingRect.get().getHeight() / textScale - fm.getLineHeight()) / 2;
+                double textYOffset = (viewBoundingRect.getHeight() / textScale - fm.getLineHeight()) / 2;
                 textYPosition += textYOffset;
                 gc.scale(1 / textScale, 1 / textScale);
                 double i = 0;
-                double minX = viewBoundingRect.get().getMinX();
+                double minX = viewBoundingRect.getMinX();
                 int baseWidth = 1;
                 final char[] innerTextChars = innerText.toUpperCase().toCharArray();
                 final char[] seqChars = sequence.toUpperCase().toCharArray();
                 for (int j = 0; j < innerTextChars.length; j++) {
                     boolean charMatch = false;
                     char c = innerTextChars[j];
-                    if (colorByBase || maskMatches) {
+                    if (colorByBase || maskBasePairMatches) {
                         if (innerTextChars.length == seqChars.length && c == seqChars[j]) {
                             charMatch = true;
                             gc.setFill(fill);
@@ -173,11 +176,11 @@ public class RectangleGlyph implements Glyph {
                         gc.setFill(fill);
                     }
                     if (startOffset % 1 > 0 && i == 0) {
-                        gc.fillRect(minX, y, 1 - startOffset % 1, viewBoundingRect.get().getHeight());
+                        gc.fillRect(minX, y, 1 - startOffset % 1, viewBoundingRect.getHeight());
                         i += (1 - startOffset % 1);
                         continue;
                     } else {
-                        gc.fillRect(minX + i, y, 1, viewBoundingRect.get().getHeight());
+                        gc.fillRect(minX + i, y, 1, viewBoundingRect.getHeight());
                     }
                     if (!charMatch) {
                         if (colorByBase) {

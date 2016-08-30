@@ -58,6 +58,7 @@ public class BamRenderer implements Renderer<BamFeature> {
                 )
                         .setMirrorReferenceSequence(alignmentBlock.isExactRefMatch())
                         .setInnerTextRefSeqTranslator(seq -> alignmentBlock.isExactRefMatch() ? seq : alignmentBlock.getSeqString())
+                        .setIsMaskBasePairMatches(true)
                         .build());
             case PADDING:
                 return Optional.of(Rectangle.start(alignmentBlock.getRange().lowerEndpoint(), alignmentBlock.getRange().upperEndpoint() - alignmentBlock.getRange().lowerEndpoint()).build());

@@ -23,7 +23,7 @@ import org.lorainelab.igb.menu.api.MenuBarEntryProvider;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
 import org.lorainelab.igb.menu.api.model.WeightedMenuEntry;
 import org.lorainelab.igb.menu.api.model.WeightedMenuItem;
-import org.lorainelab.igb.datasetloadingservice.DataSetLoadingService;
+import org.lorainelab.igb.datasetloadingservice.api.DataSetLoadingService;
 import org.lorainelab.igb.selections.SelectionInfoService;
 import org.lorainelab.igb.toolbar.api.ToolbarButtonProvider;
 import org.lorainelab.igb.toolbar.api.WeightedButton;

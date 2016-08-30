@@ -37,7 +37,7 @@ public class SearchBox extends TextField {
         setPrefWidth(203.0);
         setPrefHeight(26.0);
     }
-    
+
     @Activate
     public void activate() {
         initializeSearch();
@@ -45,34 +45,36 @@ public class SearchBox extends TextField {
 
     private void initializeSearch() {
         setOnKeyReleased(e -> {
-            Platform.runLater(() -> {
-                if (getText().length() == 0) {
-                    searchAutocomplete.hide();
-                } else {
-                    selectionInfoService.getSelectedGenomeVersion().get().ifPresent(selectedGenomeVersion -> {
-                        selectionInfoService.getSelectedChromosome().get().ifPresent(selectedChromosome -> {
-                            List<Document> searchResult = new LinkedList<>();
-                            Optional<IndexIdentity> resourceIndexIdentity
-                                    = searchService.getResourceIndexIdentity(
-                                            selectedGenomeVersion.getSpeciesName().get());
-                            if (resourceIndexIdentity.isPresent()) {
-                                //TODO: refactor to boolean queries in search module
-                                searchService.search("(chromosomeId:" + selectedChromosome.getName() + ") AND (id:" + getText() + "*)",
-                                        resourceIndexIdentity.get()).stream()
-                                        .forEach(doc -> searchResult.add(doc));
-                            }
-                            if (searchResult.size() > 0) {
-                                populatePopup(searchResult);
-                                if (!searchAutocomplete.isShowing()) {
-                                    searchAutocomplete.show(this, Side.BOTTOM, 0, 0);
+            if (searchService != null) {
+                Platform.runLater(() -> {
+                    if (getText().length() == 0) {
+                        searchAutocomplete.hide();
+                    } else {
+                        selectionInfoService.getSelectedGenomeVersion().get().ifPresent(selectedGenomeVersion -> {
+                            selectionInfoService.getSelectedChromosome().get().ifPresent(selectedChromosome -> {
+                                List<Document> searchResult = new LinkedList<>();
+                                Optional<IndexIdentity> resourceIndexIdentity
+                                        = searchService.getResourceIndexIdentity(
+                                                selectedGenomeVersion.getSpeciesName().get());
+                                if (resourceIndexIdentity.isPresent()) {
+                                    //TODO: refactor to boolean queries in search module
+                                    searchService.search("(chromosomeId:" + selectedChromosome.getName() + ") AND (id:" + getText() + "*)",
+                                            resourceIndexIdentity.get()).stream()
+                                            .forEach(doc -> searchResult.add(doc));
                                 }
-                            } else {
-                                searchAutocomplete.hide();
-                            }
+                                if (searchResult.size() > 0) {
+                                    populatePopup(searchResult);
+                                    if (!searchAutocomplete.isShowing()) {
+                                        searchAutocomplete.show(this, Side.BOTTOM, 0, 0);
+                                    }
+                                } else {
+                                    searchAutocomplete.hide();
+                                }
+                            });
                         });
-                    });
-                }
-            });
+                    }
+                });
+            }
         });
     }
 
@@ -105,13 +107,13 @@ public class SearchBox extends TextField {
 
     }
 
-    @Reference(unbind = "removeSearchService")
+    @Reference(optional = true, dynamic = true, unbind = "removeSearchService")
     public void setSearchService(SearchService searchService) {
         this.searchService = searchService;
     }
 
     public void removeSearchService(SearchService searchService) {
-        LOG.info("removeSearchService called");
+        this.searchService = null;
     }
 
     @Reference(unbind = "removeSelectionInfoService")

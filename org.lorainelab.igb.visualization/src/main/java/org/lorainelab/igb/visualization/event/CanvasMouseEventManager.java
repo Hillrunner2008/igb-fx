@@ -5,7 +5,8 @@ import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import java.time.Duration;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.Timer;
+import java.util.TimerTask;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
@@ -61,7 +62,6 @@ public class CanvasMouseEventManager {
 
         canvas.setOnMouseDragged(event -> {
             canvasModel.setLastDragPosition(getPoint2dFromMouseEvent(event));
-            canvasModel.setScreenPoint(getScreenPoint2DFromMouseEvent(event));
             canvasModel.setMouseDragging(true);
         });
         canvas.setOnMouseExited(event -> {
@@ -73,13 +73,12 @@ public class CanvasMouseEventManager {
         canvas.setOnMouseReleased((MouseEvent event) -> {
             if (canvasModel.isMouseDragging()) {
                 processMouseDragReleased(event);
+                canvasModel.setClickDragStartPosition(null);
+                canvasModel.setClickDragStartPosition(null);
+                canvasModel.setMouseDragging(false);
             } else {
                 processMouseClicked(event);
             }
-            canvasModel.setClickDragStartPosition(null);
-            canvasModel.setClickDragStartPosition(null);
-            canvasModel.setScreenPoint(null);
-            canvasModel.setMouseDragging(false);
         });
 
     }
@@ -124,30 +123,37 @@ public class CanvasMouseEventManager {
     }
 
     private void processMouseClicked(MouseEvent event) {
-        Point2D mousePoint = getPoint2dFromMouseEvent(event);
-        if (event.getClickCount() >= 2) {
-            selectionInfoService.getSelectedGlyphs().clear();
-            getTrackRendererContainingPoint(mousePoint).ifPresent(tr -> {
-                tr.getTrack().getSlotMap().entrySet().stream()
-                        .flatMap(entry -> entry.getValue().getAllGlyphs().stream())
-                        .filter(glyph -> glyph.isSelected())
-                        .findFirst().ifPresent(glyphToJumpZoom -> {
-                            jumpZoom(glyphToJumpZoom.getBoundingRect(), tr, event);
-                            selectionInfoService.getSelectedGlyphs().add(glyphToJumpZoom);
-                        });
-            });
-        } else {
-            selectionInfoService.getSelectedGlyphs().clear();
-            getTrackRendererContainingPoint(mousePoint).ifPresent(tr -> {
-                selectionInfoService.getSelectedGlyphs().addAll(
-                        tr.getTrack().getSlotMap().entrySet().stream()
-                                .flatMap(entry -> entry.getValue().getAllGlyphs().stream())
-                                .filter(glyph -> glyph.isSelected())
-                                .collect(Collectors.toList())
-                );
-            });
-        }
-        updateZoomStripe(event);
+        canvasModel.forceRefresh();
+        //wait for refresh to complete
+        Timer timer = new Timer();
+        timer.schedule(
+                new TimerTask() {
+
+            @Override
+            public void run() {
+                Point2D mousePoint = getPoint2dFromMouseEvent(event);
+                if (event.getClickCount() >= 2) {
+                    selectionInfoService.getSelectedGlyphs().clear();
+                    getTrackRendererContainingPoint(mousePoint).ifPresent(tr -> {
+
+                        tr.getTrack().getSelectedGlyphs().stream()
+                                .findFirst().ifPresent(glyphToJumpZoom -> {
+                                    jumpZoom(glyphToJumpZoom.getBoundingRect(), tr, event);
+                                    selectionInfoService.getSelectedGlyphs().add(glyphToJumpZoom);
+                                });
+                    });
+                } else {
+                    selectionInfoService.getSelectedGlyphs().clear();
+                    getTrackRendererContainingPoint(mousePoint).ifPresent(tr -> {
+                        selectionInfoService.getSelectedGlyphs().addAll(
+                                tr.getTrack().getSelectedGlyphs()
+                        );
+                    });
+                }
+                updateZoomStripe(event);
+            }
+        }, 200);
+
     }
 
     private Optional<ZoomableTrackRenderer> getTrackRendererContainingPoint(Point2D mousePoint) {
@@ -186,28 +192,29 @@ public class CanvasMouseEventManager {
 
     private Optional<Rectangle2D> getSelectionRectangle() {
         Rectangle2D[] selectionRectangle = new Rectangle2D[1];
-        canvasModel.getMouseClickLocation().get().ifPresent(clickStartPosition -> {
-            tracksModel.getCoordinateTrackRenderer().ifPresent(coordinateTrackRenderer -> {
-                if (!coordinateTrackRenderer.getCanvasContext().getBoundingRect().contains(clickStartPosition)) {
-                    canvasModel.getClickDragStartPosition().get().ifPresent(localPoint -> {
+        tracksModel.getCoordinateTrackRenderer().ifPresent(coordinateTrackRenderer -> {
+            canvasModel.getClickDragStartPosition().get().ifPresent(clickDragStartPoint -> {
+                if (!coordinateTrackRenderer.getCanvasContext().getBoundingRect().contains(clickDragStartPoint)) {
+                    canvasModel.getLastDragPosition().get().ifPresent(lastDragPoint -> {
                         double minX;
                         double maxX;
                         double minY;
                         double maxY;
-                        Point2D rangeBoundedEventLocation = getRangeBoundedDragEventLocation(localPoint);
-                        if (clickStartPosition.getX() < rangeBoundedEventLocation.getX()) {
-                            minX = clickStartPosition.getX();
-                            maxX = rangeBoundedEventLocation.getX();
+                        Point2D rangeBoundedclickDragStartPoint = getRangeBoundedDragEventLocation(clickDragStartPoint);
+                        Point2D rangeBoundedlastDragPoint = getRangeBoundedDragEventLocation(lastDragPoint);
+                        if (rangeBoundedlastDragPoint.getX() < rangeBoundedclickDragStartPoint.getX()) {
+                            minX = rangeBoundedlastDragPoint.getX();
+                            maxX = rangeBoundedclickDragStartPoint.getX();
                         } else {
-                            minX = rangeBoundedEventLocation.getX();
-                            maxX = clickStartPosition.getX();
+                            minX = rangeBoundedclickDragStartPoint.getX();
+                            maxX = rangeBoundedlastDragPoint.getX();
                         }
-                        if (clickStartPosition.getY() < rangeBoundedEventLocation.getY()) {
-                            minY = clickStartPosition.getY();
-                            maxY = rangeBoundedEventLocation.getY();
+                        if (rangeBoundedlastDragPoint.getY() < rangeBoundedclickDragStartPoint.getY()) {
+                            minY = rangeBoundedlastDragPoint.getY();
+                            maxY = rangeBoundedclickDragStartPoint.getY();
                         } else {
-                            minY = rangeBoundedEventLocation.getY();
-                            maxY = clickStartPosition.getY();
+                            minY = rangeBoundedclickDragStartPoint.getY();
+                            maxY = rangeBoundedlastDragPoint.getY();
                         }
                         selectionRectangle[0] = new Rectangle2D(minX, minY, maxX - minX, maxY - minY);
                     });

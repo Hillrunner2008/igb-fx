@@ -1,10 +1,7 @@
 package org.lorainelab.igb.visualization.widget;
 
 import com.google.common.collect.Range;
-import java.util.List;
 import java.util.Optional;
-import static java.util.stream.Collectors.toList;
-import java.util.stream.Stream;
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
@@ -18,7 +15,6 @@ import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.Track;
 import org.lorainelab.igb.data.model.View;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
-import org.lorainelab.igb.data.model.glyph.Glyph;
 import org.lorainelab.igb.visualization.event.MouseHoverEvent;
 import org.lorainelab.igb.visualization.model.CanvasModel;
 import org.lorainelab.igb.visualization.model.TrackLabel;
@@ -40,13 +36,15 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     private final CanvasContext canvasContext;
     private final GraphicsContext gc;
     private int weight;
+    private final Chromosome chromosome;
 
     public ZoomableTrackRenderer(Canvas canvas, Track track, Chromosome chromosome) {
         this.weight = 0;
         this.track = track;
+        this.chromosome = chromosome;
         this.modelWidth = chromosome.getLength();
         canvasContext = new CanvasContext(canvas, 0, 0);
-        view = new View(new Rectangle2D(0, 0, modelWidth, track.getModelHeight()),canvasContext, chromosome);
+        view = new View(new Rectangle2D(0, 0, modelWidth, track.getModelHeight()), canvasContext, chromosome, track.isNegative());
         trackLabel = new TrackLabel(this, track.getTrackLabel());
         gc = canvas.getGraphicsContext2D();
         tooltip = new Tooltip();
@@ -57,43 +55,15 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         canvasModel.getMouseClickLocation().get().ifPresent(mouseClicked -> {
             if (!canvasContext.getBoundingRect().contains(mouseClicked)) {
                 if (!multiSelectModeActive) {
-                    clearSelections();
+                    track.clearSelections();
                 }
                 return;
             }
             Rectangle2D mouseEventBoundingBox = canvasToViewCoordinates(mouseClicked);
             if (!multiSelectModeActive) {
-                clearSelections();
+                track.clearSelections();
             }
-            Rectangle2D viewBoundingRect = view.getBoundingRect();
-            List<CompositionGlyph> selections = track.getSlotMap().entrySet().stream().flatMap(entry -> {
-                double slotOffset = entry.getValue().getSlotYoffset();
-                final Range<Double> mouseEventXrange = Range.closed(mouseEventBoundingBox.getMinX(), mouseEventBoundingBox.getMaxX());
-                final Stream<CompositionGlyph> glyphsInXRange = entry.getValue().getGlyphsInXrange(mouseEventXrange).stream();
-                return glyphsInXRange.filter(glyph -> {
-                    final Range<Double> mouseEventYrange = Range.closed(mouseEventBoundingBox.getMinY(), mouseEventBoundingBox.getMaxY());
-                    return Range.closed(glyph.getBoundingRect().getMinY() + slotOffset, glyph.getBoundingRect().getMaxY() + slotOffset).isConnected(mouseEventYrange);
-                });
-            }).collect(toList());
-//
-            if (selections.size() > 1) {
-                selections.forEach(glyph -> glyph.setIsSelected(true));
-            } else {
-                selections.forEach(glyph -> {
-                    boolean subSelectionActive = false;
-                    for (Glyph g : glyph.getChildren()) {
-                        if (g.isSelectable()) {
-                            if (g.getBoundingRect().intersects(mouseEventBoundingBox)) {
-                                g.setIsSelected(true);
-                                subSelectionActive = true;
-                                break;
-                            }
-                        }
-                    }
-                    glyph.setIsSelected(true);//set this flag regardless of subselection 
-                });
-            }
-
+            track.processSelectionRectangle(mouseEventBoundingBox, view);
         });
     }
 
@@ -106,15 +76,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
             double yOffset = canvasContext.getRelativeTrackOffset() / view.getYfactor();
             view.setBoundingRect(new Rectangle2D(xOffset, yOffset, visibleVirtualCoordinatesX, visibleVirtualCoordinatesY));
             if (canvasContext.isVisible()) {
-                if (Platform.isFxApplicationThread()) {
-                    clearCanvas();
-                    draw(canvasModel);
-                } else {
-                    Platform.runLater(() -> {
-                        clearCanvas();
-                        draw(canvasModel);
-                    });
-                }
+                draw(canvasModel);
             }
         }
     }
@@ -124,41 +86,41 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         view.setXfactor(xFactor);
         if (canvasContext.isVisible()) {
             double scaleToY = canvasContext.getTrackHeight() / track.getModelHeight();
-            gc.save();
-            gc.scale(xFactor, scaleToY);
             view.setYfactor(scaleToY);
-            gc.restore();
             updateView(canvasModel);
         }
     }
 
-    private void clearCanvas() {
-        gc.save();
-        gc.clearRect(
-                0,
-                canvasContext.getBoundingRect().getMinY(),
-                canvasContext.getBoundingRect().getWidth(),
-                canvasContext.getBoundingRect().getHeight()
-        );
-        gc.setFill(Color.WHITE);
-        gc.fillRect(
-                0,
-                canvasContext.getBoundingRect().getMinY(),
-                canvasContext.getBoundingRect().getWidth(),
-                canvasContext.getBoundingRect().getHeight()
-        );
-        gc.restore();
+    void draw(CanvasModel canvasModel) {
+        if (Platform.isFxApplicationThread()) {
+            gc.save();
+            gc.scale(view.getXfactor(), view.getYfactor());
+            highlightLoadedRegions();
+            track.draw(gc, view, canvasContext);
+            gc.restore();
+        } else {
+            LOG.error("Must be on FxApplication thread");
+        }
     }
 
-    void draw(CanvasModel canvasModel) {
+    private void highlightLoadedRegions() {
         gc.save();
-        gc.scale(view.getXfactor(), view.getYfactor());
-        track.draw(gc, view, canvasContext);
+        gc.setFill(Color.WHITE);
+        track.getDataSet().getLoadedRegions(chromosome.getName()).asRanges().forEach(range -> {
+            if (range.isConnected(Range.closed(view.getXrange().lowerEndpoint().intValue(), view.getXrange().upperEndpoint().intValue()))) {
+                double minX = range.lowerEndpoint() - view.getXrange().lowerEndpoint();
+                gc.fillRect(
+                        minX,
+                        canvasContext.getBoundingRect().getMinY(),
+                        range.upperEndpoint() - range.lowerEndpoint(),
+                        view.getBoundingRect().getHeight()
+                );
+            }
+        });
         gc.restore();
     }
 
     public void render(CanvasModel canvasModel) {
-        clearCanvas();
         processLastMouseClickedPosition(canvasModel);
         scaleCanvas(canvasModel);
     }
@@ -173,8 +135,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         Point2D local = hoverEvent.getLocal();
         Point2D screen = hoverEvent.getScreen();
         Rectangle2D modelCoordinateBoundingBox = canvasToViewCoordinates(local);
-        Optional<CompositionGlyph> intersect = track.getSlotMap().values().stream()
-                .flatMap(glyphBin -> glyphBin.getGlyphsInView(view).stream())
+        Optional<CompositionGlyph> intersect = track.getGlyphsInView(view).stream()
                 .filter(glyph -> glyph.getBoundingRect().intersects(modelCoordinateBoundingBox))
                 .findFirst();
 
@@ -204,17 +165,6 @@ public class ZoomableTrackRenderer implements TrackRenderer {
                 tooltip.show(gc.getCanvas(), newX, newY);
             });
         }
-    }
-
-    private void clearSelections() {
-        track.getSlotMap().values().stream()
-                .flatMap(glyphBin -> glyphBin.getAllGlyphs().stream())
-                .forEach(glyph -> {
-                    glyph.setIsSelected(false);
-                    for (Glyph g : glyph.getChildren()) {
-                        g.setIsSelected(false);
-                    }
-                });
     }
 
     private Rectangle2D canvasToViewCoordinates(Point2D clickLocation) {

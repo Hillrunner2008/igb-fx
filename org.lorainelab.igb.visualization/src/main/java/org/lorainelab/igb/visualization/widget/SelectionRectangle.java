@@ -7,9 +7,9 @@ import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import org.lorainelab.igb.visualization.ui.CanvasRegion;
 import org.lorainelab.igb.visualization.model.CanvasModel;
 import org.lorainelab.igb.visualization.model.TracksModel;
+import org.lorainelab.igb.visualization.ui.OverlayRegion;
 import org.lorainelab.igb.visualization.util.BoundsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 public class SelectionRectangle implements Widget {
 
     private static final Logger LOG = LoggerFactory.getLogger(SelectionRectangle.class);
-    private CanvasRegion canvasRegion;
+    private OverlayRegion overlayRegion;
     private CanvasModel canvasModel;
     private TracksModel tracksModel;
 
@@ -31,7 +31,7 @@ public class SelectionRectangle implements Widget {
 
     @Override
     public void render(CanvasModel canvasModel) {
-        GraphicsContext gc = canvasRegion.getCanvas().getGraphicsContext2D();
+        GraphicsContext gc = overlayRegion.getCanvas().getGraphicsContext2D();
         try {
             gc.save();
             getSelectionRectangle().ifPresent(selectionRectangle -> {
@@ -44,35 +44,36 @@ public class SelectionRectangle implements Widget {
     }
 
     private Point2D getRangeBoundedDragEventLocation(Point2D localPoint) {
-        double boundedEventX = BoundsUtil.enforceRangeBounds(localPoint.getX(), 0, canvasRegion.getCanvas().getWidth());
-        double boundedEventY = BoundsUtil.enforceRangeBounds(localPoint.getY(), 0, canvasRegion.getCanvas().getHeight());
+        double boundedEventX = BoundsUtil.enforceRangeBounds(localPoint.getX(), 0, overlayRegion.getCanvas().getWidth());
+        double boundedEventY = BoundsUtil.enforceRangeBounds(localPoint.getY(), 0, overlayRegion.getCanvas().getHeight());
         return new Point2D(boundedEventX, boundedEventY);
     }
 
     private Optional<Rectangle2D> getSelectionRectangle() {
         Rectangle2D[] selectionRectangle = new Rectangle2D[1];
-        canvasModel.getMouseClickLocation().get().ifPresent(clickStartPosition -> {
-            tracksModel.getCoordinateTrackRenderer().ifPresent(coordinateTrackRenderer -> {
-                if (!coordinateTrackRenderer.getCanvasContext().getBoundingRect().contains(clickStartPosition)) {
-                    canvasModel.getClickDragStartPosition().get().ifPresent(localPoint -> {
+        tracksModel.getCoordinateTrackRenderer().ifPresent(coordinateTrackRenderer -> {
+            canvasModel.getClickDragStartPosition().get().ifPresent(clickDragStartPoint -> {
+                if (!coordinateTrackRenderer.getCanvasContext().getBoundingRect().contains(clickDragStartPoint)) {
+                    canvasModel.getLastDragPosition().get().ifPresent(lastDragPoint -> {
                         double minX;
                         double maxX;
                         double minY;
                         double maxY;
-                        Point2D rangeBoundedEventLocation = getRangeBoundedDragEventLocation(localPoint);
-                        if (clickStartPosition.getX() < rangeBoundedEventLocation.getX()) {
-                            minX = clickStartPosition.getX();
-                            maxX = rangeBoundedEventLocation.getX();
+                        Point2D rangeBoundedclickDragStartPoint = getRangeBoundedDragEventLocation(clickDragStartPoint);
+                        Point2D rangeBoundedlastDragPoint = getRangeBoundedDragEventLocation(lastDragPoint);
+                        if (rangeBoundedlastDragPoint.getX() < rangeBoundedclickDragStartPoint.getX()) {
+                            minX = rangeBoundedlastDragPoint.getX();
+                            maxX = rangeBoundedclickDragStartPoint.getX();
                         } else {
-                            minX = rangeBoundedEventLocation.getX();
-                            maxX = clickStartPosition.getX();
+                            minX = rangeBoundedclickDragStartPoint.getX();
+                            maxX = rangeBoundedlastDragPoint.getX();
                         }
-                        if (clickStartPosition.getY() < rangeBoundedEventLocation.getY()) {
-                            minY = clickStartPosition.getY();
-                            maxY = rangeBoundedEventLocation.getY();
+                        if (rangeBoundedlastDragPoint.getY() < rangeBoundedclickDragStartPoint.getY()) {
+                            minY = rangeBoundedlastDragPoint.getY();
+                            maxY = rangeBoundedclickDragStartPoint.getY();
                         } else {
-                            minY = rangeBoundedEventLocation.getY();
-                            maxY = clickStartPosition.getY();
+                            minY = rangeBoundedclickDragStartPoint.getY();
+                            maxY = rangeBoundedlastDragPoint.getY();
                         }
                         selectionRectangle[0] = new Rectangle2D(minX, minY, maxX - minX, maxY - minY);
                     });
@@ -93,13 +94,18 @@ public class SelectionRectangle implements Widget {
     }
 
     @Reference
-    public void setCanvasRegion(CanvasRegion canvasRegion) {
-        this.canvasRegion = canvasRegion;
+    public void setOverlayRegion(OverlayRegion overlayRegion) {
+        this.overlayRegion = overlayRegion;
     }
 
     @Override
     public int getZindex() {
         return 10;
+    }
+
+    @Override
+    public boolean isOverlayWidget() {
+        return true;
     }
 
 }

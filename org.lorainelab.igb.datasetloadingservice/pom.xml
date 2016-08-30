@@ -71,9 +71,8 @@
                             !${project.artifactId},
                             *
                         </Import-Package>
-                        <Export-Package>org.lorainelab.igb.datasetloadingservice</Export-Package>
+                        <Export-Package>${project.artifactId}.api</Export-Package>
                         <Service-Component>*</Service-Component>
-                        <Private-Package>org.lorainelab.igb.datasetloadingImpl.*,org.lorainelab.igb.datasetloadingservice.*</Private-Package>
                     </instructions>
                 </configuration>
             </plugin>
@@ -83,5 +82,4 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
-    <name>org.lorainelab.igb.datasetloadingservice</name>
 </project>

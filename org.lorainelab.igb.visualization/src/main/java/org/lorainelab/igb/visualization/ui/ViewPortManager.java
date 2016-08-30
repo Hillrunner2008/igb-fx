@@ -26,7 +26,7 @@ public class ViewPortManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(ViewPortManager.class);
 
-    private static double MIN_TRACK_HEIGHT = 50;
+    private static double MIN_TRACK_HEIGHT = 10;
     private static final int MAX_TRACK_HEIGHT = 1000;
     private static final int COORDINATE_TRACK_HEIGHT = 50;
     private List<TrackRenderer> sortedTrackRenderers;
@@ -57,7 +57,7 @@ public class ViewPortManager {
         canvasHeight = canvas.getHeight();
         int trackCountExcludingCoordinates = (int) tracksModel.getTrackRenderers().stream().filter(track -> !(track instanceof CoordinateTrackRenderer)).count();
         final double vSliderValue = 
-        trackSize = MIN_TRACK_HEIGHT + (MAX_TRACK_HEIGHT - MIN_TRACK_HEIGHT) * canvasModel.getvSlider().doubleValue() / 100;
+        trackSize = 1 + (MAX_TRACK_HEIGHT - 1) * canvasModel.getvSlider().doubleValue() / 100;
         totalTrackSize = (trackSize * trackCountExcludingCoordinates) + COORDINATE_TRACK_HEIGHT;
         if (totalTrackSize < canvasHeight) {
             double availableTrackSpace = canvas.getHeight() - COORDINATE_TRACK_HEIGHT;

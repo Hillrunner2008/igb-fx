@@ -9,6 +9,7 @@ import com.google.common.collect.TreeMultimap;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
+import javafx.animation.AnimationTimer;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.SetChangeListener;
@@ -18,6 +19,7 @@ import org.lorainelab.igb.selections.SelectionInfoService;
 import org.lorainelab.igb.visualization.model.CanvasModel;
 import org.lorainelab.igb.visualization.model.TracksModel;
 import org.lorainelab.igb.visualization.ui.CanvasRegion;
+import org.lorainelab.igb.visualization.ui.OverlayRegion;
 import org.lorainelab.igb.visualization.ui.ViewPortManager;
 import org.reactfx.EventSource;
 import org.slf4j.Logger;
@@ -32,6 +34,7 @@ public class WidgetManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(WidgetManager.class);
     private EventSource<RenderAction> refreshViewStream;
+    private EventSource<OverlayRenderAction> overlayRefreshStream;
     private List<Widget> widgets;
     private CanvasModel canvasModel;
     private TracksModel tracksModel;
@@ -39,37 +42,44 @@ public class WidgetManager {
     private ChangeListener<Number> refreshViewListener;
     private CanvasRegion canvasRegion;
     private SelectionInfoService selectionInfoService;
+    private boolean isRefreshing;
+    private OverlayRegion overlayRegion;
 
     public WidgetManager() {
+        isRefreshing = false;
         refreshViewStream = new EventSource<>();
+        overlayRefreshStream = new EventSource<>();
         widgets = Lists.newArrayList();
         refreshViewListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             refreshViewStream.emit(new RenderAction());
         };
+
     }
 
     @Activate
     public void activate() {
-        refreshViewStream.successionEnds(Duration.ofMillis(1)).subscribe(e -> {
-            renderWidgets();
+        overlayRefreshStream.subscribe(renderEvent -> {
+            overlayAnimationTimer.start();
+        });
+        refreshViewStream.successionEnds(Duration.ofMillis(4)).subscribe(renderEvent -> {
+            animationTimer.start();
         });
         canvasModel.getxFactor().addListener(refreshViewListener);
         canvasModel.getScrollX().addListener(refreshViewListener);
         canvasModel.getModelWidth().addListener(refreshViewListener);
-        canvasModel.getZoomStripeCoordinate().addListener(refreshViewListener);
+        canvasModel.getZoomStripeCoordinate().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+            overlayRefreshStream.emit(new OverlayRenderAction());
+        });
         canvasModel.getyFactor().addListener(refreshViewListener);
         canvasModel.getScrollY().addListener(refreshViewListener);
         canvasModel.getScrollYVisibleAmount().addListener(refreshViewListener);
         canvasModel.getVisibleVirtualCoordinatesX().addListener(refreshViewListener);
         canvasModel.getvSlider().addListener(refreshViewListener);
-        canvasModel.getMouseClickLocation().addListener((ObservableValue<? extends Optional<Point2D>> observable, Optional<Point2D> oldValue, Optional<Point2D> newValue) -> {
-            refreshViewStream.emit(new RenderAction());
-        });
         canvasModel.getClickDragStartPosition().addListener((ObservableValue<? extends Optional<Point2D>> observable, Optional<Point2D> oldValue, Optional<Point2D> newValue) -> {
-            refreshViewStream.emit(new RenderAction());
+            overlayRefreshStream.emit(new OverlayRenderAction());
         });
-        canvasModel.getScreenPoint().addListener((ObservableValue<? extends Optional<Point2D>> observable, Optional<Point2D> oldValue, Optional<Point2D> newValue) -> {
-            refreshViewStream.emit(new RenderAction());
+        canvasModel.getLastDragPosition().addListener((ObservableValue<? extends Optional<Point2D>> observable, Optional<Point2D> oldValue, Optional<Point2D> newValue) -> {
+            overlayRefreshStream.emit(new OverlayRenderAction());
         });
         tracksModel.getTrackRenderers().addListener((SetChangeListener.Change<? extends TrackRenderer> change) -> {
             refreshViewStream.emit(new RenderAction());
@@ -82,7 +92,24 @@ public class WidgetManager {
         canvasModel.isforceRefresh().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
             refreshViewStream.emit(new RenderAction());
         });
+        animationTimer = new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                renderWidgets();
+                stop();
+            }
+        };
+        overlayAnimationTimer = new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                renderOverayWidgets();
+                stop();
+            }
+        };
+
     }
+    private AnimationTimer animationTimer;
+    private AnimationTimer overlayAnimationTimer;
 
     @Reference(multiple = true, unbind = "removeWidget", dynamic = true, optional = true)
     public void addWidget(Widget widget) {
@@ -96,17 +123,36 @@ public class WidgetManager {
     }
 
     public void renderWidgets() {
+        TreeMultimap<Integer, Widget> sortedWidgets = getSortedWidgets();
+        viewPortManager.refresh();
+        canvasRegion.clear();
+        overlayRegion.clear();
+        sortedWidgets.entries().forEach(entry -> entry.getValue().render(canvasModel));
+        //TODO consider other ways to handle the need to rest this value
+        canvasModel.setMouseClickLocation(null);
+    }
+
+    private void renderOverayWidgets() {
+        overlayRegion.clear();
+        TreeMultimap<Integer, Widget> sortedWidgets = getSortedWidgets();
+        sortedWidgets.entries().stream().filter(entry -> entry.getValue().isOverlayWidget()).forEach(entry -> entry.getValue().render(canvasModel));
+    }
+
+    private TreeMultimap<Integer, Widget> getSortedWidgets() {
         TreeMultimap<Integer, Widget> sortedWidgets = TreeMultimap.create(Ordering.natural(), Ordering.arbitrary());
         widgets.stream().forEach(widget -> sortedWidgets.put(widget.getZindex(), widget));
         tracksModel.getTrackRenderers().stream().forEach(widget -> sortedWidgets.put(widget.getZindex(), widget));
-        viewPortManager.refresh();
-        sortedWidgets.entries().forEach(entry -> entry.getValue().render(canvasModel));
-        canvasModel.setMouseClickLocation(null);
+        return sortedWidgets;
     }
 
     @Reference
     public void setCanvasRegion(CanvasRegion canvasRegion) {
         this.canvasRegion = canvasRegion;
+    }
+
+    @Reference
+    public void setOverlayRegion(OverlayRegion overlayRegion) {
+        this.overlayRegion = overlayRegion;
     }
 
     @Reference
@@ -129,7 +175,14 @@ public class WidgetManager {
         this.selectionInfoService = selectionInfoService;
     }
 
-    private class RenderAction {
+    private static class ProcessSelectionsEvent {
+
+    }
+
+    private static class RenderAction {
+    }
+
+    private static class OverlayRenderAction {
     }
 
 }

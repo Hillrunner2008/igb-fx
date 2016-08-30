@@ -9,7 +9,7 @@ import com.google.common.collect.Ordering;
 import com.google.common.collect.SortedSetMultimap;
 import com.google.common.collect.TreeMultimap;
 import java.util.EnumMap;
-import javafx.application.Platform;
+import java.util.concurrent.ExecutionException;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -17,6 +17,7 @@ import javafx.scene.control.SeparatorMenuItem;
 import org.lorainelab.igb.menu.api.MenuBarEntryProvider;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
 import org.lorainelab.igb.menu.api.model.WeightedMenuEntry;
+import static org.lorainelab.igb.visualization.util.FXUtilities.runAndWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -210,64 +211,66 @@ public class MenuBarManager {
     }
 
     private synchronized void rebuildMenus() {
-        Platform.runLater(() -> {
-            rebuildFileMenu();
-            rebuildEditMenu();
-            rebuildViewMenu();
-            rebuildToolsMenu();
-            rebuildHelpMenu();
-            rebuildGenomeMenu();
-            rebuildParentMenus();
-        });
+        try {
+            runAndWait(() -> {
+                rebuildFileMenu();
+                rebuildEditMenu();
+                rebuildViewMenu();
+                rebuildToolsMenu();
+                rebuildHelpMenu();
+                rebuildGenomeMenu();
+                rebuildParentMenus();
+            });
+        } catch (InterruptedException | ExecutionException ex) {
+            LOG.error(ex.getMessage(), ex);
+        }
     }
 
     private void rebuildParentMenus() {
         menuBar.getMenus().clear();
-        parentMenuEntries.keySet().stream().forEach(key -> {
+        parentMenuEntries.keySet().iterator().forEachRemaining(key -> {
             parentMenuEntries.get(key).forEach(menu -> menuBar.getMenus().add(menu));
         });
     }
 
     private void rebuildHelpMenu() {
         helpMenu.getItems().clear();
-        helpMenuEntries.keySet().stream().forEach(key -> {
+        helpMenuEntries.keySet().iterator().forEachRemaining(key -> {
             helpMenuEntries.get(key).forEach(menuItem -> helpMenu.getItems().add(menuItem));
         });
     }
 
     private void rebuildToolsMenu() {
         toolsMenu.getItems().clear();
-        toolsMenuEntries.keySet().stream().forEach(key -> {
+        toolsMenuEntries.keySet().iterator().forEachRemaining(key -> {
             toolsMenuEntries.get(key).forEach(menuItem -> toolsMenu.getItems().add(menuItem));
         });
     }
 
     private void rebuildViewMenu() {
         viewMenu.getItems().clear();
-        viewMenuEntries.keySet().stream().forEach(key -> {
+        viewMenuEntries.keySet().iterator().forEachRemaining(key -> {
             viewMenuEntries.get(key).forEach(menuItem -> viewMenu.getItems().add(menuItem));
         });
     }
 
     private void rebuildEditMenu() {
         editMenu.getItems().clear();
-        editMenuEntries.keySet().stream().forEach(key -> {
+        editMenuEntries.keySet().iterator().forEachRemaining(key -> {
             editMenuEntries.get(key).forEach(menuItem -> editMenu.getItems().add(menuItem));
         });
     }
 
     private void rebuildFileMenu() {
         fileMenu.getItems().clear();
-        synchronized (fileMenuEntries) {
-            fileMenuEntries.keySet().stream().forEach(key -> {
-                fileMenuEntries.get(key).forEach(menuItem -> fileMenu.getItems().add(menuItem));
-            });
-        }
+        fileMenuEntries.keySet().iterator().forEachRemaining(key -> {
+            fileMenuEntries.get(key).forEach(menuItem -> fileMenu.getItems().add(menuItem));
+        });
     }
 
     private void rebuildGenomeMenu() {
         genomeMenu.getItems().clear();
-        genomeMenuEntries.keySet().stream().forEach(key -> {
+        genomeMenuEntries.keySet().iterator().forEachRemaining(key -> {
             genomeMenuEntries.get(key).forEach(menuItem -> genomeMenu.getItems().add(menuItem));
         });
     }

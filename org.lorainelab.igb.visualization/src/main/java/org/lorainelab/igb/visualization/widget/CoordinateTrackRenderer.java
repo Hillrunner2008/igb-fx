@@ -4,7 +4,6 @@ import com.google.common.collect.Range;
 import com.sun.javafx.tk.FontMetrics;
 import com.sun.javafx.tk.Toolkit;
 import java.text.DecimalFormat;
-import javafx.application.Platform;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -164,9 +163,6 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     }
 
     private void drawCoordinateLine() {
-        gc.save();
-        gc.scale(1 / xfactor, 1);
-        gc.setFill(Color.BLACK);
         double majorTickInterval = getMajorTick(viewBoundingRectangle.getWidth());
 
         double minorTickInterval = majorTickInterval / 10;
@@ -184,6 +180,9 @@ public class CoordinateTrackRenderer implements TrackRenderer {
             } else {
                 startMajor = (long) (viewBoundingRectangle.getMinX() + majorTickInterval - (viewBoundingRectangle.getMinX() % majorTickInterval));
             }
+            gc.save();
+            gc.scale(1 / xfactor, 1);
+            gc.setFill(Color.BLACK);
             for (long i = startMajor; i < (viewBoundingRectangle.getMaxX() + 1); i += majorTickInterval) {
                 gc.scale(textScale, textScale);
                 double x = (i - viewBoundingRectangle.getMinX()) * xfactor;
@@ -197,7 +196,6 @@ public class CoordinateTrackRenderer implements TrackRenderer {
                 }
                 gc.strokeLine(x, y1, x, y2);
             }
-
             long startMinor = (long) (viewBoundingRectangle.getMinX() + minorTickInterval - (viewBoundingRectangle.getMinX() % minorTickInterval));
             for (long i = startMinor; i < (viewBoundingRectangle.getMaxX() + 1); i += minorTickInterval) {
                 double x = (i - viewBoundingRectangle.getMinX()) * xfactor;
@@ -209,16 +207,15 @@ public class CoordinateTrackRenderer implements TrackRenderer {
                 }
                 gc.strokeLine(x, y1, x, y2);
             }
+            gc.restore();
             yOffset = modelHeight - viewBoundingRectangle.getHeight();
             y = COORDINATE_CENTER_LINE + canvasContext.getBoundingRect().getMinY();
             if (viewBoundingRectangle.getMinY() + modelHeight < gc.getCanvas().getHeight()) {
                 y -= yOffset;
             }
-            gc.restore();
             gc.strokeLine(0, y, viewBoundingRectangle.getWidth(), y);
             return;
         }
-        gc.restore();
     }
 
     private void drawCoordinateBasePairs() {
@@ -293,15 +290,8 @@ public class CoordinateTrackRenderer implements TrackRenderer {
             viewBoundingRectangle = new Rectangle2D(xOffset, canvasContext.getBoundingRect().getMinY(), visibleVirtualCoordinatesX, canvasContext.getBoundingRect().getHeight());
             viewYcoordinateRange = Range.<Double>closed(viewBoundingRectangle.getMinY(), viewBoundingRectangle.getMaxY());
             if (canvasContext.isVisible()) {
-                if (Platform.isFxApplicationThread()) {
-                    clearCanvas();
-                    draw(canvasModel);
-                } else {
-                    Platform.runLater(() -> {
-                        clearCanvas();
-                        draw(canvasModel);
-                    });
-                }
+                clearCanvas();
+                draw(canvasModel);
             }
         }
     }
@@ -388,7 +378,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
 
     @Override
     public View getView() {
-        View toReturn = new View(viewBoundingRectangle, canvasContext, chromosome);
+        View toReturn = new View(viewBoundingRectangle, canvasContext, chromosome, false);
         toReturn.setXfactor(xfactor);
         return toReturn;
     }
@@ -423,6 +413,11 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     @Override
     public int getZindex() {
         return 1;
+    }
+
+    @Override
+    public boolean isOverlayWidget() {
+        return true;
     }
 
 }

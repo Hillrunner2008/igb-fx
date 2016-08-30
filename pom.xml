@@ -23,7 +23,7 @@
         <pluginRepository>
             <id>public</id>
             <url>http://eos.transvar.org/nexus/content/groups/public</url>
-        </pluginRepository>
+        </pluginRepository> 
     </pluginRepositories>
     
     <distributionManagement>
@@ -56,6 +56,18 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
                 <version>1.7.7</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.logging</groupId>
+                <artifactId>pax-logging-api</artifactId>
+                <version>1.8.5</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.log</groupId>
+                <artifactId>org.apache.karaf.log.core</artifactId>
+                <version>${karaf.version}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
@@ -137,10 +149,21 @@
                 <scope>test</scope>
             </dependency>
             <!--modules-->
-            
+                 <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.utils</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>org.lorainelab.igb.preferences</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.preferences.otheroptions</artifactId>
                 <version>${project.version}</version>
                 <scope>provided</scope>
             </dependency>
@@ -183,6 +206,12 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>org.lorainelab.igb.filehandler.bed</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.filehandler.bigwig</artifactId>
                 <version>${project.version}</version>
                 <scope>provided</scope>
             </dependency>
@@ -254,6 +283,12 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.tabs.console</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>org.lorainelab.igb.tabs.selection</artifactId>
                 <version>${project.version}</version>
                 <scope>provided</scope>
@@ -304,6 +339,7 @@
     </build>
 
     <modules>
+        <module>org.lorainelab.igb.utils</module>
         <module>org.lorainelab.igb.stage.provider.api</module>
         <module>menus/org.lorainelab.igb.menu.api</module>
         <module>toolbar/org.lorainelab.igb.toolbar.api</module>
@@ -313,6 +349,7 @@
         
         <module>org.lorainelab.igb.main</module>
         
+        <module>org.lorainelab.igb.preferences.otheroptions</module>
         <module>menus/org.lorainelab.igb.menu.openfile</module>
         <module>menus/org.lorainelab.igb.menu.about</module>
         <module>menus/org.lorainelab.igb.menu.customgenome</module>
@@ -326,11 +363,13 @@
         <module>org.lorainelab.igb.recentfiles.registry</module>
         
         <module>filetypeHandlers/org.lorainelab.igb.filehandler.bed</module>
+        <module>filetypeHandlers/org.lorainelab.igb.filehandler.bigwig</module>
         <module>filetypeHandlers/org.lorainelab.igb.filehandler.bam</module>
         
         <module>org.lorainelab.igb.visualization</module>
         
         <module>tabs/org.lorainelab.igb.tabs.genome</module>
+        <module>tabs/org.lorainelab.igb.tabs.console</module>
         <module>tabs/org.lorainelab.igb.tabs.selection</module>
         
         <module>cache/org.lorainelab.igb.cache.http</module> 
@@ -344,9 +383,10 @@
         <module>org.lorainelab.igb.persistencemanager</module>
         <module>org.lorainelab.igb.datasetloadingservice</module>
         <module>org.lorainelab.igb.kar</module>
-    </modules>
+  </modules>
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <karaf.version>4.0.5</karaf.version>
     </properties>
 </project>

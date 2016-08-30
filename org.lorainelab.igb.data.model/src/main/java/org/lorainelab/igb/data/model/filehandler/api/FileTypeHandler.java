@@ -47,6 +47,9 @@ public interface FileTypeHandler {
     
     Set<String> getSearchIndexKeys();
     
+    boolean isGraphType();
+    
+    //TODO this doesn't seem like it should be in this api, we should revisit the design of search indexing 
     void createIndex(IndexIdentity indexIdentity, DataSourceReference dataSourceReference);
     
 }

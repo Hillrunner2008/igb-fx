@@ -16,7 +16,7 @@ import org.lorainelab.igb.menu.api.MenuBarEntryProvider;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
 import org.lorainelab.igb.menu.api.model.WeightedMenu;
 import org.lorainelab.igb.menu.api.model.WeightedMenuEntry;
-import org.lorainelab.igb.datasetloadingservice.DataSetLoadingService;
+import org.lorainelab.igb.datasetloadingservice.api.DataSetLoadingService;
 import org.lorainelab.igb.recentfiles.registry.api.RecentFilesRegistry;
 import org.slf4j.LoggerFactory;
 
