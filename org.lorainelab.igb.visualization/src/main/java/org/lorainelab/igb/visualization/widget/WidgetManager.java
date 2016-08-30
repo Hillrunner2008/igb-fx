@@ -9,6 +9,7 @@ import com.google.common.collect.TreeMultimap;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
+import javafx.animation.AnimationTimer;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.SetChangeListener;
@@ -52,15 +53,16 @@ public class WidgetManager {
         refreshViewListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             refreshViewStream.emit(new RenderAction());
         };
+
     }
 
     @Activate
     public void activate() {
-        refreshViewStream.successionEnds(Duration.ofMillis(5)).subscribe(e -> {
-            renderWidgets();
+        overlayRefreshStream.subscribe(renderEvent -> {
+            overlayAnimationTimer.start();
         });
-        overlayRefreshStream.subscribe(e -> {
-            renderOverayWidgets();
+        refreshViewStream.successionEnds(Duration.ofMillis(4)).subscribe(renderEvent -> {
+            animationTimer.start();
         });
         canvasModel.getxFactor().addListener(refreshViewListener);
         canvasModel.getScrollX().addListener(refreshViewListener);
@@ -90,7 +92,24 @@ public class WidgetManager {
         canvasModel.isforceRefresh().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
             refreshViewStream.emit(new RenderAction());
         });
+        animationTimer = new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                renderWidgets();
+                stop();
+            }
+        };
+        overlayAnimationTimer = new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                renderOverayWidgets();
+                stop();
+            }
+        };
+
     }
+    private AnimationTimer animationTimer;
+    private AnimationTimer overlayAnimationTimer;
 
     @Reference(multiple = true, unbind = "removeWidget", dynamic = true, optional = true)
     public void addWidget(Widget widget) {
