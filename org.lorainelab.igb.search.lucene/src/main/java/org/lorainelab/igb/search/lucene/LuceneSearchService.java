@@ -48,6 +48,7 @@ import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.SimpleFSDirectory;
 import org.apache.lucene.util.Version;
+import org.lorainelab.igb.preferences.PreferenceUtils;
 import org.lorainelab.igb.search.api.SearchService;
 import org.lorainelab.igb.search.api.model.Document;
 import org.lorainelab.igb.search.api.model.IndexIdentity;
@@ -71,11 +72,7 @@ public class LuceneSearchService implements SearchService {
     public void activate(Map<String, Object> properties) throws IOException {
         analyzer = new StandardAnalyzer();
         analyzer.setVersion(Version.LUCENE_6_0_0);
-        String indexPathRoot = System.getProperty("karaf.data", "");
-        if (indexPathRoot.isEmpty()) {
-            throw new IllegalStateException("could not find karaf data directory");
-        }
-        indexRoot = indexPathRoot + File.separator + "lucene" + File.separator;
+        indexRoot = PreferenceUtils.getApplicationDataDirectory() + File.separator + "lucene" + File.separator;
         initDb();
     }
 
