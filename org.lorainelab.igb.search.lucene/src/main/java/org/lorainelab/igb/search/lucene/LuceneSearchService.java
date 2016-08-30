@@ -11,6 +11,7 @@ import aQute.bnd.annotation.component.ConfigurationPolicy;
 import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Lists;
+import com.google.common.io.Files;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -48,6 +49,7 @@ import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.SimpleFSDirectory;
 import org.apache.lucene.util.Version;
+import org.lorainelab.igb.preferences.PreferenceUtils;
 import org.lorainelab.igb.search.api.SearchService;
 import org.lorainelab.igb.search.api.model.Document;
 import org.lorainelab.igb.search.api.model.IndexIdentity;
@@ -71,18 +73,16 @@ public class LuceneSearchService implements SearchService {
     public void activate(Map<String, Object> properties) throws IOException {
         analyzer = new StandardAnalyzer();
         analyzer.setVersion(Version.LUCENE_6_0_0);
-        String indexPathRoot = System.getProperty("karaf.data", "");
-        if (indexPathRoot.isEmpty()) {
-            throw new IllegalStateException("could not find karaf data directory");
-        }
-        indexRoot = indexPathRoot + File.separator + "lucene" + File.separator;
+        indexRoot = PreferenceUtils.getApplicationDataDirectory() + File.separator + "lucene" + File.separator;
         initDb();
     }
 
     private void initDb() {
         try {
             Properties props = new Properties();
-            props.put("databaseName", "data/search.sqlite");
+            final String dataBaseFilePath = indexRoot + "data/search.sqlite";
+            props.put("databaseName", dataBaseFilePath);
+            Files.touch(new File(dataBaseFilePath));
             ds = dataSourceFactory.createDataSource(props);
             try (Connection dsConnection = ds.getConnection()) {
                 try (Statement stmt = dsConnection.createStatement()) {
@@ -94,7 +94,7 @@ public class LuceneSearchService implements SearchService {
                     LOG.debug(ex.getMessage(), ex);
                 }
             }
-        } catch (SQLException ex) {
+        } catch (SQLException | IOException ex) {
             LOG.error(ex.getMessage(), ex);
         }
     }
