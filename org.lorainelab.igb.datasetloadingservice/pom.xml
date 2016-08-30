@@ -71,9 +71,9 @@
                             !${project.artifactId},
                             *
                         </Import-Package>
-                        <Export-Package>org.lorainelab.igb.datasetloadingservice</Export-Package>
+                        <Export-Package>org.lorainelab.igb.datasetloadingImpl,org.lorainelab.igb.datasetloadingservice</Export-Package>
                         <Service-Component>*</Service-Component>
-                        <Private-Package>org.lorainelab.igb.datasetloadingservice.*,org.lorainelab.igb.openfileImpl.*</Private-Package>
+                        <Private-Package>org.lorainelab.igb.datasetloadingImpl.*,org.lorainelab.igb.datasetloadingservice.*,org.lorainelab.igb.openfileImpl.*</Private-Package>
                     </instructions>
                 </configuration>
             </plugin>

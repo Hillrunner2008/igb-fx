@@ -93,7 +93,7 @@ public class RecentFilesMenuEntry implements MenuBarEntryProvider {
     }
 
     @Reference
-    public void setFileOpener(DataSetLoadingService fileOpener) {
+    public void setDataSetLoadingService(DataSetLoadingService fileOpener) {
         this.fileOpener = fileOpener;
     }
 
