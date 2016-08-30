@@ -39,10 +39,11 @@ public class RecentFilesRegistryImpl implements RecentFilesRegistry {
     private ObservableList<String> observableRecentFiles;
     private ReadOnlyListWrapper<String> readOnlySetWrapper;
     private static final Comparator<? super RecentFileEntry> name = (o1, o2) -> o1.timeStamp.compareTo(o2.timeStamp);
-
+    private static int oldFileCountLimit = 5;
+    
     public RecentFilesRegistryImpl() {
         md5HashFunction = Hashing.md5();
-        recentFiles = EvictingQueue.create(5);
+        recentFiles = EvictingQueue.create(oldFileCountLimit);
         modulePreferencesNode = PreferenceUtils.getPackagePrefsNode(RecentFilesRegistryImpl.class);
         initializeFromPreferences();
     }
@@ -102,6 +103,9 @@ public class RecentFilesRegistryImpl implements RecentFilesRegistry {
     @Override
     public void addRecentFile(String recentFile) {
         recentFiles.removeIf(file -> file.getName().equals(recentFile));
+        if(recentFiles.size() == oldFileCountLimit){
+            removeRecentFileFromPreferences(recentFiles.poll().getName());
+        }
         RecentFileEntry fileEntry = new RecentFileEntry(recentFile, LocalDateTime.now());
         recentFiles.add(fileEntry);
         addRecentFileToPreferences(fileEntry);
@@ -132,7 +136,7 @@ public class RecentFilesRegistryImpl implements RecentFilesRegistry {
 
         private String name;
         private LocalDateTime timeStamp;
-      
+
         public String getName() {
             return name;
         }
@@ -140,7 +144,6 @@ public class RecentFilesRegistryImpl implements RecentFilesRegistry {
         public LocalDateTime getTimeStamp() {
             return timeStamp;
         }
-
 
         public RecentFileEntry(String name, LocalDateTime timeStamp) {
             this.name = name;
