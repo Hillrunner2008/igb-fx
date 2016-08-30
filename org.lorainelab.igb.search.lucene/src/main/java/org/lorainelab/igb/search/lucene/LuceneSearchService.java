@@ -75,7 +75,7 @@ public class LuceneSearchService implements SearchService {
         if (indexPathRoot.isEmpty()) {
             throw new IllegalStateException("could not find karaf data directory");
         }
-        indexRoot = (String) properties.get("index.path.root") + File.separator + "lucene" + File.separator;
+        indexRoot = indexPathRoot + File.separator + "lucene" + File.separator;
         initDb();
     }
 
