@@ -30,7 +30,7 @@ public class OtherPreferences implements PreferencesTabProvider {
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(OtherPreferences.class);
 
     @Activate
-    public void activate() {
+    void OtherPreferences() {
         resetButton = new Button("Reset Preferences");
         resetButton.setOnAction(ae -> {
             Platform.runLater(() -> {
@@ -38,13 +38,13 @@ public class OtherPreferences implements PreferencesTabProvider {
                 alert.setTitle("Preferences reset confirmation");
                 alert.setHeaderText("Reset all preferences to default");
                 alert.setContentText("Preferences reset needs application restart.\nAre you sure want reset preferences and exit?");
-                Optional<ButtonType> result = alert.showAndWait();
-                if (result.get() == ButtonType.OK) {
-                    LOG.info("Reset preferences requested.");
-                    PreferenceUtils.clearAllPreferences();
-                    LOG.debug("Preferences cleared, terminating the application");
-                    System.exit(0);
-                }
+                alert.showAndWait().filter(resp -> resp == ButtonType.OK)
+                        .ifPresent(resp -> {
+                            LOG.info("Reset preferences requested.");
+                            PreferenceUtils.clearAllPreferences();
+                            LOG.debug("Preferences cleared, terminating the application");
+                            System.exit(0);
+                        });
 
             });
         });
