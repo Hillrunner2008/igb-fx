@@ -28,9 +28,8 @@ public class OtherPreferences implements PreferencesTabProvider {
     Button resetButton;
     Tab otherPrefTab;
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(OtherPreferences.class);
-
-    @Activate  
-    void OtherPreferences() {
+  
+    public OtherPreferences() {
         resetButton = new Button("Reset Preferences");
         resetButton.setOnAction(ae -> {
             Platform.runLater(() -> {
