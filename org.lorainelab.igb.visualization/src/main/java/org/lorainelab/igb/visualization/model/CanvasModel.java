@@ -144,7 +144,7 @@ public class CanvasModel {
         return xFactor;
     }
 
-    public ReadOnlyDoubleProperty getyFactor() {
+    public DoubleProperty getyFactor() {
         return yFactor;
     }
 

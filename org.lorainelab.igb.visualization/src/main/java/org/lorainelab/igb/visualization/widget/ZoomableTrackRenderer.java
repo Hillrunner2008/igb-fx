@@ -3,6 +3,7 @@ package org.lorainelab.igb.visualization.widget;
 import com.google.common.collect.Range;
 import java.util.Optional;
 import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.Canvas;
@@ -37,15 +38,17 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     private final GraphicsContext gc;
     private int weight;
     private final Chromosome chromosome;
+    private ReadOnlyBooleanProperty isHeightLocked;
 
     public ZoomableTrackRenderer(Canvas canvas, Track track, Chromosome chromosome) {
         this.weight = 0;
         this.track = track;
         this.chromosome = chromosome;
         this.modelWidth = chromosome.getLength();
-        canvasContext = new CanvasContext(canvas, 0, 0);
+        canvasContext = new CanvasContext(canvas, track.getModelHeight(), 0);
         view = new View(new Rectangle2D(0, 0, modelWidth, track.getModelHeight()), canvasContext, chromosome, track.isNegative());
-        trackLabel = new TrackLabel(this, track.getTrackLabel());
+        trackLabel = new TrackLabel(this, track.getTrackLabel(), false);
+        isHeightLocked = trackLabel.getIsHeightLocked();
         gc = canvas.getGraphicsContext2D();
         tooltip = new Tooltip();
     }
@@ -71,22 +74,22 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         double scrollX = canvasModel.getScrollX().get();
         if (canvasContext.isVisible()) {
             final double visibleVirtualCoordinatesX = Math.floor(canvasContext.getBoundingRect().getWidth() / view.getXfactor());
-            final double visibleVirtualCoordinatesY = Math.floor(canvasContext.getBoundingRect().getHeight() / view.getYfactor());
+            final double visibleVirtualCoordinatesY = canvasContext.getBoundingRect().getHeight();
             double xOffset = Math.round((scrollX / 100) * (modelWidth - visibleVirtualCoordinatesX));
-            double yOffset = canvasContext.getRelativeTrackOffset() / view.getYfactor();
+            double yOffset = canvasContext.getRelativeTrackOffset();
             view.setBoundingRect(new Rectangle2D(xOffset, yOffset, visibleVirtualCoordinatesX, visibleVirtualCoordinatesY));
             if (canvasContext.isVisible()) {
                 draw(canvasModel);
             }
         }
     }
-
+    
     private void scaleCanvas(CanvasModel canvasModel) {
         double xFactor = canvasModel.getxFactor().get();
+        double yFactor = canvasModel.getyFactor().get();
         view.setXfactor(xFactor);
+        view.setYfactor(yFactor);
         if (canvasContext.isVisible()) {
-            double scaleToY = canvasContext.getTrackHeight() / track.getModelHeight();
-            view.setYfactor(scaleToY);
             updateView(canvasModel);
         }
     }
@@ -113,7 +116,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
                         minX,
                         canvasContext.getBoundingRect().getMinY(),
                         range.upperEndpoint() - range.lowerEndpoint(),
-                        view.getBoundingRect().getHeight()
+                        canvasContext.getBoundingRect().getHeight()
                 );
             }
         });
@@ -244,5 +247,10 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     @Override
     public int getZindex() {
         return 1;
+    }
+
+    @Override
+    public boolean isHeightLocked() {
+        return trackLabel.getIsHeightLocked().get();
     }
 }

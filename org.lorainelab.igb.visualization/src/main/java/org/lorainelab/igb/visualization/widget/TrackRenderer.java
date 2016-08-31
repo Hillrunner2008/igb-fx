@@ -9,7 +9,6 @@ import java.util.Comparator;
 import org.lorainelab.igb.data.model.CanvasContext;
 import org.lorainelab.igb.data.model.View;
 import org.lorainelab.igb.visualization.model.TrackLabel;
-import org.lorainelab.igb.visualization.widget.Widget;
 
 /**
  * = TrackRenderer
@@ -38,5 +37,7 @@ public interface TrackRenderer extends Widget {
     int getWeight();
 
     void setWeight(int weight);
+    
+    boolean isHeightLocked();
 
 }

@@ -5,6 +5,9 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import java.io.IOException;
 import java.net.URL;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Cursor;
@@ -58,8 +61,10 @@ public class TrackLabel {
     private StackPane dragGrip;
     private final TrackRenderer trackRenderer;
     private String trackLabelText;
+    private BooleanProperty isHeightLocked;
 
-    public TrackLabel(TrackRenderer trackRenderer, String trackLabelText) {
+    public TrackLabel(TrackRenderer trackRenderer, String trackLabelText, boolean isHeightLocked) {
+        this.isHeightLocked = new SimpleBooleanProperty(isHeightLocked);
         this.trackRenderer = trackRenderer;
         this.trackLabelText = trackLabelText;
         final URL resource = TrackLabel.class.getClassLoader().getResource("trackLabel.fxml");
@@ -113,6 +118,10 @@ public class TrackLabel {
 
     public String getTrackLabelText() {
         return trackLabelText;
+    }
+
+    public ReadOnlyBooleanProperty getIsHeightLocked() {
+        return isHeightLocked;
     }
 
     public void setTrackLabelText(String trackLabelText) {

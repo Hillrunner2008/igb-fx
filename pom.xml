@@ -148,8 +148,13 @@
                 <version>1.1.2</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>org.jooq</groupId>
+                <artifactId>jool</artifactId>
+                <version>0.9.11</version>
+            </dependency>
             <!--modules-->
-                 <dependency>
+            <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>org.lorainelab.igb.utils</artifactId>
                 <version>${project.version}</version>
@@ -383,7 +388,7 @@
         <module>org.lorainelab.igb.persistencemanager</module>
         <module>org.lorainelab.igb.datasetloadingservice</module>
         <module>org.lorainelab.igb.kar</module>
-  </modules>
+    </modules>
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>

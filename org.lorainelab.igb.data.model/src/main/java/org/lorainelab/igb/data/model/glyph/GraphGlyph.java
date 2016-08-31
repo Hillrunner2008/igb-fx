@@ -64,7 +64,7 @@ public class GraphGlyph implements Glyph {
             final double x = r.lowerEndpoint();
             double height = entry.getValue();
             double width = r.upperEndpoint() - r.lowerEndpoint() + 1;
-            final double y = view.getCanvasContext().getTrackHeight() / view.getYfactor();
+            final double y = view.getCanvasContext().getBoundingRect().getMinY() / view.getYfactor();
             SHARED_RECT.setRect(x, y - height, width, height);
             if (SHARED_RECT.intersects(view.getMutableBoundingRect())) {
                 intersect(view.getMutableBoundingRect(), SHARED_RECT, SHARED_RECT);

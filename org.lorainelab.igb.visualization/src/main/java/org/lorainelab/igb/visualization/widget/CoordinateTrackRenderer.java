@@ -51,8 +51,8 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         this.modelHeight = 50;
         validViewRange = Range.closedOpen(0, modelWidth);
         viewBoundingRectangle = new Rectangle2D(0, 0, modelWidth, modelHeight);
-        canvasContext = new CanvasContext(canvas, 0, 0);
-        trackLabel = new TrackLabel(this, COORDINATES_TRACK_LABEL);
+        canvasContext = new CanvasContext(canvas, modelHeight, 0);
+        trackLabel = new TrackLabel(this, COORDINATES_TRACK_LABEL, true);
         gc = canvas.getGraphicsContext2D();
     }
 
@@ -364,8 +364,10 @@ public class CoordinateTrackRenderer implements TrackRenderer {
 //        lastMouseClickX = Math.floor(event.getLocal().getX() / xfactor);
 //    }
     public void render(CanvasModel canvasModel) {
-        clearCanvas();
-        scaleCanvas(canvasModel);
+        if (canvasContext.isVisible()) {
+            clearCanvas();
+            scaleCanvas(canvasModel);
+        }
     }
 
     public void setZoomStripeCoordinate(double zoomStripeCoordinate) {
@@ -418,6 +420,11 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     @Override
     public boolean isOverlayWidget() {
         return true;
+    }
+
+    @Override
+    public boolean isHeightLocked() {
+        return trackLabel.getIsHeightLocked().get();
     }
 
 }

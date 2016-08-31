@@ -292,7 +292,9 @@ public class StackedGlyphTrack implements Track {
     public void addGlyphs(Collection<CompositionGlyph> glyphs) {
         this.glyphs.addAll(glyphs);
         slotMap.clear();
-        buildSlots();
+        if (!glyphs.isEmpty()) {
+            buildSlots();
+        }
     }
 
 }
