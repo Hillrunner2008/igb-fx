@@ -3,6 +3,7 @@ package org.lorainelab.igb.visualization.ui;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
+import javafx.beans.value.ObservableValue;
 import javafx.geometry.Orientation;
 import javafx.scene.control.ScrollBar;
 import org.lorainelab.igb.visualization.model.CanvasModel;
@@ -28,6 +29,10 @@ public class VerticalScrollBar extends ScrollBar {
     public void activate() {
         valueProperty().bindBidirectional(canvasModel.getScrollY());
         visibleAmountProperty().bindBidirectional(canvasModel.getScrollYVisibleAmount());
+        canvasModel.getvSlider().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+               final double visiblePercentage = 1 - (newValue.doubleValue() / 100);
+               setVisibleAmount(visiblePercentage * 100);
+        });
     }
 
     @Reference
