@@ -56,7 +56,8 @@ public class DataSetLoadingServiceImpl implements DataSetLoadingService {
             return f.getSupportedExtensions().contains(Files.getFileExtension(file.getPath()));
         }).findFirst().ifPresent(fileTypeHandler -> {
             selectionInfoService.getSelectedGenomeVersion().get().ifPresent(gv -> {
-                recentFilesRegistry.getRecentFiles().add(file.getPath());
+                //recentFilesRegistry.getRecentFiles().add(file.getPath());
+                recentFilesRegistry.addRecentFile(file.getPath());
                 DataSourceReference dataSourceReference = new DataSourceReference(file.getPath(), dataSource);
                 gv.getLoadedDataSets().add(new DataSet(file.getName(), dataSourceReference, fileTypeHandler));
                 indexDataSetForSearch(fileTypeHandler, dataSourceReference);
@@ -72,7 +73,8 @@ public class DataSetLoadingServiceImpl implements DataSetLoadingService {
                     return f.getSupportedExtensions().contains(Files.getFileExtension(file.getPath()));
                 }).findFirst().ifPresent(fileTypeHandler -> {
                     selectionInfoService.getSelectedGenomeVersion().get().ifPresent(gv -> {
-                        recentFilesRegistry.getRecentFiles().add(file.getPath());
+                        //recentFilesRegistry.getRecentFiles().add(file.getPath());
+                        recentFilesRegistry.addRecentFile(file.getPath());
                         DataSourceReference dataSourceReference = new DataSourceReference(file.getPath(), dataSource);
                         gv.getLoadedDataSets().add(new DataSet(file.getName(), dataSourceReference, fileTypeHandler));
                         indexDataSetForSearch(fileTypeHandler, dataSourceReference);
