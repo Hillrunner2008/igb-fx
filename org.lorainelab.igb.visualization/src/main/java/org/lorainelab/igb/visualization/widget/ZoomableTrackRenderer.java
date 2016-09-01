@@ -74,22 +74,24 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         double scrollX = canvasModel.getScrollX().get();
         if (canvasContext.isVisible()) {
             final double visibleVirtualCoordinatesX = Math.floor(canvasContext.getBoundingRect().getWidth() / view.getXfactor());
-            final double visibleVirtualCoordinatesY = canvasContext.getBoundingRect().getHeight();
+            final double visibleVirtualCoordinatesY = canvasContext.getBoundingRect().getHeight() / view.getYfactor();
             double xOffset = Math.round((scrollX / 100) * (modelWidth - visibleVirtualCoordinatesX));
-            double yOffset = canvasContext.getRelativeTrackOffset();
+            double yOffset = canvasContext.getRelativeTrackOffset() / view.getYfactor();
             view.setBoundingRect(new Rectangle2D(xOffset, yOffset, visibleVirtualCoordinatesX, visibleVirtualCoordinatesY));
             if (canvasContext.isVisible()) {
                 draw(canvasModel);
             }
         }
     }
-    
+
     private void scaleCanvas(CanvasModel canvasModel) {
         double xFactor = canvasModel.getxFactor().get();
-        double yFactor = canvasModel.getyFactor().get();
+//        double yFactor = canvasModel.getyFactor().get();
         view.setXfactor(xFactor);
-        view.setYfactor(yFactor);
+//        view.setYfactor(yFactor);
         if (canvasContext.isVisible()) {
+            double scaleToY = canvasContext.getTrackHeight() / track.getModelHeight();
+            view.setYfactor(scaleToY);
             updateView(canvasModel);
         }
     }
@@ -98,7 +100,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         if (Platform.isFxApplicationThread()) {
             gc.save();
             gc.scale(view.getXfactor(), view.getYfactor());
-            highlightLoadedRegions();
+//            highlightLoadedRegions();
             track.draw(gc, view, canvasContext);
             gc.restore();
         } else {
@@ -252,5 +254,9 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     @Override
     public boolean isHeightLocked() {
         return trackLabel.getIsHeightLocked().get();
+    }
+
+    public double getLockedHeight() {
+        return 50;//TODO implement this field
     }
 }

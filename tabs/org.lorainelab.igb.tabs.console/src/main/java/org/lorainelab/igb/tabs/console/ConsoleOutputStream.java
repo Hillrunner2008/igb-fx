@@ -42,7 +42,9 @@ public class ConsoleOutputStream extends OutputStream {
     @Override
     public void write(byte b[], int off, int len) throws IOException {
         try {
-            logLines.add(new String(b, off, len, "UTF-8"));
+            if (logLines.remainingCapacity() > 0) {
+                logLines.add(new String(b, off, len, "UTF-8"));
+            }
             updateStream.emit(null);
             if (original != null) {
                 original.write(b, off, len);

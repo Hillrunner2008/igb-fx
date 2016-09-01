@@ -37,7 +37,8 @@ public interface TrackRenderer extends Widget {
     int getWeight();
 
     void setWeight(int weight);
-    
+
     boolean isHeightLocked();
 
+    double getLockedHeight();
 }

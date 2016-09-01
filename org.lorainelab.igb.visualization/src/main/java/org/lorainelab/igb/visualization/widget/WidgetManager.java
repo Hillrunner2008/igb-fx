@@ -59,10 +59,12 @@ public class WidgetManager {
     @Activate
     public void activate() {
         overlayRefreshStream.subscribe(renderEvent -> {
-            overlayAnimationTimer.start();
+//            overlayAnimationTimer.start();
+              renderOverayWidgets();
         });
         refreshViewStream.successionEnds(Duration.ofMillis(4)).subscribe(renderEvent -> {
-            animationTimer.start();
+//            animationTimer.start();
+             renderWidgets();
         });
         canvasModel.getxFactor().addListener(refreshViewListener);
         canvasModel.getScrollX().addListener(refreshViewListener);
@@ -72,7 +74,6 @@ public class WidgetManager {
         });
         canvasModel.getyFactor().addListener(refreshViewListener);
         canvasModel.getScrollY().addListener(refreshViewListener);
-        canvasModel.getScrollYVisibleAmount().addListener(refreshViewListener);
         canvasModel.getVisibleVirtualCoordinatesX().addListener(refreshViewListener);
         canvasModel.getvSlider().addListener(refreshViewListener);
         canvasModel.getClickDragStartPosition().addListener((ObservableValue<? extends Optional<Point2D>> observable, Optional<Point2D> oldValue, Optional<Point2D> newValue) -> {

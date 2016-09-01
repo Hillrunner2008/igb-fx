@@ -43,7 +43,6 @@ public class CanvasModel {
     private DoubleProperty xOffset;
     private DoubleProperty scrollX;
     private DoubleProperty scrollY;
-    private DoubleProperty scrollYVisibleAmount;
     private DoubleProperty hSlider;
     private DoubleProperty vSlider;
     private SelectionInfoService selectionInfoService;
@@ -66,7 +65,6 @@ public class CanvasModel {
         xOffset = new SimpleDoubleProperty(0);
         scrollX = new SimpleDoubleProperty(0);
         scrollY = new SimpleDoubleProperty(0);
-        scrollYVisibleAmount = new SimpleDoubleProperty(100);
         hSlider = new SimpleDoubleProperty(0);
         vSlider = new SimpleDoubleProperty(0);
         mouseClickLocation = new SimpleObjectProperty<>(Optional.empty());
@@ -127,7 +125,6 @@ public class CanvasModel {
         resetZoomStripe();
         scrollX.setValue(0);
         scrollY.setValue(0);
-        scrollYVisibleAmount.setValue(100);
         hSlider.setValue(0);
         vSlider.setValue(0);
     }
@@ -177,10 +174,6 @@ public class CanvasModel {
 
     public DoubleProperty getScrollY() {
         return scrollY;
-    }
-
-    public DoubleProperty getScrollYVisibleAmount() {
-        return scrollYVisibleAmount;
     }
 
     public DoubleProperty gethSlider() {

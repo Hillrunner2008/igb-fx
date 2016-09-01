@@ -427,4 +427,9 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         return trackLabel.getIsHeightLocked().get();
     }
 
+    @Override
+    public double getLockedHeight() {
+        return modelHeight;
+    }
+
 }

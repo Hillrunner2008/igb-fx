@@ -44,13 +44,29 @@ public class ViewPortManager {
         double canvasWidth = canvas.getWidth();
         double canvasHeight = canvas.getHeight();
 
-        double totalLockedPixelHeight = sortedTrackRenderers.stream().filter(t -> t.isHeightLocked()).mapToDouble(t -> t.getModelHeight()).sum();
-        double totalModelHeight = Math.max(1, sortedTrackRenderers.stream().filter(t -> !t.isHeightLocked()).mapToDouble(t -> t.getModelHeight()).sum());//min 1 to avoid division by zero
-        double unlockedPixels = Math.max(1, canvas.getHeight() - totalLockedPixelHeight);//min 1 to avoid division by zero
+        double totalLockedPixelHeight = sortedTrackRenderers.stream().filter(t -> t.isHeightLocked()).mapToDouble(t -> t.getLockedHeight()).sum();
+        double totalUnlockedPixels = Math.max(1, sortedTrackRenderers.stream().filter(t -> !t.isHeightLocked()).mapToDouble(t -> t.getModelHeight()).sum());//min 1 to avoid division by zero
+        double totalPixels = totalLockedPixelHeight + totalUnlockedPixels;
+        double pixelToCoordRatio = 1;
+        if (totalPixels < canvasHeight) {
+            //scaled the unlocked pixels to minimally fit the view
+            double stretchPixelsNeeded = canvasHeight - totalPixels;
+            pixelToCoordRatio = (stretchPixelsNeeded + totalUnlockedPixels) / totalUnlockedPixels;
+        }
         //fit into this space if there is enough room
-        double pixelToCoordRatio = Math.max(unlockedPixels / totalModelHeight, 1);//adjust as needed to set min track height to smaller pixel value
-        double totalPixelsInScrollPane = totalLockedPixelHeight + (totalModelHeight * pixelToCoordRatio);
+
+        final double stretchedToFitModelHeight = totalUnlockedPixels * pixelToCoordRatio;
+        double totalPixelsInScrollPane = totalLockedPixelHeight + (stretchedToFitModelHeight);
         updateYFactor(totalPixelsInScrollPane);
+
+        double yFactor = canvasModel.getyFactor().doubleValue();
+        double value = verticalScrollBar.getValue() / verticalScrollBar.getMax();
+        verticalScrollBar.setMax(totalLockedPixelHeight + (stretchedToFitModelHeight * yFactor));
+        verticalScrollBar.setValue(Math.min(verticalScrollBar.getMax() * value, verticalScrollBar.getMax() - canvasHeight));
+//        if (canvasHeight >= verticalScrollBar.getMax()) {
+//            verticalScrollBar.setValue(0);///shouldn't be needed... and doesn't work well
+//        }
+        verticalScrollBar.setVisibleAmount(canvasHeight);
 
         //pass through as if unscaled
         double remainingPixels = totalPixelsInScrollPane;
@@ -58,21 +74,19 @@ public class ViewPortManager {
             final CanvasContext canvasContext = tr.getCanvasContext();
             double trackPixelHeight = getPixelHeight(tr, pixelToCoordRatio);
             double trackOffset = totalPixelsInScrollPane - remainingPixels;
-            canvasContext.update(new Rectangle2D(0, trackOffset, canvasWidth, trackPixelHeight), 0);
+            canvasContext.update(new Rectangle2D(0, trackOffset, canvasWidth, trackPixelHeight), trackPixelHeight, 0);
             remainingPixels -= trackPixelHeight;
             canvasContext.setIsVisible(false);//set all to false until next pass to determine intersections with viewports
         }
-        //now worry about scaling etc...
-//        final double visiblePercentage = 1 - (canvasModel.getvSlider().get() / 100);
-        double yFactor = Math.round(canvasModel.getyFactor().doubleValue() * 100) / 100.0;
-        double viewPortOffset = (totalPixelsInScrollPane * (verticalScrollBar.getValue() / 100)) * yFactor;
-        double scaledCanvasHeight = canvasHeight * yFactor;
-        Range<Double> viewPortRange = Range.closed(viewPortOffset, viewPortOffset + scaledCanvasHeight);
-        double unscaledPixelsAdjustment = 0;
+        final double viewPortOffset = verticalScrollBar.getValue();
+        final double viewPortMax = verticalScrollBar.getValue() + verticalScrollBar.getVisibleAmount();
+        //now correct for scaling etc...
+        Range<Double> viewPortRange = Range.closed(viewPortOffset, viewPortMax);
+        double previousLockedTrackMaxY = -1;
         for (TrackRenderer tr : sortedTrackRenderers) {
             final CanvasContext canvasContext = tr.getCanvasContext();
             Rectangle2D canvasContextRect = canvasContext.getBoundingRect();
-            final double trackMinY = canvasContextRect.getMinY() * yFactor;
+            final double trackMinY = tr.isHeightLocked() ? canvasContextRect.getMinY() * yFactor : canvasContextRect.getMinY() * yFactor;
             final double trackHeight = tr.isHeightLocked() ? canvasContextRect.getHeight() : canvasContextRect.getHeight() * yFactor;
             Range<Double> trackRange = Range.closed(trackMinY, trackMinY + trackHeight);
             if (viewPortRange.isConnected(trackRange)) {
@@ -81,41 +95,53 @@ public class ViewPortManager {
                 double y = intersection.lowerEndpoint() - startPosition;
                 final double y2 = intersection.upperEndpoint() - startPosition;
                 double height = y2 - y;
-                double trackOffset = intersection.lowerEndpoint() - viewPortOffset;
+                double trackOffset = intersection.lowerEndpoint() - viewPortRange.lowerEndpoint();
                 Rectangle2D boundingRectangle;
                 if (tr.isHeightLocked()) {
-                    unscaledPixelsAdjustment += (yFactor * height) - height;
                     boundingRectangle = new Rectangle2D(0, trackOffset, canvasWidth, height);
+                    previousLockedTrackMaxY += boundingRectangle.getMaxY();
                 } else {
-                    double minY = trackOffset - unscaledPixelsAdjustment;
-                    height += unscaledPixelsAdjustment;
+                    final double minY = previousLockedTrackMaxY > -1 ? previousLockedTrackMaxY : trackOffset;
+                    double diff = trackOffset - minY;
+                    height += diff;
                     boundingRectangle = new Rectangle2D(0, minY, canvasWidth, height);
-                    unscaledPixelsAdjustment = 0;
+                    previousLockedTrackMaxY = -1;
                 }
                 double relativeTrackOffset = 0;
                 if (trackOffset == 0) {
-                    relativeTrackOffset = viewPortOffset - canvasContextRect.getMinY();
+                    relativeTrackOffset = viewPortRange.lowerEndpoint() - canvasContextRect.getMinY();
                 }
-                canvasContext.update(boundingRectangle, relativeTrackOffset);
+                double originalHeight = canvasContextRect.getHeight() * yFactor;
+                canvasContext.update(boundingRectangle, originalHeight, relativeTrackOffset);
                 canvasContext.setIsVisible(true);
 
+            } else {
+                //locked tracks height adjustment still needed if it is out of view above a track
+                if (tr.isHeightLocked()) {
+                    previousLockedTrackMaxY = 0;
+                }
             }
         }
 
     }
 
-    private void updateYFactor(double totalPixels) {
+    private void updateYFactor(double totalPixelsInScrollPane) {
+        double yFactor = getYFactor(totalPixelsInScrollPane);
+        canvasModel.getyFactor().setValue(yFactor);
+    }
+
+    private double getYFactor(double totalPixelsInScrollPane) {
         final double vSliderValue = canvasModel.getvSlider().get();
-        final double visiblePercentage = 1 - (vSliderValue / 100);
+        final double vSliderPercentage = 1 - (vSliderValue / 100);
         double minScaleY = canvas.getHeight();
         double maxScaleY = MAX_MODEL_COORDINATES_IN_VIEW;
-        double yFactor = totalPixels / (maxScaleY + (minScaleY - maxScaleY) * visiblePercentage);
-        canvasModel.getyFactor().setValue(yFactor);
+        double yFactor = totalPixelsInScrollPane / (maxScaleY + (minScaleY - maxScaleY) * vSliderPercentage);
+        return yFactor;
     }
 
     private double getPixelHeight(final TrackRenderer tr, double pixelToCoordRatio) {
         if (tr.isHeightLocked()) {
-            return tr.getCanvasContext().getBoundingRect().getHeight();
+            return tr.getLockedHeight();
         }
         return tr.getModelHeight() * pixelToCoordRatio;
     }
