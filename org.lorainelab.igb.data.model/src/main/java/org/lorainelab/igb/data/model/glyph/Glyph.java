@@ -76,7 +76,11 @@ public interface Glyph {
                 height = height - cutOff;
                 y -= MIN_Y_OFFSET;
             } else {
-                y -= cutOff;
+                if (slotBoundingViewRect.getMaxY() == viewRect.getMaxY()) {
+                    y += cutOff;
+                } else {
+                    y -= cutOff;
+                }
             }
         }
         if (width <= 0 || height <= 0) {
