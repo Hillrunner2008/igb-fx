@@ -19,7 +19,7 @@ public class VerticalScrollBar extends ScrollBar {
 
     public VerticalScrollBar() {
         setOrientation(Orientation.VERTICAL);
-        setBlockIncrement(.01);
+        setBlockIncrement(1);
         setMin(0);
         setMax(100);
         setVisibleAmount(100);
