@@ -14,6 +14,7 @@ import org.junit.Test;
 import org.lorainelab.igb.data.model.CanvasContext;
 import org.lorainelab.igb.visualization.model.CanvasModel;
 import org.lorainelab.igb.visualization.model.TracksModel;
+import static org.lorainelab.igb.visualization.ui.ViewPortManager.MAX_MODEL_COORDINATES_IN_VIEW;
 import org.lorainelab.igb.visualization.widget.CoordinateTrackRenderer;
 import org.lorainelab.igb.visualization.widget.TrackRenderer;
 import org.lorainelab.igb.visualization.widget.ZoomableTrackRenderer;
@@ -80,9 +81,7 @@ public class ViewPortManagerTest {
         assertEquals(yFactor, 1d, 0);
         vSliderValue.set(100);
         yFactor = viewPortManager.getYFactor();
-        assertEquals(yFactor, 10d, 0);
-        yFactor = viewPortManager.getYFactor();
-        assertEquals(yFactor, 10d, 0);
+        assertEquals(yFactor, canvas.getHeight() / MAX_MODEL_COORDINATES_IN_VIEW, 0);
     }
 
     @Test
