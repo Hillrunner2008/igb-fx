@@ -3,6 +3,7 @@ package org.lorainelab.igb.visualization.ui;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
+import javafx.beans.value.ObservableValue;
 import javafx.geometry.Orientation;
 import javafx.scene.control.ScrollBar;
 import org.lorainelab.igb.visualization.model.CanvasModel;
@@ -29,17 +30,15 @@ public class VerticalScrollBar extends ScrollBar {
     public void activate() {
 //        visibleAmountProperty().bind(canvasRegion.heightProperty().multiply(canvasModel.getyFactor()));
         valueProperty().bindBidirectional(canvasModel.getScrollY());
-//        canvasModel.getvSlider().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-//            final double visiblePercentage = 1 - (newValue.doubleValue() / 100);
-//            double visibleAmount = visiblePercentage * 100;
-//            visibleAmount = Math.round(visibleAmount * 10) / 10.0;
-//            setVisibleAmount(visibleAmount);
-//            double previousValuePercentage = getValue() / oldValue.doubleValue();
-//            double updatedValuePercentage = getValue() / newValue.doubleValue();
-//        });
+        canvasModel.getvSlider().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+            final double visiblePercentage = 1 - (newValue.doubleValue() / 100);
+            double visibleAmount = visiblePercentage * 100;
+            visibleAmount = Math.round(visibleAmount * 10) / 10.0;
+            setVisibleAmount(visibleAmount);
+        });
     }
-    
-      @Reference
+
+    @Reference
     public void setCanvasRegion(CanvasRegion canvasRegion) {
         this.canvasRegion = canvasRegion;
     }

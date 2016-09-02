@@ -1,6 +1,7 @@
 package org.lorainelab.igb.visualization.model;
 
 import com.google.common.base.CharMatcher;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import java.io.IOException;
 import java.net.URL;
@@ -10,6 +11,7 @@ import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.HPos;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -54,19 +56,26 @@ public class TrackLabel {
     @FXML
     private Rectangle colorChooserRect;
     @FXML
-    private FontAwesomeIconView lockIcon;
+    private FontAwesomeIconView unLockIcon;
     @FXML
     private StackPane root;
     @FXML
     private StackPane dragGrip;
+    @FXML
+    private GridPane gridPane;
     private final TrackRenderer trackRenderer;
     private String trackLabelText;
     private BooleanProperty isHeightLocked;
+    private FontAwesomeIconView lockIcon;
 
     public TrackLabel(TrackRenderer trackRenderer, String trackLabelText, boolean isHeightLocked) {
         this.isHeightLocked = new SimpleBooleanProperty(isHeightLocked);
         this.trackRenderer = trackRenderer;
         this.trackLabelText = trackLabelText;
+        lockIcon = new FontAwesomeIconView(FontAwesomeIcon.LOCK);
+        lockIcon.setSize("20");
+        GridPane.setColumnIndex(lockIcon, 3);
+        GridPane.setHalignment(lockIcon, HPos.CENTER);
         final URL resource = TrackLabel.class.getClassLoader().getResource("trackLabel.fxml");
         FXMLLoader fxmlLoader = new FXMLLoader(resource);
         fxmlLoader.setClassLoader(this.getClass().getClassLoader());
@@ -102,6 +111,16 @@ public class TrackLabel {
         dragGrip.setOnMouseExited(event -> root.getScene().setCursor(Cursor.DEFAULT));
         addContextMenu();
         root.setStyle("-fx-border-width: .5 0 .5 0; -fx-border-color: BLACK;");
+        unLockIcon.setOnMouseClicked(click -> {
+            isHeightLocked.set(true);
+            gridPane.getChildren().remove(unLockIcon);
+            gridPane.getChildren().add(lockIcon);
+        });
+        lockIcon.setOnMouseClicked(click -> {
+            isHeightLocked.set(false);
+            gridPane.getChildren().remove(lockIcon);
+            gridPane.getChildren().add(unLockIcon);
+        });
     }
 
     public StackPane getContent() {
@@ -109,7 +128,7 @@ public class TrackLabel {
     }
 
     private void hideOptionalWidgets() {
-        lockIcon.setVisible(false);
+        unLockIcon.setVisible(false);
         leftSideColorIndicator.setStyle(colorToWebStyle(Color.GRAY));
         colorChooserRect.setVisible(false);
         GridPane.setRowIndex(dragGrip, 0);
@@ -129,7 +148,7 @@ public class TrackLabel {
     }
 
     private void showOptionalWidgets() {
-        lockIcon.setVisible(true);
+        unLockIcon.setVisible(true);
         colorChooserRect.setFill(Color.DODGERBLUE.brighter());
         leftSideColorIndicator.setStyle(colorToWebStyle(Color.DODGERBLUE));
         colorChooserRect.setVisible(true);

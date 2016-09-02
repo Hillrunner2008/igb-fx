@@ -41,4 +41,5 @@ public interface TrackRenderer extends Widget {
     boolean isHeightLocked();
 
     double getLockedHeight();
+
 }

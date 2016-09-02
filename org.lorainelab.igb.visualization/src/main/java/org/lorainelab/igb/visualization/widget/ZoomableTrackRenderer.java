@@ -4,6 +4,7 @@ import com.google.common.collect.Range;
 import java.util.Optional;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.Canvas;
@@ -39,6 +40,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     private int weight;
     private final Chromosome chromosome;
     private ReadOnlyBooleanProperty isHeightLocked;
+    private double lockedHeight;
 
     public ZoomableTrackRenderer(Canvas canvas, Track track, Chromosome chromosome) {
         this.weight = 0;
@@ -51,6 +53,12 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         isHeightLocked = trackLabel.getIsHeightLocked();
         gc = canvas.getGraphicsContext2D();
         tooltip = new Tooltip();
+        lockedHeight = track.getModelHeight();
+        isHeightLocked.addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+            if (newValue) {
+                lockedHeight = canvasContext.getBoundingRect().getHeight();
+            }
+        });
     }
 
     private void processLastMouseClickedPosition(CanvasModel canvasModel) {
@@ -90,8 +98,13 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         view.setXfactor(xFactor);
 //        view.setYfactor(yFactor);
         if (canvasContext.isVisible()) {
-            double scaleToY = canvasContext.getTrackHeight() / track.getModelHeight();
-            view.setYfactor(scaleToY);
+            if (isHeightLocked()) {
+                double scaleToY = lockedHeight / track.getModelHeight();
+                view.setYfactor(scaleToY);
+            } else {
+                double scaleToY = canvasContext.getTrackHeight() / track.getModelHeight();
+                view.setYfactor(scaleToY);
+            }
             updateView(canvasModel);
         }
     }
@@ -257,6 +270,6 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     }
 
     public double getLockedHeight() {
-        return 50;//TODO implement this field
+        return lockedHeight;
     }
 }

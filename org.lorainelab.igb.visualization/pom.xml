@@ -98,7 +98,7 @@
             <groupId>com.miglayout</groupId>
             <artifactId>miglayout-javafx</artifactId>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
         </dependency>
