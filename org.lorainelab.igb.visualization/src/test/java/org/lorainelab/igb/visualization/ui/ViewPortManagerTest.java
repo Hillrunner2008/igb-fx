@@ -92,7 +92,6 @@ public class ViewPortManagerTest {
         assertEquals(coordinateTrack.getCanvasContext().getBoundingRect().getHeight(), 50d, 0);
         assertEquals(bottomTrack.getCanvasContext().getBoundingRect().getHeight(), 225d, 1);
 
-//        assertEquals(verticalScrollBar.getMax(), 500d, 0);
     }
 
     @Test
@@ -103,17 +102,13 @@ public class ViewPortManagerTest {
         assertFalse(coordinateTrack.getCanvasContext().isVisible());
         assertFalse(bottomTrack.getCanvasContext().isVisible());
 
-//        assertEquals(verticalScrollBar.getMax(), 4550d, 0);
-//        assertEquals(verticalScrollBar.getValue(), 0, 0);
-//        assertEquals(verticalScrollBar.getVisibleAmount(), 500, 0);
     }
 
     @Test
     public void testScrolledOffset() {
         vSliderValue.set(100);//zoom fully
         viewPortManager.activate();
-//        verticalScrollBar.setValue(4050d);
-        verticalScrollBar.setValue(89.010989011);
+        verticalScrollBar.setValue(((double) 4050 / (double) 4550) * 100);
         viewPortManager.refresh();
 
         //validate visibility
@@ -121,24 +116,15 @@ public class ViewPortManagerTest {
         assertFalse(coordinateTrack.getCanvasContext().isVisible());
         assertEquals(bottomTrack.getCanvasContext().getBoundingRect().getHeight(), 500d, 1);
 
-        //validate srollbar state
-//        assertEquals(verticalScrollBar.getMax(), 4550d, 0);
-//        assertEquals(verticalScrollBar.getValue(), 4050d, 0);
-//        assertEquals(verticalScrollBar.getVisibleAmount(), 500, 0);
     }
 
     @Test
     public void testCoordinatePartiallyInView() {
         vSliderValue.set(100);//zoom fully
         viewPortManager.activate();
-//        verticalScrollBar.setValue(2295d);
         verticalScrollBar.setValue(((double) 2295 / (double) 4550) * 100);
         viewPortManager.refresh();
 
-        //validate srollbar state
-//        assertEquals(verticalScrollBar.getMax(), 4550d, 0);
-//        assertEquals(verticalScrollBar.getValue(), 2295d, 0);
-//        assertEquals(verticalScrollBar.getVisibleAmount(), 500, 0);
         //validate visibility
         assertFalse(topTrack.getCanvasContext().isVisible());
         assertTrue(coordinateTrack.getCanvasContext().isVisible());
