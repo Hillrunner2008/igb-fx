@@ -23,7 +23,7 @@ public class VerticalScrollBar extends ScrollBar {
         setBlockIncrement(1);
         setMin(0);
         setMax(100);
-        setVisibleAmount(100);
+        setVisibleAmount(MAX_VISIBLE_AMOUNT);
     }
 
     @Activate
@@ -34,9 +34,14 @@ public class VerticalScrollBar extends ScrollBar {
             final double visiblePercentage = 1 - (newValue.doubleValue() / 100);
             double visibleAmount = visiblePercentage * 100;
             visibleAmount = Math.round(visibleAmount * 10) / 10.0;
-            setVisibleAmount(visibleAmount);
+            if (visibleAmount > MAX_VISIBLE_AMOUNT) {
+                  setVisibleAmount(MAX_VISIBLE_AMOUNT);
+            } else {
+                setVisibleAmount(visibleAmount);
+            }
         });
     }
+    private static final double MAX_VISIBLE_AMOUNT =99;
 
     @Reference
     public void setCanvasRegion(CanvasRegion canvasRegion) {

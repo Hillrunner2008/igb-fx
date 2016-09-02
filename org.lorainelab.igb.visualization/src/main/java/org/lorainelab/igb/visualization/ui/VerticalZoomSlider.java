@@ -22,7 +22,7 @@ public class VerticalZoomSlider extends Slider {
         setPrefWidth(15);
         setRotate(180);
         setPadding(new Insets(15, 0, 15, 0));
-        setMin(0);
+        setMin(0.1);
         setValue(0);
         setMax(100);
     }
