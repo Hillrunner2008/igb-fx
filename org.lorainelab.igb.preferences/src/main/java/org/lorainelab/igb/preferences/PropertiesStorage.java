@@ -116,17 +116,20 @@ class PropertiesStorage implements NbPreferences.FileStorage {
             List<File> childFolders = StreamSupport.stream(Files.fileTreeTraverser().children(folder).spliterator(), false)
                     .filter(child -> child.isDirectory())
                     .collect(toList());
+            
             for (File fo : childFolders) {
-                Files.fileTreeTraverser().breadthFirstTraversal(fo).filter(child -> Files.getFileExtension(child.getPath()).equals("properties")).forEach(child -> folderNames.add(child.getName()));
+                Files.fileTreeTraverser().breadthFirstTraversal(fo).filter(child -> Files.getFileExtension(child.getPath()).equals("properties")).forEach(child -> folderNames.add(fo.getName()));
             }
-            List<File> childFiles = StreamSupport.stream(Files.fileTreeTraverser().children(folder).spliterator(), false)
-                    .filter(child -> child.isFile())
-                    .collect(toList());
-            for (File fo : childFiles) {
-                if (Files.getFileExtension(fo.getPath()).equals("properties")) { // NOI18N
-                    folderNames.add(fo.getName());
-                }
-            }
+                        
+//            List<File> childFiles = StreamSupport.stream(Files.fileTreeTraverser().children(folder).spliterator(), false)
+//                    .filter(child -> child.isFile())
+//                    .collect(toList());
+//            
+//            for (File fo : childFiles) {
+//                if (Files.getFileExtension(fo.getPath()).equals("properties")) { // NOI18N
+//                    folderNames.add(fo.getName());
+//                }
+//            }
         }
 
         return folderNames.toArray(new String[folderNames.size()]);
@@ -214,7 +217,7 @@ class PropertiesStorage implements NbPreferences.FileStorage {
         if (filePath == null) {
             String[] all = folderPath().split("/");//NOI18N
             StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < all.length - 1; i++) {
+            for (int i = 0; i < all.length; i++) {
                 sb.append(all[i]).append("/");//NOI18N
             }
             if (all.length > 0) {
