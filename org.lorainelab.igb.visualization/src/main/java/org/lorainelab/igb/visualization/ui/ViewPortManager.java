@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 public class ViewPortManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(ViewPortManager.class);
-    static final double MAX_MODEL_COORDINATES_IN_VIEW = 250;//full zoom //TODO unit test depend on this not changing due to hard coded validation numbers... need to update them to be flexible
+    static final double MAX_MODEL_COORDINATES_IN_VIEW = 50;//full zoom //TODO unit test depend on this not changing due to hard coded validation numbers... need to update them to be flexible
     private Canvas canvas;
     private CanvasRegion canvasRegion;
     private TracksModel tracksModel;
