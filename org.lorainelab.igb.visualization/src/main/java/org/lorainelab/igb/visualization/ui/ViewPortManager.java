@@ -78,7 +78,7 @@ public class ViewPortManager {
         double updatedMax = totalLockedPixelHeight + (stretchedToFitModelHeight * yFactor);
         double viewPortOffset = updatedMax * (verticalScrollBar.getValue() / 100);
         viewPortOffset = Math.min(updatedMax - canvasHeight, viewPortOffset);
-        final double viewPortMax =viewPortOffset + canvasHeight;
+        final double viewPortMax = viewPortOffset + canvasHeight;
         //now correct for scaling etc...
         Range<Double> viewPortRange = Range.closed(viewPortOffset, viewPortMax);
         double previousLockedTrackMaxY = -1;
@@ -122,6 +122,7 @@ public class ViewPortManager {
                 if (tr.isHeightLocked()) {
                     previousLockedTrackMaxY = 0;
                 }
+                previousIntersectionMax = trackRange.upperEndpoint();
             }
         }
 
