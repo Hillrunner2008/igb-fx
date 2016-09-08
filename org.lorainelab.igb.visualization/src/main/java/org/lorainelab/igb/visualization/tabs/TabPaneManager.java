@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.ExecutionException;
 import javafx.collections.ObservableList;
 import javafx.geometry.Side;
 import javafx.scene.control.Tab;
@@ -54,38 +53,30 @@ public class TabPaneManager {
 
     @Reference(optional = true, multiple = true, unbind = "removeTab", dynamic = true)
     public void addTab(TabProvider tabProvider) {
-        try {
-            runAndWait(() -> {
-                tabProvider.getTab().setClosable(false);
-                switch (tabProvider.getTabDockingPosition()) {
-                    case BOTTOM:
-                        addTab(bottomTabPane, tabProvider);
-                        break;
-                    case RIGHT:
-                        addTab(rightTabPane, tabProvider);
-                        break;
-                }
-            });
-        } catch (InterruptedException | ExecutionException ex) {
-            LOG.error(ex.getMessage(), ex);
-        }
+        runAndWait(() -> {
+            tabProvider.getTab().setClosable(false);
+            switch (tabProvider.getTabDockingPosition()) {
+                case BOTTOM:
+                    addTab(bottomTabPane, tabProvider);
+                    break;
+                case RIGHT:
+                    addTab(rightTabPane, tabProvider);
+                    break;
+            }
+        });
     }
 
     public void removeTab(TabProvider tabProvider) {
-        try {
-            runAndWait(() -> {
-                switch (tabProvider.getTabDockingPosition()) {
-                    case BOTTOM:
-                        removeTab(bottomTabPane, tabProvider);
-                        break;
-                    case RIGHT:
-                        removeTab(rightTabPane, tabProvider);
-                        break;
-                }
-            });
-        } catch (InterruptedException | ExecutionException ex) {
-            LOG.error(ex.getMessage(), ex);
-        }
+        runAndWait(() -> {
+            switch (tabProvider.getTabDockingPosition()) {
+                case BOTTOM:
+                    removeTab(bottomTabPane, tabProvider);
+                    break;
+                case RIGHT:
+                    removeTab(rightTabPane, tabProvider);
+                    break;
+            }
+        });
     }
 
     private synchronized void addTab(TabPane tabPane, TabProvider tabProvider) {

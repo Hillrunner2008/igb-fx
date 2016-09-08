@@ -1,7 +1,7 @@
 package org.lorainelab.igb.visualization.util;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
+import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.concurrent.CountDownLatch;
 import javafx.application.Platform;
 
 /**
@@ -10,13 +10,23 @@ import javafx.application.Platform;
  */
 public class FXUtilities {
 
-    public static void runAndWait(Runnable runnable) throws InterruptedException, ExecutionException {
+    public static void runAndWait(Runnable runnable) {
+        checkNotNull(runnable);
         if (Platform.isFxApplicationThread()) {
             runnable.run();
         } else {
-            FutureTask<Void> future = new FutureTask<>(runnable, null);
-            Platform.runLater(future);
-            future.get();
+            final CountDownLatch doneLatch = new CountDownLatch(1);
+            Platform.runLater(() -> {
+                try {
+                    runnable.run();
+                } finally {
+                    doneLatch.countDown();
+                }
+            });
+            try {
+                doneLatch.await();
+            } catch (InterruptedException ex) {
+            }
         }
     }
 

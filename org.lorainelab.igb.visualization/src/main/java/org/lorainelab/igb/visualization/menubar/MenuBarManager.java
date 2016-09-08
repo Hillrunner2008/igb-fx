@@ -9,7 +9,6 @@ import com.google.common.collect.Ordering;
 import com.google.common.collect.SortedSetMultimap;
 import com.google.common.collect.TreeMultimap;
 import java.util.EnumMap;
-import java.util.concurrent.ExecutionException;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -211,19 +210,15 @@ public class MenuBarManager {
     }
 
     private synchronized void rebuildMenus() {
-        try {
-            runAndWait(() -> {
-                rebuildFileMenu();
-                rebuildEditMenu();
-                rebuildViewMenu();
-                rebuildToolsMenu();
-                rebuildHelpMenu();
-                rebuildGenomeMenu();
-                rebuildParentMenus();
-            });
-        } catch (InterruptedException | ExecutionException ex) {
-            LOG.error(ex.getMessage(), ex);
-        }
+        runAndWait(() -> {
+            rebuildFileMenu();
+            rebuildEditMenu();
+            rebuildViewMenu();
+            rebuildToolsMenu();
+            rebuildHelpMenu();
+            rebuildGenomeMenu();
+            rebuildParentMenus();
+        });
     }
 
     private void rebuildParentMenus() {
