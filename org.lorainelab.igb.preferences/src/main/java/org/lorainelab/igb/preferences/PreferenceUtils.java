@@ -24,9 +24,7 @@ public class PreferenceUtils {
     private static String DATA_HOME_DIR;
 
     public static Preferences getDefaultPrefsNode() {
-        String prefDirPath = getApplicationDataDirectory().getAbsolutePath() + File.separator + "preferences" + File.separator + IgbVersion.getVersion() + File.separator;
-        System.setProperty("java.util.prefs.userRoot", prefDirPath);
-        return Preferences.userRoot().node(ROOT_PREFERENCE_NODE_NAME);
+        return NbPreferences.userRootImpl();
     }
 
     public static Preferences getPackagePrefsNode(Class c) {
@@ -61,9 +59,16 @@ public class PreferenceUtils {
         return new File(DATA_HOME_DIR + File.separator);
     }
 
+    public static File getPreferenceConfigDirectory() {
+        File applicationDataDirectory = getApplicationDataDirectory();
+        File preferenceConfigDirectory = new File(applicationDataDirectory.getPath() + File.separator + IgbVersion.getVersion() + File.separator + "preferences");
+        preferenceConfigDirectory.mkdir();
+        return preferenceConfigDirectory;
+    }
+
     private static String getPreferenceNodeName(String name) {
         final String replace = name.replace('.', '/');
-        return replace.replaceFirst(ROOT_PREFERENCE_NODE_NAME + "/", "");
+        return replace;//replace.replaceFirst(ROOT_PREFERENCE_NODE_NAME + "/", "");
     }
 
 }
