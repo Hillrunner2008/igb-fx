@@ -23,11 +23,11 @@ public class PreferencesManager {
     }
 
     public static Preferences getCachePrefsNode() {
-        return PreferenceUtils.getDefaultPrefsNode().node("org.lorainelab.igb.cache.root");
+        return PreferenceUtils.getPackagePrefsNode(PreferencesManager.class).node("org.lorainelab.igb.cache.root");
     }
 
     public static Preferences getCacheRequestNode() {
-        return PreferenceUtils.getDefaultPrefsNode().node("org.lorainelab.igb.cache.request");
+        return PreferenceUtils.getPackagePrefsNode(PreferencesManager.class).node("org.lorainelab.igb.cache.request");
     }
 
 }

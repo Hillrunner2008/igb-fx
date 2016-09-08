@@ -68,7 +68,7 @@ public class PreferenceUtils {
 
     private static String getPreferenceNodeName(String name) {
         final String replace = name.replace('.', '/');
-        return replace.replaceFirst(ROOT_PREFERENCE_NODE_NAME + "/", "");
+        return replace;//replace.replaceFirst(ROOT_PREFERENCE_NODE_NAME + "/", "");
     }
 
 }

@@ -40,17 +40,17 @@ public class TestPreferences {
     }
 
     @After
-    public void tearDown() {
+    public void tearDown() throws BackingStoreException {
     }
 
     // TODO add test methods here.
     // The methods must be annotated with annotation @Test. For example:
     //
-//    @Test
-//    public void testPut() {
-//        Preferences node = modulePreferencesNode.node("demoNode");
-//        node.put("demoKey2", "demoValue");
-//    }
+    @Test
+    public void testPut() {
+        Preferences node = modulePreferencesNode.node("demoNode");
+        node.put("demoKey2", "demoValue");
+    }
     
     @Test
     public void testGet() throws BackingStoreException {
@@ -60,5 +60,11 @@ public class TestPreferences {
                     .forEach(node -> {
                         System.out.println(node.get("demoKey2", ""));
                     });
+    }
+    
+    @Test
+    public void testDelete() throws BackingStoreException {
+        Preferences node = modulePreferencesNode.node("demoNode");
+        node.removeNode();
     }
 }
