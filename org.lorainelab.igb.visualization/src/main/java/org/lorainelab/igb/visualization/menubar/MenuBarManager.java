@@ -16,7 +16,7 @@ import javafx.scene.control.SeparatorMenuItem;
 import org.lorainelab.igb.menu.api.MenuBarEntryProvider;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
 import org.lorainelab.igb.menu.api.model.WeightedMenuEntry;
-import static org.lorainelab.igb.visualization.util.FXUtilities.runAndWait;
+import static org.lorainelab.igb.utils.FXUtilities.runAndWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

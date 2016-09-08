@@ -15,7 +15,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.AnchorPane;
 import org.lorainelab.igb.tabs.api.TabProvider;
-import static org.lorainelab.igb.visualization.util.FXUtilities.runAndWait;
+import static org.lorainelab.igb.utils.FXUtilities.runAndWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

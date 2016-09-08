@@ -1,6 +1,7 @@
 package org.lorainelab.igb.visualization.model;
 
 import com.google.common.base.CharMatcher;
+import static com.google.common.base.Preconditions.checkNotNull;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import java.io.IOException;
@@ -34,6 +35,7 @@ import net.miginfocom.layout.CC;
 import org.lorainelab.igb.data.model.StackedGlyphTrack;
 import org.lorainelab.igb.data.model.Track;
 import static org.lorainelab.igb.data.model.util.ColorUtils.colorToWebStyle;
+import static org.lorainelab.igb.utils.FXUtilities.runAndWait;
 import org.lorainelab.igb.visualization.widget.TrackRenderer;
 import org.lorainelab.igb.visualization.widget.ZoomableTrackRenderer;
 import org.slf4j.Logger;
@@ -69,6 +71,8 @@ public class TrackLabel {
     private FontAwesomeIconView lockIcon;
 
     public TrackLabel(TrackRenderer trackRenderer, String trackLabelText, boolean isHeightLocked) {
+        checkNotNull(trackRenderer);
+        checkNotNull(trackLabelText);
         this.isHeightLocked = new SimpleBooleanProperty(isHeightLocked);
         this.trackRenderer = trackRenderer;
         this.trackLabelText = trackLabelText;
@@ -80,14 +84,18 @@ public class TrackLabel {
         FXMLLoader fxmlLoader = new FXMLLoader(resource);
         fxmlLoader.setClassLoader(this.getClass().getClassLoader());
         fxmlLoader.setController(this);
-        try {
-            fxmlLoader.load();
-        } catch (IOException exception) {
-            throw new RuntimeException(exception);
-        }
+        runAndWait(() -> {
+            try {
+                fxmlLoader.load();
+            } catch (IOException ex) {
+                LOG.error(ex.getMessage(), ex);
+            }
+        });
+        initComponenets();
     }
 
     public void setDimensions(Pane parent) {
+        checkNotNull(parent);
         double y = trackRenderer.getCanvasContext().getBoundingRect().getMinY();
         double height = trackRenderer.getCanvasContext().getBoundingRect().getHeight();
         root.setLayoutY(y - root.getLayoutBounds().getMinY());
@@ -101,8 +109,7 @@ public class TrackLabel {
         root.setClip(clipRect);
     }
 
-    @FXML
-    private void initialize() {
+    private void initComponenets() {
         colorChooserRect.setFill(Color.DODGERBLUE.brighter());
         leftSideColorIndicator.setStyle(colorToWebStyle(Color.DODGERBLUE));
         trackLabel.setText(trackLabelText);
