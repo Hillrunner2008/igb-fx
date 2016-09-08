@@ -6,6 +6,8 @@
 package org.lorainelab.igb.preferences;
 
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import org.junit.After;
@@ -33,6 +35,12 @@ public class TestPreferences {
 
     @AfterClass
     public static void tearDownClass() {
+        Preferences node = modulePreferencesNode.node("demoNode");
+        try {
+            node.removeNode();
+        } catch (BackingStoreException ex) {
+            assertTrue(false);
+        }
     }
 
     @Before
@@ -47,24 +55,23 @@ public class TestPreferences {
     // The methods must be annotated with annotation @Test. For example:
     //
     @Test
-    public void testPut() {
-        Preferences node = modulePreferencesNode.node("demoNode");
-        node.put("demoKey2", "demoValue");
-    }
-    
-    @Test
-    public void testGet() throws BackingStoreException {
-        //Preferences node = modulePreferencesNode.node("demoNode");
-        Arrays.stream(modulePreferencesNode.childrenNames())
+    public void test() {
+        try {
+            Preferences node = modulePreferencesNode.node("demoNode");
+            node.put("demoKey2", "demoValue");
+            node.put("demoKey", "demoValue2");
+            Preferences node2 = modulePreferencesNode.node("demoNode2");
+            node2.put("demoKey2", "demoValue");
+            node2.put("demoKey", "demoValue2");
+            
+            Arrays.stream(modulePreferencesNode.childrenNames())
                     .map(nodeName -> modulePreferencesNode.node(nodeName))
-                    .forEach(node -> {
-                        System.out.println(node.get("demoKey2", ""));
+                    .forEach(n -> {
+                        assertTrue(n.get("demoKey2", "").equals("demoValue"));
+                        assertTrue(n.get("demoKey", "").equals("demoValue2"));
                     });
-    }
-    
-    @Test
-    public void testDelete() throws BackingStoreException {
-        Preferences node = modulePreferencesNode.node("demoNode");
-        node.removeNode();
+        } catch (BackingStoreException ex) {
+            assertTrue(false);
+        }
     }
 }
