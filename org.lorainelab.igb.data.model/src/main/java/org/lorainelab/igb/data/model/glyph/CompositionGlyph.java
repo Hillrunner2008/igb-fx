@@ -138,11 +138,7 @@ public class CompositionGlyph implements Glyph {
 //            } else {
 //                y = (glyphMinY);
 //            }
-            if (Strings.isNullOrEmpty(label)) {
-                SCRATCH_RECT.setRect(minX, y, width, height);
-            } else {
-                SCRATCH_RECT.setRect(minX, y, width, height * 2);
-            }
+            SCRATCH_RECT.setRect(minX, y, width, height * 2);
             return Optional.of(SCRATCH_RECT);
         }
 
@@ -179,13 +175,20 @@ public class CompositionGlyph implements Glyph {
     private void drawChildren(GraphicsContext gc, View view, Rectangle2D slotBoundingViewRect) {
         final RangeMap<Double, Glyph> intersectionRangeMapX = xRange.subRangeMap(view.getXrange());
         if (!intersectionRangeMapX.asMapOfRanges().isEmpty()) {
-            for (Glyph glyph : intersectionRangeMapX.asMapOfRanges().values()) {
-                if (glyph instanceof GraphGlyph) {
-                    glyph.draw(gc, view, slotBoundingViewRect);
-                } else {
-                    glyph.draw(gc, view, slotBoundingViewRect);
-                }
-            }
+            final Collection<Glyph> childrenInView = intersectionRangeMapX.asMapOfRanges().values();
+            //TODO implement z index based sorting
+            childrenInView.stream().filter(glyph -> glyph instanceof LineGlyph).forEach(glyph -> glyph.draw(gc, view, slotBoundingViewRect));
+            childrenInView.stream()
+                    .filter(glyph -> glyph instanceof RectangleGlyph)
+                    .map(glyph -> RectangleGlyph.class.cast(glyph))
+                    .filter(rect -> rect.getBoundingRect().getHeight() == 10)
+                    .forEach(glyph -> glyph.draw(gc, view, slotBoundingViewRect));
+            childrenInView.stream()
+                    .filter(glyph -> glyph instanceof RectangleGlyph)
+                    .map(glyph -> RectangleGlyph.class.cast(glyph))
+                    .filter(rect -> rect.getBoundingRect().getHeight() != 10)
+                    .forEach(glyph -> glyph.draw(gc, view, slotBoundingViewRect));
+            childrenInView.stream().filter(glyph -> glyph instanceof GraphGlyph).forEach(glyph -> glyph.draw(gc, view, slotBoundingViewRect));
         }
     }
 
@@ -236,12 +239,12 @@ public class CompositionGlyph implements Glyph {
         }
     }
 
-    private void drawSelectionRectangle(GraphicsContext gc, View view, Rectangle.Double glyphViewIntersectionBounds, Rectangle2D slotBoundingViewRect) {
+    private void drawSelectionRectangle(GraphicsContext gc, View view, Rectangle.Double glyphViewIntersectionBounds, Rectangle2D slotBoundingRect) {
         if (isSelected()) {
             Rectangle.Double drawRect = glyphViewIntersectionBounds;
             for (Glyph g : xRange.asMapOfRanges().values()) {
                 if (g.isSelectable() && g.isSelected()) {
-                    Optional<Rectangle.Double> viewBoundingRect = g.calculateDrawRect(view, slotBoundingViewRect);
+                    Optional<Rectangle.Double> viewBoundingRect = g.calculateDrawRect(view, slotBoundingRect);
                     if (viewBoundingRect.isPresent()) {
                         drawRect = viewBoundingRect.get();
                         break;
@@ -252,10 +255,10 @@ public class CompositionGlyph implements Glyph {
             gc.setFill(Color.RED);
             double rectWidth = 0.25;
             double xToYRatio = view.getXfactor() / view.getYfactor();
-            double minY = drawRect.getMinY();
+            double minY = slotBoundingRect.getMinY();
             double minX = drawRect.getMinX();
             double maxX = drawRect.getMaxX();
-            double maxY = drawRect.getMaxY();
+            double maxY = slotBoundingRect.getMaxY();
             double width = drawRect.getWidth();
             double height = drawRect.getHeight();
             gc.fillRect(minX, minY, width, rectWidth); //top
