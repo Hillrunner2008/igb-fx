@@ -1,6 +1,7 @@
 package org.lorainelab.igb.visualization.widget;
 
 import com.google.common.collect.Range;
+import java.awt.Rectangle;
 import java.util.Optional;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyBooleanProperty;
@@ -17,6 +18,7 @@ import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.Track;
 import org.lorainelab.igb.data.model.View;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
+import org.lorainelab.igb.data.model.util.RectangleUtils;
 import org.lorainelab.igb.visualization.event.MouseHoverEvent;
 import org.lorainelab.igb.visualization.model.CanvasModel;
 import org.lorainelab.igb.visualization.model.TrackLabel;
@@ -112,8 +114,8 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     void draw(CanvasModel canvasModel) {
         if (Platform.isFxApplicationThread()) {
             gc.save();
-//            highlightLoadedRegions();
             gc.scale(view.getXfactor(), view.getYfactor());
+            highlightLoadedRegions();
             track.draw(gc, view, canvasContext);
             gc.restore();
         } else {
@@ -123,15 +125,19 @@ public class ZoomableTrackRenderer implements TrackRenderer {
 
     private void highlightLoadedRegions() {
         gc.save();
+        double trackPositionOffset = canvasContext.getBoundingRect().getMinY() / view.getYfactor();
+        gc.translate(0, trackPositionOffset);
         gc.setFill(Color.WHITE);
         track.getDataSet().getLoadedRegions(chromosome.getName()).asRanges().forEach(range -> {
             if (range.isConnected(Range.closed(view.getXrange().lowerEndpoint().intValue(), view.getXrange().upperEndpoint().intValue()))) {
-                double minX = range.lowerEndpoint() - view.getXrange().lowerEndpoint();
+                double minX = range.lowerEndpoint();
+                Rectangle.Double bgRect = new Rectangle.Double(minX, view.getBoundingRect().getMinY(), range.upperEndpoint() - range.lowerEndpoint(), view.getBoundingRect().getHeight());
+                RectangleUtils.intersect(view.getMutableBoundingRect(), bgRect, bgRect);
                 gc.fillRect(
-                        minX,
-                        canvasContext.getBoundingRect().getMinY(),
-                        range.upperEndpoint() - range.lowerEndpoint(),
-                        canvasContext.getBoundingRect().getHeight()
+                        bgRect.x - view.getXrange().lowerEndpoint(),
+                        bgRect.y,
+                        bgRect.width,
+                        bgRect.height
                 );
             }
         });
