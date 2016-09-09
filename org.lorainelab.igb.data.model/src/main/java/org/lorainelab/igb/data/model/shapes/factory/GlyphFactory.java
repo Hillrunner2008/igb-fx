@@ -34,7 +34,7 @@ public class GlyphFactory {
     }
 
     public static LineGlyph generateLine(org.lorainelab.igb.data.model.shapes.Line line) {
-        LineGlyph toReturn = new LineGlyph(line.getOffset(), line.getWidth(), 25);
+        LineGlyph toReturn = new LineGlyph(line.getOffset(), line.getWidth());
         return toReturn;
     }
 }

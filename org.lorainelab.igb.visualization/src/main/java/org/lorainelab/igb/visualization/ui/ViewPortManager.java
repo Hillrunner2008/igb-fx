@@ -110,7 +110,7 @@ public class ViewPortManager {
                     }
                     double relativeTrackOffset = 0;
                     if (trackOffset == 0) {
-                        relativeTrackOffset = viewPortRange.lowerEndpoint() - canvasContextRect.getMinY();
+                            relativeTrackOffset = intersection.lowerEndpoint() - startPosition;
                     }
                     double originalHeight = canvasContextRect.getHeight() * yFactor;
                     canvasContext.update(boundingRectangle, originalHeight, relativeTrackOffset);

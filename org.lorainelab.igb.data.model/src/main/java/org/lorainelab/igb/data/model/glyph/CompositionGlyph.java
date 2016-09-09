@@ -91,7 +91,7 @@ public class CompositionGlyph implements Glyph {
     }
 
     @Override
-    public Optional<Rectangle.Double> calculateDrawRect(View view, Rectangle2D slotBoundingViewRect) {
+    public Optional<Rectangle.Double> calculateDrawRect(View view, Rectangle2D slotBoundingRect) {
         final RangeMap<Double, Glyph> intersectionRangeMapX = xRange.subRangeMap(view.getXrange());
         if (!intersectionRangeMapX.asMapOfRanges().isEmpty()) {
             double minX = Double.MAX_VALUE;
@@ -101,7 +101,7 @@ public class CompositionGlyph implements Glyph {
             double glyphMinY = Double.MIN_VALUE;
             double maxGlyphheight = Double.MIN_VALUE;
             for (Glyph g : intersectionRangeMapX.asMapOfRanges().values()) {
-                Optional<Rectangle.Double> rect = g.calculateDrawRect(view, slotBoundingViewRect);
+                Optional<Rectangle.Double> rect = g.calculateDrawRect(view, slotBoundingRect);
                 if (rect.isPresent()) {
                     minX = Math.min(minX, rect.get().getMinX());
                     maxX = Math.max(maxX, rect.get().getMaxX());
@@ -138,7 +138,11 @@ public class CompositionGlyph implements Glyph {
 //            } else {
 //                y = (glyphMinY);
 //            }
-            SCRATCH_RECT.setRect(minX, y, width, height * 2);
+            if (Strings.isNullOrEmpty(label)) {
+                SCRATCH_RECT.setRect(minX, y, width, height);
+            } else {
+                SCRATCH_RECT.setRect(minX, y, width, height * 2);
+            }
             return Optional.of(SCRATCH_RECT);
         }
 
@@ -155,8 +159,8 @@ public class CompositionGlyph implements Glyph {
         drawChildren(gc, view, slotBoundingViewRect);
         if (!isSummaryRow) {
             drawLabel(view, viewBoundingRect, gc, glyphViewIntersectionBounds);
-            drawSelectionRectangle(gc, view, glyphViewIntersectionBounds, slotBoundingViewRect);
         }
+        drawSelectionRectangle(gc, view, glyphViewIntersectionBounds, slotBoundingViewRect);
     }
 
     @Override

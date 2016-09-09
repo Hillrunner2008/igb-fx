@@ -13,6 +13,7 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import org.lorainelab.igb.data.model.View;
+import static org.lorainelab.igb.data.model.util.RectangleUtils.intersect;
 
 /**
  *
@@ -21,8 +22,6 @@ import org.lorainelab.igb.data.model.View;
 public interface Glyph {
 
     static final int SLOT_HEIGHT = 30;
-    static final double MIN_Y_OFFSET = 17.5;
-    static final double MAX_SHAPE_HEIGHT = 15;
     static Rectangle.Double SHARED_RECT = new Rectangle.Double(0, 0, 0, 0);
 
     Color getFill();
@@ -43,51 +42,45 @@ public interface Glyph {
         //do nothing
     }
 
+    default SlotAlignment getSlotAlignment() {
+        return SlotAlignment.CENTER;
+    }
+
     void draw(GraphicsContext gc, View view, Rectangle2D slotBoundingViewRect);
 
-    default Optional<Rectangle.Double> calculateDrawRect(View view, Rectangle2D slotBoundingViewRect) {
-        double cutOff = SLOT_HEIGHT - slotBoundingViewRect.getHeight();
+    // aligns glyph within slot and clips to view bounds
+    default Optional<Rectangle.Double> calculateDrawRect(View view, Rectangle2D slotRect) {
         Rectangle2D viewRect = view.getBoundingRect();
         Rectangle2D boundingRect = getBoundingRect();
-        double x = boundingRect.getMinX();
-        double maxX = boundingRect.getMaxX();
-        double y = boundingRect.getMinY() + slotBoundingViewRect.getMinY();
-        double width = boundingRect.getWidth();
-        double height = boundingRect.getHeight();
+        double alignedMinY = getAlignedMinY(boundingRect, slotRect);
+        SHARED_RECT.setRect(boundingRect.getMinX(), alignedMinY, boundingRect.getWidth(), boundingRect.getHeight());
+        if (view.getMutableBoundingRect().intersects(SHARED_RECT)) {
+            intersect(view.getMutableBoundingRect(), SHARED_RECT, SHARED_RECT);
+            SHARED_RECT.setRect(SHARED_RECT.x - viewRect.getMinX(), SHARED_RECT.y - viewRect.getMinY(), SHARED_RECT.width, SHARED_RECT.height);
+            return Optional.of(SHARED_RECT);
+        }
+        return Optional.empty();
+    }
 
-        if (x < viewRect.getMinX()) {
-            double offSet = viewRect.getMinX() - x;
-            width = width - offSet;
-            x = 0;
-        } else {
-            x = x - viewRect.getMinX();
+    default double getAlignedMinY(Rectangle2D boundingRect, Rectangle2D slotRect) {
+        double y;
+        switch (getSlotAlignment()) {
+            case BOTTOM:
+                y = SLOT_HEIGHT - boundingRect.getHeight();
+                break;
+            case CENTER:
+                y = slotRect.getMinY() + (SLOT_HEIGHT - boundingRect.getHeight()) / 2;
+                break;
+            case TOP:
+                y = 0;
+                break;
+            case CUSTOM:
+                y = boundingRect.getMinY();
+                break;
+            default:
+                y = slotRect.getMinY() + (SLOT_HEIGHT - boundingRect.getHeight()) / 2;
         }
-        if (maxX > viewRect.getMaxX()) {
-            int offSet = (int) (maxX - viewRect.getMaxX());
-            width = width - offSet;
-        }
-        if (y < viewRect.getMinY()) {
-            double offSet = (viewRect.getMinY() - y - cutOff);
-            height = height - offSet;
-            y = 0;
-        } else {
-            y = y - viewRect.getMinY();
-            if (view.isIsNegative()) {
-                height = height - cutOff;
-                y -= MIN_Y_OFFSET;
-            } else {
-                if (slotBoundingViewRect.getMaxY() == viewRect.getMaxY()) {
-                    y += cutOff;
-                } else {
-                    y -= cutOff;
-                }
-            }
-        }
-        if (width <= 0 || height <= 0) {
-            return Optional.empty();
-        }
-        SHARED_RECT.setRect(x, y, width, height);
-        return Optional.of(SHARED_RECT);
+        return y;
     }
 
     static Comparator<CompositionGlyph> MIN_X_COMPARATOR

@@ -30,13 +30,16 @@ public class RectangleUtils {
         checkNotNull(src2);
         checkNotNull(dest);
         checkArgument(src1.intersects(src2), "cannot create intersection between non connected rectangles {} {}", src1, src2);
-        double x = Math.max(src1.getMinX(), src2.getMinX());
-        double y = Math.max(src1.getMinY(), src2.getMinY());
-        double maxx = Math.min(src1.getMaxX(), src2.getMaxX());
-        double maxy = Math.min(src1.getMaxY(), src2.getMaxY());
-//        if (maxx - x <= 0 || maxy - y <= 0) {
-//            throw new IllegalArgumentException("cannot create intersection between non connected rectangles");
-//        }
-        dest.setRect(x, y, maxx - x, maxy - y);
+        dest.setRect(src1.createIntersection(src2));
     }
+
+//    public static Optional<Rectangle.Double> intersect(Rectangle.Double src1, Rectangle.Double src2) {
+//        checkNotNull(src1);
+//        checkNotNull(src2);
+//        if (src1.intersects(src2)) {
+//            return Optional.of((Rectangle.Double) src1.createIntersection(src2));
+//        } else {
+//              return Optional.empty();
+//        }
+//    }
 }
