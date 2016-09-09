@@ -159,7 +159,7 @@ public class GlyphTest {
         assertTrue(calculateDrawRect.isPresent());
         java.awt.geom.Rectangle2D.Double drawRect = calculateDrawRect.get();
         assertEquals(drawRect.width, 45, 0);
-        assertEquals(drawRect.x, 5, 0);
+        assertEquals(drawRect.x, 0, 0);
         //x-y/2 + slot offset
         final double centeredMinY = slotRect.getMinY() + (SLOT_HEIGHT - g.getBoundingRect().getHeight()) / 2;
         assertEquals(drawRect.y, centeredMinY, 0);
