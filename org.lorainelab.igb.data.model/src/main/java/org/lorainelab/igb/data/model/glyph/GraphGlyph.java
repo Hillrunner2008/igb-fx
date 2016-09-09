@@ -53,7 +53,6 @@ public class GraphGlyph implements Glyph {
     public void draw(GraphicsContext gc, View view, Rectangle2D slotBoundingViewRect) {
         double modelCoordinatesPerScreenXPixel = view.getBoundingRect().getWidth() / view.getCanvasContext().getBoundingRect().getWidth();
         double modelCoordinatesPerScreenYPixel = view.getBoundingRect().getHeight() / view.getCanvasContext().getBoundingRect().getHeight();
-
         Rectangle2D viewRect = view.getBoundingRect();
         double viewMinx = viewRect.getMinX();
         gc.save();
@@ -65,7 +64,7 @@ public class GraphGlyph implements Glyph {
             double height = entry.getValue();
             double width = r.upperEndpoint() - r.lowerEndpoint() + 1;
             final double y = view.getCanvasContext().getBoundingRect().getMinY() / view.getYfactor();
-            SHARED_RECT.setRect(x, y - height, width, height);
+            SHARED_RECT.setRect(x, Math.max(0, y - height), width, height);
             if (SHARED_RECT.intersects(view.getMutableBoundingRect())) {
                 intersect(view.getMutableBoundingRect(), SHARED_RECT, SHARED_RECT);
                 width = SHARED_RECT.width;
@@ -76,11 +75,14 @@ public class GraphGlyph implements Glyph {
                 if (height > 0 && height < modelCoordinatesPerScreenYPixel) {
                     height = modelCoordinatesPerScreenYPixel;
                 }
-                gc.fillRect(SHARED_RECT.x - viewMinx, SHARED_RECT.y - viewRect.getMinY(), width, height);
+                final double padding = 1 * modelCoordinatesPerScreenYPixel;
+                final double minX = SHARED_RECT.x - viewMinx;
+                final double minY = (viewRect.getHeight() - height) - padding;
+                height += padding;
+                gc.fillRect(minX, minY, width, height);
             }
         }
         gc.restore();
-
     }
 
     public Optional<Rectangle.Double> calculateDrawRect(View view, Rectangle2D slotBoundingViewRect) {

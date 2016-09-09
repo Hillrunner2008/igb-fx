@@ -9,7 +9,6 @@ import java.net.URL;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.HPos;
@@ -70,10 +69,11 @@ public class TrackLabel {
     private BooleanProperty isHeightLocked;
     private FontAwesomeIconView lockIcon;
 
-    public TrackLabel(TrackRenderer trackRenderer, String trackLabelText, boolean isHeightLocked) {
+    public TrackLabel(TrackRenderer trackRenderer, String trackLabelText, BooleanProperty isHeightLocked) {
         checkNotNull(trackRenderer);
         checkNotNull(trackLabelText);
-        this.isHeightLocked = new SimpleBooleanProperty(isHeightLocked);
+        checkNotNull(isHeightLocked);
+        this.isHeightLocked=isHeightLocked;
         this.trackRenderer = trackRenderer;
         this.trackLabelText = trackLabelText;
         lockIcon = new FontAwesomeIconView(FontAwesomeIcon.LOCK);

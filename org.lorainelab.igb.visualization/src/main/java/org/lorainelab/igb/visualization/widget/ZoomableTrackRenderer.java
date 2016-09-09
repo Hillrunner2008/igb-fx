@@ -51,11 +51,11 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         this.modelWidth = chromosome.getLength();
         canvasContext = new CanvasContext(canvas, track.getModelHeight(), 0);
         view = new View(new Rectangle2D(0, 0, modelWidth, track.getModelHeight()), canvasContext, chromosome, track.isNegative());
-        trackLabel = new TrackLabel(this, track.getTrackLabel(), false);
+        trackLabel = new TrackLabel(this, track.getTrackLabel(), track.isHeightLocked());
         isHeightLocked = trackLabel.getIsHeightLocked();
         gc = canvas.getGraphicsContext2D();
         tooltip = new Tooltip();
-        lockedHeight = track.getModelHeight();
+        lockedHeight = track.getLockedHeight();
         isHeightLocked.addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
             if (newValue) {
                 lockedHeight = canvasContext.getBoundingRect().getHeight();

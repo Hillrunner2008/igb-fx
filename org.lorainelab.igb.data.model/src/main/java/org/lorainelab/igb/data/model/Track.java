@@ -7,6 +7,7 @@ package org.lorainelab.igb.data.model;
 
 import java.util.Collection;
 import java.util.List;
+import javafx.beans.property.BooleanProperty;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
@@ -16,7 +17,7 @@ import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
  * @author dcnorris
  */
 public interface Track {
-    
+
     DataSet getDataSet();
 
     void draw(GraphicsContext gc, View view, CanvasContext canvasContext);
@@ -32,6 +33,12 @@ public interface Track {
     void processSelectionRectangle(Rectangle2D selectionRectangle, View view);
 
     void clearSelections();
+    
+    boolean allowLockToggle();
+
+    BooleanProperty isHeightLocked();
+
+    double getLockedHeight();
 
     double getModelHeight();
 

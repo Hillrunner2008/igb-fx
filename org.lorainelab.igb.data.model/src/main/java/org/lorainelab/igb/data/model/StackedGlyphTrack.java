@@ -11,6 +11,8 @@ import java.util.OptionalInt;
 import java.util.concurrent.ConcurrentHashMap;
 import static java.util.stream.Collectors.toList;
 import java.util.stream.Stream;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
@@ -39,8 +41,12 @@ public class StackedGlyphTrack implements Track {
     private int stackHeight;
     private int slotCount;
     private final DataSet dataSet;
+    private BooleanProperty isHeightLocked;
+    private double lockedHeight;
 
     public StackedGlyphTrack(boolean isNegative, String trackLabel, int stackHeight, DataSet dataSet) {
+        this.lockedHeight = 25;
+        this.isHeightLocked = new SimpleBooleanProperty(false);
         this.dataSet = dataSet;
         this.isNegative = isNegative;
         this.trackLabel = trackLabel;
@@ -49,6 +55,7 @@ public class StackedGlyphTrack implements Track {
         this.modelHeight = Math.max(SLOT_HEIGHT * stackHeight, SLOT_HEIGHT);
         slotMap = new ConcurrentHashMap<>();
         glyphs = Lists.newArrayList();
+
     }
 
     @Override
@@ -289,6 +296,21 @@ public class StackedGlyphTrack implements Track {
         if (!glyphs.isEmpty()) {
             buildSlots();
         }
+    }
+
+    @Override
+    public BooleanProperty isHeightLocked() {
+        return isHeightLocked;
+    }
+
+    @Override
+    public double getLockedHeight() {
+        return lockedHeight;
+    }
+
+    @Override
+    public boolean allowLockToggle() {
+        return true;
     }
 
 }

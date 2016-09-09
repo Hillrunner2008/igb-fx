@@ -4,6 +4,7 @@ import com.google.common.collect.Range;
 import com.sun.javafx.tk.FontMetrics;
 import com.sun.javafx.tk.Toolkit;
 import java.text.DecimalFormat;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -52,7 +53,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         validViewRange = Range.closedOpen(0, modelWidth);
         viewBoundingRectangle = new Rectangle2D(0, 0, modelWidth, modelHeight);
         canvasContext = new CanvasContext(canvas, modelHeight, 0);
-        trackLabel = new TrackLabel(this, COORDINATES_TRACK_LABEL, true);
+        trackLabel = new TrackLabel(this, COORDINATES_TRACK_LABEL, new SimpleBooleanProperty(true));
         gc = canvas.getGraphicsContext2D();
     }
 
