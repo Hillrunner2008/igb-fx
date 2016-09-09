@@ -21,7 +21,6 @@ public class LineGlyph implements Glyph {
     int width;
     private Rectangle2D boundingRect;
     private double y;
-    private Rectangle2D renderBoundingRect;
 
     public LineGlyph(int start, int width, double y) {
         this.start = start;
@@ -46,31 +45,19 @@ public class LineGlyph implements Glyph {
     }
 
     @Override
-    public void draw(GraphicsContext gc, View view, double additionalYoffset) {
-        Rectangle2D viewRect = view.getBoundingRect();
-        Rectangle2D drawRect = getRenderBoundingRect();
-        double x = drawRect.getMinX()+.5;
-        double y = drawRect.getMinY();
-        double width = drawRect.getWidth()-1;
-        double height = drawRect.getHeight();
-        if (x < viewRect.getMinX()) {
-            int offSet = (int) (viewRect.getMinX() - x);
-            width = width - offSet;
-            x = 0;
-        } else {
-            x = x - viewRect.getMinX();
-        }
-        if (y < viewRect.getMinY()) {
-            int offSet = (int) (viewRect.getMinY() - y);
-            height = height - offSet;
-            y = height + offSet;
-        } else {
-            y = y - viewRect.getMinY();
-        }
+    public void draw(GraphicsContext gc, View view, Rectangle2D slotBoundingViewRect) {
+        calculateDrawRect(view, slotBoundingViewRect).ifPresent(drawRect -> {
+            double x = drawRect.getMinX();
+            double y = drawRect.getMinY();
+            double width = drawRect.getWidth();
+            double height = drawRect.getHeight();
+            gc.save();
+            gc.setFill(Color.BLACK);
+            gc.setStroke(Color.BLACK);
+            gc.strokeLine(x, y, x + width, y);
+            gc.restore();
+        });
 
-        gc.setFill(Color.BLACK);
-        gc.setStroke(Color.BLACK);
-        gc.strokeLine(x, y + additionalYoffset, x + width, y + additionalYoffset);
     }
 
     @Override
@@ -108,19 +95,6 @@ public class LineGlyph implements Glyph {
             return false;
         }
         return true;
-    }
-
-    @Override
-    public Rectangle2D getRenderBoundingRect() {
-        if (renderBoundingRect == null) {
-            return boundingRect;
-        }
-        return renderBoundingRect;
-    }
-
-    @Override
-    public void setRenderBoundingRect(Rectangle2D renderBoundingRect) {
-        this.renderBoundingRect = renderBoundingRect;
     }
 
 }

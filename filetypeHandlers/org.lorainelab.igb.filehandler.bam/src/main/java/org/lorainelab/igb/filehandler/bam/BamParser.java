@@ -40,6 +40,7 @@ import org.lorainelab.igb.data.model.shapes.factory.GlyphFactory;
 import org.lorainelab.igb.data.model.view.Layer;
 import org.lorainelab.igb.search.api.SearchService;
 import org.lorainelab.igb.search.api.model.IndexIdentity;
+import org.lorainelab.igb.selections.SelectionInfoService;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -52,6 +53,7 @@ public class BamParser implements FileTypeHandler {
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(BamParser.class);
 
     private SearchService searchService;
+    private SelectionInfoService selectionInfoService;
 
     @Override
     public String getName() {
@@ -65,37 +67,45 @@ public class BamParser implements FileTypeHandler {
 
     @Override
     public Set<CompositionGlyph> getRegion(DataSourceReference dataSourceReference, Range<Integer> range, String chromosomeId) {
-        String path = dataSourceReference.getPath();
         Set<BamFeature> annotations = Sets.newHashSet();
-        DataSource dataSource = dataSourceReference.getDataSource();
-        try (SeekableBufferedStream bamSeekableStream = new SeekableBufferedStream(
-                new SeekableFileStream(new File(dataSourceReference.getPath())));
-                SeekableBufferedStream indexSeekableStream = new SeekableBufferedStream(
-                        new SeekableFileStream(new File(dataSourceReference.getPath() + ".bai")));) {
+        selectionInfoService.getSelectedChromosome().get().ifPresent(selectedChromosome -> {
+            selectedChromosome.loadRegion(range);
+            String referenceSequence = new String(selectedChromosome.getSequence(range.lowerEndpoint(), range.upperEndpoint()));
 
-            SamReader reader = SamReaderFactory.make()
-                    .validationStringency(ValidationStringency.SILENT)
-                    .open(SamInputResource.of(bamSeekableStream).index(indexSeekableStream));
+            try (SeekableBufferedStream bamSeekableStream = new SeekableBufferedStream(
+                    new SeekableFileStream(new File(dataSourceReference.getPath())));
+                    SeekableBufferedStream indexSeekableStream = new SeekableBufferedStream(
+                            new SeekableFileStream(new File(dataSourceReference.getPath() + ".bai")));) {
 
-            final List<SAMSequenceRecord> seqRecords = reader.getFileHeader().getSequenceDictionary().getSequences();
-            getSequenceByName(chromosomeId, seqRecords).ifPresent((SAMSequenceRecord record) -> {
+                SamReader reader = SamReaderFactory.make()
+                        .validationStringency(ValidationStringency.SILENT)
+                        .open(SamInputResource.of(bamSeekableStream).index(indexSeekableStream));
 
-                QueryInterval[] intervals = new QueryInterval[]{
-                    new QueryInterval(record.getSequenceIndex(), range.lowerEndpoint(), range.upperEndpoint())
-                };
-                
-                try (SAMRecordIterator iter = reader.query(intervals, true)) {
-                    while (iter.hasNext()) {
-                        SAMRecord samRecord = iter.next();
-                        annotations.add(new BamFeature(samRecord));
+                final List<SAMSequenceRecord> seqRecords = reader.getFileHeader().getSequenceDictionary().getSequences();
+                getSequenceByName(chromosomeId, seqRecords).ifPresent((SAMSequenceRecord record) -> {
+
+                    QueryInterval[] intervals = new QueryInterval[]{
+                        new QueryInterval(record.getSequenceIndex(), range.lowerEndpoint(), range.upperEndpoint())
+                    };
+
+                    try (SAMRecordIterator iter = reader.query(intervals, true)) {
+                        while (iter.hasNext()) {
+                            SAMRecord samRecord = iter.next();
+                            int alignmentStart = samRecord.getAlignmentStart() - 1; // convert to interbase
+                            int alignmentEnd = samRecord.getAlignmentEnd();
+                            int width = alignmentEnd - alignmentStart;
+                            alignmentStart -= range.lowerEndpoint();
+                            annotations.add(new BamFeature(samRecord, referenceSequence.substring(alignmentStart, alignmentStart + width)));
+                        }
                     }
-                }
-            });
+                });
 
-            CloserUtil.close(reader);
-        } catch (Exception ex) {
-            LOG.error(ex.getMessage(), ex);
-        }
+                CloserUtil.close(reader);
+            } catch (Exception ex) {
+                LOG.error(ex.getMessage(), ex);
+            }
+
+        });
         return convertBamFeaturesToCompositionGlyphs(annotations);
     }
 
@@ -104,33 +114,40 @@ public class BamParser implements FileTypeHandler {
         String path = dataSourceReference.getPath();
         Set<BamFeature> annotations = Sets.newHashSet();
         DataSource dataSource = dataSourceReference.getDataSource();
-        try (SeekableBufferedStream bamSeekableStream = new SeekableBufferedStream(
-                new SeekableFileStream(new File(dataSourceReference.getPath())));
-                SeekableBufferedStream indexSeekableStream = new SeekableBufferedStream(
-                        new SeekableFileStream(new File(dataSourceReference.getPath() + ".bai")));) {
+        selectionInfoService.getSelectedChromosome().get().ifPresent(selectedChromosome -> {
+            String referenceSequence = selectedChromosome.getReferenceSequenceProvider().getSequence(chromosomeId, 0, selectedChromosome.getLength());
 
-            SamReader reader = SamReaderFactory.make()
-                    .validationStringency(ValidationStringency.SILENT)
-                    .open(SamInputResource.of(bamSeekableStream).index(indexSeekableStream));
+            try (SeekableBufferedStream bamSeekableStream = new SeekableBufferedStream(
+                    new SeekableFileStream(new File(dataSourceReference.getPath())));
+                    SeekableBufferedStream indexSeekableStream = new SeekableBufferedStream(
+                            new SeekableFileStream(new File(dataSourceReference.getPath() + ".bai")));) {
 
-            final List<SAMSequenceRecord> seqRecords = reader.getFileHeader().getSequenceDictionary().getSequences();
-            getSequenceByName(chromosomeId, seqRecords).ifPresent((SAMSequenceRecord record) -> {
+                SamReader reader = SamReaderFactory.make()
+                        .validationStringency(ValidationStringency.SILENT)
+                        .open(SamInputResource.of(bamSeekableStream).index(indexSeekableStream));
 
-                int start = record.getSequenceIndex();
-                int end = start + record.getSequenceLength();
+                final List<SAMSequenceRecord> seqRecords = reader.getFileHeader().getSequenceDictionary().getSequences();
+                getSequenceByName(chromosomeId, seqRecords).ifPresent((SAMSequenceRecord record) -> {
 
-                try (SAMRecordIterator iter = reader.query(record.getSequenceName(), start, end, true)) {
-                    while (iter.hasNext()) {
-                        SAMRecord samRecord = iter.next();
-                        annotations.add(new BamFeature(samRecord));
+                    int start = record.getSequenceIndex();
+                    int end = start + record.getSequenceLength();
+
+                    try (SAMRecordIterator iter = reader.query(record.getSequenceName(), start, end, true)) {
+                        while (iter.hasNext()) {
+                            SAMRecord samRecord = iter.next();
+                            int alignmentStart = samRecord.getAlignmentStart() - 1; // convert to interbase
+                            int alignmentEnd = samRecord.getAlignmentEnd() - 1;
+                            int width = alignmentEnd - alignmentStart;
+                            annotations.add(new BamFeature(samRecord, referenceSequence.substring(alignmentStart, alignmentStart + width)));
+                        }
                     }
-                }
-            });
+                });
 
-            CloserUtil.close(reader);
-        } catch (Exception ex) {
-            LOG.error(ex.getMessage(), ex);
-        }
+                CloserUtil.close(reader);
+            } catch (Exception ex) {
+                LOG.error(ex.getMessage(), ex);
+            }
+        });
         return convertBamFeaturesToCompositionGlyphs(annotations);
     }
 
@@ -154,12 +171,12 @@ public class BamParser implements FileTypeHandler {
                     .stream().forEach((Layer layer) -> {
                         getShapes(layer).forEach(shape -> {
                             if (Rectangle.class
-                            .isAssignableFrom(shape.getClass())) {
+                                    .isAssignableFrom(shape.getClass())) {
                                 children.add(GlyphFactory.generateRectangleGlyph((Rectangle) shape));
 
                             }
                             if (Line.class
-                            .isAssignableFrom(shape.getClass())) {
+                                    .isAssignableFrom(shape.getClass())) {
                                 children.add(GlyphFactory.generateLine((Line) shape));
                             }
                         });
@@ -194,6 +211,16 @@ public class BamParser implements FileTypeHandler {
     @Reference
     public void setSearchService(SearchService searchService) {
         this.searchService = searchService;
+    }
+
+    @Reference
+    public void setSelectionInfoService(SelectionInfoService selectionInfoService) {
+        this.selectionInfoService = selectionInfoService;
+    }
+
+    @Override
+    public boolean isGraphType() {
+        return false;
     }
 
 }

@@ -8,9 +8,8 @@ package org.lorainelab.igb.menu.api;
 import org.lorainelab.igb.menu.api.model.WeightedMenu;
 
 /**
- * This interface allows Apps to provide top level extensions to the IGB menubar.
+ * This interface allows Apps to provide top level extensions to the menubar.
  * These "parent" menu entries will not be extensible by other apps.
- * @module.info context-menu-api
  * @author dcnorris
  */
 public interface MenuBarParentProvider {
@@ -25,7 +24,7 @@ public interface MenuBarParentProvider {
      * =====
      *
      * The weight property specifies the sorting of MenuItems.
-     * A greater weight is always below an element with a lower weight.
+     * A greater weight is always below or to the right of an element with a lower weight.
      *
      * @return menu weight
      */

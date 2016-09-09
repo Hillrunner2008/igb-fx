@@ -20,13 +20,13 @@ public class CanvasContext {
     private static final Logger LOG = LoggerFactory.getLogger(CanvasContext.class);
     private final Canvas canvas;
     private volatile Rectangle2D boundingRectangle;
-    private double trackHeight;
     private double relativeTrackOffset;
     private boolean isVisible;
+    private double trackHeight;
 
     public CanvasContext(Canvas canvas, double trackHeight, double relativeTrackOffset) {
         this.canvas = canvas;
-        this.boundingRectangle = Rectangle2D.EMPTY;
+        this.boundingRectangle = new Rectangle2D(0, 0, canvas.getWidth(), trackHeight);
         this.trackHeight = trackHeight;
         this.relativeTrackOffset = relativeTrackOffset;
         isVisible = false;
@@ -38,10 +38,6 @@ public class CanvasContext {
 
     public GraphicsContext getGraphicsContext() {
         return canvas.getGraphicsContext2D();
-    }
-
-    public double getTrackHeight() {
-        return trackHeight;
     }
 
     public double getRelativeTrackOffset() {
@@ -56,9 +52,13 @@ public class CanvasContext {
         return isVisible;
     }
 
-    public void update(Rectangle2D boundingRectangle, double trackSize, double relativeTrackOffset) {
+    public double getTrackHeight() {
+        return trackHeight;
+    }
+
+    public void update(Rectangle2D boundingRectangle, double trackHeight, double relativeTrackOffset) {
         this.boundingRectangle = boundingRectangle;
-        this.trackHeight = trackSize;
         this.relativeTrackOffset = relativeTrackOffset;
+        this.trackHeight = trackHeight;
     }
 }

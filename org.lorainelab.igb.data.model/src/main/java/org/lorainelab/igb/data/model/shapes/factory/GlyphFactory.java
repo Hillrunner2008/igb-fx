@@ -12,15 +12,13 @@ import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
 import org.lorainelab.igb.data.model.glyph.Glyph;
 import org.lorainelab.igb.data.model.glyph.LineGlyph;
 import org.lorainelab.igb.data.model.glyph.RectangleGlyph;
-import static org.lorainelab.igb.data.model.shapes.factory.Palette.PRIMARY_TEXT_COLOR;
 
 /**
  *
  * @author jeckstei
  */
 public class GlyphFactory {
-
-    final static Color DEFAULT_TEXT_COLOR = Color.web(PRIMARY_TEXT_COLOR);
+    final static Color DEFAULT_TEXT_COLOR = Color.BLACK;
 
     public static CompositionGlyph generateCompositionGlyph(String label, Map<String, String> tooltipData, List<Glyph> children) {
         CompositionGlyph cg = new CompositionGlyph(label, tooltipData, children);

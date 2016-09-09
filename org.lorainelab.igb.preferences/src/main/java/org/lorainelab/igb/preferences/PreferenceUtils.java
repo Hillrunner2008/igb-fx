@@ -8,6 +8,8 @@ package org.lorainelab.igb.preferences;
 import java.io.File;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
+import org.lorainelab.igb.version.IgbVersion;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -16,12 +18,13 @@ import org.slf4j.LoggerFactory;
  */
 public class PreferenceUtils {
 
-    private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(PreferenceUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PreferenceUtils.class);
+    private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("windows");
     private static final String ROOT_PREFERENCE_NODE_NAME = "org/lorainelab/igb";
     private static String DATA_HOME_DIR;
 
     public static Preferences getDefaultPrefsNode() {
-        return Preferences.userRoot().node(ROOT_PREFERENCE_NODE_NAME);
+        return NbPreferences.userRootImpl();
     }
 
     public static Preferences getPackagePrefsNode(Class c) {
@@ -44,7 +47,6 @@ public class PreferenceUtils {
 
     public static File getApplicationDataDirectory() {
         if (DATA_HOME_DIR == null) {
-            boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("windows");
             String igbHomeDirName = ".igbfx";
             if (IS_WINDOWS) {
                 DATA_HOME_DIR = System.getenv("AppData") + File.separator + "IGB_FX";
@@ -57,9 +59,16 @@ public class PreferenceUtils {
         return new File(DATA_HOME_DIR + File.separator);
     }
 
+    public static File getPreferenceConfigDirectory() {
+        File applicationDataDirectory = getApplicationDataDirectory();
+        File preferenceConfigDirectory = new File(applicationDataDirectory.getPath() + File.separator + IgbVersion.getVersion() + File.separator + "preferences");
+        preferenceConfigDirectory.mkdir();
+        return preferenceConfigDirectory;
+    }
+
     private static String getPreferenceNodeName(String name) {
         final String replace = name.replace('.', '/');
-        return replace.replaceFirst(ROOT_PREFERENCE_NODE_NAME + "/", "");
+        return replace;//replace.replaceFirst(ROOT_PREFERENCE_NODE_NAME + "/", "");
     }
 
 }

@@ -12,7 +12,7 @@
 <?import javafx.scene.shape.Circle?>
 <?import javafx.scene.shape.Rectangle?>
 
-<StackPane fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="25.0" prefHeight="200.0" prefWidth="150.0" xmlns="http://javafx.com/javafx/8.0.74" xmlns:fx="http://javafx.com/fxml/1">
+<StackPane fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="25.0" prefHeight="200.0" prefWidth="150.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <GridPane>
             <columnConstraints>
@@ -31,7 +31,7 @@
                 <StackPane fx:id="leftSideColorIndicator" opacity="0.45" prefHeight="150.0" prefWidth="200.0" style="-fx-background-color: #1e90ff;" GridPane.rowSpan="4" />
             </children>
         </GridPane>
-        <GridPane>
+        <GridPane fx:id="gridPane">
             <columnConstraints>
                 <ColumnConstraints fillWidth="false" hgrow="NEVER" maxWidth="25.0" minWidth="25.0" prefWidth="25.0" />
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="5.0" prefWidth="100.0" />
@@ -106,7 +106,7 @@
                         <Insets bottom="5.0" />
                     </GridPane.margin>
                 </Rectangle>
-                <FontAwesomeIconView fx:id="lockIcon" glyphName="LOCK" size="20" GridPane.columnIndex="3" GridPane.halignment="CENTER" />
+                <FontAwesomeIconView fx:id="unLockIcon" glyphName="UNLOCK" size="20" GridPane.columnIndex="3" GridPane.halignment="CENTER" />
             </children>
         </GridPane>
     </children>

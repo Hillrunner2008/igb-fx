@@ -18,6 +18,26 @@ import org.lorainelab.igb.data.model.shapes.Shape;
  */
 public interface Layer {
 
+    default Layer layer(int start, Shape shape) {
+        return new Layer() {
+            List<Shape> items = Arrays.asList(shape).stream()
+                    .map(shape -> {
+                        shape.setOffset(shape.getOffset() + start);
+                        return shape;
+                    })
+                    .collect(Collectors.toList());
+
+            @Override
+            public int getStart() {
+                return start;
+            }
+
+            @Override
+            public List<Shape> getItems() {
+                return items;
+            }
+        };
+    }
     default Layer layer(int start, Stream<Shape>... shapes) {
         return new Layer() {
             List<Shape> items = Arrays.asList(shapes).stream()

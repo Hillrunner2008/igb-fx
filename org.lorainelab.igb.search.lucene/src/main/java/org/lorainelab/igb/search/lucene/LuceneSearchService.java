@@ -11,6 +11,7 @@ import aQute.bnd.annotation.component.ConfigurationPolicy;
 import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Lists;
+import com.google.common.io.Files;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -48,6 +49,7 @@ import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.SimpleFSDirectory;
 import org.apache.lucene.util.Version;
+import org.lorainelab.igb.preferences.PreferenceUtils;
 import org.lorainelab.igb.search.api.SearchService;
 import org.lorainelab.igb.search.api.model.Document;
 import org.lorainelab.igb.search.api.model.IndexIdentity;
@@ -71,14 +73,16 @@ public class LuceneSearchService implements SearchService {
     public void activate(Map<String, Object> properties) throws IOException {
         analyzer = new StandardAnalyzer();
         analyzer.setVersion(Version.LUCENE_6_0_0);
-        indexRoot = (String) properties.get("index.path.root") + File.separator + "lucene" + File.separator;
+        indexRoot = PreferenceUtils.getApplicationDataDirectory() + File.separator + "lucene" + File.separator;
         initDb();
     }
 
     private void initDb() {
         try {
             Properties props = new Properties();
-            props.put("databaseName", "data/search.sqlite");
+            final String dataBaseFilePath = indexRoot + "data" + File.separator + "search.sqlite";
+            props.put("databaseName", dataBaseFilePath);
+            Files.createParentDirs(new File(dataBaseFilePath));
             ds = dataSourceFactory.createDataSource(props);
             try (Connection dsConnection = ds.getConnection()) {
                 try (Statement stmt = dsConnection.createStatement()) {
@@ -90,7 +94,7 @@ public class LuceneSearchService implements SearchService {
                     LOG.debug(ex.getMessage(), ex);
                 }
             }
-        } catch (SQLException ex) {
+        } catch (SQLException | IOException ex) {
             LOG.error(ex.getMessage(), ex);
         }
     }

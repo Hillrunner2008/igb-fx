@@ -4,7 +4,8 @@ import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandlerRegistry;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Sets;
-import java.util.Set;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableSet;
 import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandler;
 
 /**
@@ -14,10 +15,10 @@ import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandler;
 @Component(immediate = true)
 public class FileTypeHandlerRegistryImpl implements FileTypeHandlerRegistry {
 
-    Set<FileTypeHandler> fileTypeHandlers;
+    ObservableSet<FileTypeHandler> fileTypeHandlers;
 
     public FileTypeHandlerRegistryImpl() {
-        fileTypeHandlers = Sets.newConcurrentHashSet();
+        fileTypeHandlers = FXCollections.observableSet(Sets.newConcurrentHashSet());
     }
 
     @Reference(optional = false, multiple = true, unbind = "removeFileTypeHandler", dynamic = true)
@@ -30,7 +31,7 @@ public class FileTypeHandlerRegistryImpl implements FileTypeHandlerRegistry {
     }
 
     @Override
-    public Set<FileTypeHandler> getFileTypeHandlers() {
+    public ObservableSet<FileTypeHandler> getFileTypeHandlers() {
         return fileTypeHandlers;
     }
 

@@ -1,6 +1,7 @@
 package org.lorainelab.igb.visualization.util;
 
-import static org.lorainelab.igb.visualization.model.CanvasPaneModel.MAX_ZOOM_MODEL_COORDINATES_X;
+import org.lorainelab.igb.utils.ExponentialTransform;
+import static org.lorainelab.igb.visualization.model.CanvasModel.MAX_ZOOM_MODEL_COORDINATES_X;
 
 /**
  *

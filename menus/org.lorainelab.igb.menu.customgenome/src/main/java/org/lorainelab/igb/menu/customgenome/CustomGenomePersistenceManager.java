@@ -65,7 +65,7 @@ public class CustomGenomePersistenceManager {
         String speciesName = node.get(SPECIES_NAME, "");
         String versionName = node.get(VERSION_NAME, "");
         String sequenceFileUrl = node.get(REFERENCE_PROVIDER_URL, "");
-        UUID uuid = java.util.UUID.fromString(node.get(UUID, "")); // node.get(UUID, "");;
+        UUID uuid = java.util.UUID.fromString(node.get(UUID, "")); 
         if (!Strings.isNullOrEmpty(speciesName)
                 || !Strings.isNullOrEmpty(versionName)
                 || !Strings.isNullOrEmpty(sequenceFileUrl)
@@ -86,7 +86,7 @@ public class CustomGenomePersistenceManager {
     }
 
     void persistCustomGenome(GenomeVersion customGenome) {
-        String speciesName = customGenome.getSpeciesName();
+        String speciesName = customGenome.getSpeciesName().get();
         String versionName = customGenome.getName().get();
         String sequenceFileUrl = customGenome.getReferenceSequenceProvider().getPath();
         String uuid = customGenome.getUuid().toString();
