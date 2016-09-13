@@ -28,9 +28,12 @@ public class MemoryTracker extends StackPane {
         memoryLabel = new Label();
         memoryProgressBar = new ProgressBar();
         trashIcon = new FontAwesomeIconView(FontAwesomeIcon.TRASH);
-        initLayout();
-        getChildren().addAll(memoryProgressBar, memoryLabel, trashIcon);
-        startTrackingMemory();
+        Platform.runLater(() -> {
+            initLayout();
+            getChildren().addAll(memoryProgressBar, memoryLabel, trashIcon);
+            startTrackingMemory();
+        });
+        trashIcon.setOnMouseClicked(click->System.gc());
     }
 
     private void initLayout() {
