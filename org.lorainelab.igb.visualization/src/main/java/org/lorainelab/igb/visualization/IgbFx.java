@@ -5,6 +5,7 @@ import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
 import java.awt.SplashScreen;
+import java.util.Optional;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
@@ -20,12 +21,14 @@ public class IgbFx {
     private static final Logger LOG = LoggerFactory.getLogger(IgbFx.class);
     private Stage stage;
     private Root root;
+    private StageProvider stageProvider;
 
     @Activate
     public void activate() {
         closeSplashScreen();
         initializeFxRuntime();
         Platform.runLater(() -> {
+            stageProvider.getSplashStage().hide();
             Scene scene = new Scene(root);
             stage.setTitle("IGBfx");
             stage.setScene(scene);
@@ -33,11 +36,8 @@ public class IgbFx {
         });
     }
 
-    private void closeSplashScreen() throws IllegalStateException {
-        SplashScreen splashScreen = SplashScreen.getSplashScreen();
-        if (splashScreen != null) {
-            splashScreen.close();
-        }
+    private void closeSplashScreen() {
+        Optional.ofNullable(SplashScreen.getSplashScreen()).ifPresent(SplashScreen::close);
     }
 
     private void initializeFxRuntime() {
@@ -59,6 +59,7 @@ public class IgbFx {
 
     @Reference
     public void setStageProvider(StageProvider stageProvider) {
+        this.stageProvider = stageProvider;
         this.stage = stageProvider.getStage();
     }
 
