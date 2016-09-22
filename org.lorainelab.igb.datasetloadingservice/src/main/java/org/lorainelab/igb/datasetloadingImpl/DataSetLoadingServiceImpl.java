@@ -8,7 +8,10 @@ package org.lorainelab.igb.datasetloadingImpl;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import com.google.common.io.Files;
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -39,7 +42,8 @@ public class DataSetLoadingServiceImpl implements DataSetLoadingService {
     private static final Logger LOG = LoggerFactory.getLogger(DataSetLoadingServiceImpl.class);
     private static final String DEFAULT_FILE_EXTENSION_FILTER_NAME = "All Supported Formats";
 
-    private DataSource dataSource;
+    private DataSource localDataSource;
+    private DataSource httpDataSource;
     private FileTypeHandlerRegistry fileTypeHandlerRegistry;
     private SelectionInfoService selectionInfoService;
     private SearchService searchService;
@@ -49,7 +53,21 @@ public class DataSetLoadingServiceImpl implements DataSetLoadingService {
     public void openDataSet() {
         openFileAction();
     }
-
+    
+    @Override
+    public void openHttpDataSet(String url) {    
+        fileTypeHandlerRegistry.getFileTypeHandlers().stream().filter(f -> {
+            return f.getSupportedExtensions().contains(Files.getFileExtension(url));
+        }).findFirst().ifPresent(fileTypeHandler -> {
+            selectionInfoService.getSelectedGenomeVersion().get().ifPresent(gv -> {
+                DataSourceReference dataSourceReference = new DataSourceReference(url, httpDataSource);
+                gv.getLoadedDataSets().add(new DataSet(url, dataSourceReference, fileTypeHandler));
+                indexDataSetForSearch(fileTypeHandler, dataSourceReference);
+            });
+        });
+    
+    }
+    
     @Override
     public void openDataSet(File file) {
         fileTypeHandlerRegistry.getFileTypeHandlers().stream().filter(f -> {
@@ -58,7 +76,7 @@ public class DataSetLoadingServiceImpl implements DataSetLoadingService {
             selectionInfoService.getSelectedGenomeVersion().get().ifPresent(gv -> {
                 //recentFilesRegistry.getRecentFiles().add(file.getPath());
                 recentFilesRegistry.addRecentFile(file.getPath());
-                DataSourceReference dataSourceReference = new DataSourceReference(file.getPath(), dataSource);
+                DataSourceReference dataSourceReference = new DataSourceReference(file.getPath(), localDataSource);
                 gv.getLoadedDataSets().add(new DataSet(file.getName(), dataSourceReference, fileTypeHandler));
                 indexDataSetForSearch(fileTypeHandler, dataSourceReference);
             });
@@ -75,9 +93,9 @@ public class DataSetLoadingServiceImpl implements DataSetLoadingService {
                     selectionInfoService.getSelectedGenomeVersion().get().ifPresent(gv -> {
                         //recentFilesRegistry.getRecentFiles().add(file.getPath());
                         recentFilesRegistry.addRecentFile(file.getPath());
-                        DataSourceReference dataSourceReference = new DataSourceReference(file.getPath(), dataSource);
+                        DataSourceReference dataSourceReference = new DataSourceReference(file.getPath(), localDataSource);
                         gv.getLoadedDataSets().add(new DataSet(file.getName(), dataSourceReference, fileTypeHandler));
-                        indexDataSetForSearch(fileTypeHandler, dataSourceReference);
+                        //indexDataSetForSearch(fileTypeHandler, dataSourceReference);
                     });
                 });
             });
@@ -141,7 +159,12 @@ public class DataSetLoadingServiceImpl implements DataSetLoadingService {
 
     @Reference(target = "(&(component.name=" + "LocalDataSource" + "))")
     public void setLocalDataSource(DataSource dataSource) {
-        this.dataSource = dataSource;
+        this.localDataSource = dataSource;
+    }
+
+    @Reference(target = "(&(component.name=" + "HttpDataSource" + "))")
+    public void setHttpDataSource(DataSource dataSource) {
+        this.httpDataSource = dataSource;
     }
 
     @Reference(optional = false)
