@@ -39,13 +39,13 @@ public class ViewPortManager {
     }
 
     public final void refresh() {
-        List<TrackRenderer> sortedTrackRenderers = Lists.newArrayList(tracksModel.getTrackRenderers());
-        Collections.sort(sortedTrackRenderers, SORT_BY_WEIGHT);
         double canvasWidth = canvas.getWidth();
         double canvasHeight = canvas.getHeight();
         if (canvasHeight < 1 || canvasWidth < 1) {
             return;
         }
+        List<TrackRenderer> sortedTrackRenderers = Lists.newArrayList(tracksModel.getTrackRenderers());
+        Collections.sort(sortedTrackRenderers, SORT_BY_WEIGHT);
 
         double totalLockedPixelHeight = sortedTrackRenderers.stream().filter(t -> t.isHeightLocked()).mapToDouble(t -> t.getLockedHeight()).sum();
         double totalUnlockedPixels = Math.max(1, sortedTrackRenderers.stream().filter(t -> !t.isHeightLocked()).mapToDouble(t -> t.getModelHeight()).sum());//min 1 to avoid division by zero

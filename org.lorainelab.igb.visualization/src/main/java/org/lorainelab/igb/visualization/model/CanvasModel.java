@@ -55,6 +55,7 @@ public class CanvasModel {
     private boolean mouseDragging;
     private BooleanProperty multiSelectModeActive;
     private BooleanProperty forceRefresh;
+    private BooleanProperty labelResizingActive;
 
     public CanvasModel() {
         modelWidth = new SimpleDoubleProperty(1);
@@ -74,6 +75,7 @@ public class CanvasModel {
         mouseDragging = false;
         multiSelectModeActive = new SimpleBooleanProperty(false);
         forceRefresh = new SimpleBooleanProperty(false);
+        labelResizingActive = new SimpleBooleanProperty(false);
     }
 
     @Activate
@@ -199,6 +201,10 @@ public class CanvasModel {
     public void forceRefresh() {
         this.forceRefresh.set(true);
         this.forceRefresh.set(false);
+    }
+
+    public BooleanProperty getLabelResizingActive() {
+        return labelResizingActive;
     }
 
     public ObjectProperty<Optional<Point2D>> getMouseClickLocation() {

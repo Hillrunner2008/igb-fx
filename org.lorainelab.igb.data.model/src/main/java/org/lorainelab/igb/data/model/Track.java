@@ -18,6 +18,8 @@ import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
  */
 public interface Track {
 
+    static final double MIN_TRACK_HEIGHT = 50;
+
     DataSet getDataSet();
 
     void draw(GraphicsContext gc, View view, CanvasContext canvasContext);
@@ -33,7 +35,7 @@ public interface Track {
     void processSelectionRectangle(Rectangle2D selectionRectangle, View view);
 
     void clearSelections();
-    
+
     boolean allowLockToggle();
 
     BooleanProperty isHeightLocked();

@@ -25,8 +25,9 @@ public class IgbFx {
 
     @Activate
     public void activate() {
-        closeSplashScreen();
-        initializeFxRuntime();
+//        closeSplashScreen();
+//        initializeFxRuntime();
+        Platform.setImplicitExit(false);
         Platform.runLater(() -> {
             stageProvider.getSplashStage().hide();
             Scene scene = new Scene(root);
