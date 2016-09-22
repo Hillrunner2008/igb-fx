@@ -27,7 +27,7 @@ import org.mockito.MockitoAnnotations;
  *
  * @author dcnorris
  */
-public class ViewPortManagerTest {
+public class ViewPortManagerTestFx {
 
     @Mock
     private CanvasRegion canvasRegion = mock(CanvasRegion.class);
