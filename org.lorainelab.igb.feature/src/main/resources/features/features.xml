@@ -54,6 +54,7 @@
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.datasource.http/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.menu.about/${project.version}</bundle>
      
+        <bundle>mvn:${project.groupId}/org.lorainelab.igb.menu.loadurl/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.menu.openfile/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.menu.recentfile/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.datasetloadingservice/${project.version}</bundle>

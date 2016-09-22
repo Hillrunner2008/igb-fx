@@ -40,7 +40,7 @@ public class HttpDataSource implements DataSource {
     @Override
     public Optional<InputStream> getInputStream(String path) {
 
-        HttpRequest remoteHttpRequest = HttpRequest.get(toExternalForm(path), true)
+        HttpRequest remoteHttpRequest = HttpRequest.get(path)//toExternalForm(path), true)
                 .acceptGzipEncoding()
                 .uncompress(true)
                 .trustAllCerts()

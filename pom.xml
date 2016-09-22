@@ -258,6 +258,12 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.menu.loadurl</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>org.lorainelab.igb.menu.customgenome</artifactId>
                 <version>${project.version}</version>
                 <scope>provided</scope>
@@ -368,6 +374,7 @@
         
         <module>org.lorainelab.igb.preferences.otheroptions</module>
         <module>menus/org.lorainelab.igb.menu.openfile</module>
+        <module>menus/org.lorainelab.igb.menu.loadurl</module>
         <module>menus/org.lorainelab.igb.menu.about</module>
         <module>menus/org.lorainelab.igb.menu.customgenome</module>
         <module>menus/org.lorainelab.igb.menu.recentfile</module>
