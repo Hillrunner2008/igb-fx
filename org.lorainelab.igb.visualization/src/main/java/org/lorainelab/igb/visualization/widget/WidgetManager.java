@@ -65,7 +65,7 @@ public class WidgetManager {
 
         debouncedRefreshAwareStream.subscribe(renderEvent -> {
             isRefreshing.setValue(Boolean.TRUE);
-            LOG.info(renderEvent);
+            LOG.debug(renderEvent);
             renderWidgets();
             isRefreshing.setValue(Boolean.FALSE);
         });
