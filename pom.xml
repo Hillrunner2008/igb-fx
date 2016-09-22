@@ -361,6 +361,11 @@
                             <artifactId>surefire-junit47</artifactId>
                             <version>2.18.1</version>
                         </dependency>
+<!--                        <dependency>
+                            <groupId>org.testfx</groupId>
+                            <artifactId>openjfx-monocle</artifactId>
+                            <version>8u76-b04</version>
+                        </dependency>-->
                     </dependencies>
                     <configuration>
                         <!--this is great for mouse debugging, but breaks drag drop functionality-->

@@ -64,9 +64,13 @@ public class LabelPaneTest extends ApplicationTest {
     private TrackLabel neg;
     public StackPane root;
     private LabelPane lp;
+    private Canvas canvas;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        if (Boolean.getBoolean("headless")) {
+            return;
+        }
         canvas = new Canvas(250, 600);
         posTrCanvasContext = new CanvasContext(canvas, 275, 0);
         coordTrCanvasContext = new CanvasContext(canvas, 50, 275);
@@ -81,10 +85,12 @@ public class LabelPaneTest extends ApplicationTest {
         primaryStage.setScene(scene);
         primaryStage.show();
     }
-    private Canvas canvas;
 
     @Test
     public void basicTest() throws InterruptedException {
+        if (Boolean.getBoolean("headless")) {
+            return;
+        }
         MockitoAnnotations.initMocks(this);
         pos = new TrackLabel(posTr, "bed(+)", new SimpleBooleanProperty(false));
         coord = new TrackLabel(coordTr, "Coordinates", new SimpleBooleanProperty(true));
@@ -137,5 +143,4 @@ public class LabelPaneTest extends ApplicationTest {
         drag(coord.getDragGrip()).moveBy(20, 40).release(MouseButton.PRIMARY);
         drag(neg.getDragGrip()).moveBy(20, 40).release(MouseButton.PRIMARY);
     }
-
 }
