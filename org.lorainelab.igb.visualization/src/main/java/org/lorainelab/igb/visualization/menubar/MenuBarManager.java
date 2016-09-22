@@ -92,7 +92,6 @@ public class MenuBarManager {
     private void initFileMenu() {
         fileMenu = new Menu("File");
         fileMenu.setMnemonicParsing(true);
-        fileMenuEntries.put(5, new MenuItem("Load Url"));
         fileMenuEntries.put(10, new SeparatorMenuItem());
         fileMenuEntries.put(70, getExitMenuItem());
     }

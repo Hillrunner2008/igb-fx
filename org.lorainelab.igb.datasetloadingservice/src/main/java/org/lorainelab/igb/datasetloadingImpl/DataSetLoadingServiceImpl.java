@@ -55,28 +55,7 @@ public class DataSetLoadingServiceImpl implements DataSetLoadingService {
     }
     
     @Override
-    public void openHttpDataSet(String url) {
-        //InputStream is = httpDataSource.getInputStream("http://www.textfiles.com/stories/100west.txt").get();
-//        httpDataSource.getInputStream("http://www.textfiles.com/stories/100west.txt").ifPresent(isnb -> {
-//            InputStream is = new BufferedInputStream(isnb);
-//            byte[] data = new byte[1000000];
-//            int off = 0;
-//            while (true) {
-//                try {
-//                    int read = is.read(data, off, 1);
-//                    off++;
-//                    if(read < 0){
-//                        break;
-//                    }
-//                    System.out.println(""+data[off-1]);
-//                } catch (IOException ex) {
-//                    LOG.error(ex.getMessage() ,ex);
-//                    break;
-//                }
-//            }
-//            System.out.println(new String(data));
-//        });
-    
+    public void openHttpDataSet(String url) {    
         fileTypeHandlerRegistry.getFileTypeHandlers().stream().filter(f -> {
             return f.getSupportedExtensions().contains(Files.getFileExtension(url));
         }).findFirst().ifPresent(fileTypeHandler -> {

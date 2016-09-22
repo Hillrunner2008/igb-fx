@@ -46,20 +46,18 @@ public class HttpDataSource implements DataSource {
                 .trustAllCerts()
                 .trustAllHosts()
                 .followRedirects(true);
-        LOG.info(remoteHttpRequest.toString());
         InputStream inputStream = remoteHttpRequest.buffer();
         return Optional.of(inputStream);
     }
 
     @Override
     public byte[] getByteRange(String path, int startPosition, int len) {
-        HttpRequest remoteHttpRequest = HttpRequest.get(toExternalForm(path), true)
+        HttpRequest remoteHttpRequest = HttpRequest.get(path)
                 .acceptGzipEncoding()
                 .uncompress(true)
                 .trustAllCerts()
                 .trustAllHosts()
                 .followRedirects(true);
-        LOG.info(remoteHttpRequest.toString());
         InputStream inputStream = remoteHttpRequest.buffer();
         byte[] data = new byte[len];
         try {

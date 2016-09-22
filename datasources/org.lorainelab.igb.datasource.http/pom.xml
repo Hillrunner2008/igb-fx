@@ -53,8 +53,6 @@
                             *
                         </Import-Package>
                         <Service-Component>*</Service-Component>
-                        <Export-Package>org.lorainelab.igb.datasource.http</Export-Package>
-                        <Private-Package>org.lorainelab.igb.datasource.http.*</Private-Package>
                     </instructions>
                 </configuration>
             </plugin>  
