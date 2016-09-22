@@ -37,7 +37,7 @@ import org.testfx.framework.junit.ApplicationTest;
  * @author dcnorris
  */
 @RunWith(MockitoJUnitRunner.class)
-public class LabelPaneTest extends ApplicationTest {
+public class LabelPaneTestFx extends ApplicationTest {
 
     @Mock
     private BundleContext bc = mock(BundleContext.class);
@@ -68,9 +68,6 @@ public class LabelPaneTest extends ApplicationTest {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        if (Boolean.getBoolean("headless")) {
-            return;
-        }
         canvas = new Canvas(250, 600);
         posTrCanvasContext = new CanvasContext(canvas, 275, 0);
         coordTrCanvasContext = new CanvasContext(canvas, 50, 275);
@@ -88,9 +85,6 @@ public class LabelPaneTest extends ApplicationTest {
 
     @Test
     public void basicTest() throws InterruptedException {
-        if (Boolean.getBoolean("headless")) {
-            return;
-        }
         MockitoAnnotations.initMocks(this);
         pos = new TrackLabel(posTr, "bed(+)", new SimpleBooleanProperty(false));
         coord = new TrackLabel(coordTr, "Coordinates", new SimpleBooleanProperty(true));
