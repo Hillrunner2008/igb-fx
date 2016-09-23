@@ -66,7 +66,6 @@ public class Launcher extends Application {
                 try {
                     modulePreferencesNode.put(HEIGHT_KEY, primaryStage.getHeight() + "");
                     modulePreferencesNode.put(WIDTH_KEY, primaryStage.getWidth() + "");
-                    System.out.println("exit");
                     BundleContext bc = FrameworkUtil.getBundle(Launcher.class).getBundleContext();
                     Bundle bundle = bc.getBundle(0);
                     bundle.stop();
