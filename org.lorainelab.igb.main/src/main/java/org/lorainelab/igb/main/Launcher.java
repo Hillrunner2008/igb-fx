@@ -2,8 +2,11 @@ package org.lorainelab.igb.main;
 
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
+import java.awt.DisplayMode;
+import java.awt.GraphicsEnvironment;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
+import java.util.prefs.Preferences;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.application.Platform;
@@ -19,6 +22,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
+import org.lorainelab.igb.preferences.PreferenceUtils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -32,6 +36,14 @@ public class Launcher extends Application {
     private static final Logger LOG = LoggerFactory.getLogger(Launcher.class);
     private StageProviderRegistrationManager stageRegistrationManager;
     private Stage splashStage;
+    private Preferences modulePreferencesNode;
+    private Stage primaryStage;
+    public static final String WIDTH_KEY = "stageWidth";
+    public static final String HEIGHT_KEY = "stageHeight";
+
+    public Launcher() {
+        modulePreferencesNode = PreferenceUtils.getPackagePrefsNode(Launcher.class);
+    }
 
     public void activate() throws InterruptedException {
         Executors.defaultThreadFactory().newThread(() -> {
@@ -52,6 +64,9 @@ public class Launcher extends Application {
             LOG.info("Received request to shutdown container");
             CompletableFuture.runAsync(() -> {
                 try {
+                    modulePreferencesNode.put(HEIGHT_KEY, primaryStage.getHeight() + "");
+                    modulePreferencesNode.put(WIDTH_KEY, primaryStage.getWidth() + "");
+                    System.out.println("exit");
                     BundleContext bc = FrameworkUtil.getBundle(Launcher.class).getBundleContext();
                     Bundle bundle = bc.getBundle(0);
                     bundle.stop();
@@ -67,6 +82,7 @@ public class Launcher extends Application {
             Stage newStage = new Stage();
             Stage newsplashStage = new Stage();
             newStage.setOnCloseRequest(onClose);
+            initPrimaryStage(newStage);
             stageRegistrationManager.registerStageProvider(newStage, newsplashStage, getHostServices());
         });
     }
@@ -77,8 +93,31 @@ public class Launcher extends Application {
         ServiceReference<StageProviderRegistrationManager> serviceReference = bundleContext.getServiceReference(StageProviderRegistrationManager.class);
         StageProviderRegistrationManager stageRegistrationManager = bundleContext.getService(serviceReference);
         initSplashScreen();
+        initPrimaryStage(primaryStage);
         stageRegistrationManager.registerStageProvider(primaryStage, splashStage, getHostServices());
         primaryStage.setOnCloseRequest(onClose);
+    }
+
+    private void initPrimaryStage(Stage pStage) {
+        this.primaryStage = pStage;
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        final DisplayMode displayMode = ge.getDefaultScreenDevice().getDisplayMode();
+        double width = displayMode.getWidth() * .8;
+        double height = displayMode.getHeight() * .8;
+        try {
+            double sHeight = Double.parseDouble(modulePreferencesNode.get(HEIGHT_KEY, ""));
+            double sWidth = Double.parseDouble(modulePreferencesNode.get(WIDTH_KEY, ""));
+            if (sHeight / height < 0.4 || sWidth / width < 0.4) {
+                primaryStage.setHeight(height);
+                primaryStage.setWidth(width);
+            } else {
+                primaryStage.setHeight(sHeight);
+                primaryStage.setWidth(sWidth);
+            }
+        } catch (Exception ex) {
+            primaryStage.setHeight(height);
+            primaryStage.setWidth(width);
+        }
     }
 
     public void initSplashScreen() {
