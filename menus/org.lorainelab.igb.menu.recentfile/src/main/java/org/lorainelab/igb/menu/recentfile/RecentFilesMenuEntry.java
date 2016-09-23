@@ -18,6 +18,7 @@ import org.lorainelab.igb.menu.api.model.WeightedMenu;
 import org.lorainelab.igb.menu.api.model.WeightedMenuEntry;
 import org.lorainelab.igb.datasetloadingservice.api.DataSetLoadingService;
 import org.lorainelab.igb.recentfiles.registry.api.RecentFilesRegistry;
+import org.lorainelab.igb.selections.SelectionInfoService;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -34,6 +35,7 @@ public class RecentFilesMenuEntry implements MenuBarEntryProvider {
     private final WeightedMenu recentFilesMenu;
     private final MenuItem clearMenuItem;
     private DataSetLoadingService fileOpener;
+    private SelectionInfoService selectionInfoService;
 
     public RecentFilesMenuEntry() {
         recentFilesMenu = new WeightedMenu(RECENT_FILE_MENU_ENTRY_WEIGHT, "Open Recent Files");
@@ -49,6 +51,10 @@ public class RecentFilesMenuEntry implements MenuBarEntryProvider {
         clearMenuItem.setOnAction(action -> {
             recentFilesRegistry.clearRecentFiles();
             recentFilesMenu.setDisable(true);
+        });
+        recentFilesMenu.setDisable(!selectionInfoService.getSelectedGenomeVersion().get().isPresent());
+        selectionInfoService.getSelectedGenomeVersion().addListener((observable, oldValue, newValue) -> {
+            recentFilesMenu.setDisable(!selectionInfoService.getSelectedGenomeVersion().get().isPresent());
         });
     }
 
@@ -95,6 +101,11 @@ public class RecentFilesMenuEntry implements MenuBarEntryProvider {
     @Reference
     public void setDataSetLoadingService(DataSetLoadingService fileOpener) {
         this.fileOpener = fileOpener;
+    }
+    
+    @Reference
+    public void setSelectionInfoService(SelectionInfoService selectionInfoService) {
+        this.selectionInfoService = selectionInfoService;
     }
 
 }
