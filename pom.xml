@@ -53,6 +53,21 @@
                 <scope>provided</scope>
             </dependency>
             <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>biz.aQute.bnd</groupId>
                 <artifactId>bndlib</artifactId>
                 <version>2.4.0</version>
@@ -264,6 +279,12 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.synonymservice</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>org.lorainelab.igb.menu.openfile</artifactId>
                 <version>${project.version}</version>
                 <scope>provided</scope>
@@ -402,8 +423,8 @@
         <module>cache/org.lorainelab.igb.cache.api</module>
         
         <module>org.lorainelab.igb.main</module>
-        
         <module>org.lorainelab.igb.preferences.otheroptions</module>
+        <module>org.lorainelab.igb.synonymservice</module>
         <module>menus/org.lorainelab.igb.menu.openfile</module>
         <module>menus/org.lorainelab.igb.menu.loadurl</module>
         <module>menus/org.lorainelab.igb.menu.about</module>
@@ -438,10 +459,12 @@
         <module>preferences/org.lorainelab.igb.preferencemanager.api</module>
         <module>org.lorainelab.igb.datasetloadingservice</module>
         <module>org.lorainelab.igb.kar</module>
+    
     </modules>
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <karaf.version>4.0.5</karaf.version>
+        <jackson.version>2.6.3</jackson.version>
     </properties>
 </project>
