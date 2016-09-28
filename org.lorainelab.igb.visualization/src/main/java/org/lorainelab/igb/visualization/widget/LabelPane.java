@@ -1,5 +1,6 @@
 package org.lorainelab.igb.visualization.widget;
 
+import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import com.google.common.base.CharMatcher;
@@ -10,6 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
+import javafx.collections.SetChangeListener;
 import javafx.geometry.Bounds;
 import javafx.geometry.Orientation;
 import javafx.geometry.Rectangle2D;
@@ -66,7 +68,7 @@ public class LabelPane extends ScrollPane implements Widget {
     private CanvasModel canvasModel;
     private AnimationTimer animationTimer;
     private Robot robot;
-    private TrackLabel activeDraggingTrackLabel;
+    private TrackLabel activeLabel;
     private VBox labelContainer;
     private VerticalScrollBar verticalScrollBar;
 
@@ -84,36 +86,48 @@ public class LabelPane extends ScrollPane implements Widget {
                 @Override
                 public void handle(long now) {
                     int mouseY = robot.getMouseY();
-                    if (activeDraggingTrackLabel != null) {
-                        Bounds screenBounds = activeDraggingTrackLabel.getContent().localToScreen(activeDraggingTrackLabel.getContent().getBoundsInLocal());
+                    if (activeLabel != null) {
+                        Bounds screenBounds = activeLabel.getContent().localToScreen(activeLabel.getContent().getBoundsInLocal());
                         double delta = (int) (mouseY - screenBounds.getMaxY());
-                        double updatedContextHeight = getUpdatedContextHeight(activeDraggingTrackLabel, delta);
-                        double trackHeight = getUpdatedTrackHeight(activeDraggingTrackLabel, updatedContextHeight);
-                        final CanvasContext canvasContext = activeDraggingTrackLabel.getTrackRenderer().getCanvasContext();
-                        Rectangle2D updatedBounds = getUpdatedContextBoundingRect(activeDraggingTrackLabel, updatedContextHeight);
-                        canvasContext.update(updatedBounds, trackHeight, canvasContext.getRelativeTrackOffset());
-                        activeDraggingTrackLabel.setDimensions(labelContainer);
+                        double initialContextHeight = activeLabel.getContent().getLayoutBounds().getHeight();
+                        double updatedContextHeight = getUpdatedContextHeight(activeLabel, delta);
+                        final TrackRenderer tr = activeLabel.getTrackRenderer();
+                        double currentHeightDelta = updatedContextHeight - initialContextHeight;
+                        final double currentStretchDelta = tr.stretchDelta().doubleValue();
+                        tr.stretchDelta().set(currentStretchDelta + currentHeightDelta);
+                        activeLabel.refreshSize(labelContainer, canvasModel.getyFactor().get());
+                        canvasModel.forceRefresh();
                     }
                 }
             };
         });
     }
 
+    @Activate
+    public void activate() {
+        refreshLabelPaneContent();
+        tracksModel.getTrackRenderers().addListener((SetChangeListener.Change<? extends TrackRenderer> change) -> {
+            initializeScrollBarBinding();
+            refreshLabelPaneContent();
+        });
+    }
+
     public void render(CanvasModel canvasModel) {
-        initializeScrollBarBinding();
+        tracksModel.getTrackRenderers().forEach(tr -> tr.getTrackLabel().refreshSize(labelContainer, canvasModel.getyFactor().get()));
+    }
+
+    private void refreshLabelPaneContent() {
         labelContainer.getChildren().clear();
         List<TrackRenderer> sortedTrackRenderers = Lists.newArrayList(tracksModel.getTrackRenderers());
         Collections.sort(sortedTrackRenderers, SORT_BY_WEIGHT);
         sortedTrackRenderers.stream()
                 .forEach(trackRenderer -> {
-                    TrackLabel trackLabel = trackRenderer.getTrackLabel();
-                    trackLabel.setDimensions(labelContainer);
-                    addContextMenu(trackLabel);
-                    StackPane content = trackLabel.getContent();
-                    labelContainer.getChildren().add(content);
-                    addSortDragHandleListener(trackLabel);
-                    addDragResizeListener(trackLabel);
+                    addTrackLabel(trackRenderer);
                 });
+        setupDragDropSorting();
+    }
+
+    private void setupDragDropSorting() {
         labelContainer.getChildren().stream()
                 .filter(node -> node instanceof StackPane)
                 .map(node -> (StackPane) node)
@@ -157,6 +171,16 @@ public class LabelPane extends ScrollPane implements Widget {
                 });
     }
 
+    private void addTrackLabel(TrackRenderer trackRenderer) {
+        TrackLabel trackLabel = trackRenderer.getTrackLabel();
+        trackLabel.refreshSize(labelContainer, canvasModel.getyFactor().get());
+        addContextMenu(trackLabel);
+        StackPane content = trackLabel.getContent();
+        labelContainer.getChildren().add(content);
+        addSortDragHandleListener(trackLabel);
+        addDragResizeListener(trackLabel);
+    }
+
     public void addSortDragHandleListener(TrackLabel trackLabel) {
         StackPane content = trackLabel.getContent();
         trackLabel.getDragGrip().onMousePressedProperty().set(event -> event.setDragDetect(true));
@@ -179,26 +203,32 @@ public class LabelPane extends ScrollPane implements Widget {
 
     private void addDragResizeListener(TrackLabel trackLabel) {
         final VBox dragHangle = trackLabel.getResizeDragGrip();
-        dragHangle.onMousePressedProperty().set(event -> event.setDragDetect(true));
-        dragHangle.setOnDragDetected(event -> {
+        dragHangle.onMousePressedProperty().set(event -> {
+            event.setDragDetect(true);
             dragHangle.getParent().setCursor(Cursor.S_RESIZE);
+        });
+        dragHangle.setOnDragDetected(event -> {
             canvasModel.getLabelResizingActive().set(true);
-            activeDraggingTrackLabel = trackLabel;
+            activeLabel = trackLabel;
             animationTimer.start();
         });
         dragHangle.setOnMouseReleased(event -> {
             animationTimer.stop();
-            dragHangle.getParent().setCursor(Cursor.DEFAULT);
             canvasModel.getLabelResizingActive().set(false);
-            activeDraggingTrackLabel = null;
+            if (activeLabel != null) {
+                activeLabel.getResizeDragGrip().getParent().setCursor(Cursor.DEFAULT);
+                activeLabel = null;
+                canvasModel.forceRefresh();
+            }
         });
         //TODO it would be nice is the dragHangle.setOnMouseReleased event was a stable solution, but it appears to work unreliably 
         getScene().addEventFilter(MouseEvent.MOUSE_RELEASED, (MouseEvent mouseEvent) -> {
             animationTimer.stop();
             canvasModel.getLabelResizingActive().set(false);
-            if (activeDraggingTrackLabel != null) {
-                activeDraggingTrackLabel.getResizeDragGrip().getParent().setCursor(Cursor.DEFAULT);
-                activeDraggingTrackLabel = null;
+            if (activeLabel != null) {
+                activeLabel.getResizeDragGrip().getParent().setCursor(Cursor.DEFAULT);
+                activeLabel = null;
+                canvasModel.forceRefresh();
             }
         });
     }
@@ -212,7 +242,7 @@ public class LabelPane extends ScrollPane implements Widget {
 
     private double getUpdatedContextHeight(TrackLabel trackLabel, double delta) {
         double initialContextHeight = trackLabel.getContent().getLayoutBounds().getHeight();
-        double updatedContextHeight = initialContextHeight + delta;
+        double updatedContextHeight = initialContextHeight + (delta * canvasModel.getyFactor().doubleValue());
         if (updatedContextHeight < MIN_TRACK_HEIGHT) {
             updatedContextHeight = MIN_TRACK_HEIGHT;
         }
@@ -271,9 +301,6 @@ public class LabelPane extends ScrollPane implements Widget {
                 cancelBtn.setOnAction(event -> {
                     stage.hide();
                 });
-                stage.setWidth(220);
-
-                stage.setHeight(155);
 
                 stage.setTitle("Set Track Stack Height");
                 migPane.add(label, "growx, wrap");
@@ -284,6 +311,7 @@ public class LabelPane extends ScrollPane implements Widget {
 
                 stage.setResizable(false);
                 Scene scene = new Scene(migPane);
+                stage.sizeToScene();
                 stage.setScene(scene);
                 adjustStackHeightMenuItem.setOnAction(action -> {
                     stackHeightEntryField.setText("" + stackedGlyphTrack.getStackHeight());

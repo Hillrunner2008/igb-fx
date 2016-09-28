@@ -33,9 +33,9 @@ public class RectangleGlyph implements Glyph {
 
     private static final Logger LOG = LoggerFactory.getLogger(RectangleGlyph.class);
     public static final int THICK_RECTANGLE_HEIGHT = 15;
-    private Color fill = Color.WHITE;
-
-    private Color strokeColor = Color.BLACK;
+    
+    private Color fill = DEFAULT_GLYPH_FILL;
+    private Color strokeColor = DEFAULT_GLYPH_FILL;
 
     private final Rectangle2D boundingRect;
     private final Optional<Function<String, String>> innerTextRefSeqTranslator;

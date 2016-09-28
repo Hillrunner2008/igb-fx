@@ -4,7 +4,10 @@ import com.google.common.collect.Range;
 import com.sun.javafx.tk.FontMetrics;
 import com.sun.javafx.tk.Toolkit;
 import java.text.DecimalFormat;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -44,12 +47,14 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     private TrackLabel trackLabel;
     private final Chromosome chromosome;
     private final Range<Integer> validViewRange;
+    private DoubleProperty trackHeight;
 
     public CoordinateTrackRenderer(Canvas canvas, Chromosome chromosome) {
-        weight = 0;
         this.chromosome = chromosome;
         this.modelWidth = chromosome.getLength();
         this.modelHeight = 50;
+        trackHeight = new SimpleDoubleProperty(50);
+        weight = 0;
         validViewRange = Range.closedOpen(0, modelWidth);
         viewBoundingRectangle = new Rectangle2D(0, 0, modelWidth, modelHeight);
         canvasContext = new CanvasContext(canvas, modelHeight, 0);
@@ -424,13 +429,13 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     }
 
     @Override
-    public boolean isHeightLocked() {
-        return trackLabel.getIsHeightLocked().get();
+    public DoubleProperty stretchDelta() {
+        return new SimpleDoubleProperty(0);
     }
 
     @Override
-    public double getLockedHeight() {
-        return modelHeight;
+    public ReadOnlyBooleanProperty heightLocked() {
+        return new SimpleBooleanProperty(true);
     }
 
 }

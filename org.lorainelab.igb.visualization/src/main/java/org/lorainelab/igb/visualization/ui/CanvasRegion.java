@@ -3,8 +3,10 @@ package org.lorainelab.igb.visualization.ui;
 import aQute.bnd.annotation.component.Component;
 import javafx.geometry.Insets;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
+import javafx.scene.paint.Color;
 
 /**
  *
@@ -14,6 +16,7 @@ import javafx.scene.layout.Region;
 public class CanvasRegion extends Region {
 
     private final Canvas canvas;
+    static final Color DEFAULT_BG = Color.web("#323232");
 
     public CanvasRegion() {
         canvas = new Canvas();
@@ -42,7 +45,11 @@ public class CanvasRegion extends Region {
     }
 
     public void clear() {
-         canvas.getGraphicsContext2D().clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        final GraphicsContext gc = canvas.getGraphicsContext2D();
+        gc.save();
+        gc.setFill(DEFAULT_BG);
+        gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        gc.restore();
     }
 
 }

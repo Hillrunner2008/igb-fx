@@ -21,6 +21,10 @@ import static org.lorainelab.igb.data.model.util.RectangleUtils.intersect;
  */
 public interface Glyph {
 
+    static final Color DEFAULT_LINE_FILL = Color.web("#A9B7C6");
+    static final Color DEFAULT_GLYPH_FILL = Color.web("#29938B");
+    static final Color DEFAULT_LABEL_COLOR = Color.web("#A9B7C6");
+
     static final int SLOT_HEIGHT = 30;
     static Rectangle.Double SHARED_RECT = new Rectangle.Double(0, 0, 0, 0);
 

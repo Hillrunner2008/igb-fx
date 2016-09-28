@@ -31,7 +31,6 @@ public class CompositionGlyph implements Glyph {
     private final String label;
     boolean isSelected = false;
     private Rectangle2D boundingRect;
-    public static final Color DEFAULT_COLOR = Color.web("#3F51B5");
 
     public CompositionGlyph(String label, Map<String, String> tooltipData, List<Glyph> children) {
         this.xRange = TreeRangeMap.<Double, Glyph>create();
@@ -53,12 +52,12 @@ public class CompositionGlyph implements Glyph {
 
     @Override
     public Color getFill() {
-        return Color.BLACK;
+        return DEFAULT_LABEL_COLOR;
     }
 
     @Override
     public Color getStrokeColor() {
-        return Color.RED;
+        return DEFAULT_LABEL_COLOR;
     }
 
     public String getLabel() {
@@ -194,8 +193,8 @@ public class CompositionGlyph implements Glyph {
 
     public void drawSummaryRectangle(GraphicsContext gc, Rectangle.Double glyphViewIntersectionBounds) {
         gc.save();
-        gc.setFill(DEFAULT_COLOR);
-        gc.setStroke(DEFAULT_COLOR);
+        gc.setFill(DEFAULT_GLYPH_FILL);
+        gc.setStroke(DEFAULT_GLYPH_FILL);
         if (!isNegative) {
             gc.fillRect(glyphViewIntersectionBounds.getMinX(), glyphViewIntersectionBounds.getMinY() + (glyphViewIntersectionBounds.getHeight() / 2), glyphViewIntersectionBounds.getWidth(), glyphViewIntersectionBounds.getHeight() / 2);
         } else {
@@ -219,7 +218,7 @@ public class CompositionGlyph implements Glyph {
                 double height = (glyphViewIntersectionBounds.getHeight() * view.getYfactor()) / textScale;
                 double width = (glyphViewIntersectionBounds.getWidth() * view.getXfactor()) / textScale;
                 gc.setFont(Font.font("Monospaced", FontWeight.NORMAL, fontSize));
-                gc.setFill(Color.BLACK);
+                gc.setFill(getFill());
                 double textHeight = ((com.sun.javafx.tk.Toolkit.getToolkit().getFontLoader().getFontMetrics(gc.getFont()).getLineHeight()));
                 String drawLabel = labelString;
                 double textWidth = (com.sun.javafx.tk.Toolkit.getToolkit().getFontLoader().computeStringWidth(labelString, gc.getFont()));

@@ -10,6 +10,7 @@ import java.util.Map;
 import javafx.scene.paint.Color;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
 import org.lorainelab.igb.data.model.glyph.Glyph;
+import static org.lorainelab.igb.data.model.glyph.Glyph.DEFAULT_GLYPH_FILL;
 import org.lorainelab.igb.data.model.glyph.LineGlyph;
 import org.lorainelab.igb.data.model.glyph.RectangleGlyph;
 
@@ -27,7 +28,7 @@ public class GlyphFactory {
 
     public static RectangleGlyph generateRectangleGlyph(org.lorainelab.igb.data.model.shapes.Rectangle rectangle) {
         RectangleGlyph toReturn = new RectangleGlyph(rectangle);
-        Color color = (Color) rectangle.getColor().orElse(Color.BLUE);
+        Color color = (Color) rectangle.getColor().orElse(DEFAULT_GLYPH_FILL);
         toReturn.setFill(color);
         toReturn.setStrokeColor(DEFAULT_TEXT_COLOR);
         return toReturn;

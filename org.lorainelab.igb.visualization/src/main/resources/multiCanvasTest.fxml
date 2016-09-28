@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+
+<HBox xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Slider orientation="VERTICAL" rotate="180.0" />
+      <SplitPane dividerPositions="0.5">
+         <items>
+            <VBox>
+               <children>
+                  <StackPane fx:id="root1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="50.0" minWidth="100.0" prefHeight="330.0" prefWidth="208.0" style="-fx-background-color: #141414; -fx-border-color: #585858; -fx-border-width: 0 0 1 0;">
+                     <children>
+                        <HBox prefHeight="100.0" prefWidth="200.0">
+                           <children>
+                              <VBox fx:id="leftSideColorIndicator1" alignment="CENTER" maxWidth="30.0" minWidth="30.0" prefHeight="330.0" prefWidth="30.0" style="-fx-background-color: #0087AF;">
+                                 <children>
+                                    <HBox alignment="CENTER" prefHeight="30.0" prefWidth="30.0">
+                                       <children>
+                                          <FontAwesomeIconView fx:id="dragGrip1" fill="WHITE" glyphName="ARROWS" size="24" />
+                                       </children>
+                                       <VBox.margin>
+                                          <Insets top="5.0" />
+                                       </VBox.margin>
+                                    </HBox>
+                                 </children>
+                              </VBox>
+                              <StackPane HBox.hgrow="ALWAYS">
+                                 <children>
+                                    <BorderPane>
+                                       <center>
+                                          <Label fx:id="trackLabel1" text="Label" textFill="#f8f8f8" />
+                                       </center>
+                                    </BorderPane>
+                                    <BorderPane fx:id="resizeHandleContainer1" prefHeight="200.0" prefWidth="200.0">
+                                       <bottom>
+                                          <VBox fx:id="bottomDragGrip1" alignment="CENTER" maxHeight="15.0" maxWidth="40.0" minHeight="15.0" minWidth="40.0" prefHeight="15.0" prefWidth="40.0" spacing="0.1" style="-fx-background-color: #8d8d8d;" BorderPane.alignment="CENTER">
+                                             <children>
+                                                <FontAwesomeIconView fill="WHITE" glyphName="ELLIPSIS_H" size="18" />
+                                             </children>
+                                          </VBox>
+                                       </bottom>
+                                    </BorderPane>
+                                 </children>
+                              </StackPane>
+                              <VBox fx:id="lockIconContainer1" alignment="TOP_CENTER" maxWidth="20.0" minWidth="20.0" prefWidth="20.0">
+                                 <children>
+                                    <FontAwesomeIconView fx:id="unLockIcon1" fill="#8d8d8d" glyphName="UNLOCK" size="18">
+                                       <VBox.margin>
+                                          <Insets />
+                                       </VBox.margin>
+                                    </FontAwesomeIconView>
+                                 </children>
+                                 <HBox.margin>
+                                    <Insets right="1.0" top="3.0" />
+                                 </HBox.margin>
+                              </VBox>
+                           </children>
+                        </HBox>
+                     </children>
+                  </StackPane>
+                  <StackPane fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="50.0" minWidth="100.0" prefHeight="330.0" prefWidth="208.0" style="-fx-background-color: #141414; -fx-border-color: #585858; -fx-border-width: 0 0 1 0;">
+                     <children>
+                        <HBox prefHeight="100.0" prefWidth="200.0">
+                           <children>
+                              <VBox fx:id="leftSideColorIndicator" alignment="CENTER" maxWidth="30.0" minWidth="30.0" prefHeight="330.0" prefWidth="30.0" style="-fx-background-color: #0087AF;">
+                                 <children>
+                                    <HBox alignment="CENTER" prefHeight="30.0" prefWidth="30.0">
+                                       <children>
+                                          <FontAwesomeIconView fx:id="dragGrip" fill="WHITE" glyphName="ARROWS" size="24" />
+                                       </children>
+                                       <VBox.margin>
+                                          <Insets top="5.0" />
+                                       </VBox.margin>
+                                    </HBox>
+                                 </children>
+                              </VBox>
+                              <StackPane HBox.hgrow="ALWAYS">
+                                 <children>
+                                    <BorderPane>
+                                       <center>
+                                          <Label fx:id="trackLabel" text="Label" textFill="#f8f8f8" />
+                                       </center>
+                                    </BorderPane>
+                                    <BorderPane fx:id="resizeHandleContainer" prefHeight="200.0" prefWidth="200.0">
+                                       <bottom>
+                                          <VBox fx:id="bottomDragGrip" alignment="CENTER" maxHeight="15.0" maxWidth="40.0" minHeight="15.0" minWidth="40.0" prefHeight="15.0" prefWidth="40.0" spacing="0.1" style="-fx-background-color: #8d8d8d;" BorderPane.alignment="CENTER">
+                                             <children>
+                                                <FontAwesomeIconView fill="WHITE" glyphName="ELLIPSIS_H" size="18" />
+                                             </children>
+                                          </VBox>
+                                       </bottom>
+                                    </BorderPane>
+                                 </children>
+                              </StackPane>
+                              <VBox fx:id="lockIconContainer" alignment="TOP_CENTER" maxWidth="20.0" minWidth="20.0" prefWidth="20.0">
+                                 <children>
+                                    <FontAwesomeIconView fx:id="unLockIcon" fill="#8d8d8d" glyphName="UNLOCK" size="18">
+                                       <VBox.margin>
+                                          <Insets />
+                                       </VBox.margin>
+                                    </FontAwesomeIconView>
+                                 </children>
+                                 <HBox.margin>
+                                    <Insets right="1.0" top="3.0" />
+                                 </HBox.margin>
+                              </VBox>
+                           </children>
+                        </HBox>
+                     </children>
+                  </StackPane>
+               </children>
+            </VBox>
+            <StackPane style="-fx-background-color: RED;">
+               <children>
+                  <ScrollPane hbarPolicy="NEVER">
+                     <content>
+                        <VBox prefHeight="200.0" prefWidth="100.0">
+                           <children>
+                              <Canvas height="200.0" width="200.0" />
+                              <Canvas height="388.0" width="200.0" />
+                              <Canvas height="200.0" width="200.0" />
+                           </children>
+                        </VBox>
+                     </content>
+                  </ScrollPane>
+                  <Canvas height="200.0" width="200.0" />
+               </children>
+            </StackPane>
+         </items>
+      </SplitPane>
+   </children>
+</HBox>

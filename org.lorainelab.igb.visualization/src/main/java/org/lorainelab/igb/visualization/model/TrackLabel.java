@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.net.URL;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Cursor;
@@ -69,7 +68,7 @@ public class TrackLabel {
                 lockIcon.setSize(unLockIcon.getSize());
                 if (trackRenderer instanceof CoordinateTrackRenderer) {
                     lockIconContainer.getChildren().remove(unLockIcon);
-                    leftSideColorIndicator.setStyle("-fx-background-color: #141414");
+//                    leftSideColorIndicator.setStyle("-fx-background-color: #141414");
                     resizeHandleContainer.setVisible(false);
                 }
             } catch (IOException ex) {
@@ -79,13 +78,8 @@ public class TrackLabel {
         initComponenets();
     }
 
-    public void setDimensions(VBox labelContainer) {
-        checkNotNull(labelContainer);
-        double height = trackRenderer.getCanvasContext().getBoundingRect().getHeight();
-        root.setPrefSize(labelContainer.getParent().getBoundsInLocal().getWidth(), height);
-        labelContainer.widthProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-            root.setPrefWidth(newValue.doubleValue());
-        });
+    public void refreshSize(VBox labelContainer, double yFactor) {
+        root.setPrefSize(labelContainer.getParent().getBoundsInLocal().getWidth(), trackRenderer.getLabelHeight(yFactor));
     }
 
     private void initComponenets() {
@@ -94,7 +88,7 @@ public class TrackLabel {
         dragGrip.setOnMouseEntered(event -> root.getScene().setCursor(Cursor.HAND));
         dragGrip.setOnMouseExited(event -> root.getScene().setCursor(Cursor.DEFAULT));
         bottomDragGrip.setOnMouseEntered(event -> root.getScene().setCursor(Cursor.S_RESIZE));
-//        bottomDragGrip.setOnMouseExited(event -> root.getScene().setCursor(Cursor.DEFAULT));
+        bottomDragGrip.setOnMouseExited(event -> root.getScene().setCursor(Cursor.DEFAULT));
         root.setOnMouseExited(event -> root.getScene().setCursor(Cursor.DEFAULT));
         unLockIcon.setOnMouseClicked(click -> {
             isHeightLocked.set(true);

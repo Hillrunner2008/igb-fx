@@ -29,12 +29,12 @@ public class LineGlyph implements Glyph {
 
     @Override
     public Color getFill() {
-        return Color.BLACK;
+        return DEFAULT_LINE_FILL;
     }
 
     @Override
     public Color getStrokeColor() {
-        return Color.BLACK;
+        return DEFAULT_LINE_FILL;
     }
 
     @Override
@@ -50,8 +50,8 @@ public class LineGlyph implements Glyph {
             double width = drawRect.getWidth();
             double height = drawRect.getHeight();
             gc.save();
-            gc.setFill(Color.BLACK);
-            gc.setStroke(Color.BLACK);
+            gc.setFill(getFill());
+            gc.setStroke(getStrokeColor());
             gc.strokeLine(x, y, x + width, y);
             gc.restore();
         });
