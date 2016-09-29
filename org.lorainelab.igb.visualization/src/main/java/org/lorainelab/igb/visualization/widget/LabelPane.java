@@ -3,7 +3,6 @@ package org.lorainelab.igb.visualization.widget;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
-import com.google.common.base.CharMatcher;
 import com.google.common.collect.Lists;
 import com.sun.glass.ui.Application;
 import com.sun.glass.ui.Robot;
@@ -16,22 +15,15 @@ import javafx.geometry.Orientation;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
-import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextField;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -39,21 +31,16 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.transform.Transform;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import net.miginfocom.layout.CC;
 import org.lorainelab.igb.data.model.CanvasContext;
-import org.lorainelab.igb.data.model.StackedGlyphTrack;
-import org.lorainelab.igb.data.model.Track;
 import static org.lorainelab.igb.data.model.Track.MIN_TRACK_HEIGHT;
 import org.lorainelab.igb.visualization.model.CanvasModel;
 import org.lorainelab.igb.visualization.model.TrackLabel;
 import org.lorainelab.igb.visualization.model.TracksModel;
+import org.lorainelab.igb.visualization.track.TrackLabelContextMenuManger;
 import org.lorainelab.igb.visualization.ui.VerticalScrollBar;
 import static org.lorainelab.igb.visualization.widget.TrackRenderer.SORT_BY_WEIGHT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tbee.javafx.scene.layout.MigPane;
 
 /**
  *
@@ -71,6 +58,7 @@ public class LabelPane extends ScrollPane implements Widget {
     private VBox labelContainer;
     private VerticalScrollBar verticalScrollBar;
     private int lastDragMouseY;
+    private TrackLabelContextMenuManger labelContextMenuManger;
 
     public LabelPane() {
         labelContainer = new VBox();
@@ -175,11 +163,19 @@ public class LabelPane extends ScrollPane implements Widget {
     private void addTrackLabel(TrackRenderer trackRenderer) {
         TrackLabel trackLabel = trackRenderer.getTrackLabel();
         trackLabel.refreshSize(labelContainer, canvasModel.getyFactor().get());
-        addContextMenu(trackLabel);
         StackPane content = trackLabel.getContent();
         labelContainer.getChildren().add(content);
         addSortDragHandleListener(trackLabel);
         addDragResizeListener(trackLabel);
+
+        trackLabel.getContent().setOnMouseClicked(event -> {
+            if ((event.getButton() == MouseButton.SECONDARY) || (event.getButton() == MouseButton.PRIMARY && event.isControlDown())) {
+                ContextMenu contextMenu = labelContextMenuManger.getContextMenu(trackLabel);
+                if (!contextMenu.getItems().isEmpty()) {
+                    contextMenu.show(getScene().getWindow(), event.getScreenX(), event.getScreenY());
+                }
+            }
+        });
     }
 
     public void addSortDragHandleListener(TrackLabel trackLabel) {
@@ -264,75 +260,6 @@ public class LabelPane extends ScrollPane implements Widget {
         return trackHeight;
     }
 
-    private void addContextMenu(TrackLabel trackLabel) {
-        StackPane root = trackLabel.getContent();
-        TrackRenderer trackRenderer = trackLabel.getTrackRenderer();
-        if (trackRenderer instanceof ZoomableTrackRenderer) {
-            ZoomableTrackRenderer zoomableTrackRenderer = (ZoomableTrackRenderer) trackRenderer;
-            final Track track = zoomableTrackRenderer.getTrack();
-            if (track instanceof StackedGlyphTrack) {
-                StackedGlyphTrack stackedGlyphTrack = (StackedGlyphTrack) track;
-                final ContextMenu contextMenu = new ContextMenu();
-                MenuItem adjustStackHeightMenuItem = new MenuItem("Set Stack Height...");
-                MigPane migPane = new MigPane("fillx", "[][]", "[][][]");
-                Stage stage = new Stage();
-                Label label = new Label("Enter new maximum track height, 0 for unlimited.");
-                label.setWrapText(true);
-                TextField stackHeightEntryField = new TextField();
-                stackHeightEntryField.textProperty().addListener((observable, oldValue, newValue) -> {
-                    stackHeightEntryField.setText(CharMatcher.inRange('0', '9').retainFrom(newValue));
-                });
-                stackHeightEntryField.setOnKeyPressed((KeyEvent ke) -> {
-                    if (ke.getCode().equals(KeyCode.ENTER)) {
-                        Platform.runLater(() -> {
-                            stackedGlyphTrack.setMaxStackHeight(Integer.parseInt(stackHeightEntryField.getText()));
-                            canvasModel.forceRefresh();
-                            stage.hide();
-                        });
-                    }
-                });
-                Button okBtn = new Button("Ok");
-                okBtn.setOnAction(event -> {
-                    Platform.runLater(() -> {
-                        stackedGlyphTrack.setMaxStackHeight(Integer.parseInt(stackHeightEntryField.getText()));
-                        canvasModel.forceRefresh();
-                        stage.hide();
-                    });
-                });
-                Button cancelBtn = new Button("Cancel");
-                cancelBtn.setOnAction(event -> {
-                    stage.hide();
-                });
-
-                stage.setTitle("Set Track Stack Height");
-                migPane.add(label, "growx, wrap");
-                migPane.add(stackHeightEntryField, "growx, wrap");
-                migPane.add(okBtn, new CC().gap("rel").x("container.x+55").y("container.y+90").span(3).tag("ok").split());
-                migPane.add(cancelBtn, new CC().x("container.x+105").y("container.y+90").tag("ok"));
-                stage.initModality(Modality.APPLICATION_MODAL);
-
-                stage.setResizable(false);
-                Scene scene = new Scene(migPane);
-                stage.sizeToScene();
-                stage.setScene(scene);
-                adjustStackHeightMenuItem.setOnAction(action -> {
-                    stackHeightEntryField.setText("" + stackedGlyphTrack.getStackHeight());
-                    stage.show();
-                });
-                contextMenu.getItems().add(adjustStackHeightMenuItem);
-                root.setOnMouseClicked(event -> {
-                    if ((event.getButton() == MouseButton.SECONDARY) || (event.getButton() == MouseButton.PRIMARY && event.isControlDown())) {
-                        contextMenu.show(root.getScene().getWindow(), event.getScreenX(), event.getScreenY());
-                        contextMenu.setOnHiding(windowEvent -> {
-                        });
-                    }
-
-                });
-
-            }
-        }
-    }
-
     @Reference
     public void setTracksModel(TracksModel tracksModel) {
         this.tracksModel = tracksModel;
@@ -373,4 +300,8 @@ public class LabelPane extends ScrollPane implements Widget {
         this.verticalScrollBar = verticalScrollBar;
     }
 
+    @Reference
+    public void setTrackLabelContextMenuManger(TrackLabelContextMenuManger labelContextMenuManger) {
+        this.labelContextMenuManger = labelContextMenuManger;
+    }
 }

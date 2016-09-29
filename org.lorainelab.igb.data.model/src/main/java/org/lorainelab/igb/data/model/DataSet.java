@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.lorainelab.igb.data.model.datasource.DataSourceReference;
+import org.lorainelab.igb.data.model.filehandler.api.DataType;
 import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandler;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
 
@@ -35,7 +36,7 @@ public class DataSet {
         this.trackLabel = trackLabel;
         this.fileTypeHandler = fileTypeHandler;
         loadedRegions = Maps.newHashMap();
-        if (fileTypeHandler.isGraphType()) {
+        if (isGraphType()) {
             graphTrack = new GraphTrack(trackLabel, this);
         } else {
             positiveStrandTrack = new StackedGlyphTrack(false, trackLabel + " (+)", DEFAULT_STACK_HEIGHT, this);
@@ -45,7 +46,7 @@ public class DataSet {
     }
     
     public boolean isGraphType() {
-        return fileTypeHandler.isGraphType();
+        return fileTypeHandler.getDataTypes().contains(DataType.GRAPH);
     }
     
     public Track getPositiveStrandTrack(String chrId) {
@@ -83,6 +84,10 @@ public class DataSet {
     public StackedGlyphTrack getCombinedStrandTrack(String chrId, int stackHeight) {
         refreshCombinedTrack(chrId);
         return combinedStrandTrack;
+    }
+
+    public FileTypeHandler getFileTypeHandler() {
+        return fileTypeHandler;
     }
     
     private void refreshCombinedTrack(String chrId) {

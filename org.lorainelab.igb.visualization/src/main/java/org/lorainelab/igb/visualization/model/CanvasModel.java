@@ -58,6 +58,7 @@ public class CanvasModel {
     private BooleanProperty forceRefresh;
     private BooleanProperty labelResizingActive;
     private VerticalScrollBar verticalScrollBar;
+    final Runnable refreshAction;
 
     public CanvasModel() {
         modelWidth = new SimpleDoubleProperty(1);
@@ -78,6 +79,7 @@ public class CanvasModel {
         multiSelectModeActive = new SimpleBooleanProperty(false);
         forceRefresh = new SimpleBooleanProperty(false);
         labelResizingActive = new SimpleBooleanProperty(false);
+        refreshAction = () -> forceRefresh();
     }
 
     @Activate
@@ -212,6 +214,10 @@ public class CanvasModel {
         this.forceRefresh.set(false);
     }
 
+    public Runnable getRefreshAction() {
+        return refreshAction;
+    }
+    
     public BooleanProperty getLabelResizingActive() {
         return labelResizingActive;
     }
