@@ -115,18 +115,18 @@ public class ZoomableTrackRenderer implements TrackRenderer {
 
     private void highlightLoadedRegions() {
         gc.save();
-         gc.scale(view.getXfactor(), 1);
+        gc.scale(view.getXfactor(), 1);
         gc.setFill(LOADED_REGION_BG);
-        
+
         track.getDataSet().getLoadedRegions(chromosome.getName()).asRanges().forEach(range -> {
             final Range<Integer> viewXRange = Range.closed(view.getXrange().lowerEndpoint().intValue(), view.getXrange().upperEndpoint().intValue());
             if (range.isConnected(viewXRange)) {
                 Range<Integer> intersection = range.intersection(range);
                 double minX = range.lowerEndpoint();
                 final Bounds boundsInParent = getTrackLabel().getContent().getBoundsInParent();
-                gc.fillRect(intersection.lowerEndpoint()- view.getXrange().lowerEndpoint(),
+                gc.fillRect(intersection.lowerEndpoint() - view.getXrange().lowerEndpoint(),
                         boundsInParent.getMinY(),
-                        intersection.upperEndpoint()-intersection.lowerEndpoint(),
+                        intersection.upperEndpoint() - intersection.lowerEndpoint(),
                         boundsInParent.getHeight()
                 );
             }
@@ -268,5 +268,10 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     @Override
     public DoubleProperty stretchDelta() {
         return stretchDelta;
+    }
+
+    @Override
+    public DoubleProperty activeStretchDelta() {
+        return activeStretchDelta;
     }
 }

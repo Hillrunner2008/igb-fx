@@ -93,8 +93,8 @@ public class LabelPane extends ScrollPane implements Widget {
                         double updatedContextHeight = getUpdatedContextHeight(activeLabel, delta);
                         final TrackRenderer tr = activeLabel.getTrackRenderer();
                         double currentHeightDelta = updatedContextHeight - initialContextHeight;
-                        final double currentStretchDelta = tr.stretchDelta().doubleValue();
-                        tr.stretchDelta().set(currentStretchDelta + currentHeightDelta);
+                        final double currentStretchDelta = tr.activeStretchDelta().doubleValue();
+                        tr.activeStretchDelta().set(currentStretchDelta + currentHeightDelta);
                         activeLabel.refreshSize(labelContainer, canvasModel.getyFactor().get());
                         canvasModel.forceRefresh();
                         lastDragMouseY = mouseY;

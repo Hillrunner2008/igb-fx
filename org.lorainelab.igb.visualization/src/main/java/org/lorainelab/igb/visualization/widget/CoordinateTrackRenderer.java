@@ -432,6 +432,10 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     public DoubleProperty stretchDelta() {
         return new SimpleDoubleProperty(0);
     }
+    @Override
+    public DoubleProperty activeStretchDelta() {
+        return new SimpleDoubleProperty(0);
+    }
 
     @Override
     public ReadOnlyBooleanProperty heightLocked() {

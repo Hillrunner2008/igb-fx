@@ -49,12 +49,15 @@ public interface TrackRenderer extends Widget {
 
     DoubleProperty stretchDelta();
 
+    DoubleProperty activeStretchDelta();
+
     default int getLabelHeight(double yFactor) {
         double height;
         if (heightLocked().get()) {
             height = getCanvasContext().getBoundingRect().getHeight();
         } else {
             height = (DEFAULT_HEIGHT + stretchDelta().doubleValue()) * yFactor;
+            height = height + activeStretchDelta().doubleValue();
         }
         return (int) Math.max(50, height);
     }
