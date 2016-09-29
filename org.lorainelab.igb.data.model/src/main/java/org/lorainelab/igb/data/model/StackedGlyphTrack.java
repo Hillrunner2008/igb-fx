@@ -304,11 +304,6 @@ public class StackedGlyphTrack implements Track {
     }
 
     @Override
-    public double getLockedHeight() {
-        return lockedHeight;
-    }
-
-    @Override
     public boolean allowLockToggle() {
         return true;
     }

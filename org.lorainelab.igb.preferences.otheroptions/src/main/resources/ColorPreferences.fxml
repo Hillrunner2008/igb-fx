@@ -41,7 +41,7 @@
             <Label text="Loaded Region Background" GridPane.rowIndex="2" />
             <Label text="Glyph Line" GridPane.rowIndex="3" />
             <Label text="Glyph Foreground" GridPane.rowIndex="4" />
-            <Label text="Annoation Label" GridPane.rowIndex="5" />
+            <Label text="Annotation Label" GridPane.rowIndex="5" />
             <Label text="Adenine" GridPane.rowIndex="6" />
             <Label text="Cytosine" GridPane.rowIndex="7" />
             <Label text="Guanine" GridPane.rowIndex="8" />

@@ -34,7 +34,7 @@ public class GraphTrack implements Track {
     private final DataSet dataSet;
 
     public GraphTrack(String trackLabel, DataSet dataSet) {
-        this.isHeightLocked = new SimpleBooleanProperty(true);
+        this.isHeightLocked = new SimpleBooleanProperty(false);
         this.dataSet = dataSet;
         this.trackLabel = trackLabel;
         this.modelHeight = 10;
@@ -115,11 +115,6 @@ public class GraphTrack implements Track {
     @Override
     public BooleanProperty isHeightLocked() {
         return isHeightLocked;
-    }
-
-    @Override
-    public double getLockedHeight() {
-        return lockedHeight;
     }
 
     @Override
