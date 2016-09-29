@@ -43,6 +43,7 @@
 
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.cache.api/${project.version}</bundle>
 
+        <bundle>mvn:${project.groupId}/org.lorainelab.igb.view.api/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.notifications.api/${project.version}</bundle>
      
     

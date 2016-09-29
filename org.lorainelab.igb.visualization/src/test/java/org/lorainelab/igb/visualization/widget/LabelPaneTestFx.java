@@ -112,7 +112,7 @@ public class LabelPaneTestFx extends ApplicationTest {
         root.setCanvasModel(canvasModel);
         root.setVerticalScrollBar(new VerticalScrollBar());
         runAndWait(() -> {
-            root.render(canvasModel);
+            root.updatedLabelBounds(canvasModel);
         });
         drag(pos.getResizeDragGrip(), MouseButton.PRIMARY)
                 .moveBy(0, -50)

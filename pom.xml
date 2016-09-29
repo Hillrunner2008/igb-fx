@@ -294,6 +294,12 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.view.api</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>org.lorainelab.igb.selections</artifactId>
                 <version>${project.version}</version>
                 <scope>provided</scope>
@@ -398,6 +404,7 @@
         <module>menus/org.lorainelab.igb.menu.api</module>
         <module>toolbar/org.lorainelab.igb.toolbar.api</module>
         <module>tabs/org.lorainelab.igb.tabs.api</module>
+        <module>org.lorainelab.igb.view.api</module>
         <module>org.lorainelab.igb.notifications.api</module>
         <module>cache/org.lorainelab.igb.cache.api</module>
         

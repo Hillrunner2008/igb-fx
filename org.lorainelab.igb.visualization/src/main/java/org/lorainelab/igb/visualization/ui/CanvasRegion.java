@@ -6,7 +6,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
-import javafx.scene.paint.Color;
+import static org.lorainelab.igb.data.model.util.Palette.DEFAULT_CANVAS_BG;
 
 /**
  *
@@ -16,7 +16,7 @@ import javafx.scene.paint.Color;
 public class CanvasRegion extends Region {
 
     private final Canvas canvas;
-    static final Color DEFAULT_BG = Color.web("#323232");
+  
 
     public CanvasRegion() {
         canvas = new Canvas();
@@ -47,7 +47,7 @@ public class CanvasRegion extends Region {
     public void clear() {
         final GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.save();
-        gc.setFill(DEFAULT_BG);
+        gc.setFill(DEFAULT_CANVAS_BG);
         gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
         gc.restore();
     }

@@ -18,10 +18,11 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.View;
-import static org.lorainelab.igb.data.model.sequence.BasePairColorReference.getBaseColor;
 import org.lorainelab.igb.data.model.shapes.Rectangle;
 import org.lorainelab.igb.data.model.util.ColorUtils;
 import org.lorainelab.igb.data.model.util.DrawUtils;
+import static org.lorainelab.igb.data.model.util.Palette.DEFAULT_GLYPH_FILL;
+import static org.lorainelab.igb.data.model.util.Palette.getBaseColor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

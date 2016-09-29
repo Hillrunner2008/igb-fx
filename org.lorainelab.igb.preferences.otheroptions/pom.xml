@@ -32,6 +32,18 @@
             <artifactId>org.lorainelab.igb.preferences</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.lorainelab.igb.data.model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.lorainelab</groupId>
+            <artifactId>org.lorainelab.igb.utils</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.lorainelab</groupId>
+            <artifactId>org.lorainelab.igb.view.api</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

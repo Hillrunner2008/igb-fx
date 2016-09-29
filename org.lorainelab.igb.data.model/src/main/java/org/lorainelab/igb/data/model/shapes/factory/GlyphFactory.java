@@ -10,9 +10,9 @@ import java.util.Map;
 import javafx.scene.paint.Color;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
 import org.lorainelab.igb.data.model.glyph.Glyph;
-import static org.lorainelab.igb.data.model.glyph.Glyph.DEFAULT_GLYPH_FILL;
 import org.lorainelab.igb.data.model.glyph.LineGlyph;
 import org.lorainelab.igb.data.model.glyph.RectangleGlyph;
+import static org.lorainelab.igb.data.model.util.Palette.DEFAULT_GLYPH_FILL;
 
 /**
  *

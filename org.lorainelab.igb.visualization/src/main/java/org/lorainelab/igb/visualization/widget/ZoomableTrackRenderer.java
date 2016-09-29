@@ -18,6 +18,7 @@ import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.Track;
 import org.lorainelab.igb.data.model.View;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
+import static org.lorainelab.igb.data.model.util.Palette.LOADED_REGION_BG;
 import org.lorainelab.igb.visualization.event.MouseHoverEvent;
 import org.lorainelab.igb.visualization.model.CanvasModel;
 import org.lorainelab.igb.visualization.model.TrackLabel;
@@ -125,9 +126,9 @@ public class ZoomableTrackRenderer implements TrackRenderer {
                 double minX = range.lowerEndpoint();
                 final Bounds boundsInParent = getTrackLabel().getContent().getBoundsInParent();
                 gc.fillRect(intersection.lowerEndpoint() - view.getXrange().lowerEndpoint(),
-                        boundsInParent.getMinY(),
+                        canvasContext.getBoundingRect().getMinY(),
                         intersection.upperEndpoint() - intersection.lowerEndpoint(),
-                        boundsInParent.getHeight()
+                        canvasContext.getBoundingRect().getHeight()
                 );
             }
         });

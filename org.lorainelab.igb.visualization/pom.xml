@@ -80,6 +80,10 @@
         </dependency>
         <dependency>
             <groupId>org.lorainelab</groupId>
+            <artifactId>org.lorainelab.igb.view.api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.lorainelab</groupId>
             <artifactId>org.lorainelab.igb.notifications.api</artifactId>
         </dependency>
         <dependency>

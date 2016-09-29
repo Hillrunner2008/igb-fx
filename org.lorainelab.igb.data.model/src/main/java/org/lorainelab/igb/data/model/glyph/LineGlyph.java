@@ -10,6 +10,7 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import org.lorainelab.igb.data.model.View;
+import static org.lorainelab.igb.data.model.util.Palette.DEFAULT_LINE_FILL;
 
 /**
  *

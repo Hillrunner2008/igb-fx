@@ -46,8 +46,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author dcnorris
  */
-@Component(immediate = true, provide = {LabelPane.class, Widget.class})
-public class LabelPane extends ScrollPane implements Widget {
+@Component(immediate = true, provide = {LabelPane.class})
+public class LabelPane extends ScrollPane {
 
     private static final Logger LOG = LoggerFactory.getLogger(LabelPane.class);
     private TracksModel tracksModel;
@@ -101,7 +101,7 @@ public class LabelPane extends ScrollPane implements Widget {
         });
     }
 
-    public void render(CanvasModel canvasModel) {
+    public void updatedLabelBounds(CanvasModel canvasModel) {
         tracksModel.getTrackRenderers().forEach(tr -> tr.getTrackLabel().refreshSize(labelContainer, canvasModel.getyFactor().get()));
     }
 
@@ -268,11 +268,6 @@ public class LabelPane extends ScrollPane implements Widget {
     @Reference
     public void setCanvasModel(CanvasModel canvasModel) {
         this.canvasModel = canvasModel;
-    }
-
-    @Override
-    public int getZindex() {
-        return 1;
     }
 
     private void initializeScrollBarBinding() {

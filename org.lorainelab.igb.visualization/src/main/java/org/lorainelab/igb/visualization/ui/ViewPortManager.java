@@ -50,6 +50,7 @@ public class ViewPortManager {
     }
 
     public final void refresh() {
+        labelPane.updatedLabelBounds(canvasModel);
         double canvasWidth = canvas.getWidth();
         double canvasHeight = canvas.getHeight();
         if (canvasHeight < 1 || canvasWidth < 1) {

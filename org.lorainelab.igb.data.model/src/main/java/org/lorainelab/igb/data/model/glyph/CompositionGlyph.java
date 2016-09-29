@@ -16,6 +16,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import org.lorainelab.igb.data.model.View;
+import static org.lorainelab.igb.data.model.util.Palette.DEFAULT_GLYPH_FILL;
+import static org.lorainelab.igb.data.model.util.Palette.DEFAULT_LABEL_COLOR;
 
 /**
  *

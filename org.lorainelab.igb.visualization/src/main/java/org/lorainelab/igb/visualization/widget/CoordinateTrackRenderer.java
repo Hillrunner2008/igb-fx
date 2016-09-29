@@ -17,7 +17,8 @@ import javafx.scene.text.FontWeight;
 import org.lorainelab.igb.data.model.CanvasContext;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.View;
-import static org.lorainelab.igb.data.model.sequence.BasePairColorReference.getBaseColor;
+import static org.lorainelab.igb.data.model.util.Palette.CLICK_DRAG_HIGHLIGHT;
+import static org.lorainelab.igb.data.model.util.Palette.getBaseColor;
 import org.lorainelab.igb.visualization.model.CanvasModel;
 import org.lorainelab.igb.visualization.model.TrackLabel;
 import static org.lorainelab.igb.visualization.util.BoundsUtil.enforceRangeBounds;
@@ -31,7 +32,7 @@ import org.slf4j.LoggerFactory;
 public class CoordinateTrackRenderer implements TrackRenderer {
 
     private static final Logger LOG = LoggerFactory.getLogger(CoordinateTrackRenderer.class);
-    private static final Color CLICK_DRAG_HIGHLIGHT = Color.rgb(33, 150, 243, .3);
+ 
     private static final String COORDINATES_TRACK_LABEL = "Coordinates";
     private static final int COORDINATE_CENTER_LINE = 20;
 
