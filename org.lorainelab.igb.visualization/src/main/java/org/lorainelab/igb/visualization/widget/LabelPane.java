@@ -12,7 +12,6 @@ import java.util.List;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.collections.SetChangeListener;
-import javafx.geometry.Bounds;
 import javafx.geometry.Orientation;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Cursor;
@@ -71,6 +70,7 @@ public class LabelPane extends ScrollPane implements Widget {
     private TrackLabel activeLabel;
     private VBox labelContainer;
     private VerticalScrollBar verticalScrollBar;
+    private int lastDragMouseY;
 
     public LabelPane() {
         labelContainer = new VBox();
@@ -87,8 +87,8 @@ public class LabelPane extends ScrollPane implements Widget {
                 public void handle(long now) {
                     int mouseY = robot.getMouseY();
                     if (activeLabel != null) {
-                        Bounds screenBounds = activeLabel.getContent().localToScreen(activeLabel.getContent().getBoundsInLocal());
-                        double delta = (int) (mouseY - screenBounds.getMaxY());
+//                        Bounds screenBounds = activeLabel.getContent().localToScreen(activeLabel.getContent().getBoundsInLocal());
+                        double delta = (int) (mouseY - lastDragMouseY);
                         double initialContextHeight = activeLabel.getContent().getLayoutBounds().getHeight();
                         double updatedContextHeight = getUpdatedContextHeight(activeLabel, delta);
                         final TrackRenderer tr = activeLabel.getTrackRenderer();
@@ -97,6 +97,7 @@ public class LabelPane extends ScrollPane implements Widget {
                         tr.stretchDelta().set(currentStretchDelta + currentHeightDelta);
                         activeLabel.refreshSize(labelContainer, canvasModel.getyFactor().get());
                         canvasModel.forceRefresh();
+                        lastDragMouseY = mouseY;
                     }
                 }
             };
@@ -210,6 +211,7 @@ public class LabelPane extends ScrollPane implements Widget {
         dragHangle.setOnDragDetected(event -> {
             canvasModel.getLabelResizingActive().set(true);
             activeLabel = trackLabel;
+            lastDragMouseY = robot.getMouseY();
             animationTimer.start();
         });
         dragHangle.setOnMouseReleased(event -> {
