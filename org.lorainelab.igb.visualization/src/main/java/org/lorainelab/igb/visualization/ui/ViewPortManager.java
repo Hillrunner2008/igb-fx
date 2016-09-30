@@ -43,7 +43,7 @@ public class ViewPortManager {
         refresh();
         canvasModel.getyFactor().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             tracksModel.getTrackRenderers().forEach(tr -> {
-                tr.stretchDelta().setValue(tr.stretchDelta().doubleValue()+(tr.activeStretchDelta().get() / canvasModel.getyFactor().doubleValue()));
+                tr.stretchDelta().setValue(tr.stretchDelta().doubleValue() + (tr.activeStretchDelta().get() / canvasModel.getyFactor().doubleValue()));
                 tr.activeStretchDelta().setValue(0);
             });
         });
@@ -89,7 +89,10 @@ public class ViewPortManager {
                     final double y2 = intersection.upperEndpoint() - labelMinY;
                     double height = y2 - y;
                     canvasContext.update(new Rectangle2D(0, trackOffset, canvasWidth, height), labelNode.getBoundsInParent().getHeight(), relativeTrackOffset);
+                    canvasContext.setIsVisible(true);
                 }
+            } else {
+                canvasContext.setIsVisible(false);
             }
         }
     }

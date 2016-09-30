@@ -126,7 +126,7 @@ public class CanvasMouseEventManager {
             selectionInfoService.getSelectedGlyphs().clear();
             getTrackRendererContainingPoint(mousePoint).ifPresent(tr -> {
 
-                tr.getTrack().getSelectedGlyphs().stream()
+                tr.getTrack().orElseThrow(() -> new NullPointerException("Track reference null")).getSelectedGlyphs().stream()
                         .findFirst().ifPresent(glyphToJumpZoom -> {
                             jumpZoom(glyphToJumpZoom.getBoundingRect(), tr, event);
                             selectionInfoService.getSelectedGlyphs().add(glyphToJumpZoom);
@@ -136,11 +136,12 @@ public class CanvasMouseEventManager {
             selectionInfoService.getSelectedGlyphs().clear();
             getTrackRendererContainingPoint(mousePoint).ifPresent(tr -> {
                 selectionInfoService.getSelectedGlyphs().addAll(
-                        tr.getTrack().getSelectedGlyphs()
+                        tr.getTrack().orElseThrow(() -> new NullPointerException("Track reference null")).getSelectedGlyphs()
                 );
             });
         }
         updateZoomStripe(event);
+        canvasModel.forceRefresh();
     }
 
     private Optional<ZoomableTrackRenderer> getTrackRendererContainingPoint(Point2D mousePoint) {

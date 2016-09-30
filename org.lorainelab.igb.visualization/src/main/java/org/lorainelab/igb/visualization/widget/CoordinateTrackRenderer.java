@@ -4,6 +4,7 @@ import com.google.common.collect.Range;
 import com.sun.javafx.tk.FontMetrics;
 import com.sun.javafx.tk.Toolkit;
 import java.text.DecimalFormat;
+import java.util.Optional;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -16,6 +17,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import org.lorainelab.igb.data.model.CanvasContext;
 import org.lorainelab.igb.data.model.Chromosome;
+import org.lorainelab.igb.data.model.Track;
 import org.lorainelab.igb.data.model.View;
 import static org.lorainelab.igb.data.model.util.Palette.CLICK_DRAG_HIGHLIGHT;
 import static org.lorainelab.igb.data.model.util.Palette.getBaseColor;
@@ -441,6 +443,11 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     @Override
     public ReadOnlyBooleanProperty heightLocked() {
         return new SimpleBooleanProperty(true);
+    }
+
+    @Override
+    public Optional<Track> getTrack() {
+        return Optional.empty();
     }
 
 }

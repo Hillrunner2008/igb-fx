@@ -247,9 +247,10 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     public TrackLabel getTrackLabel() {
         return trackLabel;
     }
-
-    public Track getTrack() {
-        return track;
+    
+     @Override
+    public Optional<Track> getTrack() {
+        return Optional.of(track);
     }
 
     public boolean isContained(Point2D point) {

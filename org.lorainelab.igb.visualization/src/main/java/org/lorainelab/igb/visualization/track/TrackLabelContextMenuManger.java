@@ -50,7 +50,7 @@ public class TrackLabelContextMenuManger {
         TrackRenderer trackRenderer = trackLabel.getTrackRenderer();
         if (trackRenderer instanceof ZoomableTrackRenderer) {
             ZoomableTrackRenderer zoomableTrackRenderer = (ZoomableTrackRenderer) trackRenderer;
-            final Track track = zoomableTrackRenderer.getTrack();
+            final Track track = zoomableTrackRenderer.getTrack().orElseThrow(() -> new NullPointerException());//should never be null
             for (TrackLabelContextMenuEntryProvider labelMenuEntrProvider : labelMenuEntrProviders) {
                 Set<DataType> dataTypes = track.getDataSet().getFileTypeHandler().getDataTypes();
                 Set<DataType> providerSupportedDataTypes = labelMenuEntrProvider.getSupportedDataTypes();
