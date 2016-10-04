@@ -3,22 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.lorainelab.igb.preferencemanager.api;
+package org.lorainelab.igb.preferencemanager.api.internal;
 
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
-import javafx.application.Platform;
-import javafx.scene.Scene;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.layout.AnchorPane;
-import javafx.stage.Stage;
-import java.util.SortedSet;
+import java.util.Comparator;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-import javafx.application.Platform;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.AnchorPane;
+import org.lorainelab.igb.preferencemanager.api.PreferencesTabProvider;
+import static org.lorainelab.igb.utils.FXUtilities.runAndWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,28 +26,29 @@ import org.slf4j.LoggerFactory;
 public class PreferencesTabManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(PreferencesTabManager.class);
-    private SortedSet<PreferencesTabProvider> tabs;
+    private Set<PreferencesTabProvider> tabs;
     private TabPane pane;
 
     public PreferencesTabManager() {
         pane = new TabPane();
-        tabs = new TreeSet<PreferencesTabProvider>((x, y) -> x.getTabWeight() - y.getTabWeight());
+        tabs = new TreeSet<PreferencesTabProvider>(Comparator.comparingInt(x -> x.getTabWeight()));
         setAnchorPaneConstraints(pane);
     }
 
-
     @Reference(optional = true, multiple = true, unbind = "removeTab", dynamic = true)
     public void addTab(PreferencesTabProvider tabProvider) {
-        tabs.add(tabProvider);
-        Platform.runLater(() -> {
+        runAndWait(() -> {
+            tabs.add(tabProvider);
             pane.getTabs().clear();
             pane.getTabs().addAll(tabs.stream().map(tab -> tab.getPreferencesTab()).collect(Collectors.toList()));
         });
     }
 
     public void removeTab(PreferencesTabProvider tabProvider) {
-        tabs.remove(tabProvider);
-        Platform.runLater(() -> pane.getTabs().remove(tabProvider.getPreferencesTab()));
+        runAndWait(() -> {
+            tabs.remove(tabProvider);
+            pane.getTabs().remove(tabProvider.getPreferencesTab());
+        });
     }
 
     public TabPane getPreferencesTabPane() {
