@@ -75,7 +75,7 @@ public class GlyphTest {
     public void partialGlyphIntersectionInYCutOffBottom() {
         GlyphImpl g = new GlyphImpl();
         g.setBoundingRect(new Rectangle2D(0, 0, 50, 20));
-        Rectangle2D viewBoundingRect = new Rectangle2D(0, 0, 1000, 480);
+        Rectangle2D viewBoundingRect = new Rectangle2D(0, 0, 1000, 490);
         Rectangle2D slotRect = new Rectangle2D(0, 470, 1000, SLOT_HEIGHT);
         MockitoAnnotations.initMocks(this);
         View view = mock(View.class);
@@ -113,7 +113,7 @@ public class GlyphTest {
         assertTrue(calculateDrawRect.isPresent());
         java.awt.geom.Rectangle2D.Double drawRect = calculateDrawRect.get();
         assertEquals(drawRect.width, 50, 0);
-        assertEquals(drawRect.height, 5, 0);
+        assertEquals(drawRect.height, 15, 0);
         assertEquals(drawRect.y, 0, 0);
     }
 
@@ -121,7 +121,8 @@ public class GlyphTest {
     public void partialGlyphIntersectionInXCutoffRight() {
         GlyphImpl g = new GlyphImpl();
         g.setBoundingRect(new Rectangle2D(0, 0, 50, 20));
-        Rectangle2D viewBoundingRect = new Rectangle2D(0, 0, 45, 480);
+        Rectangle2D viewBoundingRect = new Rectangle2D(0, 0, 45, 1000);
+        Rectangle2D slotRect = new Rectangle2D(0, 470, 1000, SLOT_HEIGHT);
         MockitoAnnotations.initMocks(this);
         View view = mock(View.class);
         when(view.getBoundingRect())
@@ -130,7 +131,6 @@ public class GlyphTest {
                 .thenReturn(new java.awt.geom.Rectangle2D.Double(viewBoundingRect.getMinX(), viewBoundingRect.getMinY(), viewBoundingRect.getWidth(), viewBoundingRect.getHeight()));
         when(view.isIsNegative())
                 .thenReturn(false);
-        Rectangle2D slotRect = new Rectangle2D(0, 470, 1000, SLOT_HEIGHT);
         Optional<java.awt.geom.Rectangle2D.Double> calculateDrawRect = g.calculateDrawRect(view, slotRect);
         assertTrue(calculateDrawRect.isPresent());
         java.awt.geom.Rectangle2D.Double drawRect = calculateDrawRect.get();
@@ -145,7 +145,7 @@ public class GlyphTest {
     public void partialGlyphIntersectionInXCutoffLeft() {
         GlyphImpl g = new GlyphImpl();
         g.setBoundingRect(new Rectangle2D(0, 0, 50, 20));
-        Rectangle2D viewBoundingRect = new Rectangle2D(5, 0, 50, 480);
+        Rectangle2D viewBoundingRect = new Rectangle2D(5, 0, 50, 1000);
         MockitoAnnotations.initMocks(this);
         View view = mock(View.class);
         when(view.getBoundingRect())
@@ -186,6 +186,16 @@ public class GlyphTest {
         }
 
         public void draw(GraphicsContext gc, View view, Rectangle2D slotBoundingViewRect) {
+        }
+
+        @Override
+        public GlyphAlignment getGlyphAlignment() {
+            return GlyphAlignment.CENTER;
+        }
+
+        @Override
+        public void setGlyphAlignment(GlyphAlignment alignment) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
     }
 
