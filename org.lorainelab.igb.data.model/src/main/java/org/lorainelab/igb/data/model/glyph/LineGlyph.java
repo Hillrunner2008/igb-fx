@@ -21,11 +21,13 @@ public class LineGlyph implements Glyph {
     int start;
     int width;
     private Rectangle2D boundingRect;
+    private GlyphAlignment glyphAlignment;
 
     public LineGlyph(int start, int width) {
         this.start = start;
         this.width = width;
         boundingRect = new Rectangle2D(start, 0, width, 1);
+        glyphAlignment = glyphAlignment.BOTTOM;
     }
 
     @Override
@@ -90,6 +92,16 @@ public class LineGlyph implements Glyph {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public GlyphAlignment getGlyphAlignment() {
+        return glyphAlignment;
+    }
+
+    @Override
+    public void setGlyphAlignment(GlyphAlignment alignment) {
+        this.glyphAlignment = alignment;
     }
 
 }

@@ -184,11 +184,11 @@ public class ZoomableTrackRenderer implements TrackRenderer {
 
     private Rectangle2D canvasToViewCoordinates(Point2D clickLocation) {
         double x = Math.floor(clickLocation.getX() / view.getXfactor());
-        double y = Math.floor((clickLocation.getY() - canvasContext.getBoundingRect().getMinY()) / view.getYfactor());
+        double y = Math.floor((clickLocation.getY() - canvasContext.getBoundingRect().getMinY()));
         double offsetX = view.getBoundingRect().getMinX();
-        double offsetY = view.getBoundingRect().getMinY();
+//        double offsetY = view.getBoundingRect().getMinY();
         x += offsetX;
-        y += offsetY;
+//        y += offsetY;
         Rectangle2D mouseEventBoundingBox = new Rectangle2D(x, y, 1, 1);
         return mouseEventBoundingBox;
     }
@@ -247,8 +247,8 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     public TrackLabel getTrackLabel() {
         return trackLabel;
     }
-    
-     @Override
+
+    @Override
     public Optional<Track> getTrack() {
         return Optional.of(track);
     }

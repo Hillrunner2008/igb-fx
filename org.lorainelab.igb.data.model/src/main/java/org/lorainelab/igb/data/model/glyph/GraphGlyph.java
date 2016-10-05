@@ -21,10 +21,12 @@ public class GraphGlyph implements Glyph {
     private final Rectangle.Double bounds;
     private final Rectangle2D boundingRect;
     private final RangeMap<Double, Double> graphIntervals;
+    private GlyphAlignment glyphAlignment;
 
     public GraphGlyph(RangeMap<Double, Double> graphIntervals) {
         checkNotNull(graphIntervals);
         this.graphIntervals = graphIntervals;
+        glyphAlignment = GlyphAlignment.BOTTOM;
         bounds = new Rectangle.Double();
 
         for (Map.Entry<Range<Double>, Double> entry : graphIntervals.asMapOfRanges().entrySet()) {
@@ -88,6 +90,16 @@ public class GraphGlyph implements Glyph {
     public Optional<Rectangle.Double> calculateDrawRect(View view, Rectangle2D slotBoundingViewRect) {
         SHARED_RECT.setRect(view.getMutableBoundingRect());
         return Optional.of(SHARED_RECT);
+    }
+
+    @Override
+    public GlyphAlignment getGlyphAlignment() {
+        return glyphAlignment;
+    }
+
+    @Override
+    public void setGlyphAlignment(GlyphAlignment alignment) {
+        this.glyphAlignment = alignment;
     }
 
 }

@@ -21,9 +21,8 @@ import static org.lorainelab.igb.data.model.util.RectangleUtils.intersect;
  */
 public interface Glyph {
 
-
-
-    static final int SLOT_HEIGHT = 30;
+    static final int SLOT_HEIGHT = 50;
+    static final double MAX_GLYPH_HEIGHT = SLOT_HEIGHT * .75;
     static Rectangle.Double SHARED_RECT = new Rectangle.Double(0, 0, 0, 0);
 
     Color getFill();
@@ -44,9 +43,8 @@ public interface Glyph {
         //do nothing
     }
 
-    default SlotAlignment getSlotAlignment() {
-        return SlotAlignment.CENTER;
-    }
+    GlyphAlignment getGlyphAlignment();
+    void setGlyphAlignment(GlyphAlignment alignment);
 
     void draw(GraphicsContext gc, View view, Rectangle2D slotBoundingViewRect);
 
@@ -66,15 +64,23 @@ public interface Glyph {
 
     default double getAlignedMinY(Rectangle2D boundingRect, Rectangle2D slotRect) {
         double y;
-        switch (getSlotAlignment()) {
+        switch (getGlyphAlignment()) {
             case BOTTOM:
-                y = SLOT_HEIGHT - boundingRect.getHeight();
+                y = slotRect.getMinY() + (SLOT_HEIGHT - boundingRect.getHeight());
+                break;
+            case BOTTOM_CENTER:
+                double centerPos = slotRect.getMinY() + (SLOT_HEIGHT - boundingRect.getHeight()) / 2;
+                y = centerPos + ((SLOT_HEIGHT - MAX_GLYPH_HEIGHT) / 2);
                 break;
             case CENTER:
                 y = slotRect.getMinY() + (SLOT_HEIGHT - boundingRect.getHeight()) / 2;
                 break;
             case TOP:
-                y = 0;
+                y = slotRect.getMinY();
+                break;
+            case TOP_CENTER:
+                double centerY = slotRect.getMinY() + (SLOT_HEIGHT - boundingRect.getHeight()) / 2;
+                y = centerY - ((SLOT_HEIGHT - MAX_GLYPH_HEIGHT) / 2);
                 break;
             case CUSTOM:
                 y = boundingRect.getMinY();
