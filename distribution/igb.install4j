@@ -13,8 +13,8 @@
     </searchSequence>
     <variables>
       <variable name="projectHomeDirectory" value="/home/jeckstei/Projects/igb/code/igb-fx/" description="This variable should point to the source control root of the IGB project" category="" />
-      <variable name="igbVersion" value="8.5.0" description="" category="" />
-      <variable name="codeBaseUrl" value="http://eos.transvar.org/igb/" description="A variable holding the url location of the lateset IGB installers and update information" category="" />
+      <variable name="igbVersion" value="0.0.1" description="" category="" />
+      <variable name="codeBaseUrl" value="http://eos.transvar.org/igbfx/" description="A variable holding the url location of the lateset IGB installers and update information" category="" />
     </variables>
     <mergedProjects />
     <codeSigning macEnabled="true" macPkcs12File="/opt/igb/developerID_application_igb.p12" windowsEnabled="true" windowsKeySource="pkcs12" windowsPvkFile="" windowsSpcFile="" windowsPkcs12File="/opt/igb/windows_keystore.pfx" />
@@ -1776,7 +1776,7 @@
     </macosFolder>
   </mediaSets>
   <buildIds buildAll="false">
-    <mediaSet refId="25" />
+    <mediaSet refId="552" />
   </buildIds>
-  <buildOptions verbose="true" faster="false" disableSigning="true" disableJreBundling="false" debug="false" />
+  <buildOptions verbose="true" faster="false" disableSigning="false" disableJreBundling="false" debug="false" />
 </install4j>
