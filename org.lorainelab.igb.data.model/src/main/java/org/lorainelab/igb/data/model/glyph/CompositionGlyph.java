@@ -278,7 +278,7 @@ public class CompositionGlyph implements Glyph {
     private double getTextYOffset(FontReference fontReference, double availableLabelHeight) {
         double textHeightOffset = fontReference.getAscent() - fontReference.getDescent();
         if (textHeightOffset < availableLabelHeight) {
-            textHeightOffset -= ((availableLabelHeight - textHeightOffset) / 4) * 3;
+            textHeightOffset += ((availableLabelHeight - textHeightOffset) / 4) * 3;
         }
         return textHeightOffset;
     }
