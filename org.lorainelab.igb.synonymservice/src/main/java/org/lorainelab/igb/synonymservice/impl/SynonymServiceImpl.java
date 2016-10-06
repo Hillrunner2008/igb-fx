@@ -12,6 +12,7 @@ import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import org.lorainelab.igb.synonymservice.SynonymService;
 import org.lorainelab.igb.synonymservice.util.SynonymEntry;
 import org.slf4j.LoggerFactory;
@@ -43,11 +44,11 @@ public class SynonymServiceImpl implements SynonymService {
     }
 
     @Override
-    public String getBaseWord(String synonym) {
+    public Optional<String> getBaseWord(String synonym) {
         if (invertedMap.containsKey(synonym)) {
-            return invertedMap.get(synonym).iterator().next();
+            return Optional.of(invertedMap.get(synonym).iterator().next());
         }
-        return null;
+        return Optional.empty();
     }
 
     @Override
@@ -60,7 +61,7 @@ public class SynonymServiceImpl implements SynonymService {
     public boolean checkIfSynonym(String key, String synonym) {
         return thesaurus.containsEntry(key, synonym);
     }
-    
+
     @Override
     public void loadSynonymJson(String synonymJson) {
 
@@ -75,29 +76,10 @@ public class SynonymServiceImpl implements SynonymService {
         } catch (IOException ex) {
             LOG.error(ex.getMessage(), ex);
         }
-        
+
         if (asList != null) {
             asList.forEach(l -> thesaurus.putAll(l.getPreferredName(), l.getSynomyms()));
             invertedMap = Multimaps.invertFrom(thesaurus, invertedMap);
         }
-        
-//        final ObjectMapper mapper = new ObjectMapper();
-//        mapper.registerModule(new GuavaModule());
-//
-//        final CollectionType javaType
-//                = mapper.getTypeFactory().constructCollectionType(List.class, LinkedHashMultimap.class);
-//        List<Multimap> asList = null;
-//        try {
-//            asList = mapper.readValue(
-//                    synonymJson, javaType);
-//        } catch (IOException ex) {
-//            LOG.error(ex.getMessage(), ex);
-//        }
-//        if (asList != null) {
-//            asList.forEach(l -> thesaurus.putAll(l));
-//            invertedMap = Multimaps.invertFrom(thesaurus, invertedMap);
-//        }
-//        LOG.trace("Loaded data from "+synonymJson);
-//    }
     }
 }

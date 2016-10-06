@@ -1,1 +1,280 @@
-[{"preferredName":"chr1","synomyms":["chr1","1","CHR1v01212004","chromosome1|c212","chr01|12001"]},{"preferredName":"chr2","synomyms":["chr2","2","CHR2v01212004","chromosome2|c1348","chr02|12002"]},{"preferredName":"chr3","synomyms":["chr3","3","CHR3v01212004","chromosome3|p20C8","chr03|12001"]},{"preferredName":"chr4","synomyms":["chr4","4","arm_4","CHR4v01212004","chr04|12004"]},{"preferredName":"chr5","synomyms":["chr5","5","CHR5v01212004","chr05|12005"]},{"preferredName":"chr6","synomyms":["chr6","6","chr06|12006"]},{"preferredName":"chr7","synomyms":["chr7","7","chr07|12007"]},{"preferredName":"chr8","synomyms":["chr8","8","chr08|12008"]},{"preferredName":"chr9","synomyms":["chr9","9","chr09|12009"]},{"preferredName":"chr10","synomyms":["chr10","10","chr10|12010"]},{"preferredName":"chr11","synomyms":["chr11","11","chr11|12011"]},{"preferredName":"chr12","synomyms":["chr12","12","chr12|12012"]},{"preferredName":"chr13","synomyms":["chr13","13"]},{"preferredName":"chr14","synomyms":["chr14","14"]},{"preferredName":"chr15","synomyms":["chr15","15"]},{"preferredName":"chr16","synomyms":["chr16","16"]},{"preferredName":"chr17","synomyms":["chr17","17"]},{"preferredName":"chr18","synomyms":["chr18","18"]},{"preferredName":"chr19","synomyms":["chr19","19"]},{"preferredName":"chr20","synomyms":["chr20","20"]},{"preferredName":"chr21","synomyms":["chr21","21"]},{"preferredName":"chr22","synomyms":["chr22","22"]},{"preferredName":"chr23","synomyms":["chr23","23"]},{"preferredName":"chr24","synomyms":["chr24","24"]},{"preferredName":"chr25","synomyms":["chr25","25"]},{"preferredName":"chr26","synomyms":["chr26","26"]},{"preferredName":"chr27","synomyms":["chr27","27"]},{"preferredName":"chr28","synomyms":["chr28","28"]},{"preferredName":"chr29","synomyms":["chr29","29"]},{"preferredName":"chr30","synomyms":["chr30","30"]},{"preferredName":"chr31","synomyms":["chr31","31"]},{"preferredName":"chr32","synomyms":["chr32","32"]},{"preferredName":"chr33","synomyms":["chr33","33"]},{"preferredName":"chr34","synomyms":["chr34","34"]},{"preferredName":"chr35","synomyms":["chr35","35"]},{"preferredName":"chr36","synomyms":["chr36","36"]},{"preferredName":"chr37","synomyms":["chr37","37"]},{"preferredName":"chr38","synomyms":["chr38","38"]},{"preferredName":"chrX","synomyms":["chrX","X","arm_X"]},{"preferredName":"chrY","synomyms":["chrY","Y"]},{"preferredName":"chrM","synomyms":["chrM","M","MT","chrMT","mitochondria","mitochondrion","NC_001709","chrM|11706"]},{"preferredName":"chrC","synomyms":["chrC","C","chloroplast","chrC|11562"]},{"preferredName":"chrUn","synomyms":["chrUn","U","Un","chrU","ArmU"]},{"preferredName":"chrUextra","synomyms":["chrUextra","ArmUextra"]},{"preferredName":"chrI","synomyms":["chrI","I"]},{"preferredName":"chrII","synomyms":["chrII","II"]},{"preferredName":"chrIII","synomyms":["chrIII","III"]},{"preferredName":"chrIV","synomyms":["chrIV","IV"]},{"preferredName":"chrV","synomyms":["chrV","V"]},{"preferredName":"chr1L","synomyms":["chr1L","1L","arm_1L"]},{"preferredName":"chr1R","synomyms":["chr1R","1R","arm_1R"]},{"preferredName":"chr2L","synomyms":["chr2L","2L","arm_2L"]},{"preferredName":"chr2R","synomyms":["chr2R","2R","arm_2R"]},{"preferredName":"chr2h","synomyms":["chr2h","2h"]},{"preferredName":"chr2RHet","synomyms":["chr2RHet","2RHet"]},{"preferredName":"chr2LHet","synomyms":["chr2LHet","2LHet"]},{"preferredName":"chr3L","synomyms":["chr3L","3L","arm_3L"]},{"preferredName":"chr3R","synomyms":["chr3R","3R","arm_3R"]},{"preferredName":"chr3h","synomyms":["chr3h","3h"]},{"preferredName":"chr3RHet","synomyms":["chr3RHet","3RHet"]},{"preferredName":"chr3LHet","synomyms":["chr3LHet","3LHet"]},{"preferredName":"chr4h","synomyms":["chr4h","4h"]},{"preferredName":"chrXh","synomyms":["chrXh","Xh","XHet","chrXHet"]},{"preferredName":"chrYh","synomyms":["chrYh","Yh","YHet","chrYHet"]},{"preferredName":"chr1_random","synomyms":["chr1_random","1_random"]},{"preferredName":"chr2_random","synomyms":["chr2_random","2_random"]},{"preferredName":"chr3_random","synomyms":["chr3_random","3_random"]},{"preferredName":"chr4_random","synomyms":["chr4_random","4_random"]},{"preferredName":"chr5_random","synomyms":["chr5_random","5_random"]},{"preferredName":"chr6_random","synomyms":["chr6_random","6_random"]},{"preferredName":"chr7_random","synomyms":["chr7_random","7_random"]},{"preferredName":"chr8_random","synomyms":["chr8_random","8_random"]},{"preferredName":"chr9_random","synomyms":["chr9_random","9_random"]},{"preferredName":"chr10_random","synomyms":["chr10_random","10_random"]},{"preferredName":"chr11_random","synomyms":["chr11_random","11_random"]},{"preferredName":"chr12_random","synomyms":["chr12_random","12_random"]},{"preferredName":"chr13_random","synomyms":["chr13_random","13_random"]},{"preferredName":"chr14_random","synomyms":["chr14_random","14_random"]},{"preferredName":"chr15_random","synomyms":["chr15_random","15_random"]},{"preferredName":"chr16_random","synomyms":["chr16_random","16_random"]},{"preferredName":"chr17_random","synomyms":["chr17_random","17_random"]},{"preferredName":"chr18_random","synomyms":["chr18_random","18_random"]},{"preferredName":"chr19_random","synomyms":["chr19_random","19_random"]},{"preferredName":"chr20_random","synomyms":["chr20_random","20_random"]},{"preferredName":"chr21_random","synomyms":["chr21_random","21_random"]},{"preferredName":"chr22_random","synomyms":["chr22_random","22_random"]},{"preferredName":"chrX_random","synomyms":["chrX_random","X_random"]},{"preferredName":"chrY_random","synomyms":["chrY_random","Y_random"]},{"preferredName":"chrUn_random","synomyms":["chrUn_random","U_random","Un_random"]},{"preferredName":"chr5_h2_hap1","synomyms":["chr5_h2_hap1","5_h2_hap1"]},{"preferredName":"chr6_cox_hap1","synomyms":["chr6_cox_hap1","6_cox_hap1"]},{"preferredName":"chr6_qbl_hap1","synomyms":["chr6_qbl_hap1","6_qbl_hap1"]},{"preferredName":"chr22_h2_hap1","synomyms":["chr22_h2_hap1","22_h2_hap1"]}]
+[{
+        "preferredName": "chr1",
+        "synomyms": ["chr1", "1", "CHR1v01212004", "chromosome1|c212", "chr01|12001"]
+    }, {
+        "preferredName": "chr2",
+        "synomyms": ["chr2", "2", "CHR2v01212004", "chromosome2|c1348", "chr02|12002"]
+    }, {
+        "preferredName": "chr3",
+        "synomyms": ["chr3", "3", "CHR3v01212004", "chromosome3|p20C8", "chr03|12001"]
+    }, {
+        "preferredName": "chr4",
+        "synomyms": ["chr4", "4", "arm_4", "CHR4v01212004", "chr04|12004"]
+    }, {
+        "preferredName": "chr5",
+        "synomyms": ["chr5", "5", "CHR5v01212004", "chr05|12005"]
+    }, {
+        "preferredName": "chr6",
+        "synomyms": ["chr6", "6", "chr06|12006"]
+    }, {
+        "preferredName": "chr7",
+        "synomyms": ["chr7", "7", "chr07|12007"]
+    }, {
+        "preferredName": "chr8",
+        "synomyms": ["chr8", "8", "chr08|12008"]
+    }, {
+        "preferredName": "chr9",
+        "synomyms": ["chr9", "9", "chr09|12009"]
+    }, {
+        "preferredName": "chr10",
+        "synomyms": ["chr10", "10", "chr10|12010"]
+    }, {
+        "preferredName": "chr11",
+        "synomyms": ["chr11", "11", "chr11|12011"]
+    }, {
+        "preferredName": "chr12",
+        "synomyms": ["chr12", "12", "chr12|12012"]
+    }, {
+        "preferredName": "chr13",
+        "synomyms": ["chr13", "13"]
+    }, {
+        "preferredName": "chr14",
+        "synomyms": ["chr14", "14"]
+    }, {
+        "preferredName": "chr15",
+        "synomyms": ["chr15", "15"]
+    }, {
+        "preferredName": "chr16",
+        "synomyms": ["chr16", "16"]
+    }, {
+        "preferredName": "chr17",
+        "synomyms": ["chr17", "17"]
+    }, {
+        "preferredName": "chr18",
+        "synomyms": ["chr18", "18"]
+    }, {
+        "preferredName": "chr19",
+        "synomyms": ["chr19", "19"]
+    }, {
+        "preferredName": "chr20",
+        "synomyms": ["chr20", "20"]
+    }, {
+        "preferredName": "chr21",
+        "synomyms": ["chr21", "21"]
+    }, {
+        "preferredName": "chr22",
+        "synomyms": ["chr22", "22"]
+    }, {
+        "preferredName": "chr23",
+        "synomyms": ["chr23", "23"]
+    }, {
+        "preferredName": "chr24",
+        "synomyms": ["chr24", "24"]
+    }, {
+        "preferredName": "chr25",
+        "synomyms": ["chr25", "25"]
+    }, {
+        "preferredName": "chr26",
+        "synomyms": ["chr26", "26"]
+    }, {
+        "preferredName": "chr27",
+        "synomyms": ["chr27", "27"]
+    }, {
+        "preferredName": "chr28",
+        "synomyms": ["chr28", "28"]
+    }, {
+        "preferredName": "chr29",
+        "synomyms": ["chr29", "29"]
+    }, {
+        "preferredName": "chr30",
+        "synomyms": ["chr30", "30"]
+    }, {
+        "preferredName": "chr31",
+        "synomyms": ["chr31", "31"]
+    }, {
+        "preferredName": "chr32",
+        "synomyms": ["chr32", "32"]
+    }, {
+        "preferredName": "chr33",
+        "synomyms": ["chr33", "33"]
+    }, {
+        "preferredName": "chr34",
+        "synomyms": ["chr34", "34"]
+    }, {
+        "preferredName": "chr35",
+        "synomyms": ["chr35", "35"]
+    }, {
+        "preferredName": "chr36",
+        "synomyms": ["chr36", "36"]
+    }, {
+        "preferredName": "chr37",
+        "synomyms": ["chr37", "37"]
+    }, {
+        "preferredName": "chr38",
+        "synomyms": ["chr38", "38"]
+    }, {
+        "preferredName": "chrX",
+        "synomyms": ["chrX", "X", "arm_X"]
+    }, {
+        "preferredName": "chrY",
+        "synomyms": ["chrY", "Y"]
+    }, {
+        "preferredName": "chrM",
+        "synomyms": ["chrM", "M", "MT", "chrMT", "mitochondria", "mitochondrion", "NC_001709", "chrM|11706"]
+    }, {
+        "preferredName": "chrC",
+        "synomyms": ["chrC", "C", "chloroplast", "chrC|11562"]
+    }, {
+        "preferredName": "chrUn",
+        "synomyms": ["chrUn", "U", "Un", "chrU", "ArmU"]
+    }, {
+        "preferredName": "chrUextra",
+        "synomyms": ["chrUextra", "ArmUextra"]
+    }, {
+        "preferredName": "chrI",
+        "synomyms": ["chrI", "I"]
+    }, {
+        "preferredName": "chrII",
+        "synomyms": ["chrII", "II"]
+    }, {
+        "preferredName": "chrIII",
+        "synomyms": ["chrIII", "III"]
+    }, {
+        "preferredName": "chrIV",
+        "synomyms": ["chrIV", "IV"]
+    }, {
+        "preferredName": "chrV",
+        "synomyms": ["chrV", "V"]
+    }, {
+        "preferredName": "chr1L",
+        "synomyms": ["chr1L", "1L", "arm_1L"]
+    }, {
+        "preferredName": "chr1R",
+        "synomyms": ["chr1R", "1R", "arm_1R"]
+    }, {
+        "preferredName": "chr2L",
+        "synomyms": ["chr2L", "2L", "arm_2L"]
+    }, {
+        "preferredName": "chr2R",
+        "synomyms": ["chr2R", "2R", "arm_2R"]
+    }, {
+        "preferredName": "chr2h",
+        "synomyms": ["chr2h", "2h"]
+    }, {
+        "preferredName": "chr2RHet",
+        "synomyms": ["chr2RHet", "2RHet"]
+    }, {
+        "preferredName": "chr2LHet",
+        "synomyms": ["chr2LHet", "2LHet"]
+    }, {
+        "preferredName": "chr3L",
+        "synomyms": ["chr3L", "3L", "arm_3L"]
+    }, {
+        "preferredName": "chr3R",
+        "synomyms": ["chr3R", "3R", "arm_3R"]
+    }, {
+        "preferredName": "chr3h",
+        "synomyms": ["chr3h", "3h"]
+    }, {
+        "preferredName": "chr3RHet",
+        "synomyms": ["chr3RHet", "3RHet"]
+    }, {
+        "preferredName": "chr3LHet",
+        "synomyms": ["chr3LHet", "3LHet"]
+    }, {
+        "preferredName": "chr4h",
+        "synomyms": ["chr4h", "4h"]
+    }, {
+        "preferredName": "chrXh",
+        "synomyms": ["chrXh", "Xh", "XHet", "chrXHet"]
+    }, {
+        "preferredName": "chrYh",
+        "synomyms": ["chrYh", "Yh", "YHet", "chrYHet"]
+    }, {
+        "preferredName": "chr1_random",
+        "synomyms": ["chr1_random", "1_random"]
+    }, {
+        "preferredName": "chr2_random",
+        "synomyms": ["chr2_random", "2_random"]
+    }, {
+        "preferredName": "chr3_random",
+        "synomyms": ["chr3_random", "3_random"]
+    }, {
+        "preferredName": "chr4_random",
+        "synomyms": ["chr4_random", "4_random"]
+    }, {
+        "preferredName": "chr5_random",
+        "synomyms": ["chr5_random", "5_random"]
+    }, {
+        "preferredName": "chr6_random",
+        "synomyms": ["chr6_random", "6_random"]
+    }, {
+        "preferredName": "chr7_random",
+        "synomyms": ["chr7_random", "7_random"]
+    }, {
+        "preferredName": "chr8_random",
+        "synomyms": ["chr8_random", "8_random"]
+    }, {
+        "preferredName": "chr9_random",
+        "synomyms": ["chr9_random", "9_random"]
+    }, {
+        "preferredName": "chr10_random",
+        "synomyms": ["chr10_random", "10_random"]
+    }, {
+        "preferredName": "chr11_random",
+        "synomyms": ["chr11_random", "11_random"]
+    }, {
+        "preferredName": "chr12_random",
+        "synomyms": ["chr12_random", "12_random"]
+    }, {
+        "preferredName": "chr13_random",
+        "synomyms": ["chr13_random", "13_random"]
+    }, {
+        "preferredName": "chr14_random",
+        "synomyms": ["chr14_random", "14_random"]
+    }, {
+        "preferredName": "chr15_random",
+        "synomyms": ["chr15_random", "15_random"]
+    }, {
+        "preferredName": "chr16_random",
+        "synomyms": ["chr16_random", "16_random"]
+    }, {
+        "preferredName": "chr17_random",
+        "synomyms": ["chr17_random", "17_random"]
+    }, {
+        "preferredName": "chr18_random",
+        "synomyms": ["chr18_random", "18_random"]
+    }, {
+        "preferredName": "chr19_random",
+        "synomyms": ["chr19_random", "19_random"]
+    }, {
+        "preferredName": "chr20_random",
+        "synomyms": ["chr20_random", "20_random"]
+    }, {
+        "preferredName": "chr21_random",
+        "synomyms": ["chr21_random", "21_random"]
+    }, {
+        "preferredName": "chr22_random",
+        "synomyms": ["chr22_random", "22_random"]
+    }, {
+        "preferredName": "chrX_random",
+        "synomyms": ["chrX_random", "X_random"]
+    }, {
+        "preferredName": "chrY_random",
+        "synomyms": ["chrY_random", "Y_random"]
+    }, {
+        "preferredName": "chrUn_random",
+        "synomyms": ["chrUn_random", "U_random", "Un_random"]
+    }, {
+        "preferredName": "chr5_h2_hap1",
+        "synomyms": ["chr5_h2_hap1", "5_h2_hap1"]
+    }, {
+        "preferredName": "chr6_cox_hap1",
+        "synomyms": ["chr6_cox_hap1", "6_cox_hap1"]
+    }, {
+        "preferredName": "chr6_qbl_hap1",
+        "synomyms": ["chr6_qbl_hap1", "6_qbl_hap1"]
+    }, {
+        "preferredName": "chr22_h2_hap1",
+        "synomyms": ["chr22_h2_hap1", "22_h2_hap1"]
+    }]

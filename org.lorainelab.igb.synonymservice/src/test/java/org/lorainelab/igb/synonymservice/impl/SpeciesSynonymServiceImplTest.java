@@ -11,17 +11,17 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.lorainelab.igb.synonymservice.SpeciesSynomymService;
-import org.lorainelab.igb.synonymservice.SynonymService;
 
 /**
  *
  * @author Devdatta Kulkarni
  */
-public class SynonymServiceImplTest {
+public class SpeciesSynonymServiceImplTest {
 
+    //private static SpeciesSynomymService service;
     private static SpeciesSynomymService service;
 
-    public SynonymServiceImplTest() {
+    public SpeciesSynonymServiceImplTest() {
     }
 
     @BeforeClass

@@ -6,6 +6,7 @@
 package org.lorainelab.igb.synonymservice;
 
 import java.io.InputStream;
+import java.util.Optional;
 
 /**
  *
@@ -15,7 +16,7 @@ public interface SynonymService {
     
     void loadSynonymJson(String synonymJson);
     void storeSynonym(String key, String synonym);
-    String getBaseWord(String synonym);
+    Optional<String> getBaseWord(String synonym);
     void removeSynonym(String key, String synonym);
     boolean checkIfSynonym(String key, String synonym);
     

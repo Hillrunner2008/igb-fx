@@ -6,16 +6,11 @@
 package org.lorainelab.igb.synonymservice.impl;
 
 import aQute.bnd.annotation.component.Component;
+import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.lorainelab.igb.synonymservice.SpeciesSynomymService;
-import org.lorainelab.igb.synonymservice.util.CsvToJsonConverter;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -26,32 +21,19 @@ import org.slf4j.LoggerFactory;
 public class SpeciesSynomymServiceImpl extends SynonymServiceImpl implements SpeciesSynomymService {
 
     //private SynonymServiceImpl service;
-    private static final String SPECIES_SYNONYM_FILE = "species.json";
+    private static final String SPECIES_SYNONYM_FILE = "/species.json";
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(SpeciesSynomymServiceImpl.class);
 
     public SpeciesSynomymServiceImpl() {
-        StringBuffer jsonData = new StringBuffer();
+        String jsonData = null;
         try {
-            InputStream resourceAsStream = CsvToJsonConverter.class.getClassLoader().getResourceAsStream(SPECIES_SYNONYM_FILE);
-            BufferedReader br = new BufferedReader(new InputStreamReader(resourceAsStream));
-            String line;
-            while ((line = br.readLine()) != null) {
-                jsonData.append(line.trim());
-            }
+            jsonData = com.google.common.io.Resources.toString(SpeciesSynomymService.class.getResource(SPECIES_SYNONYM_FILE), Charsets.UTF_8);
         } catch (IOException ex) {
-            Logger.getLogger(SpeciesSynomymServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.error(ex.getMessage(), ex);
         }
-        if (!Strings.isNullOrEmpty(jsonData.toString())) {
-            loadSynonymJson(jsonData.toString());
+        if (!Strings.isNullOrEmpty(jsonData)) {
+            loadSynonymJson(jsonData);
         }
-//        try {
-//            //service = new SynonymServiceImpl();
-//            String json = CsvToJsonConverter.loadCsvToJsonString(SPECIES_SYNONYM_FILE);
-//            //service.loadSynonymJson(json);
-//            loadSynonymJson(json);
-//        } catch (IOException ex) {
-//            LOG.error(ex.getMessage(), ex);
-//        }
     }
 
     @Override
@@ -76,12 +58,7 @@ public class SpeciesSynomymServiceImpl extends SynonymServiceImpl implements Spe
 
     @Override
     public Optional<String> getPreferredSpeciesName(String synonym) {
-        String name = getBaseWord(synonym);
-        if (name != null) {
-            return Optional.of(name);
-        } else {
-            return Optional.empty();
-        }
+        return getBaseWord(synonym);
     }
 
 }
