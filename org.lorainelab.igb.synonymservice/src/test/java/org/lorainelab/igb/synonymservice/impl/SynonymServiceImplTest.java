@@ -10,8 +10,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.lorainelab.igb.synonymservice.SpeciesSynomymService;
 import org.lorainelab.igb.synonymservice.SynonymService;
-import org.lorainelab.igb.synonymservice.util.CsvToJsonConverter;
 
 /**
  *
@@ -19,18 +19,14 @@ import org.lorainelab.igb.synonymservice.util.CsvToJsonConverter;
  */
 public class SynonymServiceImplTest {
 
-    private static final String SPECIES_SYNONYM_FILE = "species.txt";
-    private static SynonymService service = new SynonymServiceImpl();
+    private static SpeciesSynomymService service;
 
     public SynonymServiceImplTest() {
     }
 
     @BeforeClass
     public static void setUpClass() throws IOException {
-        //String json = CsvToJsonConverter.loadCsvToJsonString(SPECIES_SYNONYM_FILE);
         service = new SpeciesSynomymServiceImpl();
-//        service = new SynonymServiceImpl();
-        //service.loadSynonymJson(json);
     }
 
     @Before
@@ -44,12 +40,12 @@ public class SynonymServiceImplTest {
         String synonym1 = "testdata1";
         String synonym2 = "testdata2";
 
-        service.storeSynonym(key, synonym);
-        service.storeSynonym(key, synonym1);
-        service.storeSynonym(key, synonym2);
+        service.addSynonym(key, synonym);
+        service.addSynonym(key, synonym1);
+        service.addSynonym(key, synonym2);
 
-        assertTrue(service.checkIfSynonym(key, synonym));
-        assertTrue(service.getBaseWord(synonym2).equals(key));
+        assertTrue(service.isSynonym(key, synonym));
+        assertTrue(service.getPreferredSpeciesName(synonym2).get().equals(key));
 
         //
     }
@@ -60,8 +56,8 @@ public class SynonymServiceImplTest {
         String expResult = "Ailuropoda melanoleuca";
         String synonym1 = "Giant panda";
         String synonym2 = "ailMel";
-        assertEquals(expResult, service.getBaseWord(synonym1));
-        assertEquals(expResult, service.getBaseWord(synonym2));
+        assertEquals(expResult, service.getPreferredSpeciesName(synonym1).get());
+        assertEquals(expResult, service.getPreferredSpeciesName(synonym2).get());
     }
 
     @Test
@@ -69,10 +65,10 @@ public class SynonymServiceImplTest {
         String key = "keyRemove";
         String synonym1 = "valueRemove1";
         String synonym2 = "valueRemove2";
-        service.storeSynonym(key, synonym1);
-        service.storeSynonym(key, synonym2);
+        service.addSynonym(key, synonym1);
+        service.addSynonym(key, synonym2);
         service.removeSynonym(key, synonym2);
-        assertFalse(service.checkIfSynonym(key, synonym2));
+        assertFalse(service.isSynonym(key, synonym2));
     }
 
 //    @Test

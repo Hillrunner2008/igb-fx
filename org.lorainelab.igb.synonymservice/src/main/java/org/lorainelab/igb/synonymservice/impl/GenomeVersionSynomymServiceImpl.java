@@ -57,7 +57,7 @@ public class GenomeVersionSynomymServiceImpl extends SynonymServiceImpl implemen
 
     @Override
     public void removeSynonym(String species, String synonym) {
-        removeSynonym(species, synonym);
+        super.removeSynonym(species, synonym);
     }
 
     @Override

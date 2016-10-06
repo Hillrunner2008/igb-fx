@@ -60,7 +60,7 @@ public class ChromosomeSynomymServiceImpl extends SynonymServiceImpl implements 
 
     @Override
     public void removeSynonym(String species, String synonym) {
-        removeSynonym(species, synonym);
+        super.removeSynonym(species, synonym);
     }
 
     @Override

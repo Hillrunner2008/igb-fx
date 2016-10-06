@@ -66,7 +66,7 @@ public class SpeciesSynomymServiceImpl extends SynonymServiceImpl implements Spe
 
     @Override
     public void removeSynonym(String species, String synonym) {
-        removeSynonym(species, synonym);
+        super.removeSynonym(species, synonym);
     }
 
     @Override
