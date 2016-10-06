@@ -21,10 +21,16 @@
         <bundle>mvn:org.apache.commons/commons-lang3/3.4</bundle>
         <bundle>mvn:commons-codec/commons-codec/1.10</bundle>
         <bundle>mvn:commons-io/commons-io/2.4</bundle>
+        <bundle>mvn:org.apache.commons/commons-csv/1.4</bundle>
         <bundle>mvn:com.github.kevinsawicki/http-request/6.0</bundle>        
         <bundle>wrap:mvn:com.github.samtools/htsjdk/2.1.0</bundle>
         <bundle>mvn:org.controlsfx/controlsfx/8.40.11</bundle>
         
+        
+        <bundle>mvn:com.fasterxml.jackson.core/jackson-core/2.6.3</bundle>
+        <bundle>mvn:com.fasterxml.jackson.core/jackson-annotations/2.6.3</bundle>
+        <bundle>mvn:com.fasterxml.jackson.core/jackson-databind/2.6.3</bundle>
+                        
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jakarta-regexp/1.4_1</bundle>
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.lucene/6.0.0_1</bundle>
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.lucene-queries/6.0.0_1</bundle>
@@ -39,7 +45,8 @@
            
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.menu.api/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.toolbar.api/${project.version}</bundle>
-     
+        <bundle>mvn:${project.groupId}/org.lorainelab.igb.synonymservice/${project.version}</bundle>
+        
 
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.cache.api/${project.version}</bundle>
 
