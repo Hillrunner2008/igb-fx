@@ -22,7 +22,9 @@ import static org.lorainelab.igb.data.model.util.RectangleUtils.intersect;
 public interface Glyph {
 
     static final int SLOT_HEIGHT = 50;
-    static final double MAX_GLYPH_HEIGHT = SLOT_HEIGHT * .75;
+    static final double MAX_GLYPH_HEIGHT = SLOT_HEIGHT * .65;
+    static final int SLOT_PADDING = SLOT_HEIGHT / 10;
+    static final double LABEL_OFFSET = ((SLOT_HEIGHT - MAX_GLYPH_HEIGHT) / 2) - SLOT_PADDING;
     static Rectangle.Double SHARED_RECT = new Rectangle.Double(0, 0, 0, 0);
 
     Color getFill();
@@ -44,6 +46,7 @@ public interface Glyph {
     }
 
     GlyphAlignment getGlyphAlignment();
+
     void setGlyphAlignment(GlyphAlignment alignment);
 
     void draw(GraphicsContext gc, View view, Rectangle2D slotBoundingViewRect);
@@ -70,7 +73,7 @@ public interface Glyph {
                 break;
             case BOTTOM_CENTER:
                 double centerPos = slotRect.getMinY() + (SLOT_HEIGHT - boundingRect.getHeight()) / 2;
-                y = centerPos + ((SLOT_HEIGHT - MAX_GLYPH_HEIGHT) / 2);
+                y = centerPos + LABEL_OFFSET;
                 break;
             case CENTER:
                 y = slotRect.getMinY() + (SLOT_HEIGHT - boundingRect.getHeight()) / 2;
@@ -80,7 +83,7 @@ public interface Glyph {
                 break;
             case TOP_CENTER:
                 double centerY = slotRect.getMinY() + (SLOT_HEIGHT - boundingRect.getHeight()) / 2;
-                y = centerY - ((SLOT_HEIGHT - MAX_GLYPH_HEIGHT) / 2);
+                y = centerY - LABEL_OFFSET;
                 break;
             case CUSTOM:
                 y = boundingRect.getMinY();
