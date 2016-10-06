@@ -6,7 +6,14 @@
 package org.lorainelab.igb.synonymservice.impl;
 
 import aQute.bnd.annotation.component.Component;
+import com.google.common.base.Strings;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.lorainelab.igb.synonymservice.GenomeVersionSynomymService;
 import org.lorainelab.igb.synonymservice.util.CsvToJsonConverter;
 import org.slf4j.LoggerFactory;
@@ -18,18 +25,25 @@ import org.slf4j.LoggerFactory;
 @Component(immediate = true, provide = GenomeVersionSynomymService.class)
 public class GenomeVersionSynomymServiceImpl extends SynonymServiceImpl implements GenomeVersionSynomymService {
 
-    private static final String SPECIES_SYNONYM_FILE = "synonyms.txt";
+    private static final String GENOMES_SYNONYM_FILE = "synonyms.json";
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(GenomeVersionSynomymServiceImpl.class);
 
     public GenomeVersionSynomymServiceImpl() {
+        StringBuffer jsonData = new StringBuffer();
         try {
-            String json = CsvToJsonConverter.loadCsvToJsonString(SPECIES_SYNONYM_FILE);
-            loadSynonymJson(json);
+            InputStream resourceAsStream = CsvToJsonConverter.class.getClassLoader().getResourceAsStream(GENOMES_SYNONYM_FILE);
+            BufferedReader br = new BufferedReader(new InputStreamReader(resourceAsStream));
+            String line;
+            while ((line = br.readLine()) != null) {
+                jsonData.append(line.trim());
+            }
         } catch (IOException ex) {
-            LOG.error(ex.getMessage(), ex);
+            Logger.getLogger(SpeciesSynomymServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        if (!Strings.isNullOrEmpty(jsonData.toString())) {
+            loadSynonymJson(jsonData.toString());
         }
     }
-    
 
     @Override
     public void loadSynonymJson(String synonymJson) {
@@ -42,11 +56,6 @@ public class GenomeVersionSynomymServiceImpl extends SynonymServiceImpl implemen
     }
 
     @Override
-    public String getGenomeVersion(String synonym) {
-        return getBaseWord(synonym);
-    }
-
-    @Override
     public void removeSynonym(String species, String synonym) {
         removeSynonym(species, synonym);
     }
@@ -54,6 +63,16 @@ public class GenomeVersionSynomymServiceImpl extends SynonymServiceImpl implemen
     @Override
     public boolean isSynonym(String species, String synonym) {
         return checkIfSynonym(species, synonym);
+    }
+
+    @Override
+    public Optional<String> getPreferredGenomeVersionName(String synonym) {
+        String name = getBaseWord(synonym);
+        if (name != null) {
+            return Optional.of(name);
+        } else {
+            return Optional.empty();
+        }
     }
 
 }

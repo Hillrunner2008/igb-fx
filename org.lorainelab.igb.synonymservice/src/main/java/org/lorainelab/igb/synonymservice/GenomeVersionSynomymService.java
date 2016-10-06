@@ -5,20 +5,20 @@
  */
 package org.lorainelab.igb.synonymservice;
 
+import java.util.Optional;
+
 /**
  *
  * @author Devdatta Kulkarni
  */
 public interface GenomeVersionSynomymService {
 
-    void loadSynonymJson(String synonymJson);
+    void addSynonym(String preferredGenomeVersionName, String synonym);
 
-    void addSynonym(String species, String synonym);
+    Optional<String> getPreferredGenomeVersionName(String synonym);
 
-    String getGenomeVersion(String synonym);
+    void removeSynonym(String preferredGenomeVersionName, String synonym);
 
-    void removeSynonym(String genomeVersion, String synonym);
-
-    boolean isSynonym(String genomeVersion, String synonym);
+    boolean isSynonym(String preferredGenomeVersionName, String synonym);
 
 }

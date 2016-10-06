@@ -27,9 +27,10 @@ public class SynonymServiceImplTest {
 
     @BeforeClass
     public static void setUpClass() throws IOException {
-        String json = CsvToJsonConverter.loadCsvToJsonString(SPECIES_SYNONYM_FILE);
-        service = new SynonymServiceImpl();
-        service.loadSynonymJson(json);
+        //String json = CsvToJsonConverter.loadCsvToJsonString(SPECIES_SYNONYM_FILE);
+        service = new SpeciesSynomymServiceImpl();
+//        service = new SynonymServiceImpl();
+        //service.loadSynonymJson(json);
     }
 
     @Before
@@ -74,13 +75,13 @@ public class SynonymServiceImplTest {
         assertFalse(service.checkIfSynonym(key, synonym2));
     }
 
-    @Test
-    public void testLoadSynonymJson() {
-        String jsonString = "[{\"DemoKeyJson\":[\"demovalue1\",\"demovalue2\",\"demovalue4\",\"demovalue3\",\"demovalue3\"]}]";
-        service.loadSynonymJson(jsonString);
-        assertEquals("DemoKeyJson", service.getBaseWord("demovalue1"));
-        assertTrue(service.checkIfSynonym("DemoKeyJson", "demovalue4"));
-        
-    }
+//    @Test
+//    public void testLoadSynonymJson() {
+//        String jsonString = "[{\"DemoKeyJson\":[\"demovalue1\",\"demovalue2\",\"demovalue4\",\"demovalue3\",\"demovalue3\"]}]";
+//        service.loadSynonymJson(jsonString);
+//        assertEquals("DemoKeyJson", service.getBaseWord("demovalue1"));
+//        assertTrue(service.checkIfSynonym("DemoKeyJson", "demovalue4"));
+//
+//    }
 
 }

@@ -5,20 +5,20 @@
  */
 package org.lorainelab.igb.synonymservice;
 
+import java.util.Optional;
+
 /**
  *
  * @author Devdatta Kulkarni
  */
 public interface SpeciesSynomymService {
 
-    void loadSynonymJson(String synonymJson);
+    void addSynonym(String preferredSpeciesName, String synonym);
 
-    void addSynonym(String species, String synonym);
+    Optional<String> getPreferredSpeciesName(String synonym);
 
-    String getSpecies(String synonym);
+    void removeSynonym(String preferredSpeciesName, String synonym);
 
-    void removeSynonym(String species, String synonym);
-
-    boolean isSynonym(String species, String synonym);
+    boolean isSynonym(String preferredSpeciesName, String synonym);
 
 }

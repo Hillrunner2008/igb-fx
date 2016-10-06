@@ -5,20 +5,20 @@
  */
 package org.lorainelab.igb.synonymservice;
 
+import java.util.Optional;
+
 /**
  *
  * @author Devdatta Kulkarni
  */
 public interface ChromosomeSynomymService {
 
-    void loadSynonymJson(String synonymJson);
+    void addSynonym(String preferredChromosomeName, String synonym);
 
-    void addSynonym(String species, String synonym);
+    Optional<String> getPreferredChromosomeName(String synonym);
 
-    String getChromosome(String synonym);
+    void removeSynonym(String preferredChromosomeName, String synonym);
 
-    void removeSynonym(String chromosome, String synonym);
-
-    boolean isSynonym(String chromosome, String synonym);
+    boolean isSynonym(String preferredChromosomeName, String synonym);
 
 }

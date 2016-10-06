@@ -7,14 +7,13 @@ package org.lorainelab.igb.synonymservice.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
-import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
 import java.io.IOException;
 import java.util.List;
 import org.lorainelab.igb.synonymservice.SynonymService;
+import org.lorainelab.igb.synonymservice.util.SynonymEntry;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -23,15 +22,15 @@ import org.slf4j.LoggerFactory;
  */
 public class SynonymServiceImpl implements SynonymService {
 
-    public SynonymServiceImpl(){
-        
+    public SynonymServiceImpl() {
+
     }
-    
+
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(SynonymServiceImpl.class);
 
     protected SetMultimap<String, String> thesaurus
             = Multimaps.synchronizedSetMultimap(LinkedHashMultimap.<String, String>create());
-    
+
     protected SetMultimap<String, String> invertedMap
             = Multimaps.synchronizedSetMultimap(LinkedHashMultimap.<String, String>create());
 
@@ -61,25 +60,44 @@ public class SynonymServiceImpl implements SynonymService {
     public boolean checkIfSynonym(String key, String synonym) {
         return thesaurus.containsEntry(key, synonym);
     }
-
+    
     @Override
     public void loadSynonymJson(String synonymJson) {
-        final ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new GuavaModule());
 
+        final ObjectMapper mapper = new ObjectMapper();
         final CollectionType javaType
-                = mapper.getTypeFactory().constructCollectionType(List.class, LinkedHashMultimap.class);
-        List<Multimap> asList = null;
+                = mapper.getTypeFactory().constructCollectionType(List.class, SynonymEntry.class);
+
+        List<SynonymEntry> asList = null;
         try {
             asList = mapper.readValue(
                     synonymJson, javaType);
         } catch (IOException ex) {
             LOG.error(ex.getMessage(), ex);
         }
+        
         if (asList != null) {
-            asList.forEach(l -> thesaurus.putAll(l));
+            asList.forEach(l -> thesaurus.putAll(l.getPreferredName(), l.getSynomyms()));
             invertedMap = Multimaps.invertFrom(thesaurus, invertedMap);
         }
-        LOG.trace("Loaded data from "+synonymJson);
+        
+//        final ObjectMapper mapper = new ObjectMapper();
+//        mapper.registerModule(new GuavaModule());
+//
+//        final CollectionType javaType
+//                = mapper.getTypeFactory().constructCollectionType(List.class, LinkedHashMultimap.class);
+//        List<Multimap> asList = null;
+//        try {
+//            asList = mapper.readValue(
+//                    synonymJson, javaType);
+//        } catch (IOException ex) {
+//            LOG.error(ex.getMessage(), ex);
+//        }
+//        if (asList != null) {
+//            asList.forEach(l -> thesaurus.putAll(l));
+//            invertedMap = Multimaps.invertFrom(thesaurus, invertedMap);
+//        }
+//        LOG.trace("Loaded data from "+synonymJson);
+//    }
     }
 }

@@ -41,14 +41,15 @@ public class CsvToJsonConverter {
 
     public static String loadCsvToJsonString(String filePath) throws IOException {
         InputStream resourceAsStream = CsvToJsonConverter.class.getClassLoader().getResourceAsStream(filePath);
-        List<CsvData> data = new CsvLoader().loadSynonyms(resourceAsStream);
+        List<SynonymEntry> data = new CsvLoader().loadSynonyms(resourceAsStream);
 
 //        final OutputStream out = new ByteArrayOutputStream();
         final ObjectMapper mapper = new ObjectMapper();
-        SimpleModule module = new SimpleModule();
-        module.addSerializer(CsvData.class, new CustomSerializer());
-        mapper.registerModule(module);
-        return mapper.writeValueAsString(data);
+//        SimpleModule module = new SimpleModule();
+//        module.addSerializer(SynonymEntry.class, new CustomSerializer());
+//        mapper.registerModule(module);
+        String jsonString = mapper.writeValueAsString(data);
+        return jsonString;
     }
 
     private static class DataToJsonConverter {
@@ -59,10 +60,10 @@ public class CsvToJsonConverter {
 
         InputStream resourceAsStream;
         File csvPath;
-        ArrayList<CsvData> csvDatas = new ArrayList<>();
-        CsvData data;
+        ArrayList<SynonymEntry> csvDatas = new ArrayList<>();
+        SynonymEntry data;
 
-        public List<CsvData> loadSynonyms(InputStream istream) throws IOException {
+        public List<SynonymEntry> loadSynonyms(InputStream istream) throws IOException {
             try (Reader reader = new InputStreamReader(istream)) {
                 Iterable<CSVRecord> records = CSVFormat.TDF
                         .withCommentMarker('#')
@@ -71,7 +72,7 @@ public class CsvToJsonConverter {
                         .parse(reader);
                 for (CSVRecord record : records) {
                     if (StringUtils.isNotEmpty(record.get(0))) {
-                        data = new CsvData(record.get(0));
+                        data = new SynonymEntry(record.get(0));
                     }
                     Set<String> row = new LinkedHashSet();
                     for (String entry : record) {
@@ -91,26 +92,26 @@ public class CsvToJsonConverter {
     }
 
     //"[{\"Ailuropoda melanoleuca\":[\"Ailuropoda melanoleuca\",\"Giant panda\",\"A_melanoleuca\",\"ailMel\",\"Ailuropoda_melanoleuca\"]}]"
-    public static class CustomSerializer extends StdSerializer<CsvData> {
+    public static class CustomSerializer extends StdSerializer<SynonymEntry> {
 
         public CustomSerializer() {
             this(null);
         }
 
-        public CustomSerializer(Class<CsvData> t) {
+        public CustomSerializer(Class<SynonymEntry> t) {
             super(t);
         }
 
         @Override
-        public void serialize(CsvData record, JsonGenerator gen, SerializerProvider provider) throws IOException, JsonProcessingException {
+        public void serialize(SynonymEntry record, JsonGenerator gen, SerializerProvider provider) throws IOException, JsonProcessingException {
             gen.writeStartObject();
-            gen.writeFieldName(record.getName());
+            gen.writeFieldName(record.getPreferredName());
             gen.writeStartArray();
             record.getSynomyms().forEach(syn -> {
                 try {
                     gen.writeString(syn);
                 } catch (IOException ex) {
-                    LOG.error("failed to writs synonym " + syn + " for " + record.getName(), ex);
+                    LOG.error("failed to writs synonym " + syn + " for " + record.getPreferredName(), ex);
                 }
             });
             gen.writeEndArray();

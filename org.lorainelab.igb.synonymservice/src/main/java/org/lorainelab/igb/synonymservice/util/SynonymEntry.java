@@ -12,27 +12,31 @@ import java.util.Set;
  *
  * @author Devdatta Kulkarni
  */
-public class CsvData {
+public class SynonymEntry {
 
-    String name;
+    String preferredName;
     Set<String> synomyms;
 
-    public CsvData(String name, Set<String> synomyms) {
-        this.name = name;
+    public SynonymEntry(){
+        
+    }
+    
+    public SynonymEntry(String name, Set<String> synomyms) {
+        this.preferredName = name;
         this.synomyms = synomyms;
     }
 
-    public CsvData(String name) {
-        this.name = name;
+    public SynonymEntry(String name) {
+        this.preferredName = name;
         synomyms = new LinkedHashSet<>();
     }
 
-    public String getName() {
-        return name;
+    public String getPreferredName() {
+        return preferredName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setPreferredName(String preferredName) {
+        this.preferredName = preferredName;
     }
 
     public Set<String> getSynomyms() {
