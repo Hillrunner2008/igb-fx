@@ -18,15 +18,12 @@ import org.slf4j.LoggerFactory;
 @Component(immediate = true, provide = GenomeVersionSynomymService.class)
 public class GenomeVersionSynomymServiceImpl extends SynonymServiceImpl implements GenomeVersionSynomymService {
 
-    //private SynonymServiceImpl service;
     private static final String SPECIES_SYNONYM_FILE = "synonyms.txt";
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(GenomeVersionSynomymServiceImpl.class);
 
     public GenomeVersionSynomymServiceImpl() {
         try {
-            //service = new SynonymServiceImpl();
             String json = CsvToJsonConverter.loadCsvToJsonString(SPECIES_SYNONYM_FILE);
-            //service.loadSynonymJson(json);
             loadSynonymJson(json);
         } catch (IOException ex) {
             LOG.error(ex.getMessage(), ex);
