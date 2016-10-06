@@ -20,7 +20,8 @@ import org.lorainelab.igb.visualization.model.TrackLabel;
  */
 public interface TrackRenderer extends Widget {
 
-    static final int DEFAULT_HEIGHT = 150;
+    static final int DEFAULT_HEIGHT = 200;
+    static final int MIN_HEIGHT = DEFAULT_HEIGHT / 4;
 
     final Comparator<TrackRenderer> SORT_BY_WEIGHT = (TrackRenderer o1, TrackRenderer o2) -> Double.compare(o1.getWeight(), o2.getWeight());
 
@@ -29,7 +30,7 @@ public interface TrackRenderer extends Widget {
     TrackLabel getTrackLabel();
 
     CanvasContext getCanvasContext();
-    
+
     Optional<Track> getTrack();
 
     View getView();
@@ -60,7 +61,7 @@ public interface TrackRenderer extends Widget {
             height = (DEFAULT_HEIGHT + stretchDelta().doubleValue()) * yFactor;
             height = height + activeStretchDelta().doubleValue();
         }
-        return (int) Math.max(50, height);
+        return (int) Math.max(MIN_HEIGHT, height);
     }
 
 }

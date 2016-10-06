@@ -55,8 +55,8 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     public CoordinateTrackRenderer(Canvas canvas, Chromosome chromosome) {
         this.chromosome = chromosome;
         this.modelWidth = chromosome.getLength();
-        this.modelHeight = 50;
-        trackHeight = new SimpleDoubleProperty(50);
+        this.modelHeight = MIN_HEIGHT;
+        trackHeight = new SimpleDoubleProperty(MIN_HEIGHT);
         weight = 0;
         validViewRange = Range.closedOpen(0, modelWidth);
         viewBoundingRectangle = new Rectangle2D(0, 0, modelWidth, modelHeight);
@@ -423,7 +423,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
 
     @Override
     public int getZindex() {
-        return 1;
+        return 2;
     }
 
     @Override

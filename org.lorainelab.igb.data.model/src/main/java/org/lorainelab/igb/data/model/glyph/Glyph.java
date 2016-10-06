@@ -24,7 +24,10 @@ public interface Glyph {
     static final int SLOT_HEIGHT = 50;
     static final double MAX_GLYPH_HEIGHT = SLOT_HEIGHT * .65;
     static final int SLOT_PADDING = SLOT_HEIGHT / 10;
-    static final double LABEL_OFFSET = ((SLOT_HEIGHT - MAX_GLYPH_HEIGHT) / 2) - SLOT_PADDING;
+    static final double LABEL_HEIGHT = SLOT_HEIGHT - MAX_GLYPH_HEIGHT;
+    static final double LABEL_OFFSET = LABEL_HEIGHT / 2;
+    static final double LABEL_OFFSET_PADDED_TOP = LABEL_OFFSET + SLOT_PADDING;
+    static final double LABEL_OFFSET_PADDED_BOTTOM = LABEL_OFFSET - SLOT_PADDING;
     static Rectangle.Double SHARED_RECT = new Rectangle.Double(0, 0, 0, 0);
 
     Color getFill();
@@ -73,7 +76,7 @@ public interface Glyph {
                 break;
             case BOTTOM_CENTER:
                 double centerPos = slotRect.getMinY() + (SLOT_HEIGHT - boundingRect.getHeight()) / 2;
-                y = centerPos + LABEL_OFFSET;
+                y = centerPos + LABEL_OFFSET_PADDED_BOTTOM;
                 break;
             case CENTER:
                 y = slotRect.getMinY() + (SLOT_HEIGHT - boundingRect.getHeight()) / 2;
@@ -83,7 +86,7 @@ public interface Glyph {
                 break;
             case TOP_CENTER:
                 double centerY = slotRect.getMinY() + (SLOT_HEIGHT - boundingRect.getHeight()) / 2;
-                y = centerY - LABEL_OFFSET;
+                y = centerY - LABEL_OFFSET_PADDED_BOTTOM;
                 break;
             case CUSTOM:
                 y = boundingRect.getMinY();

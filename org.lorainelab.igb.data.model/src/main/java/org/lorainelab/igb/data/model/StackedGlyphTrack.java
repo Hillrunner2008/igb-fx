@@ -110,19 +110,19 @@ public class StackedGlyphTrack implements Track {
                         double maxX = SCRATCH_RECT.getMaxX();
                         while (i + 1 < glyphsInView.size()) {
                             final CompositionGlyph nextGlyph = glyphsInView.get(i + 1);
-                            isSelected = isSelected | nextGlyph.isSelected();
                             Rectangle.Double nextRenderRect = nextGlyph.calculateDrawRect(view, slotBoundingRect).orElse(null);
                             if (nextRenderRect != null && nextRenderRect.width < modelCoordinatesPerScreenXPixel) {
                                 nextRenderRect.setRect(nextRenderRect.x, nextRenderRect.y, modelCoordinatesPerScreenXPixel, nextRenderRect.height);
                             }
                             if (nextRenderRect != null && nextRenderRect.getMinX() / xPixelsPerCoordinate < (SCRATCH_RECT.getMaxX() / xPixelsPerCoordinate) + 1) {
+                                isSelected = isSelected | nextGlyph.isSelected();
                                 maxX = nextRenderRect.getMaxX();
                             } else {
                                 SCRATCH_RECT.setRect(SCRATCH_RECT.getMinX(), SCRATCH_RECT.getMinY(), maxX - SCRATCH_RECT.getMinX(), SCRATCH_RECT.getHeight());
                                 DrawUtils.scaleToVisibleRec(view, SCRATCH_RECT);
-                                glyph.drawSummaryRectangle(gc, SCRATCH_RECT,slotBoundingRect);
+                                glyph.drawSummaryRectangle(gc, SCRATCH_RECT, slotBoundingRect);
                                 if (isSelected) {
-                                    glyph.drawSummarySelectionRectangle(gc, view, SCRATCH_RECT);
+                                    glyph.drawSummarySelectionRectangle(gc, view, SCRATCH_RECT, slotBoundingRect);
                                 }
                                 break;
                             }

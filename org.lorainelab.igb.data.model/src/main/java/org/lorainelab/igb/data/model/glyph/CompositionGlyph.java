@@ -4,8 +4,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeMap;
 import com.google.common.collect.TreeRangeMap;
-import com.sun.javafx.tk.FontMetrics;
-import com.sun.javafx.tk.Toolkit;
 import java.awt.Rectangle;
 import java.util.Collection;
 import java.util.List;
@@ -15,11 +13,12 @@ import java.util.Optional;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import org.lorainelab.igb.data.model.View;
+import org.lorainelab.igb.data.model.util.FontReference;
+import org.lorainelab.igb.data.model.util.FontUtils;
 import static org.lorainelab.igb.data.model.util.Palette.DEFAULT_GLYPH_FILL;
 import static org.lorainelab.igb.data.model.util.Palette.DEFAULT_LABEL_COLOR;
+import static org.lorainelab.igb.data.model.util.Palette.SELECTION_COLOR;
 
 /**
  *
@@ -27,7 +26,8 @@ import static org.lorainelab.igb.data.model.util.Palette.DEFAULT_LABEL_COLOR;
  */
 public class CompositionGlyph implements Glyph {
 
-    private static final double LABEL_SPACE = 5;
+    private static final double SELECTION_RECTANGLE_WIDTH = 0.25;
+
     private RangeMap<Double, Glyph> xRange;
     private final Map<String, String> tooltipData;
     private static Rectangle.Double SCRATCH_RECT = new Rectangle.Double(0, 0, 0, 0);
@@ -147,7 +147,6 @@ public class CompositionGlyph implements Glyph {
     }
 
     public void draw(GraphicsContext gc, View view, Rectangle2D slotBoundingViewRect, boolean isSummaryRow) {
-        Rectangle2D viewBoundingRect = view.getBoundingRect();
         Optional<Rectangle.Double> glyphViewIntersectionBoundsWrapper = calculateDrawRect(view, slotBoundingViewRect);
         if (!glyphViewIntersectionBoundsWrapper.isPresent()) {
             return;
@@ -155,21 +154,20 @@ public class CompositionGlyph implements Glyph {
         Rectangle.Double glyphViewIntersectionBounds = glyphViewIntersectionBoundsWrapper.get();
         drawChildren(gc, view, slotBoundingViewRect);
         if (!isSummaryRow) {
-            drawLabel(view, viewBoundingRect, gc, glyphViewIntersectionBounds);
+            drawLabel(view, gc, glyphViewIntersectionBounds);
         }
         drawSelectionRectangle(gc, view, glyphViewIntersectionBounds, slotBoundingViewRect);
     }
 
     @Override
     public void draw(GraphicsContext gc, View view, Rectangle2D slotBoundingViewRect) {
-        Rectangle2D viewBoundingRect = view.getBoundingRect();
         Optional<Rectangle.Double> glyphViewIntersectionBoundsWrapper = calculateDrawRect(view, slotBoundingViewRect);
         if (!glyphViewIntersectionBoundsWrapper.isPresent()) {
             return;
         }
         Rectangle.Double glyphViewIntersectionBounds = glyphViewIntersectionBoundsWrapper.get();
         drawChildren(gc, view, slotBoundingViewRect);
-        drawLabel(view, viewBoundingRect, gc, glyphViewIntersectionBounds);
+        drawLabel(view, gc, glyphViewIntersectionBounds);
         drawSelectionRectangle(gc, view, glyphViewIntersectionBounds, slotBoundingViewRect);
     }
 
@@ -197,24 +195,44 @@ public class CompositionGlyph implements Glyph {
         gc.save();
         gc.setFill(DEFAULT_GLYPH_FILL);
         gc.setStroke(DEFAULT_GLYPH_FILL);
-        double minY = slotRect.getMinY() + (SLOT_HEIGHT - glyphViewIntersectionBounds.getHeight() / 2) / 2;
+        final double centerOffset = (SLOT_HEIGHT - glyphViewIntersectionBounds.getHeight() / 2) / 2;
+        double minY;
         switch (glyphAlignment) {
             case BOTTOM_CENTER:
-                double centerPos = slotRect.getMinY() + (SLOT_HEIGHT - glyphViewIntersectionBounds.getHeight() / 2) / 2;
-                minY = centerPos + ((SLOT_HEIGHT - (MAX_GLYPH_HEIGHT/2)) / 2);
+                double centerPos = slotRect.getMinY() + centerOffset;
+                minY = centerPos + LABEL_OFFSET;
                 break;
             case TOP_CENTER:
-                double centerY = slotRect.getMinY() + (SLOT_HEIGHT - glyphViewIntersectionBounds.getHeight() / 2) / 2;
-                minY = centerY - ((SLOT_HEIGHT - MAX_GLYPH_HEIGHT/2) / 2);
+                double centerY = slotRect.getMinY() + centerOffset;
+                minY = centerY - LABEL_OFFSET;
                 break;
             default:
-                minY = slotRect.getMinY() + (SLOT_HEIGHT - glyphViewIntersectionBounds.getHeight() / 2) / 2;
+                minY = slotRect.getMinY() + centerOffset;
         }
         gc.fillRect(glyphViewIntersectionBounds.getMinX(), minY, glyphViewIntersectionBounds.getWidth(), glyphViewIntersectionBounds.getHeight() / 2);
         gc.restore();
     }
 
-    private void drawLabel(View view, Rectangle2D viewBoundingRect, GraphicsContext gc, Rectangle.Double glyphViewIntersectionBounds) {
+    public void drawSummarySelectionRectangle(GraphicsContext gc, View view, Rectangle.Double drawRect, Rectangle2D slotRect) {
+        gc.save();
+        gc.setFill(SELECTION_COLOR);
+        double xToYRatio = view.getXfactor() / view.getYfactor();
+        double vMargin = drawRect.getHeight() / 10;
+        double minY = (drawRect.getMinY() - view.getBoundingRect().getMinY()) + vMargin;
+        double minX = drawRect.getMinX();
+        double maxX = drawRect.getMaxX();
+        double maxY = drawRect.getMaxY() - view.getBoundingRect().getMinY() - vMargin;
+        double width = drawRect.getWidth();
+        double height = maxY - minY;
+        gc.fillRect(minX, minY, width, SELECTION_RECTANGLE_WIDTH); //top
+        gc.fillRect(minX, minY, SELECTION_RECTANGLE_WIDTH / xToYRatio, height); //left
+        gc.fillRect(maxX, minY, SELECTION_RECTANGLE_WIDTH / xToYRatio, height + SELECTION_RECTANGLE_WIDTH);//right
+        gc.fillRect(minX, maxY, width, SELECTION_RECTANGLE_WIDTH);//bottom
+        gc.restore();
+    }
+
+    private void drawLabel(View view, GraphicsContext gc, Rectangle.Double glyphViewIntersectionBounds) {
+        Rectangle2D viewBoundingRect = view.getBoundingRect();
         final String labelString = label;
         if (!Strings.isNullOrEmpty(labelString)) {
             if (viewBoundingRect.getWidth() < 700_000) {
@@ -223,19 +241,21 @@ public class CompositionGlyph implements Glyph {
 
                 double textScale = .5;
                 gc.scale(textScale, textScale);
-                final double fontSize = (glyphViewIntersectionBounds.getHeight() * view.getYfactor() / 5) / textScale;;
-                if (fontSize > 10) {
-                    gc.setFont(Font.font("Monospaced", FontWeight.NORMAL, fontSize));
-                    FontMetrics fm = Toolkit.getToolkit().getFontLoader().getFontMetrics(gc.getFont());
-                    double textHeight = fm.getAscent();
-                    double textYPosition = ((glyphViewIntersectionBounds.getMinY() * view.getYfactor()) / textScale);
+                double availableLabelHeight = (LABEL_HEIGHT * view.getYfactor()) / textScale;
+                availableLabelHeight *= .75;
+                FontReference fontReference = FontUtils.getFontByPixelHeight(availableLabelHeight);
+                gc.setFont(fontReference.getFont());
+                if (availableLabelHeight > 10) {
 
-                    double textYOffset = textHeight;
+                    double textYOffset = getTextYOffset(fontReference, availableLabelHeight);
+                    double textYPosition;
                     if (isNegative) {
-                        textYPosition = ((glyphViewIntersectionBounds.getMaxY() * view.getYfactor()) / textScale) - LABEL_SPACE;
-                        textYOffset = 0;
+                        textYPosition = ((glyphViewIntersectionBounds.getMaxY() * view.getYfactor()) / textScale);
+                        textYPosition -= textYOffset;
+                    } else {
+                        textYPosition = (((glyphViewIntersectionBounds.getMinY()) * view.getYfactor()) / textScale);
+                        textYPosition += textYOffset;
                     }
-                    textYPosition += textYOffset;
 
                     double x = (glyphViewIntersectionBounds.getMinX() * view.getXfactor()) / textScale;
                     double width = (glyphViewIntersectionBounds.getWidth() * view.getXfactor()) / textScale;
@@ -255,7 +275,15 @@ public class CompositionGlyph implements Glyph {
         }
     }
 
-    private void drawSelectionRectangle(GraphicsContext gc, View view, Rectangle.Double glyphViewIntersectionBounds, Rectangle2D slotBoundingRect) {
+    private double getTextYOffset(FontReference fontReference, double availableLabelHeight) {
+        double textHeightOffset = fontReference.getAscent() - fontReference.getDescent();
+        if (textHeightOffset < availableLabelHeight) {
+            textHeightOffset -= ((availableLabelHeight - textHeightOffset) / 4) * 3;
+        }
+        return textHeightOffset;
+    }
+
+    private void drawSelectionRectangle(GraphicsContext gc, View view, Rectangle.Double glyphViewIntersectionBounds, Rectangle2D slotRect) {
         if (isSelected()) {
             Rectangle.Double drawRect = glyphViewIntersectionBounds;
 //            for (Glyph g : xRange.asMapOfRanges().values()) {
@@ -268,39 +296,20 @@ public class CompositionGlyph implements Glyph {
 //                }
 //            }
             gc.save();
-            gc.setFill(Color.RED);
-            double rectWidth = 0.25;
+            gc.setFill(SELECTION_COLOR);
             double xToYRatio = view.getXfactor() / view.getYfactor();
-            double minY = slotBoundingRect.getMinY() - view.getBoundingRect().getMinY();
+            double minY = slotRect.getMinY() - view.getBoundingRect().getMinY();
             double minX = drawRect.getMinX();
             double maxX = drawRect.getMaxX();
-            double maxY = slotBoundingRect.getMaxY() - view.getBoundingRect().getMinY();
+            double maxY = slotRect.getMaxY() - view.getBoundingRect().getMinY() - SLOT_PADDING;
             double width = drawRect.getWidth();
-            double height = drawRect.getHeight();
-            gc.fillRect(minX, minY, width, rectWidth); //top
-            gc.fillRect(minX, minY, rectWidth / xToYRatio, height); //left
-            gc.fillRect(maxX, minY, rectWidth / xToYRatio, height + rectWidth);//right
-            gc.fillRect(minX, maxY, width, rectWidth);//bottom
+            double height = maxY - minY;
+            gc.fillRect(minX, minY, width, SELECTION_RECTANGLE_WIDTH); //top
+            gc.fillRect(minX, minY, SELECTION_RECTANGLE_WIDTH / xToYRatio, height); //left
+            gc.fillRect(maxX, minY, SELECTION_RECTANGLE_WIDTH / xToYRatio, height + SELECTION_RECTANGLE_WIDTH);//right
+            gc.fillRect(minX, maxY, width, SELECTION_RECTANGLE_WIDTH);//bottom
             gc.restore();
         }
-    }
-
-    public void drawSummarySelectionRectangle(GraphicsContext gc, View view, Rectangle.Double drawRect) {
-        gc.save();
-        gc.setFill(Color.RED);
-        double rectWidth = 0.25;
-        double xToYRatio = view.getXfactor() / view.getYfactor();
-        double minY = drawRect.getMinY() - view.getBoundingRect().getMinY();
-        double minX = drawRect.getMinX();
-        double maxX = drawRect.getMaxX();
-        double maxY = drawRect.getMaxY() - view.getBoundingRect().getMinY();
-        double width = drawRect.getWidth();
-        double height = drawRect.getHeight();
-        gc.fillRect(minX, minY, width, rectWidth); //top
-        gc.fillRect(minX, minY, rectWidth / xToYRatio, height); //left
-        gc.fillRect(maxX, minY, rectWidth / xToYRatio, height + rectWidth);//right
-        gc.fillRect(minX, maxY, width, rectWidth);//bottom
-        gc.restore();
     }
 
     @Override

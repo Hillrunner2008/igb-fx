@@ -8,12 +8,14 @@ import javafx.scene.paint.Color;
  */
 public class Palette {
 
-    public static Color DEFAULT_CANVAS_BG = Color.web("#323232");
+    public static Color DEFAULT_CANVAS_BG = Color.web("#282828");
 
     public static Color LOADED_REGION_BG = Color.web("#1E1E1E");
     public static Color DEFAULT_LINE_FILL = Color.web("#A9B7C6");
-    public static Color DEFAULT_GLYPH_FILL = Color.web("#29938B");
+    public static Color DEFAULT_GLYPH_FILL = Color.web("#0084B4");
     public static Color DEFAULT_LABEL_COLOR = Color.web("#A9B7C6");
+    
+    public static Color SELECTION_COLOR = Color.web("#DC322F");
 
     public static Color CLICK_DRAG_HIGHLIGHT = Color.rgb(33, 150, 243, .3);
 
