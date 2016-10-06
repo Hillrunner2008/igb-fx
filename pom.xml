@@ -68,6 +68,16 @@
                 <version>${jackson.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.fasterxml.jackson.datatype</groupId>
+                <artifactId>jackson-datatype-guava</artifactId>
+                <version>2.2.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-csv</artifactId>
+                <version>1.4</version>
+            </dependency> 
+            <dependency>
                 <groupId>biz.aQute.bnd</groupId>
                 <artifactId>bndlib</artifactId>
                 <version>2.4.0</version>
@@ -137,6 +147,12 @@
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>4.12</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.hamcrest</groupId>
+                <artifactId>hamcrest-core</artifactId>
+                <version>1.3</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
