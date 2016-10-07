@@ -7,6 +7,7 @@
         <bundle>mvn:org.ops4j.pax.jdbc/pax-jdbc-sqlite/0.8.0</bundle>
     </feature>
     <feature name="${project.artifactId}" version="${project.version}" install="auto">	
+        <bundle start-level="60">mvn:${project.groupId}/org.lorainelab.igb.preferences/${project.version}</bundle>
         <bundle start-level="65">mvn:${project.groupId}/org.lorainelab.igb.stage.provider.api/${project.version}</bundle>
         <bundle start-level="65">mvn:${project.groupId}/org.lorainelab.igb.main/${project.version}</bundle>
         <bundle start-level="65">wrap:mvn:org.reactfx/reactfx/2.0-M4u1</bundle>
@@ -39,7 +40,6 @@
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.lucene-queryparser/6.0.0_1</bundle>
         
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.utils/${project.version}</bundle>
-        <bundle>mvn:${project.groupId}/org.lorainelab.igb.preferences/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.search.api/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.search.lucene/${project.version}</bundle>
            
