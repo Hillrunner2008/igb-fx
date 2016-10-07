@@ -10,6 +10,7 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import org.lorainelab.igb.data.model.View;
+import static org.lorainelab.igb.data.model.util.Palette.DEFAULT_LINE_FILL;
 
 /**
  *
@@ -20,21 +21,23 @@ public class LineGlyph implements Glyph {
     int start;
     int width;
     private Rectangle2D boundingRect;
+    private GlyphAlignment glyphAlignment;
 
     public LineGlyph(int start, int width) {
         this.start = start;
         this.width = width;
         boundingRect = new Rectangle2D(start, 0, width, 1);
+        glyphAlignment = glyphAlignment.BOTTOM;
     }
 
     @Override
     public Color getFill() {
-        return Color.BLACK;
+        return DEFAULT_LINE_FILL;
     }
 
     @Override
     public Color getStrokeColor() {
-        return Color.BLACK;
+        return DEFAULT_LINE_FILL;
     }
 
     @Override
@@ -50,8 +53,8 @@ public class LineGlyph implements Glyph {
             double width = drawRect.getWidth();
             double height = drawRect.getHeight();
             gc.save();
-            gc.setFill(Color.BLACK);
-            gc.setStroke(Color.BLACK);
+            gc.setFill(getFill());
+            gc.setStroke(getStrokeColor());
             gc.strokeLine(x, y, x + width, y);
             gc.restore();
         });
@@ -89,6 +92,16 @@ public class LineGlyph implements Glyph {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public GlyphAlignment getGlyphAlignment() {
+        return glyphAlignment;
+    }
+
+    @Override
+    public void setGlyphAlignment(GlyphAlignment alignment) {
+        this.glyphAlignment = alignment;
     }
 
 }

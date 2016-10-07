@@ -40,8 +40,6 @@ public interface Track {
 
     BooleanProperty isHeightLocked();
 
-    double getLockedHeight();
-
     double getModelHeight();
 
     String getTrackLabel();

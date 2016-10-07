@@ -18,10 +18,11 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.View;
-import static org.lorainelab.igb.data.model.sequence.BasePairColorReference.getBaseColor;
 import org.lorainelab.igb.data.model.shapes.Rectangle;
 import org.lorainelab.igb.data.model.util.ColorUtils;
 import org.lorainelab.igb.data.model.util.DrawUtils;
+import static org.lorainelab.igb.data.model.util.Palette.DEFAULT_GLYPH_FILL;
+import static org.lorainelab.igb.data.model.util.Palette.getBaseColor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,10 +33,10 @@ import org.slf4j.LoggerFactory;
 public class RectangleGlyph implements Glyph {
 
     private static final Logger LOG = LoggerFactory.getLogger(RectangleGlyph.class);
-    public static final int THICK_RECTANGLE_HEIGHT = 15;
-    private Color fill = Color.WHITE;
+    public static final double THICK_RECTANGLE_HEIGHT = MAX_GLYPH_HEIGHT;
 
-    private Color strokeColor = Color.BLACK;
+    private Color fill = DEFAULT_GLYPH_FILL;
+    private Color strokeColor = DEFAULT_GLYPH_FILL;
 
     private final Rectangle2D boundingRect;
     private final Optional<Function<String, String>> innerTextRefSeqTranslator;
@@ -44,13 +45,14 @@ public class RectangleGlyph implements Glyph {
     private final boolean isSelectable;
     private boolean isSelected;
     private boolean maskBasePairMatches;
+    private GlyphAlignment glyphAlignment;
 
     public RectangleGlyph(Rectangle rectShape) {
-        int height = 10;
+        double height = THICK_RECTANGLE_HEIGHT * .75;
         if (rectShape.getAttributes().contains(org.lorainelab.igb.data.model.shapes.Rectangle.Attribute.THICK)) {
             height = THICK_RECTANGLE_HEIGHT;
         } else if (rectShape.getAttributes().contains(org.lorainelab.igb.data.model.shapes.Rectangle.Attribute.INSERTION)) {
-            height = 3;
+            height = SLOT_HEIGHT / 10;
         }
         boundingRect = new Rectangle2D(rectShape.getOffset(), 0, rectShape.getWidth(), height);
         innerTextRefSeqTranslator = rectShape.getInnerTextRefSeqTranslator();
@@ -59,6 +61,7 @@ public class RectangleGlyph implements Glyph {
         isSelectable = rectShape.isSelectable();
         isSelected = false;
         maskBasePairMatches = rectShape.isMaskBasePairMatches();
+        glyphAlignment = GlyphAlignment.BOTTOM;
     }
 
     @Override
@@ -235,6 +238,16 @@ public class RectangleGlyph implements Glyph {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public GlyphAlignment getGlyphAlignment() {
+        return glyphAlignment;
+    }
+
+    @Override
+    public void setGlyphAlignment(GlyphAlignment alignment) {
+        this.glyphAlignment = alignment;
     }
 
 }

@@ -5,8 +5,6 @@ import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import java.time.Duration;
 import java.util.Optional;
-import java.util.Timer;
-import java.util.TimerTask;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
@@ -123,37 +121,27 @@ public class CanvasMouseEventManager {
     }
 
     private void processMouseClicked(MouseEvent event) {
+        Point2D mousePoint = getPoint2dFromMouseEvent(event);
+        if (event.getClickCount() >= 2) {
+            selectionInfoService.getSelectedGlyphs().clear();
+            getTrackRendererContainingPoint(mousePoint).ifPresent(tr -> {
+
+                tr.getTrack().orElseThrow(() -> new NullPointerException("Track reference null")).getSelectedGlyphs().stream()
+                        .findFirst().ifPresent(glyphToJumpZoom -> {
+                            jumpZoom(glyphToJumpZoom.getBoundingRect(), tr, event);
+                            selectionInfoService.getSelectedGlyphs().add(glyphToJumpZoom);
+                        });
+            });
+        } else {
+            selectionInfoService.getSelectedGlyphs().clear();
+            getTrackRendererContainingPoint(mousePoint).ifPresent(tr -> {
+                selectionInfoService.getSelectedGlyphs().addAll(
+                        tr.getTrack().orElseThrow(() -> new NullPointerException("Track reference null")).getSelectedGlyphs()
+                );
+            });
+        }
+        updateZoomStripe(event);
         canvasModel.forceRefresh();
-        //wait for refresh to complete
-        Timer timer = new Timer();
-        timer.schedule(
-                new TimerTask() {
-
-            @Override
-            public void run() {
-                Point2D mousePoint = getPoint2dFromMouseEvent(event);
-                if (event.getClickCount() >= 2) {
-                    selectionInfoService.getSelectedGlyphs().clear();
-                    getTrackRendererContainingPoint(mousePoint).ifPresent(tr -> {
-
-                        tr.getTrack().getSelectedGlyphs().stream()
-                                .findFirst().ifPresent(glyphToJumpZoom -> {
-                                    jumpZoom(glyphToJumpZoom.getBoundingRect(), tr, event);
-                                    selectionInfoService.getSelectedGlyphs().add(glyphToJumpZoom);
-                                });
-                    });
-                } else {
-                    selectionInfoService.getSelectedGlyphs().clear();
-                    getTrackRendererContainingPoint(mousePoint).ifPresent(tr -> {
-                        selectionInfoService.getSelectedGlyphs().addAll(
-                                tr.getTrack().getSelectedGlyphs()
-                        );
-                    });
-                }
-                updateZoomStripe(event);
-            }
-        }, 200);
-
     }
 
     private Optional<ZoomableTrackRenderer> getTrackRendererContainingPoint(Point2D mousePoint) {

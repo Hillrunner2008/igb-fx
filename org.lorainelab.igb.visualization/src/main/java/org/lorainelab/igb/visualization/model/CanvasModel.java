@@ -20,6 +20,7 @@ import javafx.geometry.Rectangle2D;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.selections.SelectionInfoService;
 import org.lorainelab.igb.visualization.ui.CanvasRegion;
+import org.lorainelab.igb.visualization.ui.VerticalScrollBar;
 import static org.lorainelab.igb.visualization.util.BoundsUtil.enforceRangeBounds;
 import static org.lorainelab.igb.visualization.util.CanvasUtils.exponentialScaleTransform;
 import org.slf4j.Logger;
@@ -56,6 +57,8 @@ public class CanvasModel {
     private BooleanProperty multiSelectModeActive;
     private BooleanProperty forceRefresh;
     private BooleanProperty labelResizingActive;
+    private VerticalScrollBar verticalScrollBar;
+    final Runnable refreshAction;
 
     public CanvasModel() {
         modelWidth = new SimpleDoubleProperty(1);
@@ -76,6 +79,7 @@ public class CanvasModel {
         multiSelectModeActive = new SimpleBooleanProperty(false);
         forceRefresh = new SimpleBooleanProperty(false);
         labelResizingActive = new SimpleBooleanProperty(false);
+        refreshAction = () -> forceRefresh();
     }
 
     @Activate
@@ -98,6 +102,14 @@ public class CanvasModel {
             double xOffset = Math.round((scrollX.get() / 100) * (modelWidth.get() - visibleVirtualCoordinatesX.get()));
             xOffset = enforceRangeBounds(xOffset, 0, modelWidth.get());
             this.xOffset.set(xOffset);
+        });
+        scrollY.bind(verticalScrollBar.valueProperty());
+
+        vSlider.addListener((ObservableValue<? extends Number> observable, Number oldValue, Number vSliderValue) -> {
+            final double vSliderPercentage = 1 - (vSliderValue.doubleValue() / 100);
+            double minScaleY = canvasRegion.getHeight();
+            double maxScaleY = MAX_ZOOM_MODEL_COORDINATES_Y;
+            yFactor.set(minScaleY / (maxScaleY + (minScaleY - maxScaleY) * vSliderPercentage));
         });
     }
 
@@ -126,7 +138,6 @@ public class CanvasModel {
         yFactor.set(1);
         resetZoomStripe();
         scrollX.setValue(0);
-        scrollY.setValue(0);
         hSlider.setValue(0);
         vSlider.setValue(0);
     }
@@ -174,7 +185,7 @@ public class CanvasModel {
         zoomStripeCoordinate.set(-1);
     }
 
-    public DoubleProperty getScrollY() {
+    public ReadOnlyDoubleProperty getScrollY() {
         return scrollY;
     }
 
@@ -203,6 +214,10 @@ public class CanvasModel {
         this.forceRefresh.set(false);
     }
 
+    public Runnable getRefreshAction() {
+        return refreshAction;
+    }
+    
     public BooleanProperty getLabelResizingActive() {
         return labelResizingActive;
     }
@@ -257,8 +272,17 @@ public class CanvasModel {
         this.canvasRegion = canvasRegion;
     }
 
+    @Reference
+    public void setVerticalScrollBar(VerticalScrollBar verticalScrollBar) {
+        this.verticalScrollBar = verticalScrollBar;
+    }
+
     public void setxFactor(double xFactor) {
         this.xFactor.set(xFactor);
+    }
+
+    public void setyFactor(double yFactor) {
+        this.yFactor.set(yFactor);
     }
 
     public void setScrollX(double scrollX) {

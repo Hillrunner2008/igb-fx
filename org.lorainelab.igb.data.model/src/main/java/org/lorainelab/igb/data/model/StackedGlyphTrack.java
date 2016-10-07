@@ -70,7 +70,11 @@ public class StackedGlyphTrack implements Track {
             Rectangle2D slotBoundingViewRect = entry.getValue().getSlotBoundingRect(view.getBoundingRect(), isNegative);
             final List<CompositionGlyph> glyphsInView = entry.getValue().getGlyphsInView(view);
             if (!glyphsInView.isEmpty()) {
-                experimentalOptimizedRender(glyphsInView, gc, view, slotBoundingViewRect, isSummaryRow(entry));
+                try {
+                    experimentalOptimizedRender(glyphsInView, gc, view, slotBoundingViewRect, isSummaryRow(entry));
+                } catch (Exception ex) {
+                    LOG.error(ex.getMessage(), ex);
+                }
             }
         }
         gc.restore();
@@ -94,7 +98,11 @@ public class StackedGlyphTrack implements Track {
                 if (drawRect != null) {
                     SCRATCH_RECT.setRect(drawRect);
                     if (SCRATCH_RECT.getWidth() / xPixelsPerCoordinate > 10) {
-                        glyph.draw(gc, view, slotBoundingRect);
+                        try {
+                            glyph.draw(gc, view, slotBoundingRect);
+                        } catch (Exception ex) {
+                            LOG.error(ex.getMessage(), ex);
+                        }
                     } else {
                         if (drawRect.width < modelCoordinatesPerScreenXPixel) {
                             drawRect.setRect(drawRect.x, drawRect.y, modelCoordinatesPerScreenXPixel, drawRect.height);
@@ -102,19 +110,19 @@ public class StackedGlyphTrack implements Track {
                         double maxX = SCRATCH_RECT.getMaxX();
                         while (i + 1 < glyphsInView.size()) {
                             final CompositionGlyph nextGlyph = glyphsInView.get(i + 1);
-                            isSelected = isSelected | nextGlyph.isSelected();
                             Rectangle.Double nextRenderRect = nextGlyph.calculateDrawRect(view, slotBoundingRect).orElse(null);
                             if (nextRenderRect != null && nextRenderRect.width < modelCoordinatesPerScreenXPixel) {
                                 nextRenderRect.setRect(nextRenderRect.x, nextRenderRect.y, modelCoordinatesPerScreenXPixel, nextRenderRect.height);
                             }
                             if (nextRenderRect != null && nextRenderRect.getMinX() / xPixelsPerCoordinate < (SCRATCH_RECT.getMaxX() / xPixelsPerCoordinate) + 1) {
+                                isSelected = isSelected | nextGlyph.isSelected();
                                 maxX = nextRenderRect.getMaxX();
                             } else {
                                 SCRATCH_RECT.setRect(SCRATCH_RECT.getMinX(), SCRATCH_RECT.getMinY(), maxX - SCRATCH_RECT.getMinX(), SCRATCH_RECT.getHeight());
                                 DrawUtils.scaleToVisibleRec(view, SCRATCH_RECT);
-                                glyph.drawSummaryRectangle(gc, SCRATCH_RECT);
+                                glyph.drawSummaryRectangle(gc, SCRATCH_RECT, slotBoundingRect);
                                 if (isSelected) {
-                                    glyph.drawSummarySelectionRectangle(gc, view, SCRATCH_RECT);
+                                    glyph.drawSummarySelectionRectangle(gc, view, SCRATCH_RECT, slotBoundingRect);
                                 }
                                 break;
                             }
@@ -248,7 +256,9 @@ public class StackedGlyphTrack implements Track {
                 if (glyphViewRect == null) {
                     return false;
                 }
-                return Range.closed(glyphViewRect.getMinY(), glyphViewRect.getMaxY()).isConnected(mouseEventYrange);
+                final double minY = glyphViewRect.getMinY() * view.getYfactor();
+                final double maxY = glyphViewRect.getMaxY() * view.getYfactor();
+                return Range.closed(minY, maxY).isConnected(mouseEventYrange);
             });
         }).collect(toList());
 //
@@ -301,11 +311,6 @@ public class StackedGlyphTrack implements Track {
     @Override
     public BooleanProperty isHeightLocked() {
         return isHeightLocked;
-    }
-
-    @Override
-    public double getLockedHeight() {
-        return lockedHeight;
     }
 
     @Override

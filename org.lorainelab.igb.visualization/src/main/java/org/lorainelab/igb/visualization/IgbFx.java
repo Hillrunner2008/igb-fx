@@ -4,13 +4,11 @@ import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
-import java.awt.SplashScreen;
-import java.util.Optional;
 import javafx.application.Platform;
-import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.lorainelab.igb.stage.provider.api.StageProvider;
+import static org.lorainelab.igb.utils.FXUtilities.runAndWait;
 import org.lorainelab.igb.visualization.ui.Root;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,10 +23,8 @@ public class IgbFx {
 
     @Activate
     public void activate() {
-//        closeSplashScreen();
-//        initializeFxRuntime();
         Platform.setImplicitExit(false);
-        Platform.runLater(() -> {
+        runAndWait(() -> {
             stageProvider.getSplashStage().hide();
             Scene scene = new Scene(root);
             stage.setTitle("IGBfx");
@@ -37,18 +33,9 @@ public class IgbFx {
         });
     }
 
-    private void closeSplashScreen() {
-        Optional.ofNullable(SplashScreen.getSplashScreen()).ifPresent(SplashScreen::close);
-    }
-
-    private void initializeFxRuntime() {
-        new JFXPanel(); // runtime initializer, do not remove
-        Platform.setImplicitExit(false);
-    }
-
     @Deactivate
     public void deactivate() {
-        Platform.runLater(() -> {
+        runAndWait(() -> {
             try {
                 stage.hide();
                 root.getChildren().clear();
