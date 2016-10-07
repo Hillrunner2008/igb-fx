@@ -2,8 +2,6 @@ package org.lorainelab.igb.main;
 
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
-import java.awt.DisplayMode;
-import java.awt.GraphicsEnvironment;
 import java.io.IOException;
 import java.net.URL;
 import java.util.concurrent.CompletableFuture;
@@ -14,8 +12,10 @@ import static javafx.application.Application.launch;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
@@ -96,16 +96,15 @@ public class Launcher extends Application {
 
     private void initPrimaryStage(Stage pStage) {
         this.primaryStage = pStage;
-        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        final DisplayMode displayMode = ge.getDefaultScreenDevice().getDisplayMode();
-        double width = displayMode.getWidth();
-        double height = displayMode.getHeight();
+        Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
+        double width = primaryScreenBounds.getWidth();
+        double height = primaryScreenBounds.getHeight();
         try {
             double sHeight = Double.parseDouble(modulePreferencesNode.get(HEIGHT_KEY, ""));
             double sWidth = Double.parseDouble(modulePreferencesNode.get(WIDTH_KEY, ""));
             if (sHeight / height < 0.4 || sWidth / width < 0.4 || sHeight > height || sWidth > width) {
-                primaryStage.setHeight(height*.8);
-                primaryStage.setWidth(width*.8);
+                primaryStage.setHeight(height * .8);
+                primaryStage.setWidth(width * .8);
             } else {
                 primaryStage.setHeight(sHeight);
                 primaryStage.setWidth(sWidth);
