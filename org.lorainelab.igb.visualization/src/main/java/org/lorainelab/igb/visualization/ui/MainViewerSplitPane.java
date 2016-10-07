@@ -33,6 +33,7 @@ public class MainViewerSplitPane extends SplitPane {
         canvasStackPane = new StackPane();
         setDividerPositions(0.25);
         leftSide = new HBox();
+        leftSide.setMinWidth(200);
         SplitPane.setResizableWithParent(leftSide, Boolean.FALSE);
         rightSide = new HBox();
         rightSideVbox = new VBox();
