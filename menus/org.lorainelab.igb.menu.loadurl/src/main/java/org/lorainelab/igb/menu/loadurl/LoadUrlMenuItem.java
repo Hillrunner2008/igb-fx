@@ -86,6 +86,7 @@ public class LoadUrlMenuItem implements MenuBarEntryProvider {
             }
             stage.hide();
         });
+        cancelBtn.setOnAction(ae -> stage.hide());
 
     }
 
