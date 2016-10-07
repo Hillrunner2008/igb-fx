@@ -103,7 +103,7 @@ public class Launcher extends Application {
         try {
             double sHeight = Double.parseDouble(modulePreferencesNode.get(HEIGHT_KEY, ""));
             double sWidth = Double.parseDouble(modulePreferencesNode.get(WIDTH_KEY, ""));
-            if (sHeight / height < 0.4 || sWidth / width < 0.4) {
+            if (sHeight / height < 0.4 || sWidth / width < 0.4 || sHeight > height || sWidth > width) {
                 primaryStage.setHeight(height);
                 primaryStage.setWidth(width);
             } else {
