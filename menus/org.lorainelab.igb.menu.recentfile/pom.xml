@@ -40,6 +40,10 @@
             <artifactId>org.lorainelab.igb.datasetloadingservice</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.lorainelab</groupId>
+            <artifactId>org.lorainelab.igb.selections</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

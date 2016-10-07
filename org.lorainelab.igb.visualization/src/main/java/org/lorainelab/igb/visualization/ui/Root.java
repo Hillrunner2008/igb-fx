@@ -32,11 +32,6 @@ public class Root extends VBox {
     private MainSplitPane mainSplitPane;
 
     public Root() {
-        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        final DisplayMode displayMode = ge.getDefaultScreenDevice().getDisplayMode();
-        double width = displayMode.getWidth() * .8;
-        double height = displayMode.getHeight() * .8;
-        setPrefSize(width, height);
         stackPane = new StackPane();
         VBox.setVgrow(stackPane, Priority.ALWAYS);
     }

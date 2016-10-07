@@ -5,6 +5,7 @@ import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Sets;
 import java.util.Optional;
+import static java.util.stream.Collectors.toList;
 import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
@@ -155,9 +156,8 @@ public class TracksModel {
                     Chromosome selectedChromosome = gv.getSelectedChromosomeProperty().get().get();
                     final DataSet loadedDataSet = change.getElementAdded();
                     if (loadedDataSet.isGraphType()) {
-                        
-                         final ZoomableTrackRenderer graphTrackRenderer = new ZoomableTrackRenderer(canvasRegion.getCanvas(), loadedDataSet.getGraphTrack(), selectedChromosome);
-                         trackRenderers.add(graphTrackRenderer);
+                        final ZoomableTrackRenderer graphTrackRenderer = new ZoomableTrackRenderer(canvasRegion.getCanvas(), loadedDataSet.getGraphTrack(), selectedChromosome);
+                        trackRenderers.add(graphTrackRenderer);
                     } else {
                         Track positiveStrandTrack = loadedDataSet.getPositiveStrandTrack(selectedChromosome.getName());
                         Track negativeStrandTrack = change.getElementAdded().getNegativeStrandTrack(gv.getSelectedChromosomeProperty().get().get().getName());
@@ -170,7 +170,8 @@ public class TracksModel {
                     }
                 }
             } else {
-                //todo implement remove
+                final DataSet removedDataSet = change.getElementRemoved();
+                trackRenderers.removeAll(trackRenderers.stream().filter(tr -> tr.getTrack().isPresent()).filter(tr -> tr.getTrack().get().getDataSet().equals(removedDataSet)).collect(toList()));
             }
         });
     };

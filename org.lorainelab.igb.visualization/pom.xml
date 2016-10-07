@@ -80,6 +80,10 @@
         </dependency>
         <dependency>
             <groupId>org.lorainelab</groupId>
+            <artifactId>org.lorainelab.igb.view.api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.lorainelab</groupId>
             <artifactId>org.lorainelab.igb.notifications.api</artifactId>
         </dependency>
         <dependency>
@@ -101,6 +105,14 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.testfx</groupId>
+            <artifactId>testfx-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.testfx</groupId>
+            <artifactId>testfx-junit</artifactId>
         </dependency>
     </dependencies>
     <build>

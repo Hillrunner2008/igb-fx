@@ -9,8 +9,9 @@ import com.google.common.collect.TreeMultimap;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
-import javafx.animation.AnimationTimer;
-import javafx.beans.value.ChangeListener;
+import java.util.function.Function;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.SetChangeListener;
 import javafx.geometry.Point2D;
@@ -22,6 +23,8 @@ import org.lorainelab.igb.visualization.ui.CanvasRegion;
 import org.lorainelab.igb.visualization.ui.OverlayRegion;
 import org.lorainelab.igb.visualization.ui.ViewPortManager;
 import org.reactfx.EventSource;
+import org.reactfx.EventStream;
+import org.reactfx.util.AccumulatorSize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,94 +36,98 @@ import org.slf4j.LoggerFactory;
 public class WidgetManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(WidgetManager.class);
-    private EventSource<RenderAction> refreshViewStream;
-    private EventSource<OverlayRenderAction> overlayRefreshStream;
+    private EventSource<String> refreshViewStream;
+    private EventSource<Void> overlayRefreshStream;
     private List<Widget> widgets;
     private CanvasModel canvasModel;
     private TracksModel tracksModel;
     private ViewPortManager viewPortManager;
-    private ChangeListener<Number> refreshViewListener;
     private CanvasRegion canvasRegion;
     private SelectionInfoService selectionInfoService;
-    private boolean isRefreshing;
+    private BooleanProperty isRefreshing;
     private OverlayRegion overlayRegion;
 
     public WidgetManager() {
-        isRefreshing = false;
+        isRefreshing = new SimpleBooleanProperty(false);
         refreshViewStream = new EventSource<>();
         overlayRefreshStream = new EventSource<>();
         widgets = Lists.newArrayList();
-        refreshViewListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-            refreshViewStream.emit(new RenderAction());
-        };
-
     }
 
     @Activate
     public void activate() {
-        overlayRefreshStream.subscribe(renderEvent -> {
-//            overlayAnimationTimer.start();
-              renderOverayWidgets();
+        overlayRefreshStream.accumulateWhen(isRefreshing, Function.identity(), (a, b) -> b, a -> AccumulatorSize.ONE, Function.identity(), Function.identity()).subscribe(renderEvent -> {
+            renderOverayWidgets();
         });
-        refreshViewStream.successionEnds(Duration.ofMillis(4)).subscribe(renderEvent -> {
-//            animationTimer.start();
-             renderWidgets();
+
+        EventStream<String> debouncedRefreshAwareStream = refreshViewStream.successionEnds(Duration.ofMillis(4))
+                .accumulateWhen(isRefreshing, Function.identity(), (a, b) -> b, a -> AccumulatorSize.ONE, Function.identity(), Function.identity());
+
+        debouncedRefreshAwareStream.subscribe(renderEvent -> {
+            isRefreshing.setValue(Boolean.TRUE);
+            LOG.debug(renderEvent);
+            renderWidgets();
+            isRefreshing.setValue(Boolean.FALSE);
         });
-        canvasModel.getxFactor().addListener(refreshViewListener);
-        canvasModel.getScrollX().addListener(refreshViewListener);
-        canvasModel.getModelWidth().addListener(refreshViewListener);
+        canvasModel.getxFactor().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+            refreshViewStream.emit("xFactor");
+        });
+        canvasModel.getScrollX().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+            refreshViewStream.emit("getScrollX");
+        });
+        canvasModel.getModelWidth().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+            refreshViewStream.emit("getModelWidth");
+        });
         canvasModel.getZoomStripeCoordinate().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-            overlayRefreshStream.emit(new OverlayRenderAction());
+            overlayRefreshStream.emit(null);
         });
-        canvasModel.getyFactor().addListener(refreshViewListener);
-        canvasModel.getScrollY().addListener(refreshViewListener);
-        canvasModel.getVisibleVirtualCoordinatesX().addListener(refreshViewListener);
-        canvasModel.getvSlider().addListener(refreshViewListener);
+        canvasModel.getyFactor().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+            refreshViewStream.emit("getyFactor");
+        });
+        canvasModel.getScrollY().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+            refreshViewStream.emit("getScrollY");
+        });
+        canvasModel.getVisibleVirtualCoordinatesX().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+            refreshViewStream.emit("getVisibleVirtualCoordinatesX");
+        });
+        canvasModel.getvSlider().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+            refreshViewStream.emit("canvasModel.getvSlider");
+        });
         canvasModel.getClickDragStartPosition().addListener((ObservableValue<? extends Optional<Point2D>> observable, Optional<Point2D> oldValue, Optional<Point2D> newValue) -> {
-            overlayRefreshStream.emit(new OverlayRenderAction());
+            overlayRefreshStream.emit(null);
         });
         canvasModel.getLastDragPosition().addListener((ObservableValue<? extends Optional<Point2D>> observable, Optional<Point2D> oldValue, Optional<Point2D> newValue) -> {
-            overlayRefreshStream.emit(new OverlayRenderAction());
+            overlayRefreshStream.emit(null);
         });
         tracksModel.getTrackRenderers().addListener((SetChangeListener.Change<? extends TrackRenderer> change) -> {
-            refreshViewStream.emit(new RenderAction());
+            refreshViewStream.emit("trackRenderers change");
         });
-        canvasRegion.widthProperty().addListener(refreshViewListener);
-        canvasRegion.heightProperty().addListener(refreshViewListener);
+        canvasRegion.widthProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+            refreshViewStream.emit("canvasRegion.widthProperty");
+        });
+        canvasRegion.heightProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+            if (!canvasModel.getLabelResizingActive().get()) {
+                refreshViewStream.emit("canvasRegion.heightProperty");
+            }
+        });
         selectionInfoService.getSelectedGenomeVersion().addListener((ObservableValue<? extends Optional<GenomeVersion>> observable, Optional<GenomeVersion> oldValue, Optional<GenomeVersion> newValue) -> {
-            refreshViewStream.emit(new RenderAction());
+            refreshViewStream.emit("selectedGenomeVersion change");
         });
         canvasModel.isforceRefresh().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-            refreshViewStream.emit(new RenderAction());
+            refreshViewStream.emit("forceRefresh");
         });
-        animationTimer = new AnimationTimer() {
-            @Override
-            public void handle(long now) {
-                renderWidgets();
-                stop();
-            }
-        };
-        overlayAnimationTimer = new AnimationTimer() {
-            @Override
-            public void handle(long now) {
-                renderOverayWidgets();
-                stop();
-            }
-        };
 
     }
-    private AnimationTimer animationTimer;
-    private AnimationTimer overlayAnimationTimer;
 
     @Reference(multiple = true, unbind = "removeWidget", dynamic = true, optional = true)
     public void addWidget(Widget widget) {
         widgets.add(widget);
-        refreshViewStream.emit(new RenderAction());
+        refreshViewStream.emit(null);
     }
 
     public void removeWidget(Widget widget) {
         widgets.remove(widget);
-        refreshViewStream.emit(new RenderAction());
+        refreshViewStream.emit(null);
     }
 
     public void renderWidgets() {
@@ -174,16 +181,6 @@ public class WidgetManager {
     @Reference
     public void setSelectionInfoService(SelectionInfoService selectionInfoService) {
         this.selectionInfoService = selectionInfoService;
-    }
-
-    private static class ProcessSelectionsEvent {
-
-    }
-
-    private static class RenderAction {
-    }
-
-    private static class OverlayRenderAction {
     }
 
 }

@@ -25,7 +25,7 @@ public class BamRenderer implements Renderer<BamFeature> {
         bamFeature.getId().ifPresent(id -> {
             name[0] = id;
         });
-        return composition(name[0],
+        return composition(null,
                 bamFeature.getTooltipData(),
                 layer(
                         0,
