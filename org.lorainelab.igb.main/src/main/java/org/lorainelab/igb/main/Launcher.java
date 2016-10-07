@@ -98,14 +98,14 @@ public class Launcher extends Application {
         this.primaryStage = pStage;
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
         final DisplayMode displayMode = ge.getDefaultScreenDevice().getDisplayMode();
-        double width = displayMode.getWidth() * .8;
-        double height = displayMode.getHeight() * .8;
+        double width = displayMode.getWidth();
+        double height = displayMode.getHeight();
         try {
             double sHeight = Double.parseDouble(modulePreferencesNode.get(HEIGHT_KEY, ""));
             double sWidth = Double.parseDouble(modulePreferencesNode.get(WIDTH_KEY, ""));
             if (sHeight / height < 0.4 || sWidth / width < 0.4 || sHeight > height || sWidth > width) {
-                primaryStage.setHeight(height);
-                primaryStage.setWidth(width);
+                primaryStage.setHeight(height*.8);
+                primaryStage.setWidth(width*.8);
             } else {
                 primaryStage.setHeight(sHeight);
                 primaryStage.setWidth(sWidth);
