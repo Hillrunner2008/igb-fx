@@ -23,12 +23,13 @@ public class VerticalSplitPane extends SplitPane {
 
     public VerticalSplitPane() {
         setOrientation(Orientation.VERTICAL);
-        setDividerPositions(0.70);
+        setDividerPositions(0.60);
     }
 
     @Activate
     public void activate() {
         Platform.runLater(() -> {
+            SplitPane.setResizableWithParent(tabPaneManager.getBottomTabPane(), Boolean.FALSE);
             getItems().add(mainViewerPane);
             getItems().add(tabPaneManager.getBottomTabPane());
         });

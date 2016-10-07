@@ -76,6 +76,7 @@ public class GenomeAssemblyTab implements TabProvider {
                 initializeSpeciesNameComboBox();
                 initializeGenomeVersionComboBox();
                 initializeSequenceTable();
+                sequenceInfoTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
             } catch (IOException exception) {
                 throw new RuntimeException(exception);
             }
@@ -211,6 +212,8 @@ public class GenomeAssemblyTab implements TabProvider {
         seqNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         seqLengthColumn.setCellValueFactory(new PropertyValueFactory<>("length"));
         sequenceInfoTable.setItems(tableData);
+        seqNameColumn.prefWidthProperty().bind(sequenceInfoTable.widthProperty().multiply(.40));
+        seqLengthColumn.prefWidthProperty().bind(sequenceInfoTable.widthProperty().multiply(.60));
     }
 
 }

@@ -29,6 +29,9 @@ public class IgbFx {
             Scene scene = new Scene(root);
             stage.setTitle("IGBfx");
             stage.setScene(scene);
+        });
+        //splitting this piece off since it has occasionally caused the stage to never start and block the bundle activation from completing
+        Platform.runLater(() -> {
             stage.show();
         });
     }
