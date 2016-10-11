@@ -26,9 +26,11 @@ public class MainSplitPane extends SplitPane {
     public MainSplitPane() {
         leftSide = new AnchorPane();
         rightSide = new AnchorPane();
+        SplitPane.setResizableWithParent(rightSide, Boolean.FALSE);
         getItems().add(leftSide);
         getItems().add(rightSide);
-        setDividerPositions(0.85);
+        leftSide.setMinWidth(150);
+        setDividerPositions(0.80);
     }
 
     @Activate

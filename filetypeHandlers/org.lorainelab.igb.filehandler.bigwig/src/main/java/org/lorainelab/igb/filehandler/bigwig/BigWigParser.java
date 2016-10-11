@@ -15,6 +15,7 @@ import org.broad.igv.bbfile.BigWigIterator;
 import org.broad.igv.bbfile.WigItem;
 import org.lorainelab.igb.data.model.datasource.DataSource;
 import org.lorainelab.igb.data.model.datasource.DataSourceReference;
+import org.lorainelab.igb.data.model.filehandler.api.DataType;
 import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandler;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
 import org.lorainelab.igb.data.model.glyph.GraphGlyph;
@@ -104,8 +105,8 @@ public class BigWigParser implements FileTypeHandler {
     }
 
     @Override
-    public boolean isGraphType() {
-        return true;
+    public Set<DataType> getDataTypes() {
+        return Sets.newHashSet(DataType.GRAPH);
     }
 
 }

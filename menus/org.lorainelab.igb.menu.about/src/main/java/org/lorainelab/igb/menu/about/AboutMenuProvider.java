@@ -31,6 +31,7 @@ import org.lorainelab.igb.menu.api.model.ParentMenu;
 import org.lorainelab.igb.menu.api.model.WeightedMenuEntry;
 import org.lorainelab.igb.menu.api.model.WeightedMenuItem;
 import org.lorainelab.igb.stage.provider.api.StageProvider;
+import static org.lorainelab.igb.utils.FXUtilities.runAndWait;
 
 /**
  * FXML Controller class
@@ -71,18 +72,16 @@ public final class AboutMenuProvider implements MenuBarEntryProvider {
     }
 
     private void createScene() {
-        Platform.runLater(() -> {
-            stage = new Stage();
-            stage.setResizable(false);
-            stage.setAlwaysOnTop(true);
-            imageView.setImage(image);
-            imageView.setFitHeight(80);
-            imageView.setFitWidth(80);
-            setTitleLabel();
-            setDescriptions();
-            Scene dialogScene = new Scene(dialogPane);
-            stage.setScene(dialogScene);
-        });
+        stage = new Stage();
+        stage.setResizable(false);
+        stage.setAlwaysOnTop(true);
+        imageView.setImage(image);
+        imageView.setFitHeight(80);
+        imageView.setFitWidth(80);
+        setTitleLabel();
+        setDescriptions();
+        Scene dialogScene = new Scene(dialogPane);
+        stage.setScene(dialogScene);
     }
 
     //TODO -change to update the version
@@ -102,23 +101,22 @@ public final class AboutMenuProvider implements MenuBarEntryProvider {
     @Activate
     private void activate() {
         hostServices = stageProvider.getHostServices();
-        Platform.runLater(() -> {
+        runAndWait(() -> {
             try {
                 final URL resource = AboutMenuProvider.class.getClassLoader().getResource("AboutMenu.fxml");
                 FXMLLoader fxmlLoader = new FXMLLoader(resource);
                 fxmlLoader.setClassLoader(this.getClass().getClassLoader());
                 fxmlLoader.setController(this);
                 dialogPane = (StackPane) fxmlLoader.load();
+                createScene();
                 init();
             } catch (IOException exception) {
                 throw new RuntimeException(exception);
             }
-
         });
     }
 
     public void init() {
-        createScene();
         menuItem.setOnAction(event -> {
             Platform.runLater(() -> {
                 stage.centerOnScreen();

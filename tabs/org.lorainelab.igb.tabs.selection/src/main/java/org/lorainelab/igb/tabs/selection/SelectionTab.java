@@ -10,7 +10,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.stream.Collectors;
 import static java.util.stream.Collectors.toList;
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
@@ -37,6 +36,7 @@ import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
 import org.lorainelab.igb.selections.SelectionInfoService;
 import org.lorainelab.igb.tabs.api.TabDockingPosition;
 import org.lorainelab.igb.tabs.api.TabProvider;
+import static org.lorainelab.igb.utils.FXUtilities.runAndWait;
 import org.osgi.framework.BundleContext;
 import org.reactfx.AwaitingEventStream;
 import org.reactfx.EventStreams;
@@ -67,7 +67,7 @@ public class SelectionTab implements TabProvider {
         FXMLLoader fxmlLoader = new FXMLLoader(resource);
         FXMLLoader.setDefaultClassLoader(this.getClass().getClassLoader());
         fxmlLoader.setController(this);
-        Platform.runLater(() -> {
+        runAndWait(() -> {
             try {
                 fxmlLoader.load();
             } catch (IOException exception) {
@@ -76,10 +76,6 @@ public class SelectionTab implements TabProvider {
         });
         AwaitingEventStream<SetChangeListener.Change<? extends CompositionGlyph>> rebuildGridEventStream = EventStreams.changesOf(selectionInfoService.getSelectedGlyphs()).successionEnds(Duration.ofMillis(100));
         rebuildGridEventStream.subscribe(change -> rebuildGridData());
-    }
-
-    @FXML
-    private void initialize() {
         initializeSpreadSheet();
         selectionTab.setContent(tabContent);
     }

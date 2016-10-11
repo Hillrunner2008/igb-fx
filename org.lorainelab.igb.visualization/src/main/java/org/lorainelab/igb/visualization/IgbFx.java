@@ -4,12 +4,11 @@ import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
-import java.awt.SplashScreen;
 import javafx.application.Platform;
-import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.lorainelab.igb.stage.provider.api.StageProvider;
+import static org.lorainelab.igb.utils.FXUtilities.runAndWait;
 import org.lorainelab.igb.visualization.ui.Root;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,34 +19,26 @@ public class IgbFx {
     private static final Logger LOG = LoggerFactory.getLogger(IgbFx.class);
     private Stage stage;
     private Root root;
+    private StageProvider stageProvider;
 
     @Activate
     public void activate() {
-        closeSplashScreen();
-        initializeFxRuntime();
-        Platform.runLater(() -> {
+        Platform.setImplicitExit(false);
+        runAndWait(() -> {
+            stageProvider.getSplashStage().hide();
             Scene scene = new Scene(root);
             stage.setTitle("IGBfx");
             stage.setScene(scene);
+        });
+        //splitting this piece off since it has occasionally caused the stage to never start and block the bundle activation from completing
+        Platform.runLater(() -> {
             stage.show();
         });
     }
 
-    private void closeSplashScreen() throws IllegalStateException {
-        SplashScreen splashScreen = SplashScreen.getSplashScreen();
-        if (splashScreen != null) {
-            splashScreen.close();
-        }
-    }
-
-    private void initializeFxRuntime() {
-        new JFXPanel(); // runtime initializer, do not remove
-        Platform.setImplicitExit(false);
-    }
-
     @Deactivate
     public void deactivate() {
-        Platform.runLater(() -> {
+        runAndWait(() -> {
             try {
                 stage.hide();
                 root.getChildren().clear();
@@ -59,6 +50,7 @@ public class IgbFx {
 
     @Reference
     public void setStageProvider(StageProvider stageProvider) {
+        this.stageProvider = stageProvider;
         this.stage = stageProvider.getStage();
     }
 

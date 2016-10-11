@@ -5,6 +5,7 @@
  */
 package org.lorainelab.igb.data.model;
 
+import com.google.common.base.Preconditions;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -26,7 +27,7 @@ public class CanvasContext {
 
     public CanvasContext(Canvas canvas, double trackHeight, double relativeTrackOffset) {
         this.canvas = canvas;
-        this.boundingRectangle = new Rectangle2D(0, 0, canvas.getWidth(), trackHeight);
+        this.boundingRectangle = new Rectangle2D(0, relativeTrackOffset, canvas.getWidth(), trackHeight);
         this.trackHeight = trackHeight;
         this.relativeTrackOffset = relativeTrackOffset;
         isVisible = false;
@@ -57,6 +58,7 @@ public class CanvasContext {
     }
 
     public void update(Rectangle2D boundingRectangle, double trackHeight, double relativeTrackOffset) {
+        Preconditions.checkArgument(trackHeight >= 50, "Invalid Track Height detected");
         this.boundingRectangle = boundingRectangle;
         this.relativeTrackOffset = relativeTrackOffset;
         this.trackHeight = trackHeight;

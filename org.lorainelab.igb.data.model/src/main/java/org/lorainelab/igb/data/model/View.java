@@ -42,7 +42,7 @@ public class View {
     public java.awt.geom.Rectangle2D.Double getMutableBoundingRect() {
         return mutableBoundingRect;
     }
-    
+
     public Range<Double> getXrange() {
         return xRange;
     }
