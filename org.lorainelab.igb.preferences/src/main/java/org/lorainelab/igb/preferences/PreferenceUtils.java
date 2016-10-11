@@ -41,6 +41,7 @@ public class PreferenceUtils {
 
     public static void clearAllPreferences() {
         try {
+            Arrays.stream(getDefaultPrefsNode().keys()).forEach(key -> getDefaultPrefsNode().remove(key));
             Arrays.stream(getDefaultPrefsNode().childrenNames())
                     .map(nodeName -> getDefaultPrefsNode().node(nodeName))
                     .forEach(node -> {
