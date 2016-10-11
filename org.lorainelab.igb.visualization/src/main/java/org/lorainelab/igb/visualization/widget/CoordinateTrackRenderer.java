@@ -1,8 +1,6 @@
 package org.lorainelab.igb.visualization.widget;
 
 import com.google.common.collect.Range;
-import com.sun.javafx.tk.FontMetrics;
-import com.sun.javafx.tk.Toolkit;
 import java.text.DecimalFormat;
 import java.util.Optional;
 import javafx.beans.property.DoubleProperty;
@@ -19,6 +17,8 @@ import org.lorainelab.igb.data.model.CanvasContext;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.Track;
 import org.lorainelab.igb.data.model.View;
+import org.lorainelab.igb.data.model.util.FontReference;
+import org.lorainelab.igb.data.model.util.FontUtils;
 import static org.lorainelab.igb.data.model.util.Palette.CLICK_DRAG_HIGHLIGHT;
 import static org.lorainelab.igb.data.model.util.Palette.getBaseColor;
 import org.lorainelab.igb.visualization.model.CanvasModel;
@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 public class CoordinateTrackRenderer implements TrackRenderer {
 
     private static final Logger LOG = LoggerFactory.getLogger(CoordinateTrackRenderer.class);
- 
+
     private static final String COORDINATES_TRACK_LABEL = "Coordinates";
     private static final int COORDINATE_CENTER_LINE = 20;
 
@@ -69,7 +69,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         if (canvasContext.isVisible()) {
             gc.save();
             gc.scale(xfactor, 1);
-            drawCoordinateBasePairs();
+            drawCoordinateBasePairs(canvasModel);
             drawCoordinateLine();
             drawClickDrag(canvasModel);
             gc.restore();
@@ -227,64 +227,48 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         }
     }
 
-    private void drawCoordinateBasePairs() {
+    private void drawCoordinateBasePairs(CanvasModel canvasModel) {
         gc.save();
-        gc.setFont(Font.font("Monospaced", FontWeight.MEDIUM, 25));
-        final int basePairPadding = 50;
+
+        final int baseRectOffset = 30;
+        final int BASE_HEIGHT = 13;
+        double yOffset = (modelHeight - viewBoundingRectangle.getHeight());
+        double y = (viewBoundingRectangle.getMinY()) + baseRectOffset;
+        if (viewBoundingRectangle.getMinY() + modelHeight < gc.getCanvas().getHeight()) {
+            y -= yOffset;
+        }
         if (viewBoundingRectangle.getWidth() < 1500) {
-            double textScale = .5;
-            gc.scale(textScale, textScale);
-            FontMetrics fm = Toolkit.getToolkit().getFontLoader().getFontMetrics(gc.getFont());
-            double textHeight = fm.getLineHeight();
-            gc.scale(1 / textScale, 1 / textScale);
-            double yOffset = (modelHeight - viewBoundingRectangle.getHeight()) / textScale;
-            double y = (viewBoundingRectangle.getMinY() / textScale) + textHeight + basePairPadding - 4;
-            if (viewBoundingRectangle.getMinY() + modelHeight < gc.getCanvas().getHeight()) {
-                y -= yOffset;
-            }
-            if (viewYcoordinateRange.contains(y * textScale)) {
+            final double pixelsPerBasePair = Math.floor(canvasContext.getBoundingRect().getWidth() / viewBoundingRectangle.getWidth());
+
+            final FontReference fontReference = new FontReference(Font.font(FontUtils.PREFERRED_FONT_NAME, FontWeight.BOLD, 12));
+            gc.setFont(fontReference.getFont());
+            if (viewYcoordinateRange.contains(y)) {
                 int startDna = (int) Math.ceil(viewBoundingRectangle.getMinX());
                 int length = (int) Math.ceil(viewBoundingRectangle.getWidth());
                 char[] dna = chromosome.getSequence(startDna, length);
-
-                gc.scale(textScale, textScale);
                 int start = (int) Math.ceil(viewBoundingRectangle.getMinX());
                 for (int i = start; i < (dna.length + viewBoundingRectangle.getMinX()); i++) {
                     double index = i - viewBoundingRectangle.getMinX();
                     char base = dna[i - start];
                     gc.setFill(getBaseColor(base));
-                    gc.scale(1 / textScale, 1 / textScale);
-                    double y1 = 2 + viewBoundingRectangle.getMinY() + basePairPadding / 2;
-                    if (viewBoundingRectangle.getMinY() + modelHeight < gc.getCanvas().getHeight()) {
-                        y1 -= (modelHeight - viewBoundingRectangle.getHeight());
-                    }
-                    gc.fillRect(index, y1, 1, 12);
+                    gc.fillRect(index, y, 1, BASE_HEIGHT);
                     if (index < 1 && (i - 1) >= 0) {
                         char outOfviewChar = chromosome.getSequence(i - 1, 1)[0];
                         gc.setFill(getBaseColor(outOfviewChar));
-                        gc.fillRect(0, y1, index, 12);
+                        gc.fillRect(0, y, index, BASE_HEIGHT);
                     }
-                    double y2 = (viewBoundingRectangle.getMinY() / textScale) + textHeight + basePairPadding - 4;
-                    if (viewBoundingRectangle.getMinY() + modelHeight < gc.getCanvas().getHeight()) {
-                        y2 -= yOffset;
-                    }
-                    gc.scale(textScale, textScale);
+                    double textHeight = fontReference.getAscent();
+                    double y2 = y + textHeight;
                     if (viewBoundingRectangle.getWidth() < 125) {
                         gc.setFill(Color.BLACK);
-                        gc.fillText("" + base, index * 2 + .5, y2, 1);
+                        gc.fillText("" + base, index + .25, y2, .5);
                     }
                 }
             }
         } else {
             gc.setFill(Color.GRAY);
-            double yOffset = (modelHeight - viewBoundingRectangle.getHeight());
-            double y = 2 + viewBoundingRectangle.getMinY() + basePairPadding / 2;
-            if (viewBoundingRectangle.getMinY() + modelHeight < gc.getCanvas().getHeight()) {
-                y -= yOffset;
-            }
-            final int height = 12;
             if (viewYcoordinateRange.contains(y)) {
-                gc.fillRect(0, y, viewBoundingRectangle.getWidth(), height);
+                gc.fillRect(0, y, viewBoundingRectangle.getWidth(), BASE_HEIGHT);
             }
         }
         gc.restore();
@@ -435,6 +419,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     public DoubleProperty stretchDelta() {
         return new SimpleDoubleProperty(0);
     }
+
     @Override
     public DoubleProperty activeStretchDelta() {
         return new SimpleDoubleProperty(0);
