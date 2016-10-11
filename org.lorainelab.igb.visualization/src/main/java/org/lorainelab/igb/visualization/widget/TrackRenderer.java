@@ -6,7 +6,11 @@
 package org.lorainelab.igb.visualization.widget;
 
 import java.util.Comparator;
+import java.util.Optional;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
 import org.lorainelab.igb.data.model.CanvasContext;
+import org.lorainelab.igb.data.model.Track;
 import org.lorainelab.igb.data.model.View;
 import org.lorainelab.igb.visualization.model.TrackLabel;
 
@@ -16,6 +20,9 @@ import org.lorainelab.igb.visualization.model.TrackLabel;
  */
 public interface TrackRenderer extends Widget {
 
+    static final int DEFAULT_HEIGHT = 200;
+    static final int MIN_HEIGHT = DEFAULT_HEIGHT / 4;
+
     final Comparator<TrackRenderer> SORT_BY_WEIGHT = (TrackRenderer o1, TrackRenderer o2) -> Double.compare(o1.getWeight(), o2.getWeight());
 
     String getTrackLabelText();
@@ -23,6 +30,8 @@ public interface TrackRenderer extends Widget {
     TrackLabel getTrackLabel();
 
     CanvasContext getCanvasContext();
+
+    Optional<Track> getTrack();
 
     View getView();
 
@@ -38,8 +47,21 @@ public interface TrackRenderer extends Widget {
 
     void setWeight(int weight);
 
-    boolean isHeightLocked();
+    ReadOnlyBooleanProperty heightLocked();
 
-    double getLockedHeight();
+    DoubleProperty stretchDelta();
+
+    DoubleProperty activeStretchDelta();
+
+    default int getLabelHeight(double yFactor) {
+        double height;
+        if (heightLocked().get()) {
+            height = getCanvasContext().getBoundingRect().getHeight();
+        } else {
+            height = (DEFAULT_HEIGHT + stretchDelta().doubleValue()) * yFactor;
+            height = height + activeStretchDelta().doubleValue();
+        }
+        return (int) Math.max(MIN_HEIGHT, height);
+    }
 
 }

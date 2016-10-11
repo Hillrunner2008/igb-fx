@@ -4,6 +4,11 @@ import com.google.common.collect.Range;
 import com.sun.javafx.tk.FontMetrics;
 import com.sun.javafx.tk.Toolkit;
 import java.text.DecimalFormat;
+import java.util.Optional;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -12,8 +17,10 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import org.lorainelab.igb.data.model.CanvasContext;
 import org.lorainelab.igb.data.model.Chromosome;
+import org.lorainelab.igb.data.model.Track;
 import org.lorainelab.igb.data.model.View;
-import static org.lorainelab.igb.data.model.sequence.BasePairColorReference.getBaseColor;
+import static org.lorainelab.igb.data.model.util.Palette.CLICK_DRAG_HIGHLIGHT;
+import static org.lorainelab.igb.data.model.util.Palette.getBaseColor;
 import org.lorainelab.igb.visualization.model.CanvasModel;
 import org.lorainelab.igb.visualization.model.TrackLabel;
 import static org.lorainelab.igb.visualization.util.BoundsUtil.enforceRangeBounds;
@@ -27,7 +34,7 @@ import org.slf4j.LoggerFactory;
 public class CoordinateTrackRenderer implements TrackRenderer {
 
     private static final Logger LOG = LoggerFactory.getLogger(CoordinateTrackRenderer.class);
-    private static final Color CLICK_DRAG_HIGHLIGHT = Color.rgb(33, 150, 243, .3);
+ 
     private static final String COORDINATES_TRACK_LABEL = "Coordinates";
     private static final int COORDINATE_CENTER_LINE = 20;
 
@@ -43,16 +50,18 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     private TrackLabel trackLabel;
     private final Chromosome chromosome;
     private final Range<Integer> validViewRange;
+    private DoubleProperty trackHeight;
 
     public CoordinateTrackRenderer(Canvas canvas, Chromosome chromosome) {
-        weight = 0;
         this.chromosome = chromosome;
         this.modelWidth = chromosome.getLength();
-        this.modelHeight = 50;
+        this.modelHeight = MIN_HEIGHT;
+        trackHeight = new SimpleDoubleProperty(MIN_HEIGHT);
+        weight = 0;
         validViewRange = Range.closedOpen(0, modelWidth);
         viewBoundingRectangle = new Rectangle2D(0, 0, modelWidth, modelHeight);
         canvasContext = new CanvasContext(canvas, modelHeight, 0);
-        trackLabel = new TrackLabel(this, COORDINATES_TRACK_LABEL, true);
+        trackLabel = new TrackLabel(this, COORDINATES_TRACK_LABEL, new SimpleBooleanProperty(true));
         gc = canvas.getGraphicsContext2D();
     }
 
@@ -414,7 +423,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
 
     @Override
     public int getZindex() {
-        return 1;
+        return 2;
     }
 
     @Override
@@ -423,13 +432,22 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     }
 
     @Override
-    public boolean isHeightLocked() {
-        return trackLabel.getIsHeightLocked().get();
+    public DoubleProperty stretchDelta() {
+        return new SimpleDoubleProperty(0);
+    }
+    @Override
+    public DoubleProperty activeStretchDelta() {
+        return new SimpleDoubleProperty(0);
     }
 
     @Override
-    public double getLockedHeight() {
-        return modelHeight;
+    public ReadOnlyBooleanProperty heightLocked() {
+        return new SimpleBooleanProperty(true);
+    }
+
+    @Override
+    public Optional<Track> getTrack() {
+        return Optional.empty();
     }
 
 }

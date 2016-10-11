@@ -25,6 +25,7 @@ import java.util.Set;
 import org.lorainelab.igb.data.model.Strand;
 import org.lorainelab.igb.data.model.datasource.DataSource;
 import org.lorainelab.igb.data.model.datasource.DataSourceReference;
+import org.lorainelab.igb.data.model.filehandler.api.DataType;
 import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandler;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
 import org.lorainelab.igb.data.model.glyph.Glyph;
@@ -229,8 +230,8 @@ public class BedParser implements FileTypeHandler {
     }
 
     @Override
-    public boolean isGraphType() {
-        return false;
+    public Set<DataType> getDataTypes() {
+        return Sets.newHashSet(DataType.ANNOTATION);
     }
 
     @Override

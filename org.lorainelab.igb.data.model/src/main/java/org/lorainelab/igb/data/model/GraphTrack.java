@@ -7,6 +7,8 @@ import com.google.common.collect.TreeRangeMap;
 import java.util.Collection;
 import java.util.List;
 import static java.util.stream.Collectors.toList;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
@@ -24,15 +26,19 @@ public class GraphTrack implements Track {
     private final String trackLabel;
     private List<CompositionGlyph> glyphs;
     private RangeMap<Double, CompositionGlyph> intervalMap;
+    private BooleanProperty isHeightLocked;
+    private double lockedHeight;
 
     //average height
     private double modelHeight;
     private final DataSet dataSet;
 
     public GraphTrack(String trackLabel, DataSet dataSet) {
-        this.dataSet=dataSet;
+        this.isHeightLocked = new SimpleBooleanProperty(false);
+        this.dataSet = dataSet;
         this.trackLabel = trackLabel;
         this.modelHeight = 10;
+        this.lockedHeight = 200;
         glyphs = Lists.newArrayList();
         intervalMap = TreeRangeMap.create();
     }
@@ -88,7 +94,6 @@ public class GraphTrack implements Track {
         this.glyphs.addAll(glyphs);
         glyphs.stream().forEach(glyph -> intervalMap.put(Range.closed(glyph.getBoundingRect().getMinX(), glyph.getBoundingRect().getMaxX()), glyph));
         modelHeight = glyphs.stream().mapToDouble(glyph -> glyph.getBoundingRect().getMaxY()).average().orElse(10);
-
     }
 
     @Override
@@ -105,5 +110,15 @@ public class GraphTrack implements Track {
     @Override
     public DataSet getDataSet() {
         return dataSet;
+    }
+
+    @Override
+    public BooleanProperty isHeightLocked() {
+        return isHeightLocked;
+    }
+
+    @Override
+    public boolean allowLockToggle() {
+        return false;
     }
 }

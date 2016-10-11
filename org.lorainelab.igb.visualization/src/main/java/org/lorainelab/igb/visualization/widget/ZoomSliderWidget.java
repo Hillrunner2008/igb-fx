@@ -1,7 +1,6 @@
 package org.lorainelab.igb.visualization.widget;
 
 import aQute.bnd.annotation.component.Activate;
-import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.input.MouseEvent;
@@ -10,16 +9,16 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import org.lorainelab.igb.visualization.ui.CanvasRegion;
 import org.lorainelab.igb.visualization.model.CanvasModel;
 import static org.lorainelab.igb.visualization.model.CanvasModel.MAX_ZOOM_MODEL_COORDINATES_X;
+import org.lorainelab.igb.visualization.ui.CanvasRegion;
 import static org.lorainelab.igb.visualization.util.CanvasUtils.linearScaleTransform;
 
 /**
  *
  * @author dcnorris
  */
-@Component(immediate = true, provide = ZoomSliderWidget.class)
+//@Component(immediate = true, provide = ZoomSliderWidget.class)
 public class ZoomSliderWidget extends HBox {
 
     private static final int TOTAL_SLIDER_THUMB_WIDTH = 30;

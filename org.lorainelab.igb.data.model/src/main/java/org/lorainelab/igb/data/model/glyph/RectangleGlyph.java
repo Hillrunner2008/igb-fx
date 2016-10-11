@@ -6,22 +6,24 @@
 package org.lorainelab.igb.data.model.glyph;
 
 import com.google.common.collect.Range;
-import com.sun.javafx.tk.FontMetrics;
-import com.sun.javafx.tk.Toolkit;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.View;
-import static org.lorainelab.igb.data.model.sequence.BasePairColorReference.getBaseColor;
+import static org.lorainelab.igb.data.model.glyph.Glyph.MAX_GLYPH_HEIGHT;
+import static org.lorainelab.igb.data.model.glyph.Glyph.SHARED_RECT;
+import static org.lorainelab.igb.data.model.glyph.Glyph.SLOT_HEIGHT;
 import org.lorainelab.igb.data.model.shapes.Rectangle;
 import org.lorainelab.igb.data.model.util.ColorUtils;
 import org.lorainelab.igb.data.model.util.DrawUtils;
+import org.lorainelab.igb.data.model.util.FontReference;
+import org.lorainelab.igb.data.model.util.FontUtils;
+import static org.lorainelab.igb.data.model.util.Palette.DEFAULT_GLYPH_FILL;
+import static org.lorainelab.igb.data.model.util.Palette.getBaseColor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,10 +34,11 @@ import org.slf4j.LoggerFactory;
 public class RectangleGlyph implements Glyph {
 
     private static final Logger LOG = LoggerFactory.getLogger(RectangleGlyph.class);
-    public static final int THICK_RECTANGLE_HEIGHT = 15;
-    private Color fill = Color.WHITE;
+    public static final double THICK_RECTANGLE_HEIGHT = MAX_GLYPH_HEIGHT;
+    public static final double DEFAULT_RECTANGLE_HEIGHT = THICK_RECTANGLE_HEIGHT * .75;
 
-    private Color strokeColor = Color.BLACK;
+    private Color fill = DEFAULT_GLYPH_FILL;
+    private Color strokeColor = DEFAULT_GLYPH_FILL;
 
     private final Rectangle2D boundingRect;
     private final Optional<Function<String, String>> innerTextRefSeqTranslator;
@@ -44,23 +47,23 @@ public class RectangleGlyph implements Glyph {
     private final boolean isSelectable;
     private boolean isSelected;
     private boolean maskBasePairMatches;
+    private GlyphAlignment glyphAlignment;
 
     public RectangleGlyph(Rectangle rectShape) {
-        int height = 10;
-        double y = 20;
+        double height = DEFAULT_RECTANGLE_HEIGHT;
         if (rectShape.getAttributes().contains(org.lorainelab.igb.data.model.shapes.Rectangle.Attribute.THICK)) {
             height = THICK_RECTANGLE_HEIGHT;
-            y = MIN_Y_OFFSET;
         } else if (rectShape.getAttributes().contains(org.lorainelab.igb.data.model.shapes.Rectangle.Attribute.INSERTION)) {
-            height = 3;
+            height = SLOT_HEIGHT / 10;
         }
-        boundingRect = new Rectangle2D(rectShape.getOffset(), y, rectShape.getWidth(), height);
+        boundingRect = new Rectangle2D(rectShape.getOffset(), 0, rectShape.getWidth(), height);
         innerTextRefSeqTranslator = rectShape.getInnerTextRefSeqTranslator();
         innerTextReferenceSequenceRange = rectShape.getInnerTextReferenceSequenceRange();
         colorByBase = rectShape.isMirrorReferenceSequence();
         isSelectable = rectShape.isSelectable();
         isSelected = false;
         maskBasePairMatches = rectShape.isMaskBasePairMatches();
+        glyphAlignment = GlyphAlignment.BOTTOM;
     }
 
     @Override
@@ -109,14 +112,17 @@ public class RectangleGlyph implements Glyph {
             gc.setStroke(strokeColor);
             final double y = sharedRect.getMinY();
             DrawUtils.scaleToVisibleRec(view, SHARED_RECT);
-            gc.fillRect(SHARED_RECT.x, SHARED_RECT.y, SHARED_RECT.width, SHARED_RECT.height);
+
             if (view.getBoundingRect().getWidth() < 150) {
-                drawText(view, viewRect, gc, y, sharedRect);
+                gc.fillRect(SHARED_RECT.x, SHARED_RECT.y, SHARED_RECT.width, SHARED_RECT.height);
+                drawText(view, viewRect, gc, sharedRect, slotBoundingViewRect);
+            } else {
+                gc.fillRect(SHARED_RECT.x, SHARED_RECT.y, SHARED_RECT.width, SHARED_RECT.height);
             }
         });
     }
 
-    private void drawText(View view, Rectangle2D viewRect, GraphicsContext gc, final double y, java.awt.Rectangle.Double viewBoundingRect) {
+    private void drawText(View view, Rectangle2D viewRect, GraphicsContext gc, java.awt.Rectangle.Double sharedRect, Rectangle2D slotRect) {
         innerTextRefSeqTranslator.ifPresent(translationFunction -> {
             Chromosome chromosome = view.getChromosome();
             String innerText;
@@ -146,57 +152,69 @@ public class RectangleGlyph implements Glyph {
                 innerText = innerText.substring(startPos, endPos);
             }
             int size = (int) boundingRect.getHeight();
-            synchronized (gc) {// should not be needed, but I am currently seeing rendering issues that appear directly related to race conditions on this function
-                gc.save();
-                double textScale = .5;
-                gc.scale(textScale, textScale);
-                gc.setFont(Font.font("Monospaced", FontWeight.MEDIUM, size));
-                FontMetrics fm = Toolkit.getToolkit().getFontLoader().getFontMetrics(gc.getFont());
-                double textHeight = fm.getAscent();
-                double textYPosition = (y / textScale) + textHeight;
-                double textYOffset = (viewBoundingRect.getHeight() / textScale - fm.getLineHeight()) / 2;
-                textYPosition += textYOffset;
-                gc.scale(1 / textScale, 1 / textScale);
-                double i = 0;
-                double minX = viewBoundingRect.getMinX();
-                int baseWidth = 1;
-                final char[] innerTextChars = innerText.toUpperCase().toCharArray();
-                final char[] seqChars = sequence.toUpperCase().toCharArray();
-                for (int j = 0; j < innerTextChars.length; j++) {
-                    boolean charMatch = false;
-                    char c = innerTextChars[j];
-                    if (colorByBase || maskBasePairMatches) {
-                        if (innerTextChars.length == seqChars.length && c == seqChars[j]) {
-                            charMatch = true;
-                            gc.setFill(fill);
-                        } else {
-                            gc.setFill(getBaseColor(c));
-                        }
-                    } else {
+
+            double yCoordsPerPixel = view.getCanvasContext().getBoundingRect().getHeight() / view.getBoundingRect().getHeight();
+            double availableLabelHeight = (boundingRect.getHeight() * view.getYfactor());
+            //cap to preserve aspect ratio
+            availableLabelHeight = Math.min(availableLabelHeight * .50, 10);
+
+            FontReference fontReference = FontUtils.getFontByPixelHeight(availableLabelHeight);
+            gc.setFont(fontReference.getFont());
+
+            double minY = slotRect.getMinY() + SLOT_HEIGHT - boundingRect.getHeight() - SLOT_PADDING - viewRect.getMinY();
+            //hack fix... need to revisit this math to correct the difference since its not clear at the moment
+            if (boundingRect.getHeight() == DEFAULT_RECTANGLE_HEIGHT) {
+                minY -= SLOT_PADDING;
+            }
+
+            double height = boundingRect.getHeight();
+            final float textHeight = fontReference.getAscent();
+            double textYPosition = minY + ((height - textHeight) / 2);
+            if (glyphAlignment == GlyphAlignment.TOP_CENTER) {
+                textYPosition -= textHeight;
+            } else {
+                textYPosition += textHeight;
+            }
+            double i = 0;
+            double minX = sharedRect.getMinX();
+            int baseWidth = 1;
+            final char[] innerTextChars = innerText.toUpperCase().toCharArray();
+            final char[] seqChars = sequence.toUpperCase().toCharArray();
+            for (int j = 0; j < innerTextChars.length; j++) {
+                boolean charMatch = false;
+                char c = innerTextChars[j];
+                if (colorByBase || maskBasePairMatches) {
+                    if (innerTextChars.length == seqChars.length && c == seqChars[j]) {
+                        charMatch = true;
                         gc.setFill(fill);
+                    } else {
+                        gc.setFill(getBaseColor(c));
                     }
+                } else {
+                    gc.setFill(fill);
+                }
+                if (!gc.getFill().equals(fill)) {
                     if (startOffset % 1 > 0 && i == 0) {
-                        gc.fillRect(minX, y, 1 - startOffset % 1, viewBoundingRect.getHeight());
+                        gc.fillRect(minX, sharedRect.getMinY(), 1 - startOffset % 1, sharedRect.getHeight());
                         i += (1 - startOffset % 1);
                         continue;
                     } else {
-                        gc.fillRect(minX + i, y, 1, viewBoundingRect.getHeight());
+                        gc.fillRect(minX + i, sharedRect.getMinY(), 1, sharedRect.getHeight());
                     }
-                    if (!charMatch) {
-                        if (colorByBase) {
-                            gc.setFill(Color.BLACK);
-                        } else {
-                            gc.setFill(ColorUtils.getEffectiveContrastColor(fill));
-                        }
-                        gc.scale(textScale, textScale);
-                        double x = ((minX + i) / textScale) + (1 / textScale) * .1;
-                        double maxWidth = (1 / textScale) * .8;
-                        gc.fillText("" + c, x, textYPosition, maxWidth);
-                        gc.scale(1 / textScale, 1 / textScale);
-                    }
-                    i++;
                 }
-                gc.restore();
+
+                final boolean textVisible = boundingRect.getHeight() * view.getYfactor() >= 10;
+                if (!charMatch && textVisible) {
+                    if (colorByBase || maskBasePairMatches) {
+                        gc.setFill(Color.BLACK);
+                    } else {
+                        gc.setFill(ColorUtils.getEffectiveContrastColor(fill));
+                    }
+                    double x = minX + i + .1;
+                    double maxWidth = .8;
+                    gc.fillText("" + c, x, textYPosition, maxWidth);
+                }
+                i++;
             }
         });
     }
@@ -232,6 +250,16 @@ public class RectangleGlyph implements Glyph {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public GlyphAlignment getGlyphAlignment() {
+        return glyphAlignment;
+    }
+
+    @Override
+    public void setGlyphAlignment(GlyphAlignment alignment) {
+        this.glyphAlignment = alignment;
     }
 
 }

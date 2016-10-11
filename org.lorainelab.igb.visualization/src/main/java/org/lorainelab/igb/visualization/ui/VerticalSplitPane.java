@@ -6,6 +6,7 @@ import aQute.bnd.annotation.component.Reference;
 import javafx.application.Platform;
 import javafx.geometry.Orientation;
 import javafx.scene.control.SplitPane;
+import javafx.scene.control.TabPane;
 import org.lorainelab.igb.visualization.tabs.TabPaneManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,14 +24,16 @@ public class VerticalSplitPane extends SplitPane {
 
     public VerticalSplitPane() {
         setOrientation(Orientation.VERTICAL);
-        setDividerPositions(0.70);
+        setDividerPositions(0.60);
     }
 
     @Activate
     public void activate() {
         Platform.runLater(() -> {
+            final TabPane bottomTabPane = tabPaneManager.getBottomTabPane();
+            SplitPane.setResizableWithParent(bottomTabPane, Boolean.FALSE);
             getItems().add(mainViewerPane);
-            getItems().add(tabPaneManager.getBottomTabPane());
+            getItems().add(bottomTabPane);
         });
     }
 

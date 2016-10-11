@@ -10,6 +10,7 @@
         <groupId>org.lorainelab</groupId>
         <artifactId>org.lorainelab.igb</artifactId>
         <version>0.0.1</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <build>
@@ -101,59 +102,59 @@
             <build>
                 <plugins>
                     <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.10</version>
-                <executions>
-                    <execution>
-                        <id>copy</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.ops4j.pax.jdbc</groupId>
-                                    <artifactId>pax-jdbc</artifactId>
-                                    <version>0.8.0</version>
-                                    <type>jar</type>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.ops4j.base</groupId>
-                                    <artifactId>ops4j-base-spi</artifactId>
-                                    <version>1.5.0</version>
-                                    <type>jar</type>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.ops4j.pax.jdbc</groupId>
-                                    <artifactId>pax-jdbc-sqlite</artifactId>
-                                    <version>0.8.0</version>
-                                    <type>jar</type>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.osgi</groupId>
-                                    <artifactId>org.osgi.service.jdbc</artifactId>
-                                    <version>1.0.0</version>
-                                    <type>jar</type>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.xerial</groupId>
-                                    <artifactId>sqlite-jdbc</artifactId>
-                                    <version>3.8.10.1</version>
-                                    <type>jar</type>
-                                </artifactItem>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>2.10</version>
+                        <executions>
+                            <execution>
+                                <id>copy</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>org.ops4j.pax.jdbc</groupId>
+                                            <artifactId>pax-jdbc</artifactId>
+                                            <version>0.8.0</version>
+                                            <type>jar</type>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>org.ops4j.base</groupId>
+                                            <artifactId>ops4j-base-spi</artifactId>
+                                            <version>1.5.0</version>
+                                            <type>jar</type>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>org.ops4j.pax.jdbc</groupId>
+                                            <artifactId>pax-jdbc-sqlite</artifactId>
+                                            <version>0.8.0</version>
+                                            <type>jar</type>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>org.osgi</groupId>
+                                            <artifactId>org.osgi.service.jdbc</artifactId>
+                                            <version>1.0.0</version>
+                                            <type>jar</type>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>org.xerial</groupId>
+                                            <artifactId>sqlite-jdbc</artifactId>
+                                            <version>3.8.10.1</version>
+                                            <type>jar</type>
+                                        </artifactItem>
                                 
                             
-                            </artifactItems>
-                            <transitive>true</transitive>
-                            <overWriteReleases>true</overWriteReleases>
-                            <overWriteSnapshots>true</overWriteSnapshots>
-                            <localRepositoryDirectory>${project.build.directory}/karafDependencies</localRepositoryDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+                                    </artifactItems>
+                                    <transitive>true</transitive>
+                                    <overWriteReleases>true</overWriteReleases>
+                                    <overWriteSnapshots>true</overWriteSnapshots>
+                                    <localRepositoryDirectory>${project.build.directory}/karafDependencies</localRepositoryDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
                 </plugins>
             </build>
         </profile>
