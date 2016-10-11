@@ -13,12 +13,14 @@ public class FontReference {
     private double textHeight;
     private final float ascent;
     private final float descent;
+    private double lineHeight;
 
     public FontReference(Font font, FontMetrics fm) {
         this.font = font;
         this.textHeight = fm.getAscent() + fm.getDescent();
         this.ascent = fm.getAscent();
         this.descent = fm.getDescent();
+        this.lineHeight = fm.getLineHeight();
     }
 
     public Font getFont() {
@@ -27,6 +29,10 @@ public class FontReference {
 
     public double getTextHeight() {
         return textHeight;
+    }
+
+    public double getLineHeight() {
+        return lineHeight;
     }
 
     public float getAscent() {

@@ -86,7 +86,7 @@ public interface Glyph {
                 break;
             case TOP_CENTER:
                 double centerY = slotRect.getMinY() + (SLOT_HEIGHT - boundingRect.getHeight()) / 2;
-                y = centerY - LABEL_OFFSET_PADDED_BOTTOM;
+                y = centerY - LABEL_OFFSET_PADDED_TOP;
                 break;
             case CUSTOM:
                 y = boundingRect.getMinY();

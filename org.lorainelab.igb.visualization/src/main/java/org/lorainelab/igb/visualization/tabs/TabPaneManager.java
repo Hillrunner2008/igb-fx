@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import javafx.collections.ObservableList;
 import javafx.geometry.Side;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.AnchorPane;
@@ -36,6 +37,9 @@ public class TabPaneManager {
     public TabPaneManager() {
         rightTabPane = new TabPane();
         bottomTabPane = new TabPane();
+        bottomTabPane.setMinHeight(250);
+        rightTabPane.setMinWidth(250);
+        SplitPane.setResizableWithParent(bottomTabPane, Boolean.FALSE);
         setAnchorPaneConstraints(rightTabPane);
         setAnchorPaneConstraints(bottomTabPane);
         rightTabPane.setSide(Side.RIGHT);

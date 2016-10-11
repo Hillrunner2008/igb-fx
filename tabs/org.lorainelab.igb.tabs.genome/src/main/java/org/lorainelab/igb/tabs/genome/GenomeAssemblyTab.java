@@ -211,6 +211,9 @@ public class GenomeAssemblyTab implements TabProvider {
         seqNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         seqLengthColumn.setCellValueFactory(new PropertyValueFactory<>("length"));
         sequenceInfoTable.setItems(tableData);
+        seqNameColumn.prefWidthProperty().bind(sequenceInfoTable.widthProperty().multiply(.40));
+        seqLengthColumn.prefWidthProperty().bind(sequenceInfoTable.widthProperty().multiply(.60));
+        sequenceInfoTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
 
 }

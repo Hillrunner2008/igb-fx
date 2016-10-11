@@ -14,6 +14,7 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import org.lorainelab.igb.data.model.View;
+import static org.lorainelab.igb.data.model.glyph.RectangleGlyph.DEFAULT_RECTANGLE_HEIGHT;
 import org.lorainelab.igb.data.model.util.FontReference;
 import org.lorainelab.igb.data.model.util.FontUtils;
 import static org.lorainelab.igb.data.model.util.Palette.DEFAULT_GLYPH_FILL;
@@ -180,12 +181,12 @@ public class CompositionGlyph implements Glyph {
             childrenInView.stream()
                     .filter(glyph -> glyph instanceof RectangleGlyph)
                     .map(glyph -> RectangleGlyph.class.cast(glyph))
-                    .filter(rect -> rect.getBoundingRect().getHeight() == 10)
+                    .filter(rect -> rect.getBoundingRect().getHeight() == DEFAULT_RECTANGLE_HEIGHT)
                     .forEach(glyph -> glyph.draw(gc, view, slotBoundingViewRect));
             childrenInView.stream()
                     .filter(glyph -> glyph instanceof RectangleGlyph)
                     .map(glyph -> RectangleGlyph.class.cast(glyph))
-                    .filter(rect -> rect.getBoundingRect().getHeight() != 10)
+                    .filter(rect -> rect.getBoundingRect().getHeight() != DEFAULT_RECTANGLE_HEIGHT)
                     .forEach(glyph -> glyph.draw(gc, view, slotBoundingViewRect));
             childrenInView.stream().filter(glyph -> glyph instanceof GraphGlyph).forEach(glyph -> glyph.draw(gc, view, slotBoundingViewRect));
         }
@@ -253,7 +254,7 @@ public class CompositionGlyph implements Glyph {
                         textYPosition = ((glyphViewIntersectionBounds.getMaxY() * view.getYfactor()) / textScale);
                         textYPosition -= textYOffset;
                     } else {
-                        textYPosition = (((glyphViewIntersectionBounds.getMinY()) * view.getYfactor()) / textScale);
+                        textYPosition = ((glyphViewIntersectionBounds.getMinY()) * view.getYfactor()) / textScale;
                         textYPosition += textYOffset;
                     }
 
@@ -278,7 +279,7 @@ public class CompositionGlyph implements Glyph {
     private double getTextYOffset(FontReference fontReference, double availableLabelHeight) {
         double textHeightOffset = fontReference.getAscent() - fontReference.getDescent();
         if (textHeightOffset < availableLabelHeight) {
-            textHeightOffset -= ((availableLabelHeight - textHeightOffset) / 4) * 3;
+            textHeightOffset += ((availableLabelHeight - textHeightOffset) / 4) * 3;
         }
         return textHeightOffset;
     }
