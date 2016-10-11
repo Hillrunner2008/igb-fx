@@ -6,6 +6,8 @@
 package org.lorainelab.igb.preferences;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.logging.Level;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import org.lorainelab.igb.version.IgbVersion;
@@ -39,7 +41,15 @@ public class PreferenceUtils {
 
     public static void clearAllPreferences() {
         try {
-            getDefaultPrefsNode().removeNode();
+            Arrays.stream(getDefaultPrefsNode().childrenNames())
+                    .map(nodeName -> getDefaultPrefsNode().node(nodeName))
+                    .forEach(node -> {
+                        try {
+                            node.removeNode();
+                        } catch (BackingStoreException ex) {
+                            LOG.error(ex.getMessage(), ex);
+                        }
+                    });
         } catch (BackingStoreException ex) {
             LOG.error(ex.getMessage(), ex);
         }
