@@ -212,7 +212,7 @@ public class RectangleGlyph implements Glyph {
                     }
                     double x = minX + i + .1;
                     double maxWidth = .8;
-                    gc.fillText("" + c, x, textYPosition, maxWidth);
+                    gc.fillText("" + c, x, textYPosition, .5);
                 }
                 i++;
             }

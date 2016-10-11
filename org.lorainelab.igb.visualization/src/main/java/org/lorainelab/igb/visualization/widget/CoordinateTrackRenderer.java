@@ -11,14 +11,11 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import org.lorainelab.igb.data.model.CanvasContext;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.Track;
 import org.lorainelab.igb.data.model.View;
-import org.lorainelab.igb.data.model.util.FontReference;
-import org.lorainelab.igb.data.model.util.FontUtils;
+import static org.lorainelab.igb.data.model.util.FontUtils.BASE_PAIR_FONT;
 import static org.lorainelab.igb.data.model.util.Palette.CLICK_DRAG_HIGHLIGHT;
 import static org.lorainelab.igb.data.model.util.Palette.getBaseColor;
 import org.lorainelab.igb.visualization.model.CanvasModel;
@@ -238,10 +235,9 @@ public class CoordinateTrackRenderer implements TrackRenderer {
             y -= yOffset;
         }
         if (viewBoundingRectangle.getWidth() < 1500) {
-            final double pixelsPerBasePair = Math.floor(canvasContext.getBoundingRect().getWidth() / viewBoundingRectangle.getWidth());
+//            final double pixelsPerBasePair = Math.floor(canvasContext.getBoundingRect().getWidth() / viewBoundingRectangle.getWidth());
 
-            final FontReference fontReference = new FontReference(Font.font(FontUtils.PREFERRED_FONT_NAME, FontWeight.BOLD, 12));
-            gc.setFont(fontReference.getFont());
+            gc.setFont(BASE_PAIR_FONT.getFont());
             if (viewYcoordinateRange.contains(y)) {
                 int startDna = (int) Math.ceil(viewBoundingRectangle.getMinX());
                 int length = (int) Math.ceil(viewBoundingRectangle.getWidth());
@@ -257,7 +253,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
                         gc.setFill(getBaseColor(outOfviewChar));
                         gc.fillRect(0, y, index, BASE_HEIGHT);
                     }
-                    double textHeight = fontReference.getAscent();
+                    double textHeight = BASE_PAIR_FONT.getAscent();
                     double y2 = y + textHeight;
                     if (viewBoundingRectangle.getWidth() < 125) {
                         gc.setFill(Color.BLACK);

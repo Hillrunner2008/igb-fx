@@ -25,6 +25,7 @@ public class FontUtils {
             .sorted(Comparator.comparingInt(fontName -> preferredFontReference.get(fontName)))
             .findFirst()
             .orElse("");
+    public static FontReference BASE_PAIR_FONT =  new FontReference(Font.font(FontUtils.PREFERRED_FONT_NAME, FontWeight.BOLD, 12));
 
     static {
         preferredFontReference.put("Courier New", 0);
