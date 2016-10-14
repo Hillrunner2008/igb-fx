@@ -51,7 +51,7 @@ public class GraphTrack implements Track {
         // everything works fine until x coordinate get large, and then the larger numbers don't render correctly on the canvas
         //i.e. we can't do this gc.translate(-view.getBoundingRect().getMinX(), trackPositionOffset);
         gc.translate(0, trackPositionOffset);
-        glyphs.forEach(child -> child.getChildren().forEach(c -> c.draw(gc, view, view.getBoundingRect())));
+        glyphs.forEach(child -> child.getChildren().forEach(c -> c.draw(gc, view, view.modelCoordRect())));
         gc.restore();
     }
 
@@ -121,4 +121,5 @@ public class GraphTrack implements Track {
     public boolean allowLockToggle() {
         return false;
     }
+
 }

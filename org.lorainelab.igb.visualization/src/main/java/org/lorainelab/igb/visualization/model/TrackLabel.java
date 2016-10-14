@@ -66,9 +66,10 @@ public class TrackLabel {
                 lockIcon = new FontAwesomeIconView(FontAwesomeIcon.LOCK);
                 lockIcon.setFill(unLockIcon.getFill());
                 lockIcon.setSize(unLockIcon.getSize());
-                if (trackRenderer instanceof CoordinateTrackRenderer) {
+                if (trackRenderer.hideLockToggle().get()) {
                     lockIconContainer.getChildren().remove(unLockIcon);
-//                    leftSideColorIndicator.setStyle("-fx-background-color: #141414");
+                }
+                if (trackRenderer instanceof CoordinateTrackRenderer) {
                     resizeHandleContainer.setVisible(false);
                 }
             } catch (IOException ex) {

@@ -161,7 +161,7 @@ public class CanvasMouseEventManager {
                     double xfactor = canvasModel.getxFactor().doubleValue();
                     double lastMouseDragX = lastMouseDragLocation.getX() / xfactor;
                     double lastMouseClickX = dragStartPoint.getX() / xfactor;
-                    double minX = tr.getView().getBoundingRect().getMinX();
+                    double minX = tr.getView().modelCoordRect().getMinX();
                     double x1 = minX + lastMouseClickX;
                     double x2 = minX + lastMouseDragX;
                     if (x1 > x2) {
@@ -245,8 +245,8 @@ public class CanvasMouseEventManager {
     private void jumpZoom(Rectangle2D focusRect, TrackRenderer eventLocationReference, MouseEvent event) {
         View view = eventLocationReference.getView();
         double modelWidth = canvasModel.getModelWidth().doubleValue();
-        double minX = Math.max(focusRect.getMinX(), view.getBoundingRect().getMinX());
-        double maxX = Math.min(focusRect.getMaxX(), view.getBoundingRect().getMaxX());
+        double minX = Math.max(focusRect.getMinX(), view.modelCoordRect().getMinX());
+        double maxX = Math.min(focusRect.getMaxX(), view.modelCoordRect().getMaxX());
         double width = maxX - minX;
         if (width < MAX_ZOOM_MODEL_COORDINATES_X) {
             width = Math.max(width * 1.1, MAX_ZOOM_MODEL_COORDINATES_X);

@@ -203,6 +203,11 @@
                 <version>4.0.4-alpha</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>com.vividsolutions</groupId>
+                <artifactId>jts</artifactId>
+                <version>1.13</version>
+            </dependency>
             <!--modules-->
             <dependency>
                 <groupId>${project.groupId}</groupId>

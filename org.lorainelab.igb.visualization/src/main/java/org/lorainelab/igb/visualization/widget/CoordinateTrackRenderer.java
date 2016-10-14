@@ -3,6 +3,7 @@ package org.lorainelab.igb.visualization.widget;
 import com.google.common.collect.Range;
 import java.text.DecimalFormat;
 import java.util.Optional;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -99,7 +100,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         return Math.floor((num + multipleOf / 2) / multipleOf) * multipleOf;
     }
 
-    public double findLarget(double[] numbers) {
+    public double findLargest(double[] numbers) {
 
         double largest = Double.MIN_VALUE;
 
@@ -429,6 +430,11 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     @Override
     public Optional<Track> getTrack() {
         return Optional.empty();
+    }
+
+    @Override
+    public BooleanProperty hideLockToggle() {
+        return new SimpleBooleanProperty(true);
     }
 
 }

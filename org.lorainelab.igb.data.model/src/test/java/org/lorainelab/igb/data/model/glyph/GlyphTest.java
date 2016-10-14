@@ -36,9 +36,9 @@ public class GlyphTest {
         Rectangle2D viewBoundingRect = new Rectangle2D(0, 0, 1000, 500);
         MockitoAnnotations.initMocks(this);
         View view = mock(View.class);
-        when(view.getBoundingRect())
+        when(view.modelCoordRect())
                 .thenReturn(viewBoundingRect);
-        when(view.getMutableBoundingRect())
+        when(view.getMutableCoordRect())
                 .thenReturn(new java.awt.geom.Rectangle2D.Double(viewBoundingRect.getMinX(), viewBoundingRect.getMinY(), viewBoundingRect.getWidth(), viewBoundingRect.getHeight()));
         when(view.isIsNegative())
                 .thenReturn(false);
@@ -60,9 +60,9 @@ public class GlyphTest {
         Rectangle2D viewBoundingRect = new Rectangle2D(0, 0, 1000, 480);
         MockitoAnnotations.initMocks(this);
         View view = mock(View.class);
-        when(view.getBoundingRect())
+        when(view.modelCoordRect())
                 .thenReturn(viewBoundingRect);
-        when(view.getMutableBoundingRect())
+        when(view.getMutableCoordRect())
                 .thenReturn(new java.awt.geom.Rectangle2D.Double(viewBoundingRect.getMinX(), viewBoundingRect.getMinY(), viewBoundingRect.getWidth(), viewBoundingRect.getHeight()));
         when(view.isIsNegative())
                 .thenReturn(false);
@@ -79,9 +79,9 @@ public class GlyphTest {
         Rectangle2D slotRect = new Rectangle2D(0, 470, 1000, SLOT_HEIGHT);
         MockitoAnnotations.initMocks(this);
         View view = mock(View.class);
-        when(view.getBoundingRect())
+        when(view.modelCoordRect())
                 .thenReturn(viewBoundingRect);
-        when(view.getMutableBoundingRect())
+        when(view.getMutableCoordRect())
                 .thenReturn(new java.awt.geom.Rectangle2D.Double(viewBoundingRect.getMinX(), viewBoundingRect.getMinY(), viewBoundingRect.getWidth(), viewBoundingRect.getHeight()));
         when(view.isIsNegative())
                 .thenReturn(false);
@@ -103,9 +103,9 @@ public class GlyphTest {
         Rectangle2D slotRect = new Rectangle2D(0, 410, 1000, SLOT_HEIGHT);
         MockitoAnnotations.initMocks(this);
         View view = mock(View.class);
-        when(view.getBoundingRect())
+        when(view.modelCoordRect())
                 .thenReturn(viewBoundingRect);
-        when(view.getMutableBoundingRect())
+        when(view.getMutableCoordRect())
                 .thenReturn(new java.awt.geom.Rectangle2D.Double(viewBoundingRect.getMinX(), viewBoundingRect.getMinY(), viewBoundingRect.getWidth(), viewBoundingRect.getHeight()));
         when(view.isIsNegative())
                 .thenReturn(false);
@@ -125,9 +125,9 @@ public class GlyphTest {
         Rectangle2D slotRect = new Rectangle2D(0, 470, 1000, SLOT_HEIGHT);
         MockitoAnnotations.initMocks(this);
         View view = mock(View.class);
-        when(view.getBoundingRect())
+        when(view.modelCoordRect())
                 .thenReturn(viewBoundingRect);
-        when(view.getMutableBoundingRect())
+        when(view.getMutableCoordRect())
                 .thenReturn(new java.awt.geom.Rectangle2D.Double(viewBoundingRect.getMinX(), viewBoundingRect.getMinY(), viewBoundingRect.getWidth(), viewBoundingRect.getHeight()));
         when(view.isIsNegative())
                 .thenReturn(false);
@@ -148,9 +148,9 @@ public class GlyphTest {
         Rectangle2D viewBoundingRect = new Rectangle2D(5, 0, 50, 1000);
         MockitoAnnotations.initMocks(this);
         View view = mock(View.class);
-        when(view.getBoundingRect())
+        when(view.modelCoordRect())
                 .thenReturn(viewBoundingRect);
-        when(view.getMutableBoundingRect())
+        when(view.getMutableCoordRect())
                 .thenReturn(new java.awt.geom.Rectangle2D.Double(viewBoundingRect.getMinX(), viewBoundingRect.getMinY(), viewBoundingRect.getWidth(), viewBoundingRect.getHeight()));
         when(view.isIsNegative())
                 .thenReturn(false);

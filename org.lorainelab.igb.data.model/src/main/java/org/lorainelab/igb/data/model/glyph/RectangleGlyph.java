@@ -107,13 +107,13 @@ public class RectangleGlyph implements Glyph {
     @Override
     public void draw(GraphicsContext gc, View view, Rectangle2D slotBoundingViewRect) {
         calculateDrawRect(view, slotBoundingViewRect).ifPresent(sharedRect -> {
-            Rectangle2D viewRect = view.getBoundingRect();
+            Rectangle2D viewRect = view.modelCoordRect();
             gc.setFill(fill);
             gc.setStroke(strokeColor);
             final double y = sharedRect.getMinY();
             DrawUtils.scaleToVisibleRec(view, SHARED_RECT);
 
-            if (view.getBoundingRect().getWidth() < 150) {
+            if (view.modelCoordRect().getWidth() < 150) {
                 gc.fillRect(SHARED_RECT.x, SHARED_RECT.y, SHARED_RECT.width, SHARED_RECT.height);
                 drawText(view, viewRect, gc, sharedRect, slotBoundingViewRect);
             } else {
@@ -153,7 +153,7 @@ public class RectangleGlyph implements Glyph {
             }
             int size = (int) boundingRect.getHeight();
 
-            double yCoordsPerPixel = view.getCanvasContext().getBoundingRect().getHeight() / view.getBoundingRect().getHeight();
+            double yCoordsPerPixel = view.getCanvasContext().getBoundingRect().getHeight() / view.modelCoordRect().getHeight();
             double availableLabelHeight = (boundingRect.getHeight() * view.getYfactor());
             //cap to preserve aspect ratio
             availableLabelHeight = Math.min(availableLabelHeight * .50, 10);
