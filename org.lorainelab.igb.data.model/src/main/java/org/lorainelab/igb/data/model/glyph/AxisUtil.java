@@ -8,9 +8,9 @@ public class AxisUtil {
 
     public static double getMajorTick(double value) {
         int approxIntervals = 10;
-        int incr1 = 10;
-        int incr2 = 20;
-        int incr3 = 50;
+        int incr1 = 5;
+        int incr2 = 10;
+        int incr3 = 25;
         int lastSmallestIncr = 0;
         double lastSmallest = value;
         while (lastSmallest > approxIntervals) {

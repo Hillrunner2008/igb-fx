@@ -50,7 +50,7 @@ public class GraphTrack implements Track {
         //NOTE: Rounding issues prevent us from using translation to take care of view offsets in the x coordinate system
         // everything works fine until x coordinate get large, and then the larger numbers don't render correctly on the canvas
         //i.e. we can't do this gc.translate(-view.getBoundingRect().getMinX(), trackPositionOffset);
-        gc.translate(0, trackPositionOffset);
+//        gc.translate(0, trackPositionOffset);
         glyphs.forEach(child -> child.getChildren().forEach(c -> c.draw(gc, view, view.modelCoordRect())));
         gc.restore();
     }

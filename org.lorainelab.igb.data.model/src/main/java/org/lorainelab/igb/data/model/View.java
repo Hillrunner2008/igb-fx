@@ -34,7 +34,6 @@ public class View {
         xPixelsPerCoordinate = modelCoordRect.getWidth() / canvasContext.getBoundingRect().getWidth();
         scrollYOffset = canvasContext.getRelativeTrackOffset() / xfactor;
     }
-
     public Rectangle2D modelCoordRect() {
         return modelCoordRect;
     }

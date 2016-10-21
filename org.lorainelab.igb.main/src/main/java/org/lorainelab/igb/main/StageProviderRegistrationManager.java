@@ -29,8 +29,14 @@ public class StageProviderRegistrationManager {
     }
 
     public void registerStageProvider(Stage stage, Stage splashStage, HostServices hostServices) {
+        LOG.info("registering StageProvider");
         this.stage = stage;
-        registerService = bundleContext.registerService(StageProvider.class, new MainStageProvider(stage, splashStage, hostServices), null);
+        try {
+            registerService = bundleContext.registerService(StageProvider.class, new MainStageProvider(stage, splashStage, hostServices), null);
+            LOG.info("StageProvider registered");
+        } catch (Throwable t) {
+            LOG.error(t.getMessage(), t);
+        }
     }
 
     @Deactivate

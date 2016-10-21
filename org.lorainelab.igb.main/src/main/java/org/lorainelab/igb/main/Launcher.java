@@ -74,6 +74,7 @@ public class Launcher extends Application {
     };
 
     private void handleRestartEvent() {
+        LOG.info("Received handleRestartEvent request");
         Platform.runLater(() -> {
             Stage newStage = new Stage();
             Stage newsplashStage = new Stage();
@@ -85,6 +86,7 @@ public class Launcher extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        LOG.info("Starting Fx Application");
         final BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
         ServiceReference<StageProviderRegistrationManager> serviceReference = bundleContext.getServiceReference(StageProviderRegistrationManager.class);
         StageProviderRegistrationManager stageRegistrationManager = bundleContext.getService(serviceReference);
@@ -118,13 +120,19 @@ public class Launcher extends Application {
     public void initSplashScreen() throws IOException {
         splashStage = new Stage(StageStyle.TRANSPARENT);
         splashStage.setAlwaysOnTop(true);
-        final URL resource = Launcher.class.getClassLoader().getResource("splashScreen.fxml");
-        FXMLLoader fxmlLoader = new FXMLLoader(resource);
-        fxmlLoader.setClassLoader(this.getClass().getClassLoader());
-        fxmlLoader.setController(this);
-        StackPane stack = fxmlLoader.load();
-        splashStage.setScene(new Scene(stack, 550, 250));
-        splashStage.show();
+        Platform.runLater(() -> {
+            try {
+                final URL resource = Launcher.class.getClassLoader().getResource("splashScreen.fxml");
+                FXMLLoader fxmlLoader = new FXMLLoader(resource);
+                fxmlLoader.setClassLoader(this.getClass().getClassLoader());
+                fxmlLoader.setController(this);
+                StackPane stack = fxmlLoader.load();
+                splashStage.setScene(new Scene(stack, 550, 250));
+                splashStage.show();
+            } catch (IOException ex) {
+                LOG.error(ex.getMessage(), ex);
+            }
+        });
     }
 
     @Reference

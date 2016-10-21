@@ -18,7 +18,7 @@ public class Palette {
     public static Color SELECTION_COLOR = Color.web("#DC322F");
 
     public static Color CLICK_DRAG_HIGHLIGHT = Color.rgb(33, 150, 243, .3);
-
+    
     public static Color A_COLOR = Color.rgb(151, 255, 179);
     public static Color T_COLOR = Color.rgb(102, 211, 255);
     public static Color G_COLOR = Color.rgb(255, 210, 0);
