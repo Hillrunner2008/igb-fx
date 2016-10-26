@@ -41,13 +41,11 @@ public class CoordinateTrackRenderer implements TrackRenderer {
     private Rectangle2D viewBoundingRectangle;
     private Range<Double> viewYcoordinateRange;
     private double xfactor = 1;
-    //protected EventBus eventBus;
     private final CanvasContext canvasContext;
     private final GraphicsContext gc;
     private int weight;
     private TrackLabel trackLabel;
     private final Chromosome chromosome;
-    private final Range<Integer> validViewRange;
     private DoubleProperty trackHeight;
 
     public CoordinateTrackRenderer(Canvas canvas, Chromosome chromosome) {
@@ -56,7 +54,6 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         this.modelHeight = MIN_HEIGHT;
         trackHeight = new SimpleDoubleProperty(MIN_HEIGHT);
         weight = 0;
-        validViewRange = Range.closedOpen(0, modelWidth);
         viewBoundingRectangle = new Rectangle2D(0, 0, modelWidth, modelHeight);
         canvasContext = new CanvasContext(canvas, modelHeight, 0);
         trackLabel = new TrackLabel(this, COORDINATES_TRACK_LABEL, new SimpleBooleanProperty(true));

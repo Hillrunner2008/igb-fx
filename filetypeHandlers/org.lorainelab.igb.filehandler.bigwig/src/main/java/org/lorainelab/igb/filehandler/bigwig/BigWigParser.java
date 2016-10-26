@@ -14,7 +14,8 @@ import org.broad.igv.bbfile.BBFileHeader;
 import org.broad.igv.bbfile.BBFileReader;
 import org.broad.igv.bbfile.BigWigIterator;
 import org.broad.igv.bbfile.WigItem;
-import org.lorainelab.igb.data.model.chart.ChartData;
+import org.lorainelab.igb.data.model.Chromosome;
+import org.lorainelab.igb.data.model.chart.IntervalChart;
 import org.lorainelab.igb.data.model.datasource.DataSource;
 import org.lorainelab.igb.data.model.datasource.DataSourceReference;
 import org.lorainelab.igb.data.model.filehandler.api.DataType;
@@ -45,7 +46,8 @@ public class BigWigParser implements FileTypeHandler {
     }
 
     @Override
-    public Set<CompositionGlyph> getRegion(DataSourceReference dataSourceReference, Range<Integer> range, String chromosomeId) {
+    public Set<CompositionGlyph> getRegion(DataSourceReference dataSourceReference, Range<Integer> range, Chromosome chromosome) {
+        String chrId = chromosome.getName();
         final DataSource dataSource = dataSourceReference.getDataSource();
         final String path = dataSourceReference.getPath();
         IntArrayList x = new IntArrayList();
@@ -55,7 +57,7 @@ public class BigWigParser implements FileTypeHandler {
             BBFileReader bbReader = new BBFileReader(path);
             BBFileHeader bbFileHdr = bbReader.getBBFileHeader();
             if (bbFileHdr.isBigWig()) {
-                BigWigIterator bigWigIterator = bbReader.getBigWigIterator(chromosomeId, range.lowerEndpoint(), chromosomeId, range.upperEndpoint(), true);
+                BigWigIterator bigWigIterator = bbReader.getBigWigIterator(chrId, range.lowerEndpoint(), chrId, range.upperEndpoint(), true);
                 try {
                     WigItem wigItem = null;
                     while (bigWigIterator.hasNext()) {
@@ -81,19 +83,19 @@ public class BigWigParser implements FileTypeHandler {
         int[] xData = Arrays.copyOf(x.elements(), dataSize);
         int[] wData = Arrays.copyOf(w.elements(), dataSize);
         double[] yData = Arrays.copyOf(y.elements(), dataSize);
-        return convertBigWigFeaturesToCompositionGlyphs(new ChartData(xData, wData, yData));
+        return convertBigWigFeaturesToCompositionGlyphs(new IntervalChart(xData, wData, yData), chromosome);
     }
 
-    private Set<CompositionGlyph> convertBigWigFeaturesToCompositionGlyphs(ChartData cd) {
+    private Set<CompositionGlyph> convertBigWigFeaturesToCompositionGlyphs(IntervalChart cd, Chromosome chromosome) {
         Set<CompositionGlyph> primaryGlyphs = Sets.newLinkedHashSet();
         final HashMap<String, String> toolTip = new HashMap<String, String>();
         toolTip.put("forward", Boolean.TRUE.toString());
-        primaryGlyphs.add(new CompositionGlyph("Graph", toolTip, Lists.newArrayList(new GraphGlyph(cd))));
+        primaryGlyphs.add(new CompositionGlyph("Graph", toolTip, Lists.newArrayList(new GraphGlyph(cd, chromosome))));
         return primaryGlyphs;
     }
 
     @Override
-    public Set<CompositionGlyph> getChromosome(DataSourceReference dataSourceReference, String chromosomeId) {
+    public Set<CompositionGlyph> getChromosome(DataSourceReference dataSourceReference, Chromosome chromosome) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

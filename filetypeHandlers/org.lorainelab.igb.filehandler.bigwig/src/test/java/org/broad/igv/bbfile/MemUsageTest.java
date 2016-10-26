@@ -2,10 +2,14 @@ package org.broad.igv.bbfile;
 
 import cern.colt.list.DoubleArrayList;
 import cern.colt.list.IntArrayList;
+import com.google.common.base.Stopwatch;
+import com.vividsolutions.jts.geom.Coordinate;
+import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import org.junit.Test;
-import org.lorainelab.igb.data.model.chart.ChartData;
+import org.lorainelab.igb.data.model.chart.IntervalChart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +22,7 @@ public class MemUsageTest {
     private static final Logger LOG = LoggerFactory.getLogger(MemUsageTest.class);
 
     @Test
-    public void testCube() throws IOException {
+    public void chartDataMemoryConsumptionTest() throws IOException {
 
         Runtime runtime = Runtime.getRuntime();
         long usedMemoryBefore = runtime.totalMemory() - runtime.freeMemory();
@@ -59,10 +63,15 @@ public class MemUsageTest {
         y = null;
         w = null;
         x = null;
-        ChartData cd = new ChartData(xData, wData, yData);
+        IntervalChart cd = new IntervalChart(xData, wData, yData);
         System.gc();
         long usedMemoryAfter = runtime.totalMemory() - runtime.freeMemory();
         System.out.println("Memory increased:" + (usedMemoryAfter - usedMemoryBefore));
+
+        final Stopwatch stopwatch = Stopwatch.createStarted();
+        List<Coordinate> dataInRange = cd.getDataInRange(new Rectangle2D.Double(0, 0, 30_000_000, 50_000), 30_000_000 / 800);
+        LOG.info("size {}", dataInRange.size());
+        LOG.info("STOPWATCH METRICS for getDataInRange {}", stopwatch.stop());
 
     }
 }
