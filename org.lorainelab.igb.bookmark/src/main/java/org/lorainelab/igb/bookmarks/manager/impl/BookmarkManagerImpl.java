@@ -112,6 +112,8 @@ public class BookmarkManagerImpl implements BookmarkManager {
 
     private void initBookmarkDefaults() {
         defaultNmeCheckBox.setSelected(true);
+        positionDataRadio.setSelected(true);
+        positionOnlyRadio.setSelected(false);
         nameTextField.setDisable(true);
         genomeVersionRegistry.getSelectedGenomeVersion().get().ifPresent(gv -> {
             nameTextField.setText(gv.getName().get());
@@ -163,7 +165,7 @@ public class BookmarkManagerImpl implements BookmarkManager {
 
     @Override
     public void storeBookmark() {
-        buildBookMark(root);
+        storeBookmark(root);
     }
 
     @Reference

@@ -63,9 +63,10 @@
                             !${project.artifactId}*,
                             *
                         </Import-Package>
-                        <Export-Package></Export-Package>
+                        <Export-Package>org.lorainelab.igb.bookmarks.manager</Export-Package>
                         <Bundle-ActivationPolicy>lazy</Bundle-ActivationPolicy>
                         <Service-Component>*</Service-Component>
+                        <Private-Package>lorainelab.igb.bookmarks.*,org.lorainelab.igb.bookmarks.data.*,org.lorainelab.igb.bookmarks.manager.*</Private-Package>
                     </instructions>
                 </configuration>
             </plugin>
