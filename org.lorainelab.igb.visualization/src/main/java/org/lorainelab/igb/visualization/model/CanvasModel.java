@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 public class CanvasModel {
 
     private static final Logger LOG = LoggerFactory.getLogger(CanvasModel.class);
-    public static final int MAX_ZOOM_MODEL_COORDINATES_X = 120;
     public static final int MAX_ZOOM_MODEL_COORDINATES_Y = 50;
     private DoubleProperty modelWidth;
     private DoubleProperty xFactor;

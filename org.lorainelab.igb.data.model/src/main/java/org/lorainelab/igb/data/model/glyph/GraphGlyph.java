@@ -10,8 +10,9 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.View;
+import static org.lorainelab.igb.data.model.chart.GraphXAxis.drawXAxisGridLines;
+import org.lorainelab.igb.data.model.chart.GraphYAxis;
 import org.lorainelab.igb.data.model.chart.IntervalChart;
-import static org.lorainelab.igb.data.model.glyph.GraphXAxis.drawXAxisGridLines;
 import org.lorainelab.igb.data.model.util.Palette;
 import static org.lorainelab.igb.data.model.util.Palette.GRAPH_FILL;
 import org.slf4j.Logger;
@@ -26,13 +27,11 @@ public class GraphGlyph implements Glyph {
     private static final Logger LOG = LoggerFactory.getLogger(GraphGlyph.class);
     private final Rectangle2D boundingRect;
     private IntervalChart data;
-    private final Chromosome chromosome;
     private GraphYAxis yAxis;
 
     public GraphGlyph(IntervalChart data, Chromosome chromosome) {
         checkNotNull(data);
         checkNotNull(chromosome);
-        this.chromosome = chromosome;
         this.data = data;
         this.boundingRect = new Rectangle2D(0, data.getDataBounds().y, chromosome.getLength(), data.getDataBounds().height);
         yAxis = new GraphYAxis();
@@ -57,45 +56,14 @@ public class GraphGlyph implements Glyph {
     public void draw(GraphicsContext gc, View view, Rectangle2D slotBoundingViewRect) {
         try {
             gc.save();
-            updateBounds(view);
-            drawXAxisGridLines(gc, view);
-            yAxis.drawYAxisGridLines(gc, view);
+            drawXAxisGridLines(gc, view, boundingRect);
+            yAxis.drawYAxisGridLines(gc, view, boundingRect);
             drawChartData(gc, view);
-            yAxis.drawYAxis(gc, view);
+            yAxis.drawYAxis(gc, view, boundingRect);
         } finally {
             gc.restore();
         }
     }
-
-    private void updateBounds(View view) {
-        final Rectangle2D canvasCoordRect = view.getCanvasContext().getBoundingRect();
-        java.awt.geom.Rectangle2D.Double modelCoordRect = view.getMutableCoordRect();
-        final double modelCoordMinY = modelCoordRect.getMinY();
-        double visPercY = canvasCoordRect.getHeight() / view.getCanvasContext().getTrackHeight();
-        double maxUpperBounds = boundingRect.getHeight() - modelCoordMinY;
-        double minVisibleY;
-        double maxVisibleY;
-        if (visPercY < 1) {
-            if (modelCoordMinY > 0) {
-                //cut off from top
-                double topCutOff = maxUpperBounds * visPercY;
-                minVisibleY = topCutOff - modelCoordRect.getHeight();
-                maxVisibleY = topCutOff;
-            } else {
-                //cut off from bottom
-                double bottomCutOff = maxUpperBounds - (maxUpperBounds * visPercY);
-                minVisibleY = bottomCutOff;
-                maxVisibleY = bottomCutOff + modelCoordRect.getHeight();
-            }
-        } else {
-            minVisibleY = boundingRect.getMinY();
-            maxVisibleY = boundingRect.getHeight();
-        }
-        double width = Math.min(chromosome.getLength() - modelCoordRect.x, Math.ceil(modelCoordRect.getMaxX() - modelCoordRect.x) + 1);
-        modelCoordRect.setRect(modelCoordRect.getMinX(), minVisibleY, width, maxVisibleY);
-    }
-
-   
 
     @Override
     public Optional<Rectangle.Double> calculateDrawRect(View view, Rectangle2D slotBoundingViewRect) {
@@ -113,10 +81,6 @@ public class GraphGlyph implements Glyph {
         LOG.warn("Graphs do not support multiple glyphAlignments yet, ignoring setter call");
     }
 
-    private double getDisplayPosition(double value, View view) {
-        return (value - view.getMutableCoordRect().getMinY()) + view.getMutableCoordRect().getHeight();
-    }
-
     private void drawChartData(GraphicsContext gc, View view) {
         try {
             gc.save();
@@ -131,22 +95,32 @@ public class GraphGlyph implements Glyph {
         } finally {
             gc.restore();
         }
-
     }
 
     private void drawGraphFill(GraphicsContext gc, View view, final List<Coordinate> dataInRange) {
         java.awt.geom.Rectangle2D.Double modelCoordRect = view.getMutableCoordRect();
-        final double zeroPosition = getDisplayPosition(0, view);
+
+        final Rectangle2D canvasCoordRect = view.getCanvasContext().getBoundingRect();
+        double minTrackY = 0; //already translated to canvas rect minY
+        double maxTrackY = canvasCoordRect.getHeight() / view.getYfactor();
+        double trackHeightInModelCoords = maxTrackY;
+        double cutOffAmount = boundingRect.getHeight() - modelCoordRect.getHeight();
+        double topCutOff = modelCoordRect.getMinY();
+        double bottomCutOff = cutOffAmount - topCutOff;
+        double minGraphY = boundingRect.getMinY() + bottomCutOff;
+        double maxGraphY = boundingRect.getMaxY() - topCutOff;
+
+        final double zeroPosition = maxGraphY - boundingRect.getMinY();
         gc.setFill(GRAPH_FILL);
         gc.beginPath();
-        gc.moveTo(0, modelCoordRect.getMaxY());
+        gc.moveTo(0, zeroPosition);
         for (Coordinate c : dataInRange) {
             double width = c.z;
-            final double minX = Math.max(c.x - 0.5 - modelCoordRect.x, 0);
-            final double maxY = modelCoordRect.getMaxY() - c.y;
+            final double minX = Math.max(c.x - modelCoordRect.x, 0);
+            final double y = maxGraphY - c.y;
             gc.moveTo(minX, zeroPosition);
-            gc.lineTo(minX, maxY);
-            gc.lineTo(minX + width, maxY);
+            gc.lineTo(minX, y);
+            gc.lineTo(minX + width, y);
             gc.lineTo(minX + width, zeroPosition);//would not needed if there were no gaps in intervals, but I don't know if that can be assumed safely
         }
         gc.setGlobalAlpha(.4);
@@ -158,16 +132,26 @@ public class GraphGlyph implements Glyph {
         gc.setStroke(GRAPH_FILL);
         gc.setLineWidth(2);
         java.awt.geom.Rectangle2D.Double modelCoordRect = view.getMutableCoordRect();
-        gc.beginPath();
+        final Rectangle2D canvasCoordRect = view.getCanvasContext().getBoundingRect();
+        double minTrackY = 0; //already translated to canvas rect minY
+        double maxTrackY = canvasCoordRect.getHeight() / view.getYfactor();
+        double trackHeightInModelCoords = maxTrackY;
+        double cutOffAmount = boundingRect.getHeight() - modelCoordRect.getHeight();
+        double topCutOff = modelCoordRect.getMinY();
+        double bottomCutOff = cutOffAmount - topCutOff;
+
+        double minGraphY = boundingRect.getMinY() + bottomCutOff;
+        double maxGraphY = boundingRect.getMaxY() - topCutOff;
         final double firstY = Math.floor((modelCoordRect.getMaxY() - dataInRange.get(0).y));
         final double startX = Math.max((dataInRange.get(0).x - 0.5 - modelCoordRect.x), 0);
+        gc.beginPath();
         gc.moveTo(startX, firstY);
         for (Coordinate c : dataInRange) {
             double width = c.z;
-            final double minX = c.x - 0.5 - modelCoordRect.x;
-            final double maxY = modelCoordRect.getMaxY() - c.y;
-            gc.lineTo(minX, maxY);
-            gc.lineTo((minX + width), maxY);
+            final double minX = c.x - modelCoordRect.x;
+            final double y = maxGraphY - c.y;
+            gc.lineTo(minX, y);
+            gc.lineTo((minX + width), y);
         }
         gc.scale(1 / view.getXfactor(), 1 / view.getYfactor());
         gc.stroke();

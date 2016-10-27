@@ -1,4 +1,4 @@
-package org.lorainelab.igb.data.model.glyph;
+package org.lorainelab.igb.data.model.chart;
 
 /**
  *

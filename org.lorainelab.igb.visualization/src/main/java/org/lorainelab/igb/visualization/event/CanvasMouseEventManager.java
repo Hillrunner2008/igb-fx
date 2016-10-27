@@ -15,7 +15,6 @@ import javafx.scene.input.MouseEvent;
 import org.lorainelab.igb.data.model.View;
 import org.lorainelab.igb.selections.SelectionInfoService;
 import org.lorainelab.igb.visualization.model.CanvasModel;
-import static org.lorainelab.igb.visualization.model.CanvasModel.MAX_ZOOM_MODEL_COORDINATES_X;
 import org.lorainelab.igb.visualization.model.TracksModel;
 import org.lorainelab.igb.visualization.ui.CanvasRegion;
 import org.lorainelab.igb.visualization.util.BoundsUtil;
@@ -248,8 +247,11 @@ public class CanvasMouseEventManager {
         double minX = Math.max(focusRect.getMinX(), view.modelCoordRect().getMinX());
         double maxX = Math.min(focusRect.getMaxX(), view.modelCoordRect().getMaxX());
         double width = maxX - minX;
-        if (width < MAX_ZOOM_MODEL_COORDINATES_X) {
-            width = Math.max(width * 1.1, MAX_ZOOM_MODEL_COORDINATES_X);
+
+        double maxZoom = exponentialScaleTransform(canvasRegion.getWidth(), modelWidth, 100);
+        double maxModelCoordinates = canvasRegion.getWidth() / maxZoom;
+        if (width < maxModelCoordinates) {
+            width = Math.max(width * 1.1, maxModelCoordinates);
             minX = Math.max((minX + focusRect.getWidth() / 2) - (width / 2), 0);
         }
         final double scaleXalt = eventLocationReference.getCanvasContext().getBoundingRect().getWidth() / width;

@@ -1,9 +1,6 @@
 package org.lorainelab.igb.data.model;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Range;
-import com.google.common.collect.RangeMap;
-import com.google.common.collect.TreeRangeMap;
 import java.util.Collection;
 import java.util.List;
 import static java.util.stream.Collectors.toList;
@@ -25,7 +22,6 @@ public class GraphTrack implements Track {
     private static final Logger LOG = LoggerFactory.getLogger(GraphTrack.class);
     private final String trackLabel;
     private List<CompositionGlyph> glyphs;
-    private RangeMap<Double, CompositionGlyph> intervalMap;
     private BooleanProperty isHeightLocked;
     private double lockedHeight;
 
@@ -40,13 +36,13 @@ public class GraphTrack implements Track {
         this.modelHeight = 10;
         this.lockedHeight = 200;
         glyphs = Lists.newArrayList();
-        intervalMap = TreeRangeMap.create();
     }
 
     @Override
     public void draw(GraphicsContext gc, View view, CanvasContext canvasContext) {
         double trackPositionOffset = canvasContext.getBoundingRect().getMinY() / view.getYfactor();
         gc.save();
+        gc.translate(0, trackPositionOffset);
         glyphs.forEach(child -> child.getChildren().forEach(c -> c.draw(gc, view, view.modelCoordRect())));
         gc.restore();
     }
@@ -68,11 +64,7 @@ public class GraphTrack implements Track {
 
     @Override
     public List<CompositionGlyph> getGlyphsInView(View view) {
-        final List<CompositionGlyph> glyphsInRange;
-        synchronized (intervalMap) {
-            glyphsInRange = Lists.newArrayList(intervalMap.subRangeMap(view.getXrange()).asMapOfRanges().values());
-        }
-        return glyphsInRange;
+        return glyphs;
     }
 
     @Override
@@ -82,13 +74,11 @@ public class GraphTrack implements Track {
     @Override
     public void clearGlyphs() {
         glyphs.clear();
-        intervalMap.clear();
     }
 
     @Override
     public void addGlyphs(Collection<CompositionGlyph> glyphs) {
         this.glyphs.addAll(glyphs);
-        glyphs.stream().forEach(glyph -> intervalMap.put(Range.closed(glyph.getBoundingRect().getMinX(), glyph.getBoundingRect().getMaxX()), glyph));
         modelHeight = glyphs.stream().mapToDouble(glyph -> glyph.getBoundingRect().getMaxY()).average().orElse(10);
     }
 

@@ -45,7 +45,7 @@ public class IntervalChart {
         final List<Coordinate> coordinates = new ArrayList<>();
         for (int i = startIndex; i <= endIndex; i++) {
             final int cx = Math.max(x[i], (int) modelCoordRect.getMinX());
-            double cy = clipToYBounds(modelCoordRect, y[i]);
+            double cy = y[i];
             double cw = w[i];
 
             if (cw < modelCoordinatesPerPixel) {
@@ -54,7 +54,7 @@ public class IntervalChart {
                     final int nextXPositionWidth = w[i + 1];
                     if (nextXPositionWidth < modelCoordinatesPerPixel) {
                         cw += w[i + 1];
-                        final double clippedToMaxYValue = clipToYBounds(modelCoordRect, y[i + 1]);
+                        final double clippedToMaxYValue = y[i + 1];
                         cy = Math.max(clippedToMaxYValue, cy);
                         i++;
                     } else {
