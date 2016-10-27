@@ -72,8 +72,8 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
             layoutComponents();
             menuItem.setOnAction(event -> {
                 Platform.runLater(() -> {
+                    clearState();
                     stage.centerOnScreen();
-
                     stage.show();
                 });
             });
@@ -83,11 +83,8 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
 
     private void initComponents() {
         migPane = new MigPane("fillx", "[]rel[grow]", "[][][]");
-
         stage = new Stage();
-        stage.sizeToScene();
         stage.setMinWidth(440);
-
         stage.setMinHeight(165);
         stage.setHeight(165);
         stage.setMaxHeight(165);
@@ -144,14 +141,25 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
                     if (!Strings.isNullOrEmpty(speciesName)
                             || !Strings.isNullOrEmpty(versionName)
                             || !Strings.isNullOrEmpty(sequenceFileUrl)) {
-                        ReferenceSequenceProvider twoBitProvider = (ReferenceSequenceProvider) new TwoBitParser(sequenceFileUrl);
-                        GenomeVersion customGenome = new GenomeVersion(versionName, speciesName, twoBitProvider, versionName);
-                        SessionPreferences.setRecentSelectedFilePath(sequenceFileUrl);
-                        customGenomePersistenceManager.persistCustomGenome(customGenome);
-                        SessionPreferences.setRecentSelectedFilePath(sequenceFileUrl);
-                        customGenomeAdded[0] = genomeVersionRegistry.getRegisteredGenomeVersions().add(customGenome);
-                        genomeVersionRegistry.setSelectedGenomeVersion(customGenome);
+                        final Optional<GenomeVersion> duplicate = isDuplicate(sequenceFileUrl);
 
+                        if (!duplicate.isPresent()) {
+                            ReferenceSequenceProvider twoBitProvider = (ReferenceSequenceProvider) new TwoBitParser(sequenceFileUrl);
+                            GenomeVersion customGenome = new GenomeVersion(versionName, speciesName, twoBitProvider, versionName);
+                            SessionPreferences.setRecentSelectedFilePath(sequenceFileUrl);
+                            customGenomePersistenceManager.persistCustomGenome(customGenome);
+                            SessionPreferences.setRecentSelectedFilePath(sequenceFileUrl);
+                            customGenomeAdded[0] = genomeVersionRegistry.getRegisteredGenomeVersions().add(customGenome);
+                            genomeVersionRegistry.setSelectedGenomeVersion(customGenome);
+                        } else {
+                            Platform.runLater(() -> {
+                                Alert dlg = new Alert(AlertType.WARNING, "This sequence file is already mapped to the \n" + duplicate.get().getName().get() + "genome.");
+                                dlg.initModality(stage.getModality());
+                                dlg.initOwner(stage.getOwner());
+                                dlg.setTitle("Cannot add duplicate genome version");
+                                dlg.show();
+                            });
+                        }
                     }
                 } catch (Exception ex) {
                     LOG.error(ex.getMessage(), ex);
@@ -214,9 +222,8 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setResizable(true);
         Scene scene = new Scene(migPane);
-
         stage.setScene(scene);
-
+        stage.sizeToScene();
     }
 
     @Override
@@ -250,5 +257,17 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
         //TODO setup dynamic registry for ReferenceSequenceProvider ... will require ReferenceSequenceProvider to hold supported extensions
         FileChooser.ExtensionFilter twoBitExtensionFilter = new FileChooser.ExtensionFilter("2bit", Lists.newArrayList("*.2bit"));
         fileChooser.getExtensionFilters().add(twoBitExtensionFilter);
+    }
+
+    private void clearState() {
+        refSeqTextField.clear();
+        versionTextField.clear();
+        speciesTextField.clear();
+    }
+
+    private Optional<GenomeVersion> isDuplicate(String sequenceFileUrl) {
+        return genomeVersionRegistry.getRegisteredGenomeVersions().stream()
+                .filter(gv -> gv.getReferenceSequenceProvider().getPath().equalsIgnoreCase(sequenceFileUrl))
+                .findFirst();
     }
 }

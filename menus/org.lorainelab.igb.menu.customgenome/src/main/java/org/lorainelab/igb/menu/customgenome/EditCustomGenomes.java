@@ -6,12 +6,8 @@ import aQute.bnd.annotation.component.Reference;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import java.io.File;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -19,24 +15,15 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
-import javafx.collections.transformation.SortedList;
-import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.FocusModel;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.control.cell.TextFieldTreeCell;
-import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -44,14 +31,10 @@ import javafx.util.Callback;
 import net.miginfocom.layout.CC;
 import org.lorainelab.igb.data.model.GenomeVersion;
 import org.lorainelab.igb.data.model.GenomeVersionRegistry;
-import org.lorainelab.igb.data.model.sequence.ReferenceSequenceProvider;
-import org.lorainelab.igb.data.model.util.TwoBitParser;
 import org.lorainelab.igb.menu.api.MenuBarEntryProvider;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
 import org.lorainelab.igb.menu.api.model.WeightedMenuEntry;
 import org.lorainelab.igb.menu.api.model.WeightedMenuItem;
-import static org.lorainelab.igb.menu.customgenome.CustomGenomePrefKeys.UUID;
-import org.lorainelab.igb.preferences.SessionPreferences;
 import org.lorainelab.igb.selections.SelectionInfoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -166,28 +149,29 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
         refSeqTextField = new TextField();
         refSeqTextField.setEditable(false);
         refSeqBrowseBtn = new Button("Choose File\u2026");
-        refSeqBrowseBtn.setOnAction(event -> {
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Choose Sequence File");
-            File homeDirectory;
-            if (SessionPreferences.getRecentSelectedFilePath() != null) {
-                File file = new File(SessionPreferences.getRecentSelectedFilePath());
-                String simpleFileName = file.getParent();
-                homeDirectory = new File(simpleFileName);
-            } else {
-                homeDirectory = new File(System.getProperty("user.home"));
-            }
-            fileChooser.setInitialDirectory(homeDirectory);
-            addFileExtensionFilters(fileChooser);
-            Optional.ofNullable(fileChooser.showOpenDialog(null)).ifPresent(selectedFile -> {
-                try {
-                    refSeqTextField.setText(selectedFile.getCanonicalPath());
-                } catch (Exception ex) {
-                    LOG.error(ex.getMessage(), ex);
-                }
-            });
-
-        });
+        refSeqBrowseBtn.setDisable(true);
+//        refSeqBrowseBtn.setOnAction(event -> {
+//            FileChooser fileChooser = new FileChooser();
+//            fileChooser.setTitle("Choose Sequence File");
+//            File homeDirectory;
+//            if (SessionPreferences.getRecentSelectedFilePath() != null) {
+//                File file = new File(SessionPreferences.getRecentSelectedFilePath());
+//                String simpleFileName = file.getParent();
+//                homeDirectory = new File(simpleFileName);
+//            } else {
+//                homeDirectory = new File(System.getProperty("user.home"));
+//            }
+//            fileChooser.setInitialDirectory(homeDirectory);
+//            addFileExtensionFilters(fileChooser);
+//            Optional.ofNullable(fileChooser.showOpenDialog(null)).ifPresent(selectedFile -> {
+//                try {
+//                    refSeqTextField.setText(selectedFile.getCanonicalPath());
+//                } catch (Exception ex) {
+//                    LOG.error(ex.getMessage(), ex);
+//                }
+//            });
+//
+//        });
 
         okBtn = new Button("Ok");
         okBtn.setOnAction(event -> {
@@ -196,22 +180,11 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
                 try {
                     final String speciesName = speciesTextField.textProperty().get();
                     final String versionName = versionTextField.textProperty().get();
-                    final String sequenceFileUrl = refSeqTextField.textProperty().get();
                     if (!Strings.isNullOrEmpty(speciesName)
-                            || !Strings.isNullOrEmpty(versionName)
-                            || !Strings.isNullOrEmpty(sequenceFileUrl)) {
+                            || !Strings.isNullOrEmpty(versionName)) {
                         //Value change of item stored in list will not trigger any event.. need to delete and reinsert to trigger event.
-
-                        if (genomeToEdit.getReferenceSequenceProvider().getPath().equals(sequenceFileUrl)) {
-                            genomeToEdit.setName(versionName);
-                            genomeToEdit.setSpeciesName(speciesName);
-                        } else {
-                            genomeVersionRegistry.getRegisteredGenomeVersions().remove(genomeToEdit);
-                            ReferenceSequenceProvider twoBitProvider = (ReferenceSequenceProvider) new TwoBitParser(sequenceFileUrl);
-                            genomeToEdit = new GenomeVersion(versionName, speciesName, twoBitProvider, versionName, genomeToEdit.getUuid());
-                            LOG.debug(EditCustomGenomes.class + " Genome file edited, creating new genome.");
-                            genomeVersionRegistry.getRegisteredGenomeVersions().add(genomeToEdit);
-                        }
+                        genomeToEdit.setName(versionName);
+                        genomeToEdit.setSpeciesName(speciesName);
                         customGenomePersistenceManager.persistCustomGenome(genomeToEdit);
                         int index = table.getItems().indexOf(genomeToEdit);
                         table.getItems().remove(genomeToEdit);
