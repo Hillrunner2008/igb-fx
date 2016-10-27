@@ -9,7 +9,10 @@ import java.util.Optional;
  */
 public interface ViewService {
 
-    public Runnable getRefreshViewAction();
+    Runnable getRefreshViewAction();
 
-    public Optional<Range<Double>> getViewCoordinates();
+    Optional<Range<Double>> getViewCoordinates();
+
+    void setViewCoordinateRange(Range<Double> range);
+
 }
