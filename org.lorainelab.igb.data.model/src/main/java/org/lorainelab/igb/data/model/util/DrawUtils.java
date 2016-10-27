@@ -11,8 +11,8 @@ public class DrawUtils {
 
     //ensures width and height are at least 1 screen pixel
     public static void scaleToVisibleRec(View view, Rectangle.Double originalDrawRect) {
-        double modelCoordinatesPerScreenXPixel = view.getBoundingRect().getWidth() / view.getCanvasContext().getBoundingRect().getWidth();
-        double modelCoordinatesPerScreenYPixel = view.getBoundingRect().getHeight() / view.getCanvasContext().getBoundingRect().getHeight();
+        double modelCoordinatesPerScreenXPixel = view.modelCoordRect().getWidth() / view.getCanvasContext().getBoundingRect().getWidth();
+        double modelCoordinatesPerScreenYPixel = view.modelCoordRect().getHeight() / view.getCanvasContext().getBoundingRect().getHeight();
         double width = originalDrawRect.getWidth();
         double height = originalDrawRect.getHeight();
         if (width > 0 && width < modelCoordinatesPerScreenXPixel) {

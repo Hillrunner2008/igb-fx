@@ -26,8 +26,8 @@
                         </ComboBox>
                         <TableView fx:id="sequenceInfoTable" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
                             <columns>
-                                <TableColumn fx:id="seqNameColumn" maxWidth="1.7976931348623157E308" prefWidth="116.0" text="Sequence(s)" />
-                                <TableColumn fx:id="seqLengthColumn" maxWidth="1.7976931348623157E308" prefWidth="120.0" text="Length" />
+                                <TableColumn fx:id="seqNameColumn" maxWidth="1.7976931348623157E308" minWidth="100.0" prefWidth="-1.0" text="Sequence(s)" />
+                                <TableColumn fx:id="seqLengthColumn" maxWidth="1.7976931348623157E308" minWidth="100.0" prefWidth="-1.0" text="Length" />
                             </columns>
                         </TableView>
                     </children>

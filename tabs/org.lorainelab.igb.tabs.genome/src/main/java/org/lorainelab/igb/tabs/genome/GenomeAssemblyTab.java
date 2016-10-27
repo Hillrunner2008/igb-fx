@@ -1,5 +1,6 @@
 package org.lorainelab.igb.tabs.genome;
 
+import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import java.io.IOException;
@@ -28,6 +29,7 @@ import org.lorainelab.igb.data.model.GenomeVersion;
 import org.lorainelab.igb.data.model.GenomeVersionRegistry;
 import org.lorainelab.igb.tabs.api.TabDockingPosition;
 import org.lorainelab.igb.tabs.api.TabProvider;
+import static org.lorainelab.igb.utils.FXUtilities.runAndWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,25 +61,25 @@ public class GenomeAssemblyTab implements TabProvider {
         tableData = FXCollections.observableArrayList();
         genomeVersionData = FXCollections.observableArrayList((GenomeVersion gv) -> new Observable[]{gv.getName()});
         genomeAssemblyTab = new Tab(TAB_TITLE);
+    }
+
+    @Activate
+    public void activate() {
         final URL resource = GenomeAssemblyTab.class.getClassLoader().getResource("GenomeAssemblyTab.fxml");
         FXMLLoader fxmlLoader = new FXMLLoader(resource);
         fxmlLoader.setClassLoader(this.getClass().getClassLoader());
         fxmlLoader.setController(this);
-        Platform.runLater(() -> {
+        runAndWait(() -> {
             try {
                 fxmlLoader.load();
+                genomeAssemblyTab.setContent(tabContent);
+                initializeSpeciesNameComboBox();
+                initializeGenomeVersionComboBox();
+                initializeSequenceTable();
             } catch (IOException exception) {
                 throw new RuntimeException(exception);
             }
         });
-    }
-
-    @FXML
-    private void initialize() {
-        genomeAssemblyTab.setContent(tabContent);
-        initializeSpeciesNameComboBox();
-        initializeGenomeVersionComboBox();
-        initializeSequenceTable();
     }
 
     private void initializeGenomeVersionComboBox() {
@@ -209,6 +211,9 @@ public class GenomeAssemblyTab implements TabProvider {
         seqNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         seqLengthColumn.setCellValueFactory(new PropertyValueFactory<>("length"));
         sequenceInfoTable.setItems(tableData);
+        seqNameColumn.prefWidthProperty().bind(sequenceInfoTable.widthProperty().multiply(.40));
+        seqLengthColumn.prefWidthProperty().bind(sequenceInfoTable.widthProperty().multiply(.60));
+        sequenceInfoTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
 
 }

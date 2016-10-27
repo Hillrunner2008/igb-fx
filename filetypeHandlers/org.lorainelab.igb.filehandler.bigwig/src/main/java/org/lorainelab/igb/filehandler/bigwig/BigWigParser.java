@@ -1,20 +1,23 @@
 package org.lorainelab.igb.filehandler.bigwig;
 
 import aQute.bnd.annotation.component.Component;
+import cern.colt.list.DoubleArrayList;
+import cern.colt.list.IntArrayList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
-import com.google.common.collect.RangeMap;
 import com.google.common.collect.Sets;
-import com.google.common.collect.TreeRangeMap;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Set;
 import org.broad.igv.bbfile.BBFileHeader;
 import org.broad.igv.bbfile.BBFileReader;
 import org.broad.igv.bbfile.BigWigIterator;
 import org.broad.igv.bbfile.WigItem;
+import org.lorainelab.igb.data.model.chart.ChartData;
 import org.lorainelab.igb.data.model.datasource.DataSource;
 import org.lorainelab.igb.data.model.datasource.DataSourceReference;
+import org.lorainelab.igb.data.model.filehandler.api.DataType;
 import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandler;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
 import org.lorainelab.igb.data.model.glyph.GraphGlyph;
@@ -45,7 +48,9 @@ public class BigWigParser implements FileTypeHandler {
     public Set<CompositionGlyph> getRegion(DataSourceReference dataSourceReference, Range<Integer> range, String chromosomeId) {
         final DataSource dataSource = dataSourceReference.getDataSource();
         final String path = dataSourceReference.getPath();
-        Set<BigWigFeature> features = Sets.newLinkedHashSet();
+        IntArrayList x = new IntArrayList();
+        IntArrayList w = new IntArrayList();
+        DoubleArrayList y = new DoubleArrayList();
         try {
             BBFileReader bbReader = new BBFileReader(path);
             BBFileHeader bbFileHdr = bbReader.getBBFileHeader();
@@ -58,9 +63,12 @@ public class BigWigParser implements FileTypeHandler {
                         if (wigItem == null) {
                             break;
                         }
-                        if (wigItem.getWigValue() > 0) { //filter for now, but maybe need to support this in the future
-                            features.add(new BigWigFeature(chromosomeId, wigItem));
-                        }
+                        final int minX = wigItem.getStartBase();
+                        final int maxX = wigItem.getEndBase();
+                        final float wigValue = wigItem.getWigValue();
+                        x.add(minX);
+                        w.add(maxX - minX);
+                        y.add(wigValue);
                     }
                 } catch (Exception ex) {
                     LOG.error(ex.getMessage(), ex);
@@ -69,22 +77,18 @@ public class BigWigParser implements FileTypeHandler {
         } catch (IOException ex) {
             LOG.error(ex.getMessage(), ex);
         }
-        return convertBigWigFeaturesToCompositionGlyphs(features);
+        int dataSize = x.size();
+        int[] xData = Arrays.copyOf(x.elements(), dataSize);
+        int[] wData = Arrays.copyOf(w.elements(), dataSize);
+        double[] yData = Arrays.copyOf(y.elements(), dataSize);
+        return convertBigWigFeaturesToCompositionGlyphs(new ChartData(xData, wData, yData));
     }
 
-    private Set<CompositionGlyph> convertBigWigFeaturesToCompositionGlyphs(Set<BigWigFeature> features) {
+    private Set<CompositionGlyph> convertBigWigFeaturesToCompositionGlyphs(ChartData cd) {
         Set<CompositionGlyph> primaryGlyphs = Sets.newLinkedHashSet();
-
-        RangeMap<Double, Double> intervals = TreeRangeMap.create();
-
-        for (BigWigFeature f : features) {
-            final double lowerEndpoint = f.getRange().lowerEndpoint();
-            final double upperEndpoint = f.getRange().upperEndpoint() - 1;
-            intervals.put(Range.<Double>closed(lowerEndpoint, upperEndpoint), f.getyValue());
-        }
         final HashMap<String, String> toolTip = new HashMap<String, String>();
         toolTip.put("forward", Boolean.TRUE.toString());
-        primaryGlyphs.add(new CompositionGlyph("Graph", toolTip, Lists.newArrayList(new GraphGlyph(intervals))));
+        primaryGlyphs.add(new CompositionGlyph("Graph", toolTip, Lists.newArrayList(new GraphGlyph(cd))));
         return primaryGlyphs;
     }
 
@@ -104,8 +108,8 @@ public class BigWigParser implements FileTypeHandler {
     }
 
     @Override
-    public boolean isGraphType() {
-        return true;
+    public Set<DataType> getDataTypes() {
+        return Sets.newHashSet(DataType.GRAPH);
     }
 
 }

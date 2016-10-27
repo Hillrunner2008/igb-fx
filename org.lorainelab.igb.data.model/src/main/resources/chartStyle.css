@@ -1,0 +1,27 @@
+.chart {
+}
+.chart-content {
+}
+ 
+.chart-title {
+}
+ 
+.axis-label {
+  -fx-text-fill: #808080;
+}
+ 
+ 
+.chart-plot-background {
+    -fx-background-color: #1E1E1E;
+}
+.chart-vertical-grid-lines {
+    -fx-stroke: #3278fa;
+}
+.chart-horizontal-grid-lines {
+    -fx-stroke: #808080;
+}
+.chart-alternative-row-fill {
+    -fx-fill: transparent;
+    -fx-stroke: transparent;
+    -fx-stroke-width: 0;
+}

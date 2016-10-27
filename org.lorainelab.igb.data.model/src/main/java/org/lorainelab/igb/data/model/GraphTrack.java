@@ -7,6 +7,8 @@ import com.google.common.collect.TreeRangeMap;
 import java.util.Collection;
 import java.util.List;
 import static java.util.stream.Collectors.toList;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
@@ -24,15 +26,19 @@ public class GraphTrack implements Track {
     private final String trackLabel;
     private List<CompositionGlyph> glyphs;
     private RangeMap<Double, CompositionGlyph> intervalMap;
+    private BooleanProperty isHeightLocked;
+    private double lockedHeight;
 
     //average height
     private double modelHeight;
     private final DataSet dataSet;
 
     public GraphTrack(String trackLabel, DataSet dataSet) {
-        this.dataSet=dataSet;
+        this.isHeightLocked = new SimpleBooleanProperty(false);
+        this.dataSet = dataSet;
         this.trackLabel = trackLabel;
         this.modelHeight = 10;
+        this.lockedHeight = 200;
         glyphs = Lists.newArrayList();
         intervalMap = TreeRangeMap.create();
     }
@@ -44,8 +50,8 @@ public class GraphTrack implements Track {
         //NOTE: Rounding issues prevent us from using translation to take care of view offsets in the x coordinate system
         // everything works fine until x coordinate get large, and then the larger numbers don't render correctly on the canvas
         //i.e. we can't do this gc.translate(-view.getBoundingRect().getMinX(), trackPositionOffset);
-        gc.translate(0, trackPositionOffset);
-        glyphs.forEach(child -> child.getChildren().forEach(c -> c.draw(gc, view, view.getBoundingRect())));
+//        gc.translate(0, trackPositionOffset);
+        glyphs.forEach(child -> child.getChildren().forEach(c -> c.draw(gc, view, view.modelCoordRect())));
         gc.restore();
     }
 
@@ -88,7 +94,6 @@ public class GraphTrack implements Track {
         this.glyphs.addAll(glyphs);
         glyphs.stream().forEach(glyph -> intervalMap.put(Range.closed(glyph.getBoundingRect().getMinX(), glyph.getBoundingRect().getMaxX()), glyph));
         modelHeight = glyphs.stream().mapToDouble(glyph -> glyph.getBoundingRect().getMaxY()).average().orElse(10);
-
     }
 
     @Override
@@ -106,4 +111,15 @@ public class GraphTrack implements Track {
     public DataSet getDataSet() {
         return dataSet;
     }
+
+    @Override
+    public BooleanProperty isHeightLocked() {
+        return isHeightLocked;
+    }
+
+    @Override
+    public boolean allowLockToggle() {
+        return false;
+    }
+
 }

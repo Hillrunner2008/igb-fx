@@ -9,8 +9,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import org.controlsfx.control.action.Action;
 import org.lorainelab.igb.visualization.widget.LabelPane;
-import org.lorainelab.igb.visualization.widget.ZoomSliderWidget;
 
 /**
  *
@@ -24,7 +24,6 @@ public class MainViewerSplitPane extends SplitPane {
     private VBox rightSideVbox;
     private VerticalZoomSlider verticalZoomSlider;
     private HorizontalPlusMinusSlider horizontalPlusMinusSlider;
-    private ZoomSliderWidget zoomSliderWidget;
     private VerticalScrollBar verticalScrollBar;
     private LabelPane labelPane;
     private StackPane canvasStackPane;
@@ -32,10 +31,15 @@ public class MainViewerSplitPane extends SplitPane {
     private OverlayRegion overlayRegion;
 
     public MainViewerSplitPane() {
+            Action action;
         canvasStackPane = new StackPane();
-        setDividerPositions(0.1);
+        setDividerPositions(0.25);
         leftSide = new HBox();
+        leftSide.setMinWidth(50);
+        leftSide.setMaxWidth(600);
+        SplitPane.setResizableWithParent(leftSide, Boolean.FALSE);
         rightSide = new HBox();
+        rightSide.setMinWidth(350);
         rightSideVbox = new VBox();
         getItems().add(leftSide);
         getItems().add(rightSide);
@@ -53,7 +57,6 @@ public class MainViewerSplitPane extends SplitPane {
             leftSide.getChildren().add(verticalZoomSlider);
             leftSide.getChildren().add(labelPane);
             rightSideVbox.getChildren().add(canvasStackPane);
-            rightSideVbox.getChildren().add(zoomSliderWidget);
             rightSideVbox.getChildren().add(horizontalPlusMinusSlider);
             rightSide.getChildren().add(verticalScrollBar);
 
@@ -78,11 +81,6 @@ public class MainViewerSplitPane extends SplitPane {
     @Reference
     public void setHorizontalPlusMinusSlider(HorizontalPlusMinusSlider horizontalPlusMinusSlider) {
         this.horizontalPlusMinusSlider = horizontalPlusMinusSlider;
-    }
-
-    @Reference
-    public void setZoomSliderWidget(ZoomSliderWidget zoomSliderWidget) {
-        this.zoomSliderWidget = zoomSliderWidget;
     }
 
     @Reference

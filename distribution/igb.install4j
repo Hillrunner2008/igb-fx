@@ -13,8 +13,8 @@
     </searchSequence>
     <variables>
       <variable name="projectHomeDirectory" value="/home/jeckstei/Projects/igb/code/igb-fx/" description="This variable should point to the source control root of the IGB project" category="" />
-      <variable name="igbVersion" value="8.5.0" description="" category="" />
-      <variable name="codeBaseUrl" value="http://eos.transvar.org/igb/" description="A variable holding the url location of the lateset IGB installers and update information" category="" />
+      <variable name="igbVersion" value="0.0.1" description="" category="" />
+      <variable name="codeBaseUrl" value="http://eos.transvar.org/igbfx/" description="A variable holding the url location of the lateset IGB installers and update information" category="" />
     </variables>
     <mergedProjects />
     <codeSigning macEnabled="true" macPkcs12File="/opt/igb/developerID_application_igb.p12" windowsEnabled="true" windowsKeySource="pkcs12" windowsPvkFile="" windowsSpcFile="" windowsPkcs12File="/opt/igb/windows_keystore.pfx" />
@@ -61,7 +61,7 @@
       <executable name="IGBfx" type="1" iconSet="true" iconFile="" executableDir="" redirectStderr="true" stderrFile="error.log" stderrMode="overwrite" redirectStdout="false" stdoutFile="output.log" stdoutMode="overwrite" failOnStderrOutput="true" executableMode="1" changeWorkingDirectory="true" workingDirectory="." singleInstance="false" serviceStartType="2" serviceDependencies="" serviceDescription="" jreLocation="" executionLevel="asInvoker" checkConsoleParameter="false" globalSingleInstance="false" singleInstanceActivate="true" dpiAware="false">
         <versionInfo include="false" fileVersion="" fileDescription="" legalCopyright="" internalName="" productName="" />
       </executable>
-      <splashScreen show="true" width="0" height="0" bitmapFile="./branding/igb_splash2.png" windowsNative="false" textOverlay="false">
+      <splashScreen show="false" width="0" height="0" bitmapFile="./branding/igb_splash2.png" windowsNative="false" textOverlay="false">
         <text>
           <statusLine x="20" y="20" text="" fontSize="8" fontColor="0,0,0" bold="false" />
           <versionLine x="20" y="40" text="version ${compiler:sys.version}" fontSize="8" fontColor="0,0,0" bold="false" />
@@ -99,7 +99,7 @@
       <executable name="IGBfx" type="1" iconSet="true" iconFile="./branding/igb_128.ico" executableDir="" redirectStderr="true" stderrFile="error.log" stderrMode="overwrite" redirectStdout="false" stdoutFile="output.log" stdoutMode="overwrite" failOnStderrOutput="true" executableMode="1" changeWorkingDirectory="true" workingDirectory="." singleInstance="false" serviceStartType="2" serviceDependencies="" serviceDescription="" jreLocation="" executionLevel="asInvoker" checkConsoleParameter="false" globalSingleInstance="false" singleInstanceActivate="true" dpiAware="false">
         <versionInfo include="false" fileVersion="" fileDescription="" legalCopyright="" internalName="" productName="" />
       </executable>
-      <splashScreen show="true" width="0" height="0" bitmapFile="./branding/igb_splash2.png" windowsNative="false" textOverlay="false">
+      <splashScreen show="false" width="0" height="0" bitmapFile="./branding/igb_splash2.png" windowsNative="false" textOverlay="false">
         <text>
           <statusLine x="20" y="20" text="" fontSize="8" fontColor="0,0,0" bold="false" />
           <versionLine x="20" y="40" text="version ${compiler:sys.version}" fontSize="8" fontColor="0,0,0" bold="false" />
@@ -137,7 +137,7 @@
       <executable name="IGBfx" type="1" iconSet="true" iconFile="./branding/igb_128.ico" executableDir="" redirectStderr="true" stderrFile="error.log" stderrMode="overwrite" redirectStdout="true" stdoutFile="output.log" stdoutMode="overwrite" failOnStderrOutput="true" executableMode="1" changeWorkingDirectory="true" workingDirectory="." singleInstance="false" serviceStartType="2" serviceDependencies="" serviceDescription="" jreLocation="" executionLevel="asInvoker" checkConsoleParameter="false" globalSingleInstance="false" singleInstanceActivate="true" dpiAware="false">
         <versionInfo include="false" fileVersion="" fileDescription="" legalCopyright="" internalName="" productName="" />
       </executable>
-      <splashScreen show="true" width="0" height="0" bitmapFile="./branding/igb_splash2.png" windowsNative="false" textOverlay="false">
+      <splashScreen show="false" width="0" height="0" bitmapFile="./branding/igb_splash2.png" windowsNative="false" textOverlay="false">
         <text>
           <statusLine x="20" y="20" text="" fontSize="8" fontColor="0,0,0" bold="false" />
           <versionLine x="20" y="40" text="version ${compiler:sys.version}" fontSize="8" fontColor="0,0,0" bold="false" />
@@ -1776,7 +1776,7 @@
     </macosFolder>
   </mediaSets>
   <buildIds buildAll="false">
-    <mediaSet refId="25" />
+    <mediaSet refId="552" />
   </buildIds>
-  <buildOptions verbose="true" faster="false" disableSigning="true" disableJreBundling="false" debug="false" />
+  <buildOptions verbose="true" faster="false" disableSigning="false" disableJreBundling="false" debug="false" />
 </install4j>

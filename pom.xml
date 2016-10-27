@@ -47,6 +47,32 @@
                 <version>1.3.2</version>
             </dependency>
             <dependency>
+                <groupId>com.github.kevinsawicki</groupId>
+                <artifactId>http-request</artifactId>
+                <version>6.0</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-csv</artifactId>
+                <version>1.4</version>
+            </dependency> 
+            <dependency>
                 <groupId>biz.aQute.bnd</groupId>
                 <artifactId>bndlib</artifactId>
                 <version>2.4.0</version>
@@ -119,6 +145,12 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
+                <groupId>org.hamcrest</groupId>
+                <artifactId>hamcrest-core</artifactId>
+                <version>1.3</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
                 <version>1.10</version>
@@ -158,6 +190,28 @@
                 <artifactId>mockito-all</artifactId>
                 <version>1.10.19</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.testfx</groupId>
+                <artifactId>testfx-core</artifactId>
+                <version>4.0.4-alpha</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.testfx</groupId>
+                <artifactId>testfx-junit</artifactId>
+                <version>4.0.4-alpha</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.vividsolutions</groupId>
+                <artifactId>jts</artifactId>
+                <version>1.13</version>
+            </dependency>
+            <dependency>
+                <groupId>colt</groupId>
+                <artifactId>colt</artifactId>
+                <version>1.2.0</version>
             </dependency>
             <!--modules-->
             <dependency>
@@ -210,6 +264,12 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.datasource.http</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>org.lorainelab.igb.filehandler.api</artifactId>
                 <version>${project.version}</version>
                 <scope>provided</scope>
@@ -240,7 +300,19 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.synonymservice</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>org.lorainelab.igb.menu.openfile</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.menu.loadurl</artifactId>
                 <version>${project.version}</version>
                 <scope>provided</scope>
             </dependency>
@@ -259,6 +331,12 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>org.lorainelab.igb.notifications.api</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.view.api</artifactId>
                 <version>${project.version}</version>
                 <scope>provided</scope>
             </dependency>
@@ -321,6 +399,28 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
     <build>
         <pluginManagement>
             <plugins>
@@ -339,6 +439,25 @@
                     <artifactId>maven-bundle-plugin</artifactId>
                     <version>3.0.1</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.18.1</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.apache.maven.surefire</groupId>
+                            <artifactId>surefire-junit47</artifactId>
+                            <version>2.18.1</version>
+                        </dependency>
+                    </dependencies>
+                    <configuration>
+                        <!--this is great for mouse debugging, but breaks drag drop functionality-->
+                        <!--                        <argLine>-Dglass.disableGrab=true</argLine>--> 
+                        <excludes>
+                            <exclude>**/*TestFx.java</exclude>
+                        </excludes>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
@@ -349,19 +468,22 @@
         <module>menus/org.lorainelab.igb.menu.api</module>
         <module>toolbar/org.lorainelab.igb.toolbar.api</module>
         <module>tabs/org.lorainelab.igb.tabs.api</module>
+        <module>org.lorainelab.igb.view.api</module>
         <module>org.lorainelab.igb.notifications.api</module>
         <module>cache/org.lorainelab.igb.cache.api</module>
         
         <module>org.lorainelab.igb.main</module>
-        
         <module>org.lorainelab.igb.preferences.otheroptions</module>
+        <module>org.lorainelab.igb.synonymservice</module>
         <module>menus/org.lorainelab.igb.menu.openfile</module>
+        <module>menus/org.lorainelab.igb.menu.loadurl</module>
         <module>menus/org.lorainelab.igb.menu.about</module>
         <module>menus/org.lorainelab.igb.menu.customgenome</module>
         <module>menus/org.lorainelab.igb.menu.recentfile</module>
         <module>org.lorainelab.igb.data.model</module>
         
         <module>datasources/org.lorainelab.igb.datasource.local</module>
+        <module>datasources/org.lorainelab.igb.datasource.http</module>
         
         <module>org.lorainelab.igb.selections</module>
         <module>org.lorainelab.igb.filehandler.registry</module>
@@ -387,10 +509,12 @@
         <module>preferences/org.lorainelab.igb.preferencemanager.api</module>
         <module>org.lorainelab.igb.datasetloadingservice</module>
         <module>org.lorainelab.igb.kar</module>
+    
     </modules>
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <karaf.version>4.0.5</karaf.version>
+        <jackson.version>2.6.3</jackson.version>
     </properties>
 </project>

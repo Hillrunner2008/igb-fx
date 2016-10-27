@@ -3,20 +3,24 @@ package org.lorainelab.igb.visualization.widget;
 import com.google.common.collect.Range;
 import java.util.Optional;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.beans.value.ObservableValue;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Tooltip;
-import javafx.scene.paint.Color;
 import org.apache.commons.lang3.text.WordUtils;
 import org.lorainelab.igb.data.model.CanvasContext;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.Track;
 import org.lorainelab.igb.data.model.View;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
+import static org.lorainelab.igb.data.model.util.Palette.LOADED_REGION_BG;
 import org.lorainelab.igb.visualization.event.MouseHoverEvent;
 import org.lorainelab.igb.visualization.model.CanvasModel;
 import org.lorainelab.igb.visualization.model.TrackLabel;
@@ -30,6 +34,7 @@ import org.slf4j.LoggerFactory;
 public class ZoomableTrackRenderer implements TrackRenderer {
 
     private static final Logger LOG = LoggerFactory.getLogger(ZoomableTrackRenderer.class);
+
     private TrackLabel trackLabel;
     final int modelWidth;
     final Track track;
@@ -40,25 +45,24 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     private int weight;
     private final Chromosome chromosome;
     private ReadOnlyBooleanProperty isHeightLocked;
-    private double lockedHeight;
+    private DoubleProperty stretchDelta;
+    private DoubleProperty activeStretchDelta;
+    private SimpleBooleanProperty hideLockToggle;
 
     public ZoomableTrackRenderer(Canvas canvas, Track track, Chromosome chromosome) {
         this.weight = 0;
         this.track = track;
         this.chromosome = chromosome;
         this.modelWidth = chromosome.getLength();
-        canvasContext = new CanvasContext(canvas, track.getModelHeight(), 0);
+        hideLockToggle = new SimpleBooleanProperty(track.allowLockToggle());
+        stretchDelta = new SimpleDoubleProperty(0);
+        activeStretchDelta = new SimpleDoubleProperty(0);
+        canvasContext = new CanvasContext(canvas, DEFAULT_HEIGHT, 0);
         view = new View(new Rectangle2D(0, 0, modelWidth, track.getModelHeight()), canvasContext, chromosome, track.isNegative());
-        trackLabel = new TrackLabel(this, track.getTrackLabel(), false);
+        trackLabel = new TrackLabel(this, track.getTrackLabel(), track.isHeightLocked());
         isHeightLocked = trackLabel.getIsHeightLocked();
         gc = canvas.getGraphicsContext2D();
         tooltip = new Tooltip();
-        lockedHeight = track.getModelHeight();
-        isHeightLocked.addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-            if (newValue) {
-                lockedHeight = canvasContext.getBoundingRect().getHeight();
-            }
-        });
     }
 
     private void processLastMouseClickedPosition(CanvasModel canvasModel) {
@@ -85,7 +89,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
             final double visibleVirtualCoordinatesY = canvasContext.getBoundingRect().getHeight() / view.getYfactor();
             double xOffset = Math.round((scrollX / 100) * (modelWidth - visibleVirtualCoordinatesX));
             double yOffset = canvasContext.getRelativeTrackOffset() / view.getYfactor();
-            view.setBoundingRect(new Rectangle2D(xOffset, yOffset, visibleVirtualCoordinatesX, visibleVirtualCoordinatesY));
+            view.setModelCoordRect(new Rectangle2D(xOffset, yOffset, visibleVirtualCoordinatesX, visibleVirtualCoordinatesY));
             if (canvasContext.isVisible()) {
                 draw(canvasModel);
             }
@@ -94,17 +98,10 @@ public class ZoomableTrackRenderer implements TrackRenderer {
 
     private void scaleCanvas(CanvasModel canvasModel) {
         double xFactor = canvasModel.getxFactor().get();
-//        double yFactor = canvasModel.getyFactor().get();
         view.setXfactor(xFactor);
-//        view.setYfactor(yFactor);
         if (canvasContext.isVisible()) {
-            if (isHeightLocked()) {
-                double scaleToY = lockedHeight / track.getModelHeight();
-                view.setYfactor(scaleToY);
-            } else {
-                double scaleToY = canvasContext.getTrackHeight() / track.getModelHeight();
-                view.setYfactor(scaleToY);
-            }
+            double scaleToY = canvasContext.getTrackHeight() / track.getModelHeight();
+            view.setYfactor(scaleToY);
             updateView(canvasModel);
         }
     }
@@ -112,7 +109,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     void draw(CanvasModel canvasModel) {
         if (Platform.isFxApplicationThread()) {
             gc.save();
-//            highlightLoadedRegions();
+            highlightLoadedRegions();
             gc.scale(view.getXfactor(), view.getYfactor());
             track.draw(gc, view, canvasContext);
             gc.restore();
@@ -123,14 +120,18 @@ public class ZoomableTrackRenderer implements TrackRenderer {
 
     private void highlightLoadedRegions() {
         gc.save();
-        gc.setFill(Color.WHITE);
+        gc.scale(view.getXfactor(), 1);
+        gc.setFill(LOADED_REGION_BG);
+
         track.getDataSet().getLoadedRegions(chromosome.getName()).asRanges().forEach(range -> {
-            if (range.isConnected(Range.closed(view.getXrange().lowerEndpoint().intValue(), view.getXrange().upperEndpoint().intValue()))) {
-                double minX = range.lowerEndpoint() - view.getXrange().lowerEndpoint();
-                gc.fillRect(
-                        minX,
+            final Range<Integer> viewXRange = Range.closed(view.getXrange().lowerEndpoint().intValue(), view.getXrange().upperEndpoint().intValue());
+            if (range.isConnected(viewXRange)) {
+                Range<Integer> intersection = range.intersection(range);
+                double minX = range.lowerEndpoint();
+                final Bounds boundsInParent = getTrackLabel().getContent().getBoundsInParent();
+                gc.fillRect(intersection.lowerEndpoint() - view.getXrange().lowerEndpoint(),
                         canvasContext.getBoundingRect().getMinY(),
-                        range.upperEndpoint() - range.lowerEndpoint(),
+                        intersection.upperEndpoint() - intersection.lowerEndpoint(),
                         canvasContext.getBoundingRect().getHeight()
                 );
             }
@@ -187,27 +188,10 @@ public class ZoomableTrackRenderer implements TrackRenderer {
 
     private Rectangle2D canvasToViewCoordinates(Point2D clickLocation) {
         double x = Math.floor(clickLocation.getX() / view.getXfactor());
-        double y = Math.floor((clickLocation.getY() - canvasContext.getBoundingRect().getMinY()) / view.getYfactor());
-        double offsetX = view.getBoundingRect().getMinX();
-        double offsetY = view.getBoundingRect().getMinY();
+        double y = Math.floor((clickLocation.getY() - canvasContext.getBoundingRect().getMinY()));
+        double offsetX = view.modelCoordRect().getMinX();
         x += offsetX;
-        y += offsetY;
         Rectangle2D mouseEventBoundingBox = new Rectangle2D(x, y, 1, 1);
-        return mouseEventBoundingBox;
-    }
-
-    private Rectangle2D canvasToViewCoordinates(Rectangle2D localSelectionRectangle) {
-        double minX = Math.floor(localSelectionRectangle.getMinX() / view.getXfactor());
-        double maxX = Math.floor(localSelectionRectangle.getMaxX() / view.getXfactor());
-        double minY = Math.floor((localSelectionRectangle.getMinY() - canvasContext.getBoundingRect().getMinY()) / view.getYfactor());
-        double maxY = Math.floor((localSelectionRectangle.getMaxY() - canvasContext.getBoundingRect().getMinY()) / view.getYfactor());
-        double offsetX = view.getBoundingRect().getMinX();
-        double offsetY = view.getBoundingRect().getMinY();
-        minX += offsetX;
-        maxX += offsetX;
-        minY += offsetY;
-        maxY += offsetY;
-        Rectangle2D mouseEventBoundingBox = new Rectangle2D(minX, minY, maxX - minX, maxY - minY);
         return mouseEventBoundingBox;
     }
 
@@ -251,8 +235,9 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         return trackLabel;
     }
 
-    public Track getTrack() {
-        return track;
+    @Override
+    public Optional<Track> getTrack() {
+        return Optional.of(track);
     }
 
     public boolean isContained(Point2D point) {
@@ -265,11 +250,22 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     }
 
     @Override
-    public boolean isHeightLocked() {
-        return trackLabel.getIsHeightLocked().get();
+    public ReadOnlyBooleanProperty heightLocked() {
+        return trackLabel.getIsHeightLocked();
     }
 
-    public double getLockedHeight() {
-        return lockedHeight;
+    @Override
+    public DoubleProperty stretchDelta() {
+        return stretchDelta;
+    }
+
+    @Override
+    public DoubleProperty activeStretchDelta() {
+        return activeStretchDelta;
+    }
+
+    @Override
+    public BooleanProperty hideLockToggle() {
+        return hideLockToggle;
     }
 }

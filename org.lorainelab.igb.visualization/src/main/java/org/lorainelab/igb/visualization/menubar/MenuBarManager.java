@@ -9,7 +9,6 @@ import com.google.common.collect.Ordering;
 import com.google.common.collect.SortedSetMultimap;
 import com.google.common.collect.TreeMultimap;
 import java.util.EnumMap;
-import java.util.concurrent.ExecutionException;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -17,7 +16,7 @@ import javafx.scene.control.SeparatorMenuItem;
 import org.lorainelab.igb.menu.api.MenuBarEntryProvider;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
 import org.lorainelab.igb.menu.api.model.WeightedMenuEntry;
-import static org.lorainelab.igb.visualization.util.FXUtilities.runAndWait;
+import static org.lorainelab.igb.utils.FXUtilities.runAndWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,7 +92,6 @@ public class MenuBarManager {
     private void initFileMenu() {
         fileMenu = new Menu("File");
         fileMenu.setMnemonicParsing(true);
-        fileMenuEntries.put(5, new MenuItem("Load Url"));
         fileMenuEntries.put(10, new SeparatorMenuItem());
         fileMenuEntries.put(70, getExitMenuItem());
     }
@@ -211,19 +209,15 @@ public class MenuBarManager {
     }
 
     private synchronized void rebuildMenus() {
-        try {
-            runAndWait(() -> {
-                rebuildFileMenu();
-                rebuildEditMenu();
-                rebuildViewMenu();
-                rebuildToolsMenu();
-                rebuildHelpMenu();
-                rebuildGenomeMenu();
-                rebuildParentMenus();
-            });
-        } catch (InterruptedException | ExecutionException ex) {
-            LOG.error(ex.getMessage(), ex);
-        }
+        runAndWait(() -> {
+            rebuildFileMenu();
+            rebuildEditMenu();
+            rebuildViewMenu();
+            rebuildToolsMenu();
+            rebuildHelpMenu();
+            rebuildGenomeMenu();
+            rebuildParentMenus();
+        });
     }
 
     private void rebuildParentMenus() {

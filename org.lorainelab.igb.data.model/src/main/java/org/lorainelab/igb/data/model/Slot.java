@@ -71,24 +71,18 @@ public class Slot {
         return glyphs.asMapOfRanges().values();
     }
 
-    public Rectangle2D getSlotBoundingViewRect(Rectangle2D viewBoundingRect, boolean isNegative) {
+    public Rectangle2D getSlotBoundingRect(Rectangle2D viewBoundingRect, boolean isNegative) {
         Range<Double> viewYRange = Range.closed(viewBoundingRect.getMinY(), viewBoundingRect.getMaxY());
-        final Range<Double> slotYrange;
-        if (isNegative) {
-            slotYrange = Range.closed(slotYoffset, SLOT_HEIGHT + slotYoffset);
-        } else {
-            slotYrange = Range.closed(slotYoffset, SLOT_HEIGHT + slotYoffset);
-        }
+        final Range<Double> slotYrange = Range.closed(slotYoffset, SLOT_HEIGHT + slotYoffset);
         if (slotYrange.isConnected(viewYRange)) {
-            Range<Double> intersection = slotYrange.intersection(viewYRange);
-            return new Rectangle2D(viewBoundingRect.getMinX(), intersection.lowerEndpoint(), viewBoundingRect.getWidth(), intersection.upperEndpoint() - intersection.lowerEndpoint());
+            return new Rectangle2D(viewBoundingRect.getMinX(), slotYoffset, viewBoundingRect.getWidth(), SLOT_HEIGHT);
         } else {
             return Rectangle2D.EMPTY;
         }
     }
 
     private boolean isSlotInView(View view) {
-        Rectangle2D viewBoundingRect = view.getBoundingRect();
+        Rectangle2D viewBoundingRect = view.modelCoordRect();
         Range<Double> viewYRange = Range.closed(viewBoundingRect.getMinY(), viewBoundingRect.getMaxY());
         return Range.closed(slotYoffset, SLOT_HEIGHT + slotYoffset).isConnected(viewYRange);
     }

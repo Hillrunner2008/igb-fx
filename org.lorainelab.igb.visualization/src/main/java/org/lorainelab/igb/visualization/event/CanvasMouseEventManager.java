@@ -5,8 +5,6 @@ import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import java.time.Duration;
 import java.util.Optional;
-import java.util.Timer;
-import java.util.TimerTask;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
@@ -123,37 +121,27 @@ public class CanvasMouseEventManager {
     }
 
     private void processMouseClicked(MouseEvent event) {
+        Point2D mousePoint = getPoint2dFromMouseEvent(event);
+        if (event.getClickCount() >= 2) {
+            selectionInfoService.getSelectedGlyphs().clear();
+            getTrackRendererContainingPoint(mousePoint).ifPresent(tr -> {
+
+                tr.getTrack().orElseThrow(() -> new NullPointerException("Track reference null")).getSelectedGlyphs().stream()
+                        .findFirst().ifPresent(glyphToJumpZoom -> {
+                            jumpZoom(glyphToJumpZoom.getBoundingRect(), tr, event);
+                            selectionInfoService.getSelectedGlyphs().add(glyphToJumpZoom);
+                        });
+            });
+        } else {
+            selectionInfoService.getSelectedGlyphs().clear();
+            getTrackRendererContainingPoint(mousePoint).ifPresent(tr -> {
+                selectionInfoService.getSelectedGlyphs().addAll(
+                        tr.getTrack().orElseThrow(() -> new NullPointerException("Track reference null")).getSelectedGlyphs()
+                );
+            });
+        }
+        updateZoomStripe(event);
         canvasModel.forceRefresh();
-        //wait for refresh to complete
-        Timer timer = new Timer();
-        timer.schedule(
-                new TimerTask() {
-
-            @Override
-            public void run() {
-                Point2D mousePoint = getPoint2dFromMouseEvent(event);
-                if (event.getClickCount() >= 2) {
-                    selectionInfoService.getSelectedGlyphs().clear();
-                    getTrackRendererContainingPoint(mousePoint).ifPresent(tr -> {
-
-                        tr.getTrack().getSelectedGlyphs().stream()
-                                .findFirst().ifPresent(glyphToJumpZoom -> {
-                                    jumpZoom(glyphToJumpZoom.getBoundingRect(), tr, event);
-                                    selectionInfoService.getSelectedGlyphs().add(glyphToJumpZoom);
-                                });
-                    });
-                } else {
-                    selectionInfoService.getSelectedGlyphs().clear();
-                    getTrackRendererContainingPoint(mousePoint).ifPresent(tr -> {
-                        selectionInfoService.getSelectedGlyphs().addAll(
-                                tr.getTrack().getSelectedGlyphs()
-                        );
-                    });
-                }
-                updateZoomStripe(event);
-            }
-        }, 200);
-
     }
 
     private Optional<ZoomableTrackRenderer> getTrackRendererContainingPoint(Point2D mousePoint) {
@@ -173,7 +161,7 @@ public class CanvasMouseEventManager {
                     double xfactor = canvasModel.getxFactor().doubleValue();
                     double lastMouseDragX = lastMouseDragLocation.getX() / xfactor;
                     double lastMouseClickX = dragStartPoint.getX() / xfactor;
-                    double minX = tr.getView().getBoundingRect().getMinX();
+                    double minX = tr.getView().modelCoordRect().getMinX();
                     double x1 = minX + lastMouseClickX;
                     double x2 = minX + lastMouseDragX;
                     if (x1 > x2) {
@@ -257,8 +245,8 @@ public class CanvasMouseEventManager {
     private void jumpZoom(Rectangle2D focusRect, TrackRenderer eventLocationReference, MouseEvent event) {
         View view = eventLocationReference.getView();
         double modelWidth = canvasModel.getModelWidth().doubleValue();
-        double minX = Math.max(focusRect.getMinX(), view.getBoundingRect().getMinX());
-        double maxX = Math.min(focusRect.getMaxX(), view.getBoundingRect().getMaxX());
+        double minX = Math.max(focusRect.getMinX(), view.modelCoordRect().getMinX());
+        double maxX = Math.min(focusRect.getMaxX(), view.modelCoordRect().getMaxX());
         double width = maxX - minX;
         if (width < MAX_ZOOM_MODEL_COORDINATES_X) {
             width = Math.max(width * 1.1, MAX_ZOOM_MODEL_COORDINATES_X);

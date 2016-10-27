@@ -11,7 +11,7 @@ public class CanvasUtils {
 
     public static double exponentialScaleTransform(double canvasWidth, double modelWidth, double value) {
         double minScaleX = canvasWidth / modelWidth;
-        double maxScaleX = canvasWidth / MAX_ZOOM_MODEL_COORDINATES_X;
+        double maxScaleX = 20;
         ExponentialTransform transform = new ExponentialTransform(minScaleX, maxScaleX);
         return transform.transform(value);
     }

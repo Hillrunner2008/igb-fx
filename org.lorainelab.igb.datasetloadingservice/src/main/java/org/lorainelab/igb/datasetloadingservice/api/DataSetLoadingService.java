@@ -14,4 +14,5 @@ import java.io.File;
 public interface DataSetLoadingService {
     void openDataSet();
     void openDataSet(File file);
+    void openHttpDataSet(String url);
 }
