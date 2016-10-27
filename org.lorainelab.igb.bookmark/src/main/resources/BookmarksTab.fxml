@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane fx:id="tabContent" minHeight="0.0" minWidth="0.0" prefHeight="502.0" prefWidth="311.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2">
+  <children>
+    <VBox prefHeight="481.0" prefWidth="311.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <children>
+        <SplitPane dividerPositions="0.496" focusTraversable="true" orientation="VERTICAL" prefHeight="499.0" prefWidth="310.0" VBox.vgrow="ALWAYS">
+          <items>
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+              <children>
+                <HBox prefHeight="100.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <children>
+                    <VBox maxWidth="32.0" minWidth="32.0" prefHeight="245.0" prefWidth="32.0" HBox.hgrow="NEVER">
+                      <children>
+                        <Button id="imageDoBookmark" fx:id="doBookmark" mnemonicParsing="false" prefWidth="57.0" text="" />
+                        <Button fx:id="addFolder" mnemonicParsing="false" prefWidth="32.0" text="" />
+                        <Button fx:id="deleteBookmark" mnemonicParsing="false" prefWidth="32.0" text="" />
+                      </children>
+                    </VBox>
+                    <TreeView fx:id="bookMarkTree" prefHeight="245.0" prefWidth="309.0" style="" HBox.hgrow="ALWAYS" />
+                  </children>
+                </HBox>
+              </children>
+            </AnchorPane>
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+              <children>
+                <TabPane prefHeight="386.0" prefWidth="311.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <tabs>
+                    <Tab text="Notes">
+                      <content>
+                        <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                          <children>
+                            <TextArea fx:id="bookmarkDescTextArea" prefHeight="132.0" prefWidth="299.0" wrapText="true" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="76.0" />
+                            <Label layoutX="13.0" layoutY="60.0" text="Notes" />
+                            <Label layoutX="13.0" layoutY="14.0" text="Name" />
+                            <TextField fx:id="bookmarkNameTextField" layoutY="30.0" prefWidth="283.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" />
+                          </children>
+                        </AnchorPane>
+                      </content>
+                    </Tab>
+                    <Tab text="Location">
+                      <content>
+                        <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                          <children>
+                            <TableView id="bookMarkDetailsTable" fx:id="bookmarkInfoTable" prefHeight="258.0" prefWidth="-1.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                              <columns>
+                                <TableColumn maxWidth="1.7976931348623157E308" minWidth="0.0" prefWidth="92.0" text="Parameter" fx:id="key" />
+                                <TableColumn maxWidth="1.7976931348623157E308" minWidth="0.0" prefWidth="209.0" text="Value" fx:id="value" />
+                              </columns>
+                            </TableView>
+                          </children>
+                        </AnchorPane>
+                      </content>
+                    </Tab>
+                  </tabs>
+                </TabPane>
+              </children>
+            </AnchorPane>
+          </items>
+        </SplitPane>
+      </children>
+    </VBox>
+  </children>
+</AnchorPane>
