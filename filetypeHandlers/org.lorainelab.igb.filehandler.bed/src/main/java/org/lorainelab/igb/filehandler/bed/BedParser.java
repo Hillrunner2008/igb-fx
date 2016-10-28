@@ -156,7 +156,7 @@ public class BedParser implements FileTypeHandler {
 
     @Override
     public Set<String> getSupportedExtensions() {
-        return Sets.newHashSet("bed");
+        return Sets.newHashSet("bed", "bed.gz");
     }
 
     private Set<CompositionGlyph> convertBedFeaturesToCompositionGlyphs(Set<BedFeature> annotations) {

@@ -8,10 +8,7 @@ package org.lorainelab.igb.datasetloadingImpl;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import com.google.common.io.Files;
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -53,11 +50,11 @@ public class DataSetLoadingServiceImpl implements DataSetLoadingService {
     public void openDataSet() {
         openFileAction();
     }
-    
+
     @Override
-    public void openHttpDataSet(String url) {    
+    public void openHttpDataSet(String url) {
         fileTypeHandlerRegistry.getFileTypeHandlers().stream().filter(f -> {
-            return f.getSupportedExtensions().contains(Files.getFileExtension(url));
+            return f.getSupportedExtensions().contains(getFileExtension(url));
         }).findFirst().ifPresent(fileTypeHandler -> {
             selectionInfoService.getSelectedGenomeVersion().get().ifPresent(gv -> {
                 DataSourceReference dataSourceReference = new DataSourceReference(url, httpDataSource);
@@ -65,13 +62,13 @@ public class DataSetLoadingServiceImpl implements DataSetLoadingService {
                 indexDataSetForSearch(fileTypeHandler, dataSourceReference);
             });
         });
-    
+
     }
-    
+
     @Override
     public void openDataSet(File file) {
         fileTypeHandlerRegistry.getFileTypeHandlers().stream().filter(f -> {
-            return f.getSupportedExtensions().contains(Files.getFileExtension(file.getPath()));
+            return f.getSupportedExtensions().contains(getFileExtension(file.getPath()));
         }).findFirst().ifPresent(fileTypeHandler -> {
             selectionInfoService.getSelectedGenomeVersion().get().ifPresent(gv -> {
                 //recentFilesRegistry.getRecentFiles().add(file.getPath());
@@ -88,7 +85,7 @@ public class DataSetLoadingServiceImpl implements DataSetLoadingService {
         Optional.ofNullable(fileChooser.showOpenMultipleDialog(null)).ifPresent(selectedFiles -> {
             selectedFiles.forEach(file -> {
                 fileTypeHandlerRegistry.getFileTypeHandlers().stream().filter(f -> {
-                    return f.getSupportedExtensions().contains(Files.getFileExtension(file.getPath()));
+                    return f.getSupportedExtensions().contains(getFileExtension(file.getPath()));
                 }).findFirst().ifPresent(fileTypeHandler -> {
                     selectionInfoService.getSelectedGenomeVersion().get().ifPresent(gv -> {
                         //recentFilesRegistry.getRecentFiles().add(file.getPath());
@@ -185,6 +182,15 @@ public class DataSetLoadingServiceImpl implements DataSetLoadingService {
     @Reference(optional = false)
     public void setRecentFilesRegistry(RecentFilesRegistry recentFilesRegistry) {
         this.recentFilesRegistry = recentFilesRegistry;
+    }
+
+    private String getFileExtension(String path) {
+        String fileExtension = Files.getFileExtension(path);
+        if (fileExtension.equalsIgnoreCase("gz")) {
+            return Files.getFileExtension(Files.getNameWithoutExtension(path));
+        } else {
+            return fileExtension;
+        }
     }
 
 }

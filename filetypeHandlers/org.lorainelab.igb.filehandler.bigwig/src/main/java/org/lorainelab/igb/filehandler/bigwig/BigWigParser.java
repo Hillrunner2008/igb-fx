@@ -42,7 +42,7 @@ public class BigWigParser implements FileTypeHandler {
 
     @Override
     public Set<String> getSupportedExtensions() {
-        return Sets.newHashSet("bw");
+        return Sets.newHashSet("bw", "bw.gz");
     }
 
     @Override
