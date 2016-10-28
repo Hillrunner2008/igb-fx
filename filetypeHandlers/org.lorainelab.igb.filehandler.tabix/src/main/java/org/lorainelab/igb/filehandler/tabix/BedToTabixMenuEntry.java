@@ -103,7 +103,7 @@ public class BedToTabixMenuEntry implements MenuBarEntryProvider {
                         BedToTabixWriter.sortedBedToBGzip(sortedBedFile, outputBedFile);
                         File bgZippedInputFile = new File(outputFileName);
                         File outputIndexFile = new File(outputFileName + STANDARD_INDEX_EXTENSION);
-                        BedToTabixWriter.writeIndex(bgZippedInputFile, outputIndexFile);
+                        BedToTabixWriter.writeIndex(sortedBedFile, outputIndexFile);
                     } catch (IOException ex) {
                         LOG.error(ex.getMessage(), ex);
                     }
