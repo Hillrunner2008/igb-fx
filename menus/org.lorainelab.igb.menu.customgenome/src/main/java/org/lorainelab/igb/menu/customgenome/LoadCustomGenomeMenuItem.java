@@ -14,6 +14,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
@@ -153,11 +155,19 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
                             genomeVersionRegistry.setSelectedGenomeVersion(customGenome);
                         } else {
                             Platform.runLater(() -> {
-                                Alert dlg = new Alert(AlertType.WARNING, "This sequence file is already mapped to the \n" + duplicate.get().getName().get() + "genome.");
+                                ButtonType switchBtn = new ButtonType("Switch");
+                                ButtonType cancelBtn = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
+                                Alert dlg = new Alert(AlertType.CONFIRMATION, "This sequence file is already mapped to the \n\"" + 
+                                        duplicate.get().getName().get() + "\" genome."+
+                                        "\n Choose Switch to load it");
                                 dlg.initModality(stage.getModality());
                                 dlg.initOwner(stage.getOwner());
                                 dlg.setTitle("Cannot add duplicate genome version");
-                                dlg.show();
+                                dlg.getButtonTypes().setAll(switchBtn, cancelBtn);
+                                Optional<ButtonType> result = dlg.showAndWait();
+                                if(result.get() == switchBtn){
+                                    genomeVersionRegistry.setSelectedGenomeVersion(duplicate.get());
+                                }
                             });
                         }
                     }
