@@ -3,7 +3,6 @@ package org.lorainelab.igb.data.model;
 import com.google.common.collect.Sets;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -21,35 +20,24 @@ public class GenomeVersion {
     private StringProperty name;
     private StringProperty speciesName;
     private StringProperty description;
-    private final UUID uuid;
+//    private final UUID uuid;
     private ReferenceSequenceProvider referenceSequenceProvider;
     private ObjectProperty<Optional<Chromosome>> selectedChromosomeProperty;
     private ObservableSet<DataSet> loadedDataSets;
 
     public GenomeVersion(String name, String speciesName, ReferenceSequenceProvider referenceSequenceProvider) {
-        this(name, speciesName, referenceSequenceProvider, null, null);
+        this(name, speciesName, referenceSequenceProvider, null);
     }
 
-    public GenomeVersion(String name, String speciesName, ReferenceSequenceProvider referenceSequenceProvider, UUID uuid) {
-        this(name, speciesName, referenceSequenceProvider, null, uuid);
-    }
-
-    public GenomeVersion(String name, String speciesName, ReferenceSequenceProvider referenceSequenceProvider, String description, UUID uuid) {
+    public GenomeVersion(String name, String speciesName, ReferenceSequenceProvider referenceSequenceProvider, String description) {
         this.name = new SimpleStringProperty(name);
         this.speciesName = new SimpleStringProperty(speciesName);
         this.description = new SimpleStringProperty(description);
-        this.referenceSequenceProvider = referenceSequenceProvider;
-        if (uuid == null) {
-            uuid = UUID.randomUUID();
-        }
-        this.uuid = uuid;
+        this.referenceSequenceProvider = referenceSequenceProvider;        
         selectedChromosomeProperty = new SimpleObjectProperty(Optional.empty());
         loadedDataSets = FXCollections.observableSet(Sets.newHashSet());
     }
 
-    public GenomeVersion(String name, String speciesName, ReferenceSequenceProvider referenceSequenceProvider, String description) {
-        this(name, speciesName, referenceSequenceProvider, null, null);
-    }
 
     public StringProperty getName() {
         return name;
@@ -59,9 +47,6 @@ public class GenomeVersion {
         this.name.set(name);
     }
 
-    public UUID getUuid() {
-        return uuid;
-    }
 
     public StringProperty getSpeciesName() {
         return speciesName;
@@ -93,7 +78,7 @@ public class GenomeVersion {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 31 * hash + Objects.hashCode(uuid);
+        hash = 67 * hash + Objects.hashCode(this.referenceSequenceProvider.getPath());
         return hash;
     }
 
@@ -109,16 +94,12 @@ public class GenomeVersion {
             return false;
         }
         final GenomeVersion other = (GenomeVersion) obj;
-        if (!Objects.equals(this.name, other.name)) {
-            return false;
-        }
-        if (!Objects.equals(this.speciesName, other.speciesName)) {
-            return false;
-        }
-        if (!Objects.equals(this.description, other.description)) {
+        if (!Objects.equals(this.referenceSequenceProvider.getPath(), other.referenceSequenceProvider.getPath())) {
             return false;
         }
         return true;
     }
+
+
 
 }
