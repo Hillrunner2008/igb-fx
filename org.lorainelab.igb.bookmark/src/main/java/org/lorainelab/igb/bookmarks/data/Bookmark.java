@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
+import javafx.scene.Node;
 import javafx.scene.image.ImageView;
 
 /**
@@ -22,7 +23,7 @@ public interface Bookmark {
     Optional<Map<String,String>> getDetails();
     StringProperty getDescription();
     void setDescription(String newDescription);
-    Optional<ImageView> getImageView();
+    Optional<Node> getImageView();
     
     Optional<ObservableList<Bookmark>> getChildren();
     void removeChild(Bookmark child);

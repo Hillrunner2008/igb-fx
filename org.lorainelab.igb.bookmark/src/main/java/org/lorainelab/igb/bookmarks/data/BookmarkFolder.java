@@ -5,6 +5,8 @@
  */
 package org.lorainelab.igb.bookmarks.data;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +16,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.Node;
 import javafx.scene.image.ImageView;
 
 /**
@@ -53,8 +56,8 @@ public class BookmarkFolder implements Bookmark {
     }
 
     @Override
-    public Optional<ImageView> getImageView() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public Optional<Node> getImageView() {
+        return Optional.of(new FontAwesomeIconView(FontAwesomeIcon.FOLDER));
     }
 
     @Override

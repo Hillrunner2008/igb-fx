@@ -5,6 +5,8 @@
  */
 package org.lorainelab.igb.bookmarks.data;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +15,7 @@ import java.util.Set;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
+import javafx.scene.Node;
 import javafx.scene.image.ImageView;
 
 /**
@@ -23,11 +26,10 @@ public class BookmarkData implements Bookmark {
 
     private StringProperty name;
     private Bookmark parent;
-    private Map<String,String> details;
+    private Map<String, String> details;
 
-    
     private StringProperty description;
-    
+
     public BookmarkData() {
         name = new SimpleStringProperty();
         description = new SimpleStringProperty();
@@ -37,7 +39,7 @@ public class BookmarkData implements Bookmark {
     public void setDetails(Map<String, String> details) {
         this.details = details;
     }
-    
+
     public BookmarkData(String name) {
         this();
         this.name.set(name);
@@ -53,10 +55,9 @@ public class BookmarkData implements Bookmark {
     }
 
     @Override
-    public Optional<ImageView> getImageView() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public Optional<Node> getImageView() {
+        return Optional.empty();
     }
-
 
     @Override
     public void removeChild(Bookmark bookmark) {
@@ -95,7 +96,7 @@ public class BookmarkData implements Bookmark {
 
     @Override
     public Optional<Map<String, String>> getDetails() {
-     return Optional.of(details);
+        return Optional.of(details);
     }
 
     @Override

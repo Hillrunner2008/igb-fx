@@ -87,8 +87,8 @@ public class BookmarksTab implements TabProvider {
     @FXML
     private TextField bookmarkNameTextField;
 
-    @Activate
-    public void activate() {
+    public BookmarksTab() {
+        this.bookmarksTab = new Tab(TAB_TITLE);
         final URL resource = BookmarksTab.class.getClassLoader().getResource("BookmarksTab.fxml");
         FXMLLoader fxmlLoader = new FXMLLoader(resource);
         fxmlLoader.setClassLoader(this.getClass().getClassLoader());
@@ -96,28 +96,33 @@ public class BookmarksTab implements TabProvider {
         runAndWait(() -> {
             try {
                 fxmlLoader.load();
-
             } catch (IOException exception) {
                 throw new RuntimeException(exception);
             }
         });
+    }
+
+    @Activate
+    public void activate() {
         bookmarksTab.setContent(tabContent);
-        init();
-        setData();
+        runAndWait(() -> {
+            init();
+            setData();
+        });
     }
 
     public void init() {
-        
+
         doBookmark.setGraphic(new FontAwesomeIconView(FontAwesomeIcon.BOOKMARK));
         doBookmark.setTooltip(new Tooltip(DO_BOOKMARK_TOOLTIP));
         doBookmark.setOnAction(ae -> {
-            bookmarkManager.storeBookmark(selectedBookmark);
+            bookmarkManager.createBookmark(selectedBookmark);
         });
 
         deleteBookmark.setGraphic(new FontAwesomeIconView(FontAwesomeIcon.TRASH));
         deleteBookmark.setTooltip(new Tooltip(DELETE_BOOKMARK_TOOLTIP));
         deleteBookmark.setOnAction(ae -> {
-            if(selectedBookmark == null || selectedBookmark.equals(bookmarkManager.getRootBookmark())){
+            if (selectedBookmark == null || selectedBookmark.equals(bookmarkManager.getRootBookmark())) {
                 return;
             }
             selectedBookmark.getParent().removeChild(selectedBookmark);
@@ -132,24 +137,24 @@ public class BookmarksTab implements TabProvider {
                 selectedBookmark.addChild(new BookmarkFolder("Folder"));
             }
         });
-        
+
         value.setCellFactory(new Callback<TableColumn<String, String>, TableCell<String, String>>() {
             @Override
             public TableCell<String, String> call(TableColumn<String, String> param) {
-                return new TextFieldTableCell<String,String>(){
+                return new TextFieldTableCell<String, String>() {
                     @Override
                     public void updateItem(String item, boolean empty) {
                         super.updateItem(item, empty); //To change body of generated methods, choose Tools | Templates.
-                        if(!empty){
+                        if (!empty) {
                             setTooltip(new Tooltip(item));
                         }
                     }
-                    
+
                 };
             }
-           
+
         });
-        
+
         key.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Map.Entry<String, String>, String>, ObservableValue<String>>() {
             @Override
             public ObservableValue<String> call(TableColumn.CellDataFeatures<Map.Entry<String, String>, String> p) {
@@ -170,24 +175,32 @@ public class BookmarksTab implements TabProvider {
                 selectedBookmark.setName(newValue);
             }
         });
-        
+
         bookmarkDescTextArea.textProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
             if (selectedBookmark != null) {
                 selectedBookmark.setDescription(newValue);
             }
         });
-    }
 
-    public void setData() {
         bookMarkTree.setCellFactory(new Callback<TreeView<Bookmark>, TreeCell<Bookmark>>() {
             @Override
             public TreeCell<Bookmark> call(TreeView<Bookmark> param) {
                 TreeCell t = new CustomTreeCell(param);
-
                 return t;
             }
         });
 
+        bookMarkTree.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends TreeItem<Bookmark>> observable, TreeItem<Bookmark> oldValue, TreeItem<Bookmark> newValue) -> {
+            if (newValue != null) {
+                selectedBookmark = newValue.getValue();
+                populateDetails(selectedBookmark);
+            }else{
+                selectedBookmark = null;
+            }
+        });
+    }
+
+    private void setData() {
         Bookmark root = bookmarkManager.getRootBookmark();
         TreeItem<Bookmark> rootItem = new TreeItem<>(root);
         root.setParent(null);
@@ -196,13 +209,6 @@ public class BookmarksTab implements TabProvider {
         Platform.runLater(() -> {
             bookMarkTree.setRoot(addBookmarks(root));
             bookMarkTree.layout();
-        });
-
-        bookMarkTree.getSelectionModel().selectedItemProperty().addListener((ObservableValue<? extends TreeItem<Bookmark>> observable, TreeItem<Bookmark> oldValue, TreeItem<Bookmark> newValue) -> {
-            if (newValue != null) {
-                selectedBookmark = newValue.getValue();
-                populateDetails(selectedBookmark);
-            }
         });
     }
 
@@ -230,17 +236,11 @@ public class BookmarksTab implements TabProvider {
             });
 
             data.addListener((ListChangeListener.Change<? extends Bookmark> c) -> {
-                Platform.runLater(() -> {
                     setData();
-                });
             });
             item.setExpanded(bookmark.isExpanded());
         });
         return item;
-    }
-
-    public BookmarksTab() {
-        this.bookmarksTab = new Tab(TAB_TITLE);
     }
 
     @Override

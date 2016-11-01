@@ -13,6 +13,7 @@ import java.util.Set;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
+import javafx.scene.Node;
 import javafx.scene.image.ImageView;
 
 /**
@@ -29,7 +30,7 @@ public class BookmarkSeparator implements Bookmark {
     }
 
     @Override
-    public Optional<ImageView> getImageView() {
+    public Optional<Node> getImageView() {
         return Optional.empty();
     }
 

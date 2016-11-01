@@ -20,6 +20,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.RadioButton;
@@ -80,15 +81,11 @@ public class BookmarkManagerImpl implements BookmarkManager {
         runAndWait(() -> {
             try {
                 fxmlLoader.load();
+                initComponents();
             } catch (IOException exception) {
                 throw new RuntimeException(exception);
             }
         });
-
-        Platform.runLater(() -> {
-            initComponents();
-        });
-
     }
 
     private void initComponents() {
@@ -146,7 +143,7 @@ public class BookmarkManagerImpl implements BookmarkManager {
     }
 
     @Override
-    public void storeBookmark(Bookmark refPosition) {
+    public void createBookmark(Bookmark refPosition) {
         initBookmarkDefaults();
         if (refPosition == null) {
             buildBookMark(root);
@@ -164,8 +161,8 @@ public class BookmarkManagerImpl implements BookmarkManager {
     }
 
     @Override
-    public void storeBookmark() {
-        storeBookmark(root);
+    public void createBookmark() {
+        createBookmark(root);
     }
 
     @Reference
@@ -175,6 +172,17 @@ public class BookmarkManagerImpl implements BookmarkManager {
 
     private void buildBookMark(Bookmark parent) {
 
+        if (!genomeVersionRegistry.getSelectedGenomeVersion().get().isPresent()) {
+            Platform.runLater(() -> {
+                Alert dlg = new Alert(Alert.AlertType.INFORMATION);
+                dlg.setWidth(600);
+                dlg.setTitle("Nothing to bookmark");
+                dlg.setHeaderText("Nothing to bookmark");
+                dlg.setContentText("No data available to bookmark");
+                dlg.show();
+            });
+            return;
+        }
         saveButton.setOnMouseClicked(ae -> {
             BookmarkData bookmarkData = new BookmarkData();
             bookmarkData.setName(nameTextField.getText());

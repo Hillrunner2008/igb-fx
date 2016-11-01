@@ -14,8 +14,8 @@ import org.lorainelab.igb.bookmarks.data.Bookmark;
 public interface BookmarkManager {
     
     Bookmark getRootBookmark();
-    void storeBookmark();
-    void storeBookmark(Bookmark relativePosition);
+    void createBookmark();
+    void createBookmark(Bookmark relativePosition);
     void restoreBookmark(Bookmark b);
     
 }
