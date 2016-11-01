@@ -399,6 +399,12 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.bookmark</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>org.lorainelab.igb.tabs.console</artifactId>
                 <version>${project.version}</version>
                 <scope>provided</scope>
@@ -542,8 +548,8 @@
         <module>org.lorainelab.igb.search.api</module>
         <module>preferences/org.lorainelab.igb.preferencemanager.api</module>
         <module>org.lorainelab.igb.datasetloadingservice</module>
+        <module>org.lorainelab.igb.bookmark</module>
         <module>org.lorainelab.igb.kar</module>
-    
     </modules>
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
