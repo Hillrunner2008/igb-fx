@@ -78,13 +78,9 @@ public class GenomeVersion {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 89 * hash + Objects.hashCode(this.name);
-        hash = 89 * hash + Objects.hashCode(this.speciesName);
-        hash = 89 * hash + Objects.hashCode(this.description);
+        hash = 67 * hash + Objects.hashCode(this.referenceSequenceProvider.getPath());
         return hash;
     }
-
-
 
     @Override
     public boolean equals(Object obj) {
@@ -98,16 +94,12 @@ public class GenomeVersion {
             return false;
         }
         final GenomeVersion other = (GenomeVersion) obj;
-        if (!Objects.equals(this.name, other.name)) {
-            return false;
-        }
-        if (!Objects.equals(this.speciesName, other.speciesName)) {
-            return false;
-        }
-        if (!Objects.equals(this.description, other.description)) {
+        if (!Objects.equals(this.referenceSequenceProvider.getPath(), other.referenceSequenceProvider.getPath())) {
             return false;
         }
         return true;
     }
+
+
 
 }
