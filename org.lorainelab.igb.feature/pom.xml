@@ -129,7 +129,7 @@
                                         <artifactItem>
                                             <groupId>org.ops4j.pax.jdbc</groupId>
                                             <artifactId>pax-jdbc-sqlite</artifactId>
-                                            <version>0.8.0</version>
+                                            <version>${pax-jdbc-sqlite_version}</version>
                                             <type>jar</type>
                                         </artifactItem>
                                         <artifactItem>
@@ -157,6 +157,9 @@
                     </plugin>
                 </plugins>
             </build>
+            <properties>
+                <pax-jdbc-sqlite_version>0.8.0</pax-jdbc-sqlite_version>
+            </properties>
         </profile>
     </profiles>
 </project>

@@ -19,14 +19,17 @@ import htsjdk.samtools.SamInputResource;
 import htsjdk.samtools.SamReader;
 import htsjdk.samtools.SamReaderFactory;
 import htsjdk.samtools.ValidationStringency;
+import htsjdk.samtools.seekablestream.ISeekableStreamFactory;
 import htsjdk.samtools.seekablestream.SeekableBufferedStream;
 import htsjdk.samtools.seekablestream.SeekableFileStream;
+import htsjdk.samtools.seekablestream.SeekableStreamFactory;
 import htsjdk.samtools.util.CloserUtil;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.datasource.DataSource;
 import org.lorainelab.igb.data.model.datasource.DataSourceReference;
 import org.lorainelab.igb.data.model.filehandler.api.DataType;
@@ -67,20 +70,23 @@ public class BamParser implements FileTypeHandler {
     }
 
     @Override
-    public Set<CompositionGlyph> getRegion(DataSourceReference dataSourceReference, Range<Integer> range, String chromosomeId) {
+    public Set<CompositionGlyph> getRegion(DataSourceReference dataSourceReference, Range<Integer> range, Chromosome chromosome) {
+        String chromosomeId = chromosome.getName();
         Set<BamFeature> annotations = Sets.newHashSet();
         selectionInfoService.getSelectedChromosome().get().ifPresent(selectedChromosome -> {
             selectedChromosome.loadRegion(range);
             String referenceSequence = new String(selectedChromosome.getSequence(range.lowerEndpoint(), range.upperEndpoint()));
-
-            try (SeekableBufferedStream bamSeekableStream = new SeekableBufferedStream(
-                    new SeekableFileStream(new File(dataSourceReference.getPath())));
-                    SeekableBufferedStream indexSeekableStream = new SeekableBufferedStream(
-                            new SeekableFileStream(new File(dataSourceReference.getPath() + ".bai")));) {
+            final ISeekableStreamFactory streamFactory = SeekableStreamFactory.getInstance();
+            final String path = dataSourceReference.getPath();
+            final String indexPath = dataSourceReference.getPath() + ".bai";
+            try (   
+                    SeekableBufferedStream bamStream = new SeekableBufferedStream(streamFactory.getStreamFor(path));
+                    SeekableBufferedStream indexStream = new SeekableBufferedStream(streamFactory.getStreamFor(indexPath));
+                ) {
 
                 SamReader reader = SamReaderFactory.make()
                         .validationStringency(ValidationStringency.SILENT)
-                        .open(SamInputResource.of(bamSeekableStream).index(indexSeekableStream));
+                        .open(SamInputResource.of(bamStream).index(indexStream));
 
                 final List<SAMSequenceRecord> seqRecords = reader.getFileHeader().getSequenceDictionary().getSequences();
                 getSequenceByName(chromosomeId, seqRecords).ifPresent((SAMSequenceRecord record) -> {
@@ -111,7 +117,9 @@ public class BamParser implements FileTypeHandler {
     }
 
     @Override
-    public Set<CompositionGlyph> getChromosome(DataSourceReference dataSourceReference, String chromosomeId) {
+
+    public Set<CompositionGlyph> getChromosome(DataSourceReference dataSourceReference, Chromosome chromosome) {
+        String chromosomeId = chromosome.getName();
         String path = dataSourceReference.getPath();
         Set<BamFeature> annotations = Sets.newHashSet();
         DataSource dataSource = dataSourceReference.getDataSource();

@@ -2,10 +2,10 @@ package org.lorainelab.igb.data.model;
 
 import cern.colt.list.IntArrayList;
 import java.util.Arrays;
+import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.Assert;
 
 /**
  *

@@ -113,7 +113,7 @@ public class RectangleGlyph implements Glyph {
             final double y = sharedRect.getMinY();
             DrawUtils.scaleToVisibleRec(view, SHARED_RECT);
 
-            if (view.modelCoordRect().getWidth() < 150) {
+            if (view.modelCoordRect().getWidth() < 250) {
                 gc.fillRect(SHARED_RECT.x, SHARED_RECT.y, SHARED_RECT.width, SHARED_RECT.height);
                 drawText(view, viewRect, gc, sharedRect, slotBoundingViewRect);
             } else {

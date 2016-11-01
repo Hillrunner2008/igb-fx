@@ -24,6 +24,10 @@
             <groupId>biz.aQute.bnd</groupId>
             <artifactId>bndlib</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

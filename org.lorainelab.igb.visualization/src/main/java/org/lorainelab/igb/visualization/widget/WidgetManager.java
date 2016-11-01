@@ -79,7 +79,9 @@ public class WidgetManager {
             refreshViewStream.emit("getModelWidth");
         });
         canvasModel.getZoomStripeCoordinate().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-            overlayRefreshStream.emit(null);
+            if (newValue.intValue() != -1) {
+                overlayRefreshStream.emit(null);
+            }
         });
         canvasModel.getyFactor().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             refreshViewStream.emit("getyFactor");

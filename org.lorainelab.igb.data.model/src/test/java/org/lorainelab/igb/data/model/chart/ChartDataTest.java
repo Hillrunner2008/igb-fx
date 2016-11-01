@@ -7,8 +7,8 @@ package org.lorainelab.igb.data.model.chart;
 
 import cern.colt.list.DoubleArrayList;
 import cern.colt.list.IntArrayList;
-import com.google.common.collect.Range;
 import com.vividsolutions.jts.geom.Coordinate;
+import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -22,7 +22,7 @@ import org.junit.Test;
  */
 public class ChartDataTest {
 
-    private ChartData chart;
+    private IntervalChart chart;
     IntArrayList x;
     IntArrayList w;
     DoubleArrayList y;
@@ -44,17 +44,23 @@ public class ChartDataTest {
         int[] xData = Arrays.copyOf(x.elements(), dataSize);
         int[] wData = Arrays.copyOf(w.elements(), dataSize);
         double[] yData = Arrays.copyOf(y.elements(), dataSize);
-        chart = new ChartData(xData, wData, yData);
+        chart = new IntervalChart(xData, wData, yData);
     }
 
     @Test
     public void testDataInRange() {
-        List<Coordinate> t = chart.getDataInRange(Range.closed(3d, 6d), 0, 75, 1);
+        List<Coordinate> t = chart.getDataInRange(new Rectangle2D.Double(3, 0, 3, 100), 1);
         Assert.assertEquals(4, t.size());
         Assert.assertEquals(t.get(0).y, y.get(3), 0);
         Assert.assertEquals(t.get(1).y, y.get(4), 0);
         Assert.assertEquals(t.get(2).y, y.get(5), 0);
         Assert.assertEquals(t.get(3).y, y.get(6), 0);
+    }
+
+    @Test
+    public void testLargeRange() {
+        List<Coordinate> t = chart.getDataInRange(new Rectangle2D.Double(0, 0, 30_000_000, 68_000), 30_000_000 / 800);
+        Assert.assertEquals(1, t.size());
     }
 
 }

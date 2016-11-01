@@ -582,4 +582,11 @@ public class MinimalNumberAxis extends MinimalValueAxis<Number> {
         }
     }
 
+    @Override
+    public void setPrefSize(double prefWidth, double prefHeight) {
+        setPrefWidth(prefWidth);
+        setPrefHeight(prefHeight);
+        setWidth(prefWidth);
+        setWidth(prefHeight);
+    }
 }

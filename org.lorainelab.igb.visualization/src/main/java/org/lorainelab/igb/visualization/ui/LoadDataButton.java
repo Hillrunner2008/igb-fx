@@ -33,7 +33,7 @@ public class LoadDataButton extends Button {
                 selectionInfoService.getSelectedChromosome().get().ifPresent(selectedChromosome -> {
                     selectedGenomeVersion.getLoadedDataSets().forEach(dataSet -> {
                         CompletableFuture.supplyAsync(() -> {
-                            dataSet.loadRegion(selectedChromosome.getName(), canvasModel.getCurrentModelCoordinatesInView());
+                            dataSet.loadRegion(selectedChromosome, canvasModel.getCurrentModelCoordinatesInView());
                             return null;
                         }).thenRun(() -> {
                             Platform.runLater(() -> {

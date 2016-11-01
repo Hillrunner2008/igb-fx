@@ -10,7 +10,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import org.lorainelab.igb.visualization.model.CanvasModel;
-import static org.lorainelab.igb.visualization.model.CanvasModel.MAX_ZOOM_MODEL_COORDINATES_X;
 import org.lorainelab.igb.visualization.ui.CanvasRegion;
 import static org.lorainelab.igb.visualization.util.CanvasUtils.linearScaleTransform;
 
@@ -196,7 +195,7 @@ public class ZoomSliderWidget extends HBox {
 
     private void syncWidgetSlider() {
         double minScaleX = canvasModel.getModelWidth().get();
-        double maxScaleX = MAX_ZOOM_MODEL_COORDINATES_X - 1;
+        double maxScaleX = 20;
         final double scaleRange = maxScaleX - minScaleX;
         xFactor = canvasModel.getxFactor().get();
         final double current = Math.floor(canvasRegion.getWidth() / xFactor);
