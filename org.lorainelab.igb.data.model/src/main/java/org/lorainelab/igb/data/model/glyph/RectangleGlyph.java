@@ -123,100 +123,101 @@ public class RectangleGlyph implements Glyph {
     }
 
     private void drawText(View view, Rectangle2D viewRect, GraphicsContext gc, java.awt.Rectangle.Double sharedRect, Rectangle2D slotRect) {
-        innerTextRefSeqTranslator.ifPresent(translationFunction -> {
-            Chromosome chromosome = view.getChromosome();
-            String innerText;
-            double startOffset = 0;
-            double endOffset = 0;
-            if (boundingRect.getMinX() < viewRect.getMinX()) {
-                //left side is cut off
-                startOffset = viewRect.getMinX() - boundingRect.getMinX();
-            }
-            if ((int) boundingRect.getMaxX() > viewRect.getMaxX()) {
-                //right side is cut off
-                endOffset = boundingRect.getMaxX() - viewRect.getMaxX();
-            }
-            int startPos = (int) startOffset;
-            int endPos = (int) (startPos + boundingRect.getWidth() - (int) startOffset - endOffset);
-            Range<Integer> basePairRange = Range.closed((int) boundingRect.getMinX() + (int) startOffset, (int) boundingRect.getMaxX() - (int) endOffset);
-            String sequence = new String(chromosome.getSequence(basePairRange.lowerEndpoint(), basePairRange.upperEndpoint() - basePairRange.lowerEndpoint()));
-            if (innerTextReferenceSequenceRange.isPresent()) {
-                //TODO handle offsets
-                String requestedSequence = new String(chromosome.getSequence(innerTextReferenceSequenceRange.get().lowerEndpoint(),
-                        innerTextReferenceSequenceRange.get().upperEndpoint() - innerTextReferenceSequenceRange.get().lowerEndpoint()));
-                innerText = translationFunction.apply(requestedSequence);
-            } else {
-                innerText = translationFunction.apply(sequence);
-            }
-            if (innerText.length() > sequence.length()) {
-                innerText = innerText.substring(startPos, endPos);
-            }
-            int size = (int) boundingRect.getHeight();
-
-            double yCoordsPerPixel = view.getCanvasContext().getBoundingRect().getHeight() / view.modelCoordRect().getHeight();
-            double availableLabelHeight = (boundingRect.getHeight() * view.getYfactor());
-            //cap to preserve aspect ratio
-            availableLabelHeight = Math.min(availableLabelHeight * .50, 10);
-
-            FontReference fontReference = FontUtils.getFontByPixelHeight(availableLabelHeight);
-            gc.setFont(fontReference.getFont());
-
-            double minY = slotRect.getMinY() + SLOT_HEIGHT - boundingRect.getHeight() - SLOT_PADDING - viewRect.getMinY();
-            //hack fix... need to revisit this math to correct the difference since its not clear at the moment
-            if (boundingRect.getHeight() == DEFAULT_RECTANGLE_HEIGHT) {
-                minY -= SLOT_PADDING;
-            }
-
-            double height = boundingRect.getHeight();
-            final float textHeight = fontReference.getAscent();
-            double textYPosition = minY + ((height - textHeight) / 2);
-            if (glyphAlignment == GlyphAlignment.TOP_CENTER) {
-                textYPosition -= textHeight;
-            } else {
-                textYPosition += textHeight;
-            }
-            double i = 0;
-            double minX = sharedRect.getMinX();
-            int baseWidth = 1;
-            final char[] innerTextChars = innerText.toUpperCase().toCharArray();
-            final char[] seqChars = sequence.toUpperCase().toCharArray();
-            for (int j = 0; j < innerTextChars.length; j++) {
-                boolean charMatch = false;
-                char c = innerTextChars[j];
-                if (colorByBase || maskBasePairMatches) {
-                    if (innerTextChars.length == seqChars.length && c == seqChars[j]) {
-                        charMatch = true;
-                        gc.setFill(fill);
-                    } else {
-                        gc.setFill(getBaseColor(c));
-                    }
+        try {
+            gc.save();
+            gc.scale(1, 1 / view.getYfactor());
+            innerTextRefSeqTranslator.ifPresent(translationFunction -> {
+                Chromosome chromosome = view.getChromosome();
+                String innerText;
+                double startOffset = 0;
+                double endOffset = 0;
+                if (boundingRect.getMinX() < viewRect.getMinX()) {
+                    //left side is cut off
+                    startOffset = viewRect.getMinX() - boundingRect.getMinX();
+                }
+                if ((int) boundingRect.getMaxX() > viewRect.getMaxX()) {
+                    //right side is cut off
+                    endOffset = boundingRect.getMaxX() - viewRect.getMaxX();
+                }
+                int startPos = (int) startOffset;
+                int endPos = (int) (startPos + boundingRect.getWidth() - (int) startOffset - endOffset);
+                Range<Integer> basePairRange = Range.closed((int) boundingRect.getMinX() + (int) startOffset, (int) boundingRect.getMaxX() - (int) endOffset);
+                String sequence = new String(chromosome.getSequence(basePairRange.lowerEndpoint(), basePairRange.upperEndpoint() - basePairRange.lowerEndpoint()));
+                if (innerTextReferenceSequenceRange.isPresent()) {
+                    //TODO handle offsets
+                    String requestedSequence = new String(chromosome.getSequence(innerTextReferenceSequenceRange.get().lowerEndpoint(),
+                            innerTextReferenceSequenceRange.get().upperEndpoint() - innerTextReferenceSequenceRange.get().lowerEndpoint()));
+                    innerText = translationFunction.apply(requestedSequence);
                 } else {
-                    gc.setFill(fill);
+                    innerText = translationFunction.apply(sequence);
                 }
-                if (!gc.getFill().equals(fill)) {
-                    if (startOffset % 1 > 0 && i == 0) {
-                        gc.fillRect(minX, sharedRect.getMinY(), 1 - startOffset % 1, sharedRect.getHeight());
-                        i += (1 - startOffset % 1);
-                        continue;
-                    } else {
-                        gc.fillRect(minX + i, sharedRect.getMinY(), 1, sharedRect.getHeight());
-                    }
+                if (innerText.length() > sequence.length()) {
+                    innerText = innerText.substring(startPos, endPos);
                 }
+                double modelHeight = view.getCanvasContext().getTrackHeight() / view.getYfactor();
+                double yCoordsPerPixel = view.getCanvasContext().getBoundingRect().getHeight() / modelHeight;
+                double availableLabelHeight = Math.ceil((boundingRect.getHeight() * yCoordsPerPixel) * view.getYfactor());
+                final boolean textVisible = availableLabelHeight >= 12;
+                //cap to preserve aspect ratio
 
-                final boolean textVisible = boundingRect.getHeight() * view.getYfactor() >= 10;
-                if (!charMatch && textVisible) {
+                FontReference fontReference = FontUtils.BASE_PAIR_FONT;
+                gc.setFont(fontReference.getFont());
+
+                double charWidth = fontReference.getCharWidth() / view.getXfactor();
+                double minY = sharedRect.getMinY();
+                double height = boundingRect.getHeight();
+                final double textHeight = fontReference.getAscent();
+                double center = minY + boundingRect.getHeight() / 2;
+                double scaledTextminY = (center * view.getYfactor()) - (textHeight / 2);
+                    scaledTextminY += textHeight - 1;
+                double i = 0;
+                double minX = sharedRect.getMinX();
+
+                int baseWidth = 1;
+                final char[] innerTextChars = innerText.toUpperCase().toCharArray();
+                final char[] seqChars = sequence.toUpperCase().toCharArray();
+                for (int j = 0; j < innerTextChars.length; j++) {
+                    boolean charMatch = false;
+                    char c = innerTextChars[j];
                     if (colorByBase || maskBasePairMatches) {
-                        gc.setFill(Color.BLACK);
+                        if (innerTextChars.length == seqChars.length && c == seqChars[j]) {
+                            charMatch = true;
+                            gc.setFill(fill);
+                        } else {
+                            gc.setFill(getBaseColor(c));
+                        }
                     } else {
-                        gc.setFill(ColorUtils.getEffectiveContrastColor(fill));
+                        gc.setFill(fill);
                     }
-                    double x = minX + i + .1;
-                    double maxWidth = .8;
-                    gc.fillText("" + c, x, textYPosition, .5);
+                    if (!gc.getFill().equals(fill)) {
+                        if (startOffset % 1 > 0 && i == 0) {
+                            gc.fillRect(minX, sharedRect.getMinY() * view.getYfactor(), 1 - startOffset % 1, sharedRect.getHeight() * view.getYfactor());
+                            i += (1 - startOffset % 1);
+                            continue;
+                        } else {
+                            gc.fillRect(minX + i, sharedRect.getMinY() * view.getYfactor(), 1, sharedRect.getHeight() * view.getYfactor());
+                        }
+                    }
+                    if (!charMatch && textVisible) {
+                        if (colorByBase || maskBasePairMatches) {
+                            gc.setFill(Color.BLACK);
+                        } else {
+                            gc.setFill(ColorUtils.getEffectiveContrastColor(fill));
+                        }
+                        double x = minX + i + (charWidth / 2);
+                        double maxWidth = .8;
+                        gc.fillText("" + c, x, scaledTextminY, .5);
+
+                    }
+                    i++;
                 }
-                i++;
-            }
-        });
+            });
+        } catch (Exception ex) {
+            LOG.error(ex.getMessage(), ex);
+        } finally {
+            gc.restore();
+        }
+
     }
 
     @Override
