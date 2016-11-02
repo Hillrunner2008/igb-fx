@@ -251,9 +251,9 @@ public class CoordinateTrackRenderer implements TrackRenderer {
                         gc.setFill(getBaseColor(outOfviewChar));
                         gc.fillRect(0, y, index, BASE_HEIGHT);
                     }
-                    double textHeight = BASE_PAIR_FONT.getAscent();
+                    double textHeight = BASE_PAIR_FONT.getAscent() * .85;
                     double y2 = y + textHeight;
-                    if (viewBoundingRectangle.getWidth() < 125) {
+                    if (viewBoundingRectangle.getWidth() < 250) {
                         gc.setFill(Color.BLACK);
                         gc.fillText("" + base, index + .25, y2, .5);
                     }

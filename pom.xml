@@ -42,12 +42,6 @@
                 <version>1.0.0</version>
             </dependency>
             <dependency>
-                <groupId>com.github.kevinsawicki</groupId>
-                <artifactId>http-request</artifactId>
-                <version>${http-request_version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-core</artifactId>
                 <version>${jackson.version}</version>
@@ -191,7 +185,11 @@
                 <artifactId>org.apache.servicemix.bundles.jakarta-regexp</artifactId>
                 <version>${jakarta-regexp_version}</version>
             </dependency>
-            
+             <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-compress</artifactId>
+                <version>${commons-compress_version}</version>
+            </dependency>
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
@@ -274,18 +272,6 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>org.lorainelab.igb.datasource.api</artifactId>
-                <version>${project.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>org.lorainelab.igb.datasource.local</artifactId>
-                <version>${project.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>org.lorainelab.igb.datasource.http</artifactId>
                 <version>${project.version}</version>
                 <scope>provided</scope>
             </dependency>
@@ -436,6 +422,11 @@
                 <artifactId>org.lorainelab.igb.recentfiles.registry</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.lorainelab</groupId>
+                <artifactId>org.lorainelab.igb.tools.sort</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <dependencies>
@@ -521,13 +512,12 @@
         <module>menus/org.lorainelab.igb.menu.recentfile</module>
         <module>org.lorainelab.igb.data.model</module>
         
-        <module>datasources/org.lorainelab.igb.datasource.local</module>
-        <module>datasources/org.lorainelab.igb.datasource.http</module>
         
         <module>org.lorainelab.igb.selections</module>
         <module>org.lorainelab.igb.filehandler.registry</module>
         <module>org.lorainelab.igb.recentfiles.registry</module>
         
+        <module>tools/org.lorainelab.igb.tools.sort</module>
         <module>filetypeHandlers/org.lorainelab.igb.filehandler.bed</module>
         <module>filetypeHandlers/org.lorainelab.igb.filehandler.bigwig</module>
         <module>filetypeHandlers/org.lorainelab.igb.filehandler.bam</module>
@@ -567,9 +557,9 @@
         <jakarta-regexp_version>1.4_1</jakarta-regexp_version>
         <colt_version>1.2.0</colt_version>
         <jts_version>1.13</jts_version>
-        <http-request_version>6.0</http-request_version>
         <commons-io_version>2.4</commons-io_version>
         <commons-csv_version>1.4</commons-csv_version>
         <commons-codec_version>1.10</commons-codec_version>
+        <commons-compress_version>1.2</commons-compress_version>
     </properties>
 </project>

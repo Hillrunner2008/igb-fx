@@ -101,6 +101,9 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         view.setXfactor(xFactor);
         if (canvasContext.isVisible()) {
             double scaleToY = canvasContext.getTrackHeight() / track.getModelHeight();
+            if (Double.isFinite(scaleToY)) {
+                scaleToY = 1;
+            }
             view.setYfactor(scaleToY);
             updateView(canvasModel);
         }

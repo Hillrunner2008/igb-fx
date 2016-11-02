@@ -8,7 +8,6 @@ import com.google.common.collect.TreeRangeSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.lorainelab.igb.data.model.datasource.DataSourceReference;
 import org.lorainelab.igb.data.model.filehandler.api.DataType;
 import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandler;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
@@ -24,13 +23,13 @@ public class DataSet {
     private final String trackLabel;
     private Map<String, RangeSet<Integer>> loadedRegions;
     private final FileTypeHandler fileTypeHandler;
-    private final DataSourceReference dataSourceReference;
+    private final String dataSourceReference;
     private StackedGlyphTrack positiveStrandTrack;
     private StackedGlyphTrack combinedStrandTrack;
     private StackedGlyphTrack negativeStrandTrack;
     private GraphTrack graphTrack;
 
-    public DataSet(String trackLabel, DataSourceReference dataSourceReference, FileTypeHandler fileTypeHandler) {
+    public DataSet(String trackLabel, String dataSourceReference, FileTypeHandler fileTypeHandler) {
         loadedAnnoations = HashMultimap.create();
         this.dataSourceReference = dataSourceReference;
         this.trackLabel = trackLabel;

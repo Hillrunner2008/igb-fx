@@ -5,6 +5,7 @@
  */
 package org.lorainelab.igb.data.model.filehandler.api;
 
+import java.util.Optional;
 import javafx.collections.ObservableSet;
 
 /**
@@ -14,5 +15,7 @@ import javafx.collections.ObservableSet;
 public interface FileTypeHandlerRegistry {
 
     ObservableSet<FileTypeHandler> getFileTypeHandlers();
+    
+    Optional<FileTypeHandler> getFileTypeHandler(String path);
 
 }

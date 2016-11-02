@@ -23,7 +23,6 @@
         <bundle>mvn:commons-codec/commons-codec/${commons-codec_version}</bundle>
         <bundle>mvn:commons-io/commons-io/${commons-io_version}</bundle>
         <bundle>mvn:org.apache.commons/commons-csv/${commons-csv_version}</bundle>
-        <bundle>mvn:com.github.kevinsawicki/http-request/${http-request_version}</bundle>        
         <bundle>wrap:mvn:com.github.samtools/htsjdk/${htsjdk_version}</bundle>
         <bundle>mvn:org.controlsfx/controlsfx/${controlsfx_version}</bundle>
         <bundle>wrap:mvn:com.vividsolutions/jts/${jts_version}</bundle>
@@ -38,6 +37,7 @@
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.lucene-analyzers-common/${lucene_version}</bundle>
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.lucene-sandbox/${lucene_version}</bundle>
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.lucene-queryparser/${lucene_version}</bundle>
+        <bundle>mvn:org.apache.commons/commons-compress/${commons-compress_version}</bundle>
         
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.utils/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.search.api/${project.version}</bundle>
@@ -58,8 +58,6 @@
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.selections/${project.version}</bundle>
         
         
-        <bundle>mvn:${project.groupId}/org.lorainelab.igb.datasource.local/${project.version}</bundle>
-        <bundle>mvn:${project.groupId}/org.lorainelab.igb.datasource.http/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.menu.about/${project.version}</bundle>
      
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.menu.loadurl/${project.version}</bundle>
@@ -67,6 +65,8 @@
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.menu.recentfile/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.datasetloadingservice/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.menu.customgenome/${project.version}</bundle>
+        
+        <bundle>mvn:${project.groupId}/org.lorainelab.igb.tools.sort/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.filehandler.registry/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.recentfiles.registry/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.filehandler.bed/${project.version}</bundle>

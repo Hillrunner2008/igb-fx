@@ -13,19 +13,13 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
-import java.io.BufferedReader;
+import htsjdk.tribble.readers.LineIteratorImpl;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.security.MessageDigest;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.Strand;
-import org.lorainelab.igb.data.model.datasource.DataSource;
-import org.lorainelab.igb.data.model.datasource.DataSourceReference;
 import org.lorainelab.igb.data.model.filehandler.api.DataType;
 import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandler;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
@@ -35,11 +29,10 @@ import org.lorainelab.igb.data.model.shapes.Line;
 import org.lorainelab.igb.data.model.shapes.Rectangle;
 import org.lorainelab.igb.data.model.shapes.Shape;
 import org.lorainelab.igb.data.model.shapes.factory.GlyphFactory;
+import static org.lorainelab.igb.data.model.util.TabixUtils.getLineIterator;
 import org.lorainelab.igb.data.model.view.Layer;
 import org.lorainelab.igb.data.model.view.Renderer;
 import org.lorainelab.igb.search.api.SearchService;
-import org.lorainelab.igb.search.api.model.Document;
-import org.lorainelab.igb.search.api.model.IndexIdentity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -129,7 +122,7 @@ public class BedParser implements FileTypeHandler {
         return bedFeature;
     }
 
-    public static int[] parseIntArray(String intArray) {
+    private int[] parseIntArray(String intArray) {
         if (Strings.isNullOrEmpty(intArray)) {
             return new int[0];
         }
@@ -143,11 +136,11 @@ public class BedParser implements FileTypeHandler {
         return results;
     }
 
-    public static boolean checkRange(int start, int end, int min, int max) {
+    public boolean checkRange(int start, int end, int min, int max) {
         return !(end < min || start > max);
     }
 
-    public static float parseScore(String s) {
+    public float parseScore(String s) {
         if (s == null || s.length() == 0 || s.equals(".") || s.equals("-")) {
             return 0.0f;
         }
@@ -156,7 +149,7 @@ public class BedParser implements FileTypeHandler {
 
     @Override
     public Set<String> getSupportedExtensions() {
-        return Sets.newHashSet("bed", "bed.gz");
+        return Sets.newHashSet("bed");
     }
 
     private Set<CompositionGlyph> convertBedFeaturesToCompositionGlyphs(Set<BedFeature> annotations) {
@@ -190,29 +183,6 @@ public class BedParser implements FileTypeHandler {
         return primaryGlyphs;
     }
 
-    @Override
-    public Set<CompositionGlyph> getChromosome(DataSourceReference dataSourceReference, Chromosome chromosome) {
-        final DataSource dataSource = dataSourceReference.getDataSource();
-        final String path = dataSourceReference.getPath();
-        Set<BedFeature> annotations = Sets.newLinkedHashSet();
-        dataSource.getInputStream(path).ifPresent(inputStream -> {
-            try (InputStream resourceAsStream = inputStream;
-                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resourceAsStream))) {
-                Iterator<String> iterator = bufferedReader.lines().iterator();
-                while (iterator.hasNext()) {
-                    String line = iterator.next().trim();
-                    List<String> fields = Splitter.on("\t").splitToList(line);
-                    final BedFeature bedFeature = createAnnotation(fields);
-                    annotations.add(bedFeature);
-                }
-            } catch (IOException ex) {
-                LOG.error(ex.getMessage(), ex);
-            }
-        });
-
-        return convertBedFeaturesToCompositionGlyphs(annotations);
-    }
-
     private List<Shape> getShapes(Layer layer) {
         List<Shape> toReturn = Lists.newArrayList();
         layer.getItems().forEach(s -> {
@@ -236,93 +206,86 @@ public class BedParser implements FileTypeHandler {
     }
 
     @Override
-    public Set<CompositionGlyph> getRegion(DataSourceReference dataSourceReference, Range<Integer> range, Chromosome chromosome) {
+    public Set<CompositionGlyph> getRegion(String dataSourceReference, Range<Integer> range, Chromosome chromosome) {
         String chromosomeId = chromosome.getName();
-        final DataSource dataSource = dataSourceReference.getDataSource();
-        final String path = dataSourceReference.getPath();
         Set<BedFeature> annotations = Sets.newLinkedHashSet();
-        dataSource.getInputStream(path).ifPresent(inputStream -> {
-            try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-                Iterator<String> iterator = bufferedReader.lines().iterator();
-                boolean alreadyTraversedRange = false; //assumes sorted bed file
-                boolean alreadyTraversedChromosome = false; //assumes sorted bed file
-                while (iterator.hasNext()) {
-                    String line = iterator.next().trim();
-                    List<String> fields = Splitter.on("\t").splitToList(line);
-                    String annotaionChromId = fields.get(0);
-                    if (annotaionChromId.equals(chromosomeId)) {
-                        final BedFeature bedFeature = createAnnotation(fields);
-                        if (bedFeature.getRange().isConnected(range)) {
-                            annotations.add(bedFeature);
-                            alreadyTraversedRange = true;
-                        } else if (alreadyTraversedRange) {
-                            break;
-                        }
-                        alreadyTraversedChromosome = true;
-                    } else if (alreadyTraversedChromosome) {
+        try (LineIteratorImpl iterator = getLineIterator(dataSourceReference, range, chromosome)) {
+            boolean alreadyTraversedRange = false; //assumes sorted bed file
+            boolean alreadyTraversedChromosome = false;
+            while (iterator.hasNext()) {
+                String line = iterator.next().trim();
+                List<String> fields = Splitter.on("\t").splitToList(line);
+                String annotaionChromId = fields.get(0);
+                if (annotaionChromId.equals(chromosomeId)) {
+                    final BedFeature bedFeature = createAnnotation(fields);
+                    if (bedFeature.getRange().isConnected(range)) {
+                        annotations.add(bedFeature);
+                        alreadyTraversedRange = true;
+                    } else if (alreadyTraversedRange) {
                         break;
                     }
+                    alreadyTraversedChromosome = true;
+                } else if (alreadyTraversedChromosome) {
+                    break;
                 }
-            } catch (IOException ex) {
-                LOG.error(ex.getMessage(), ex);
             }
-        });
+        } catch (IOException ex) {
+
+        }
         return convertBedFeaturesToCompositionGlyphs(annotations);
     }
 
-    @Override
-    public Set<String> getSearchIndexKeys() {
-        return Sets.newHashSet("id");
-    }
-
-    @Override
-    public synchronized void createIndex(IndexIdentity indexIdentity, DataSourceReference dataSourceReference) {
-        final DataSource dataSource = dataSourceReference.getDataSource();
-        final String path = dataSourceReference.getPath();
-        List<Document> documents = Lists.newArrayList();
-        dataSource.getInputStream(path).ifPresent(inputStream -> {
-            String source = null;
-            try {
-                byte[] md5 = MessageDigest.getInstance("MD5").digest(dataSourceReference.getPath().getBytes("UTF-8"));
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < md5.length; i++) {
-                    sb.append(Integer.toString((md5[i] & 0xff) + 0x100, 16).substring(1));
-                }
-                source = sb.toString();
-            } catch (Exception ex) {
-                LOG.error(ex.getMessage(), ex);
-            }
-            LOG.info("Starting index {}", indexIdentity.getId());
-            LOG.info("clearing {}", source);
-
-            searchService.clearByQuery(indexIdentity, "source", source);
-            try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-                Iterator<String> iterator = bufferedReader.lines().iterator();
-                while (iterator.hasNext()) {
-                    String line = iterator.next().trim();
-                    List<String> fields = Splitter.on("\t").splitToList(line);
-                    final BedFeature bedFeature = createAnnotation(fields);
-                    if (bedFeature.getId().isPresent()) {
-                        Document document = new Document();
-                        document.getFields().put("id", bedFeature.getId().get());
-                        document.getFields().put("chromosomeId", bedFeature.getChromosomeId());
-                        document.getFields().put("start", bedFeature.getRange().lowerEndpoint().toString());
-                        document.getFields().put("end", bedFeature.getRange().upperEndpoint().toString());
-                        document.getFields().put("source", source);
-                        documents.add(document);
-                    }
-                    if (documents.size() > 10000 || !iterator.hasNext()) {
-                        searchService.index(documents, indexIdentity);
-                        documents.clear();
-                    }
-                }
-            } catch (Exception ex) {
-                LOG.error(ex.getMessage(), ex);
-            }
-            LOG.info("Completed index {}", indexIdentity.getId());
-        });
-    }
-
+//    @Override
+//    public Set<String> getSearchIndexKeys() {
+//        return Sets.newHashSet("id");
+//    }
+//    @Override
+//    public synchronized void createIndex(IndexIdentity indexIdentity, DataSourceReference dataSourceReference) {
+//        final DataSource dataSource = dataSourceReference.getDataSource();
+//        final String path = dataSourceReference.getPath();
+//        List<Document> documents = Lists.newArrayList();
+//        dataSource.getInputStream(path).ifPresent(inputStream -> {
+//            String source = null;
+//            try {
+//                byte[] md5 = MessageDigest.getInstance("MD5").digest(dataSourceReference.getPath().getBytes("UTF-8"));
+//                StringBuilder sb = new StringBuilder();
+//                for (int i = 0; i < md5.length; i++) {
+//                    sb.append(Integer.toString((md5[i] & 0xff) + 0x100, 16).substring(1));
+//                }
+//                source = sb.toString();
+//            } catch (Exception ex) {
+//                LOG.error(ex.getMessage(), ex);
+//            }
+//            LOG.info("Starting index {}", indexIdentity.getId());
+//            LOG.info("clearing {}", source);
+//
+//            searchService.clearByQuery(indexIdentity, "source", source);
+//            try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+//                Iterator<String> iterator = bufferedReader.lines().iterator();
+//                while (iterator.hasNext()) {
+//                    String line = iterator.next().trim();
+//                    List<String> fields = Splitter.on("\t").splitToList(line);
+//                    final BedFeature bedFeature = createAnnotation(fields);
+//                    if (bedFeature.getId().isPresent()) {
+//                        Document document = new Document();
+//                        document.getFields().put("id", bedFeature.getId().get());
+//                        document.getFields().put("chromosomeId", bedFeature.getChromosomeId());
+//                        document.getFields().put("start", bedFeature.getRange().lowerEndpoint().toString());
+//                        document.getFields().put("end", bedFeature.getRange().upperEndpoint().toString());
+//                        document.getFields().put("source", source);
+//                        documents.add(document);
+//                    }
+//                    if (documents.size() > 10000 || !iterator.hasNext()) {
+//                        searchService.index(documents, indexIdentity);
+//                        documents.clear();
+//                    }
+//                }
+//            } catch (Exception ex) {
+//                LOG.error(ex.getMessage(), ex);
+//            }
+//            LOG.info("Completed index {}", indexIdentity.getId());
+//        });
+//    }
     @Reference
     public void setSearchService(SearchService searchService) {
         this.searchService = searchService;

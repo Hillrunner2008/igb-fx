@@ -21,17 +21,13 @@ import htsjdk.samtools.SamReaderFactory;
 import htsjdk.samtools.ValidationStringency;
 import htsjdk.samtools.seekablestream.ISeekableStreamFactory;
 import htsjdk.samtools.seekablestream.SeekableBufferedStream;
-import htsjdk.samtools.seekablestream.SeekableFileStream;
 import htsjdk.samtools.seekablestream.SeekableStreamFactory;
 import htsjdk.samtools.util.CloserUtil;
-import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import org.lorainelab.igb.data.model.Chromosome;
-import org.lorainelab.igb.data.model.datasource.DataSource;
-import org.lorainelab.igb.data.model.datasource.DataSourceReference;
 import org.lorainelab.igb.data.model.filehandler.api.DataType;
 import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandler;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
@@ -43,7 +39,6 @@ import org.lorainelab.igb.data.model.shapes.Shape;
 import org.lorainelab.igb.data.model.shapes.factory.GlyphFactory;
 import org.lorainelab.igb.data.model.view.Layer;
 import org.lorainelab.igb.search.api.SearchService;
-import org.lorainelab.igb.search.api.model.IndexIdentity;
 import org.lorainelab.igb.selections.SelectionInfoService;
 import org.slf4j.LoggerFactory;
 
@@ -58,6 +53,12 @@ public class BamParser implements FileTypeHandler {
 
     private SearchService searchService;
     private SelectionInfoService selectionInfoService;
+        private ISeekableStreamFactory streamFactory;
+
+    public BamParser() {
+        streamFactory = SeekableStreamFactory.getInstance();
+    }
+        
 
     @Override
     public String getName() {
@@ -70,17 +71,15 @@ public class BamParser implements FileTypeHandler {
     }
 
     @Override
-    public Set<CompositionGlyph> getRegion(DataSourceReference dataSourceReference, Range<Integer> range, Chromosome chromosome) {
+    public Set<CompositionGlyph> getRegion(String dataSourceReference, Range<Integer> range, Chromosome chromosome) {
         String chromosomeId = chromosome.getName();
         Set<BamFeature> annotations = Sets.newHashSet();
         selectionInfoService.getSelectedChromosome().get().ifPresent(selectedChromosome -> {
             selectedChromosome.loadRegion(range);
             String referenceSequence = new String(selectedChromosome.getSequence(range.lowerEndpoint(), range.upperEndpoint()));
-            final ISeekableStreamFactory streamFactory = SeekableStreamFactory.getInstance();
-            final String path = dataSourceReference.getPath();
-            final String indexPath = dataSourceReference.getPath() + ".bai";
+            final String indexPath = dataSourceReference + ".bai";
             try (   
-                    SeekableBufferedStream bamStream = new SeekableBufferedStream(streamFactory.getStreamFor(path));
+                    SeekableBufferedStream bamStream = new SeekableBufferedStream(streamFactory.getStreamFor(dataSourceReference));
                     SeekableBufferedStream indexStream = new SeekableBufferedStream(streamFactory.getStreamFor(indexPath));
                 ) {
 
@@ -112,50 +111,6 @@ public class BamParser implements FileTypeHandler {
                 LOG.error(ex.getMessage(), ex);
             }
 
-        });
-        return convertBamFeaturesToCompositionGlyphs(annotations);
-    }
-
-    @Override
-
-    public Set<CompositionGlyph> getChromosome(DataSourceReference dataSourceReference, Chromosome chromosome) {
-        String chromosomeId = chromosome.getName();
-        String path = dataSourceReference.getPath();
-        Set<BamFeature> annotations = Sets.newHashSet();
-        DataSource dataSource = dataSourceReference.getDataSource();
-        selectionInfoService.getSelectedChromosome().get().ifPresent(selectedChromosome -> {
-            String referenceSequence = selectedChromosome.getReferenceSequenceProvider().getSequence(chromosomeId, 0, selectedChromosome.getLength());
-
-            try (SeekableBufferedStream bamSeekableStream = new SeekableBufferedStream(
-                    new SeekableFileStream(new File(dataSourceReference.getPath())));
-                    SeekableBufferedStream indexSeekableStream = new SeekableBufferedStream(
-                            new SeekableFileStream(new File(dataSourceReference.getPath() + ".bai")));) {
-
-                SamReader reader = SamReaderFactory.make()
-                        .validationStringency(ValidationStringency.SILENT)
-                        .open(SamInputResource.of(bamSeekableStream).index(indexSeekableStream));
-
-                final List<SAMSequenceRecord> seqRecords = reader.getFileHeader().getSequenceDictionary().getSequences();
-                getSequenceByName(chromosomeId, seqRecords).ifPresent((SAMSequenceRecord record) -> {
-
-                    int start = record.getSequenceIndex();
-                    int end = start + record.getSequenceLength();
-
-                    try (SAMRecordIterator iter = reader.query(record.getSequenceName(), start, end, true)) {
-                        while (iter.hasNext()) {
-                            SAMRecord samRecord = iter.next();
-                            int alignmentStart = samRecord.getAlignmentStart() - 1; // convert to interbase
-                            int alignmentEnd = samRecord.getAlignmentEnd() - 1;
-                            int width = alignmentEnd - alignmentStart;
-                            annotations.add(new BamFeature(samRecord, referenceSequence.substring(alignmentStart, alignmentStart + width)));
-                        }
-                    }
-                });
-
-                CloserUtil.close(reader);
-            } catch (Exception ex) {
-                LOG.error(ex.getMessage(), ex);
-            }
         });
         return convertBamFeaturesToCompositionGlyphs(annotations);
     }
@@ -205,16 +160,6 @@ public class BamParser implements FileTypeHandler {
             }
         });
         return toReturn;
-    }
-
-    @Override
-    public Set<String> getSearchIndexKeys() {
-        return Sets.newHashSet("id");
-    }
-
-    @Override
-    public void createIndex(IndexIdentity indexIdentity, DataSourceReference dataSourceReference) {
-        //TODO: create this
     }
 
     @Reference

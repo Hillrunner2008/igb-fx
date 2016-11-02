@@ -7,24 +7,17 @@ package org.lorainelab.igb.datasetloadingImpl;
 
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
-import com.google.common.io.Files;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import javafx.stage.FileChooser;
 import org.lorainelab.igb.data.model.DataSet;
-import org.lorainelab.igb.data.model.GenomeVersion;
-import org.lorainelab.igb.data.model.datasource.DataSource;
-import org.lorainelab.igb.data.model.datasource.DataSourceReference;
-import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandler;
 import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandlerRegistry;
 import org.lorainelab.igb.datasetloadingservice.api.DataSetLoadingService;
 import org.lorainelab.igb.preferences.SessionPreferences;
 import org.lorainelab.igb.recentfiles.registry.api.RecentFilesRegistry;
 import org.lorainelab.igb.search.api.SearchService;
-import org.lorainelab.igb.search.api.model.IndexIdentity;
 import org.lorainelab.igb.selections.SelectionInfoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,8 +32,6 @@ public class DataSetLoadingServiceImpl implements DataSetLoadingService {
     private static final Logger LOG = LoggerFactory.getLogger(DataSetLoadingServiceImpl.class);
     private static final String DEFAULT_FILE_EXTENSION_FILTER_NAME = "All Supported Formats";
 
-    private DataSource localDataSource;
-    private DataSource httpDataSource;
     private FileTypeHandlerRegistry fileTypeHandlerRegistry;
     private SelectionInfoService selectionInfoService;
     private SearchService searchService;
@@ -52,14 +43,12 @@ public class DataSetLoadingServiceImpl implements DataSetLoadingService {
     }
 
     @Override
-    public void openHttpDataSet(String url) {
-        fileTypeHandlerRegistry.getFileTypeHandlers().stream().filter(f -> {
-            return f.getSupportedExtensions().contains(getFileExtension(url));
-        }).findFirst().ifPresent(fileTypeHandler -> {
+    public void openHttpDataSet(String path) {
+        fileTypeHandlerRegistry.getFileTypeHandler(path).ifPresent(fileTypeHandler -> {
             selectionInfoService.getSelectedGenomeVersion().get().ifPresent(gv -> {
-                DataSourceReference dataSourceReference = new DataSourceReference(url, httpDataSource);
-                gv.getLoadedDataSets().add(new DataSet(url, dataSourceReference, fileTypeHandler));
-                indexDataSetForSearch(fileTypeHandler, dataSourceReference);
+
+                gv.getLoadedDataSets().add(new DataSet(path, path, fileTypeHandler));
+//                indexDataSetForSearch(fileTypeHandler, dataSourceReference);
             });
         });
 
@@ -67,15 +56,11 @@ public class DataSetLoadingServiceImpl implements DataSetLoadingService {
 
     @Override
     public void openDataSet(File file) {
-        fileTypeHandlerRegistry.getFileTypeHandlers().stream().filter(f -> {
-            return f.getSupportedExtensions().contains(getFileExtension(file.getPath()));
-        }).findFirst().ifPresent(fileTypeHandler -> {
+        fileTypeHandlerRegistry.getFileTypeHandler(file.getPath()).ifPresent(fileTypeHandler -> {
             selectionInfoService.getSelectedGenomeVersion().get().ifPresent(gv -> {
-                //recentFilesRegistry.getRecentFiles().add(file.getPath());
                 recentFilesRegistry.addRecentFile(file.getPath());
-                DataSourceReference dataSourceReference = new DataSourceReference(file.getPath(), localDataSource);
-                gv.getLoadedDataSets().add(new DataSet(file.getName(), dataSourceReference, fileTypeHandler));
-                indexDataSetForSearch(fileTypeHandler, dataSourceReference);
+                gv.getLoadedDataSets().add(new DataSet(file.getName(), file.getPath(), fileTypeHandler));
+//                indexDataSetForSearch(fileTypeHandler, dataSourceReference);
             });
         });
     }
@@ -84,17 +69,7 @@ public class DataSetLoadingServiceImpl implements DataSetLoadingService {
         FileChooser fileChooser = getFileChooser();
         Optional.ofNullable(fileChooser.showOpenMultipleDialog(null)).ifPresent(selectedFiles -> {
             selectedFiles.forEach(file -> {
-                fileTypeHandlerRegistry.getFileTypeHandlers().stream().filter(f -> {
-                    return f.getSupportedExtensions().contains(getFileExtension(file.getPath()));
-                }).findFirst().ifPresent(fileTypeHandler -> {
-                    selectionInfoService.getSelectedGenomeVersion().get().ifPresent(gv -> {
-                        //recentFilesRegistry.getRecentFiles().add(file.getPath());
-                        recentFilesRegistry.addRecentFile(file.getPath());
-                        DataSourceReference dataSourceReference = new DataSourceReference(file.getPath(), localDataSource);
-                        gv.getLoadedDataSets().add(new DataSet(file.getName(), dataSourceReference, fileTypeHandler));
-                        //indexDataSetForSearch(fileTypeHandler, dataSourceReference);
-                    });
-                });
+                openDataSet(file);
             });
         });
     }
@@ -115,32 +90,31 @@ public class DataSetLoadingServiceImpl implements DataSetLoadingService {
         return fileChooser;
     }
 
-    private void indexDataSetForSearch(FileTypeHandler fileTypeHandler, DataSourceReference dataSourceReference) {
-        CompletableFuture<Void> indexTask = CompletableFuture.runAsync(() -> {
-            try {
-                Optional<GenomeVersion> genomeVersion = selectionInfoService.getSelectedGenomeVersion().getValue();
-                if (genomeVersion.isPresent()) {
-                    String speciesName = genomeVersion.get().getSpeciesName().get();
-                    Optional<IndexIdentity> resourceIndexIdentity = searchService.getResourceIndexIdentity(speciesName);
-                    if (!resourceIndexIdentity.isPresent()) {
-                        LOG.info("index doesnt exist, so create it");
-                        IndexIdentity indexIdentity = searchService.generateIndexIndentity();
-                        searchService.setResourceIndexIdentity(speciesName, indexIdentity);
-                        fileTypeHandler.createIndex(indexIdentity, dataSourceReference);
-                    } else {
-                        fileTypeHandler.createIndex(resourceIndexIdentity.get(), dataSourceReference);
-                    }
-                }
-            } catch (Exception ex) {
-                LOG.error(ex.getMessage(), ex);
-            }
-        }).whenComplete((result, ex) -> {
-            if (ex != null) {
-                LOG.error(ex.getMessage(), ex);
-            }
-        });
-    }
-
+//    private void indexDataSetForSearch(FileTypeHandler fileTypeHandler, DataSourceReference dataSourceReference) {
+//        CompletableFuture<Void> indexTask = CompletableFuture.runAsync(() -> {
+//            try {
+//                Optional<GenomeVersion> genomeVersion = selectionInfoService.getSelectedGenomeVersion().getValue();
+//                if (genomeVersion.isPresent()) {
+//                    String speciesName = genomeVersion.get().getSpeciesName().get();
+//                    Optional<IndexIdentity> resourceIndexIdentity = searchService.getResourceIndexIdentity(speciesName);
+//                    if (!resourceIndexIdentity.isPresent()) {
+//                        LOG.info("index doesnt exist, so create it");
+//                        IndexIdentity indexIdentity = searchService.generateIndexIndentity();
+//                        searchService.setResourceIndexIdentity(speciesName, indexIdentity);
+//                        fileTypeHandler.createIndex(indexIdentity, dataSourceReference);
+//                    } else {
+//                        fileTypeHandler.createIndex(resourceIndexIdentity.get(), dataSourceReference);
+//                    }
+//                }
+//            } catch (Exception ex) {
+//                LOG.error(ex.getMessage(), ex);
+//            }
+//        }).whenComplete((result, ex) -> {
+//            if (ex != null) {
+//                LOG.error(ex.getMessage(), ex);
+//            }
+//        });
+//    }
     private void addFileExtensionFilters(FileChooser fileChooser) {
         fileTypeHandlerRegistry.getFileTypeHandlers().stream()
                 .map(fileTypeHandler -> {
@@ -152,16 +126,6 @@ public class DataSetLoadingServiceImpl implements DataSetLoadingService {
         final FileChooser.ExtensionFilter defaultExtensionFilter = new FileChooser.ExtensionFilter(DEFAULT_FILE_EXTENSION_FILTER_NAME, allSupportedFileExtensions);
         fileChooser.getExtensionFilters().add(defaultExtensionFilter);
         fileChooser.setSelectedExtensionFilter(defaultExtensionFilter);
-    }
-
-    @Reference(target = "(&(component.name=" + "LocalDataSource" + "))")
-    public void setLocalDataSource(DataSource dataSource) {
-        this.localDataSource = dataSource;
-    }
-
-    @Reference(target = "(&(component.name=" + "HttpDataSource" + "))")
-    public void setHttpDataSource(DataSource dataSource) {
-        this.httpDataSource = dataSource;
     }
 
     @Reference(optional = false)
@@ -182,15 +146,6 @@ public class DataSetLoadingServiceImpl implements DataSetLoadingService {
     @Reference(optional = false)
     public void setRecentFilesRegistry(RecentFilesRegistry recentFilesRegistry) {
         this.recentFilesRegistry = recentFilesRegistry;
-    }
-
-    private String getFileExtension(String path) {
-        String fileExtension = Files.getFileExtension(path);
-        if (fileExtension.equalsIgnoreCase("gz")) {
-            return Files.getFileExtension(Files.getNameWithoutExtension(path));
-        } else {
-            return fileExtension;
-        }
     }
 
 }
