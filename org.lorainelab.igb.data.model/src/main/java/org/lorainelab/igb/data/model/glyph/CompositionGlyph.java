@@ -252,7 +252,6 @@ public class CompositionGlyph implements Glyph {
                     double textYPosition;
                     if (isNegative) {
                         textYPosition = ((glyphViewIntersectionBounds.getMaxY() * view.getYfactor()) / textScale);
-                        textYPosition -= textYOffset;
                     } else {
                         textYPosition = ((glyphViewIntersectionBounds.getMinY()) * view.getYfactor()) / textScale;
                         textYPosition += textYOffset;
@@ -302,7 +301,12 @@ public class CompositionGlyph implements Glyph {
             double minY = slotRect.getMinY() - view.modelCoordRect().getMinY();
             double minX = drawRect.getMinX();
             double maxX = drawRect.getMaxX();
-            double maxY = slotRect.getMaxY() - view.modelCoordRect().getMinY() - SLOT_PADDING;
+            double maxY = slotRect.getMaxY() - view.modelCoordRect().getMinY();
+            if (isNegative) {
+                minY += SLOT_PADDING;
+            } else {
+                maxY -= SLOT_PADDING;
+            }
             double width = drawRect.getWidth();
             double height = maxY - minY;
             gc.fillRect(minX, minY, width, SELECTION_RECTANGLE_WIDTH); //top
