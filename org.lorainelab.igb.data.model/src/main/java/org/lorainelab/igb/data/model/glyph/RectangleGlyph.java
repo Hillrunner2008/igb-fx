@@ -169,7 +169,7 @@ public class RectangleGlyph implements Glyph {
                 final double textHeight = fontReference.getAscent();
                 double center = minY + boundingRect.getHeight() / 2;
                 double scaledTextminY = (center * view.getYfactor()) - (textHeight / 2);
-                    scaledTextminY += textHeight - 1;
+                scaledTextminY += textHeight - 1;
                 double i = 0;
                 double minX = sharedRect.getMinX();
 
@@ -212,6 +212,7 @@ public class RectangleGlyph implements Glyph {
                     i++;
                 }
             });
+            gc.scale(1, view.getYfactor());
         } catch (Exception ex) {
             LOG.error(ex.getMessage(), ex);
         } finally {
