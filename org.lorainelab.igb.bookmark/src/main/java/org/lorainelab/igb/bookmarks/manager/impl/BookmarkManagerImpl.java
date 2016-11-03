@@ -5,17 +5,15 @@
  */
 package org.lorainelab.igb.bookmarks.manager.impl;
 
-import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
+import com.google.common.collect.Range;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -35,9 +33,11 @@ import org.lorainelab.igb.bookmarks.data.Bookmark;
 import org.lorainelab.igb.bookmarks.data.BookmarkData;
 import org.lorainelab.igb.bookmarks.data.BookmarkFolder;
 import org.lorainelab.igb.bookmarks.manager.BookmarkManager;
+import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.GenomeVersion;
 import org.lorainelab.igb.data.model.GenomeVersionRegistry;
 import static org.lorainelab.igb.utils.FXUtilities.runAndWait;
+import org.lorainelab.igb.view.api.ViewService;
 
 /**
  *
@@ -48,6 +48,14 @@ public class BookmarkManagerImpl implements BookmarkManager {
 
     private Bookmark root;
     private GenomeVersionRegistry genomeVersionRegistry;
+
+    private static final String GENOME_VERSION_KEY = "version";
+    private static final String GENOME_SPECIES_KEY = "species";
+    private static final String GENOME_CHROMOSOME_KEY = "chromosome";
+    private static final String GENOME_REF_SEQ_KEY = "refSeq";
+    private static final String VIEW_RANGE_LOW_X = "Low x";
+    private static final String VIEW_RANGE_HIGH_X = "High x";
+//    private static final String GENOME_VERSION_KEY = "";
 
     @FXML
     private AnchorPane tabContent;
@@ -68,6 +76,7 @@ public class BookmarkManagerImpl implements BookmarkManager {
     private ToggleGroup toggleGroup;
 
     private Stage stage;
+    private ViewService viewService;
 
     public BookmarkManagerImpl() {
 
@@ -155,9 +164,56 @@ public class BookmarkManagerImpl implements BookmarkManager {
         }
     }
 
+    private void showInvalidBookmark(String cause) {
+        Platform.runLater(() -> {
+            Alert dlg = new Alert(Alert.AlertType.WARNING);
+            dlg.setWidth(600);
+            dlg.setTitle("Invalid bookmark");
+            dlg.setHeaderText("Invalid bookmark");
+            dlg.setContentText("Invalid bookmark\n" + cause);
+            dlg.show();
+        });
+    }
+
     @Override
     public void restoreBookmark(Bookmark b) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Map<String, String> props;
+        GenomeVersion genomeVersion;
+        Chromosome chromosome = null;
+        double lowX = 0, highX = 0;
+
+        if (!b.getDetails().isPresent()) {
+            showInvalidBookmark("Bookmark details not available");
+            return;
+        }
+        props = b.getDetails().get();
+        Optional<GenomeVersion> optionalGenomeVersion = genomeVersionRegistry.getRegisteredGenomeVersions().stream().filter(gv
+                -> gv.getReferenceSequenceProvider().getPath().equals(props.get(GENOME_REF_SEQ_KEY))).findFirst();
+        if (!optionalGenomeVersion.isPresent()) {
+            showInvalidBookmark("Genome for " + props.get(GENOME_REF_SEQ_KEY) + " not available");
+            return;
+        }
+        genomeVersion = optionalGenomeVersion.get();
+
+        Optional<Chromosome> optionalChromosome = genomeVersion.getReferenceSequenceProvider().getChromosomes().stream().filter(gv
+                -> gv.getReferenceSequenceProvider().getPath().equals(props.get(GENOME_REF_SEQ_KEY))).findFirst();
+        if (!optionalGenomeVersion.isPresent()) {
+            showInvalidBookmark("Chromosome not found");
+        }
+
+        try {
+            lowX = Double.parseDouble(props.get(VIEW_RANGE_LOW_X));
+            highX = Double.parseDouble(props.get(VIEW_RANGE_HIGH_X));
+        } catch (Exception e) {
+            showInvalidBookmark("Invalid range of data selected");
+        }
+
+        //start loading once all checks complete
+        genomeVersionRegistry.setSelectedGenomeVersion(genomeVersion);
+        genomeVersion.setSelectedChromosome(chromosome);
+        viewService.setViewCoordinateRange(Range.closed(lowX, highX), chromosome);
+
+//        genomeVersionRegistry.
     }
 
     @Override
@@ -168,6 +224,11 @@ public class BookmarkManagerImpl implements BookmarkManager {
     @Reference
     public void setGenomeVersionRegistry(GenomeVersionRegistry genomeVersionRegistry) {
         this.genomeVersionRegistry = genomeVersionRegistry;
+    }
+
+    @Reference
+    public void setViewService(ViewService viewService) {
+        this.viewService = viewService;
     }
 
     private void buildBookMark(Bookmark parent) {
@@ -188,14 +249,17 @@ public class BookmarkManagerImpl implements BookmarkManager {
             bookmarkData.setName(nameTextField.getText());
             bookmarkData.setDescription(descriptionTextArea.getText());
             Map<String, String> data = new HashMap<String, String>();
-            GenomeVersion genomeVersion;
             genomeVersionRegistry.getSelectedGenomeVersion().get().ifPresent(gv -> {
-                data.put("version", gv.getName().get());
-                data.put("species", gv.getSpeciesName().get());
+                data.put(GENOME_VERSION_KEY, gv.getName().get());
+                data.put(GENOME_SPECIES_KEY, gv.getSpeciesName().get());
                 gv.getSelectedChromosomeProperty().get().ifPresent(chr -> {
-                    data.put("chromosome", chr.getName());
+                    data.put(GENOME_CHROMOSOME_KEY, chr.getName());
                 });
-                data.put("refSeq", gv.getReferenceSequenceProvider().getPath());
+                data.put(GENOME_REF_SEQ_KEY, gv.getReferenceSequenceProvider().getPath());
+            });
+            viewService.getViewCoordinates().ifPresent((Range<Double> t) -> {
+                data.put(VIEW_RANGE_LOW_X, "" + t.lowerEndpoint());
+                data.put(VIEW_RANGE_HIGH_X, "" + t.upperEndpoint());
             });
 
             bookmarkData.setDetails(data);

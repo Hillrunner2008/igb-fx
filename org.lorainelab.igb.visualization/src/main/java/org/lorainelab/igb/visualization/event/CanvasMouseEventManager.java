@@ -167,6 +167,10 @@ public class CanvasMouseEventManager {
                         x1 = x2;
                         x2 = x1old;
                     }
+                    double maxX = tr.getView().modelCoordRect().getMaxX();
+                    if(x2 > maxX){
+                        x2 = maxX;
+                    }
                     final Rectangle2D zoomFocus = new Rectangle2D(x1, 0, x2 - x1, Double.MAX_VALUE);
                     viewService.setViewCoordinateRange(Range.closed(zoomFocus.getMinX(), zoomFocus.getMaxX()));
                 }
