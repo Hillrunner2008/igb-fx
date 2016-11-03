@@ -67,7 +67,7 @@ public class StackedGlyphTrack implements Track {
         //i.e. we can't do this gc.translate(-view.getBoundingRect().getMinX(), trackPositionOffset);
         gc.translate(0, trackPositionOffset);
         for (Map.Entry<Integer, Slot> entry : slotMap.entrySet()) {
-            Rectangle2D slotBoundingViewRect = entry.getValue().getSlotBoundingRect(view.getBoundingRect(), isNegative);
+            Rectangle2D slotBoundingViewRect = entry.getValue().getSlotBoundingRect(view.modelCoordRect(), isNegative);
             final List<CompositionGlyph> glyphsInView = entry.getValue().getGlyphsInView(view);
             if (!glyphsInView.isEmpty()) {
                 try {
@@ -85,8 +85,8 @@ public class StackedGlyphTrack implements Track {
     }
 
     private void experimentalOptimizedRender(List<CompositionGlyph> glyphsInView, GraphicsContext gc, View view, Rectangle2D slotBoundingRect, boolean isSummaryRow) {
-        double xPixelsPerCoordinate = view.getBoundingRect().getWidth() / view.getCanvasContext().getBoundingRect().getWidth();
-        double modelCoordinatesPerScreenXPixel = view.getBoundingRect().getWidth() / view.getCanvasContext().getBoundingRect().getWidth();
+        double xPixelsPerCoordinate = view.modelCoordRect().getWidth() / view.getCanvasContext().getBoundingRect().getWidth();
+        double modelCoordinatesPerScreenXPixel = view.modelCoordRect().getWidth() / view.getCanvasContext().getBoundingRect().getWidth();
         //combine nearby rectangles to optimize rendering... assuming this will be less expensive, needs testing
         if (xPixelsPerCoordinate < 10_000) {
             glyphsInView.stream().forEach(glyph -> glyph.draw(gc, view, slotBoundingRect, isSummaryRow));
@@ -243,7 +243,7 @@ public class StackedGlyphTrack implements Track {
 
     @Override
     public void processSelectionRectangle(Rectangle2D selectionRectangle, View view) {
-        Rectangle2D viewBoundingRect = view.getBoundingRect();
+        Rectangle2D viewBoundingRect = view.modelCoordRect();
         List<CompositionGlyph> selections = getSlotMap().entrySet().stream().flatMap(entry -> {
             double slotOffset = entry.getValue().getSlotYoffset();
             final Range<Double> mouseEventXrange = Range.closed(selectionRectangle.getMinX(), selectionRectangle.getMaxX());

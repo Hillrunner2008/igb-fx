@@ -100,7 +100,7 @@ public class CompositionGlyph implements Glyph {
 
     @Override
     public Optional<Rectangle.Double> calculateDrawRect(View view, Rectangle2D slotBoundingRect) {
-        Rectangle2D viewRect = view.getBoundingRect();
+        Rectangle2D viewRect = view.modelCoordRect();
         final RangeMap<Double, Glyph> intersectionRangeMapX = xRange.subRangeMap(view.getXrange());
         if (!intersectionRangeMapX.asMapOfRanges().isEmpty()) {
             double minX = Double.MAX_VALUE;
@@ -219,10 +219,10 @@ public class CompositionGlyph implements Glyph {
         gc.setFill(SELECTION_COLOR);
         double xToYRatio = view.getXfactor() / view.getYfactor();
         double vMargin = drawRect.getHeight() / 10;
-        double minY = (drawRect.getMinY() - view.getBoundingRect().getMinY()) + vMargin;
+        double minY = (drawRect.getMinY() - view.modelCoordRect().getMinY()) + vMargin;
         double minX = drawRect.getMinX();
         double maxX = drawRect.getMaxX();
-        double maxY = drawRect.getMaxY() - view.getBoundingRect().getMinY() - vMargin;
+        double maxY = drawRect.getMaxY() - view.modelCoordRect().getMinY() - vMargin;
         double width = drawRect.getWidth();
         double height = maxY - minY;
         gc.fillRect(minX, minY, width, SELECTION_RECTANGLE_WIDTH); //top
@@ -233,7 +233,7 @@ public class CompositionGlyph implements Glyph {
     }
 
     private void drawLabel(View view, GraphicsContext gc, Rectangle.Double glyphViewIntersectionBounds) {
-        Rectangle2D viewBoundingRect = view.getBoundingRect();
+        Rectangle2D viewBoundingRect = view.modelCoordRect();
         final String labelString = label;
         if (!Strings.isNullOrEmpty(labelString)) {
             if (viewBoundingRect.getWidth() < 700_000) {
@@ -252,7 +252,6 @@ public class CompositionGlyph implements Glyph {
                     double textYPosition;
                     if (isNegative) {
                         textYPosition = ((glyphViewIntersectionBounds.getMaxY() * view.getYfactor()) / textScale);
-                        textYPosition -= textYOffset;
                     } else {
                         textYPosition = ((glyphViewIntersectionBounds.getMinY()) * view.getYfactor()) / textScale;
                         textYPosition += textYOffset;
@@ -299,10 +298,15 @@ public class CompositionGlyph implements Glyph {
             gc.save();
             gc.setFill(SELECTION_COLOR);
             double xToYRatio = view.getXfactor() / view.getYfactor();
-            double minY = slotRect.getMinY() - view.getBoundingRect().getMinY();
+            double minY = slotRect.getMinY() - view.modelCoordRect().getMinY();
             double minX = drawRect.getMinX();
             double maxX = drawRect.getMaxX();
-            double maxY = slotRect.getMaxY() - view.getBoundingRect().getMinY() - SLOT_PADDING;
+            double maxY = slotRect.getMaxY() - view.modelCoordRect().getMinY();
+            if (isNegative) {
+                minY += SLOT_PADDING;
+            } else {
+                maxY -= SLOT_PADDING;
+            }
             double width = drawRect.getWidth();
             double height = maxY - minY;
             gc.fillRect(minX, minY, width, SELECTION_RECTANGLE_WIDTH); //top

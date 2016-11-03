@@ -14,8 +14,8 @@ public class View {
 
     private static final Logger LOG = LoggerFactory.getLogger(View.class);
     private Chromosome chromosome;
-    private Rectangle2D boundingRect;
-    private Rectangle.Double mutableBoundingRect;
+    private Rectangle2D modelCoordRect;
+    private Rectangle.Double mutableCoordRect;
     private Range<Double> xRange;
     private double xfactor = 1;
     private double yfactor = 1;
@@ -24,32 +24,31 @@ public class View {
     private final CanvasContext canvasContext;
     private final boolean isNegative;
 
-    public View(Rectangle2D boundingRect, CanvasContext canvasContext, Chromosome chromosome, boolean isNegative) {
-        this.boundingRect = boundingRect;
-        this.mutableBoundingRect = new Rectangle.Double(boundingRect.getMinX(), boundingRect.getMinY(), boundingRect.getWidth(), boundingRect.getHeight());
+    public View(Rectangle2D modelCoordRect, CanvasContext canvasContext, Chromosome chromosome, boolean isNegative) {
+        this.modelCoordRect = modelCoordRect;
+        this.mutableCoordRect = new Rectangle.Double(modelCoordRect.getMinX(), modelCoordRect.getMinY(), modelCoordRect.getWidth(), modelCoordRect.getHeight());
         this.chromosome = chromosome;
         this.canvasContext = canvasContext;
         this.isNegative = isNegative;
-        xRange = Range.closed(boundingRect.getMinX(), boundingRect.getMaxX());
-        xPixelsPerCoordinate = boundingRect.getWidth() / canvasContext.getBoundingRect().getWidth();
+        xRange = Range.closed(modelCoordRect.getMinX(), modelCoordRect.getMaxX());
+        xPixelsPerCoordinate = modelCoordRect.getWidth() / canvasContext.getBoundingRect().getWidth();
         scrollYOffset = canvasContext.getRelativeTrackOffset() / xfactor;
     }
-
-    public Rectangle2D getBoundingRect() {
-        return boundingRect;
+    public Rectangle2D modelCoordRect() {
+        return modelCoordRect;
     }
 
-    public java.awt.geom.Rectangle2D.Double getMutableBoundingRect() {
-        return mutableBoundingRect;
+    public java.awt.geom.Rectangle2D.Double getMutableCoordRect() {
+        return mutableCoordRect;
     }
 
     public Range<Double> getXrange() {
         return xRange;
     }
 
-    public void setBoundingRect(Rectangle2D boundingRect) {
-        this.boundingRect = boundingRect;
-        mutableBoundingRect = new Rectangle.Double(boundingRect.getMinX(), boundingRect.getMinY(), boundingRect.getWidth(), boundingRect.getHeight());
+    public void setModelCoordRect(Rectangle2D boundingRect) {
+        this.modelCoordRect = boundingRect;
+        mutableCoordRect = new Rectangle.Double(boundingRect.getMinX(), boundingRect.getMinY(), boundingRect.getWidth(), boundingRect.getHeight());
         xRange = Range.closed(boundingRect.getMinX(), boundingRect.getMaxX());
         xPixelsPerCoordinate = boundingRect.getWidth() / canvasContext.getBoundingRect().getWidth();
         scrollYOffset = boundingRect.getMinY();

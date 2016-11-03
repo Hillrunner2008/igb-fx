@@ -42,17 +42,6 @@
                 <version>1.0.0</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-io</artifactId>
-                <version>1.3.2</version>
-            </dependency>
-            <dependency>
-                <groupId>com.github.kevinsawicki</groupId>
-                <artifactId>http-request</artifactId>
-                <version>6.0</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-core</artifactId>
                 <version>${jackson.version}</version>
@@ -70,7 +59,7 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-csv</artifactId>
-                <version>1.4</version>
+                <version>${commons-csv_version}</version>
             </dependency> 
             <dependency>
                 <groupId>biz.aQute.bnd</groupId>
@@ -99,44 +88,107 @@
             <dependency>
                 <groupId>org.reactfx</groupId>
                 <artifactId>reactfx</artifactId>
-                <version>2.0-M4u1</version>
+                <version>${reactfx_version}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>com.miglayout</groupId>
                 <artifactId>miglayout-core</artifactId>
-                <version>5.0</version>
+                <version>${miglayout_version}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>com.miglayout</groupId>
                 <artifactId>miglayout-javafx</artifactId>
-                <version>5.0</version>
+                <version>${miglayout_version}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>19.0</version>
+                <version>${guava_version}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>de.jensd</groupId>
                 <artifactId>fontawesomefx</artifactId>
-                <version>8.9</version>
+                <version>${fontawesomefx_version}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
-                <version>3.4</version>
+                <version>${commons-lang3_version}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>com.github.samtools</groupId>
                 <artifactId>htsjdk</artifactId>
-                <version>2.2.2</version>
+                <version>${htsjdk_version}</version>
                 <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>${commons-codec_version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons-io_version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.controlsfx</groupId>
+                <artifactId>controlsfx</artifactId>
+                <version>${controlsfx_version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.vividsolutions</groupId>
+                <artifactId>jts</artifactId>
+                <version>${jts_version}</version>
+            </dependency>
+            <dependency>
+                <groupId>colt</groupId>
+                <artifactId>colt</artifactId>
+                <version>${colt_version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.lucene</artifactId>
+                <version>${lucene_version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.lucene-queries</artifactId>
+                <version>${lucene_version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.lucene-queryparser</artifactId>
+                <version>${lucene_version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.lucene-analyzers-common</artifactId>
+                <version>${lucene_version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.lucene-sandbox</artifactId>
+                <version>${lucene_version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.jakarta-regexp</artifactId>
+                <version>${jakarta-regexp_version}</version>
+            </dependency>
+             <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-compress</artifactId>
+                <version>${commons-compress_version}</version>
             </dependency>
             <dependency>
                 <groupId>junit</groupId>
@@ -151,24 +203,6 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>commons-codec</groupId>
-                <artifactId>commons-codec</artifactId>
-                <version>1.10</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>commons-io</groupId>
-                <artifactId>commons-io</artifactId>
-                <version>2.4</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.controlsfx</groupId>
-                <artifactId>controlsfx</artifactId>
-                <version>8.40.11</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-core</artifactId>
                 <version>1.1.2</version>
@@ -179,11 +213,6 @@
                 <artifactId>logback-classic</artifactId>
                 <version>1.1.2</version>
                 <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.jooq</groupId>
-                <artifactId>jool</artifactId>
-                <version>0.9.11</version>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
@@ -248,18 +277,6 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>org.lorainelab.igb.datasource.local</artifactId>
-                <version>${project.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>org.lorainelab.igb.datasource.http</artifactId>
-                <version>${project.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
                 <artifactId>org.lorainelab.igb.filehandler.api</artifactId>
                 <version>${project.version}</version>
                 <scope>provided</scope>
@@ -273,6 +290,18 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>org.lorainelab.igb.filehandler.bigwig</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.filehandler.bam</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.filehandler.tabix</artifactId>
                 <version>${project.version}</version>
                 <scope>provided</scope>
             </dependency>
@@ -356,6 +385,12 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.bookmark</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>org.lorainelab.igb.tabs.console</artifactId>
                 <version>${project.version}</version>
                 <scope>provided</scope>
@@ -387,8 +422,35 @@
                 <artifactId>org.lorainelab.igb.recentfiles.registry</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.lorainelab</groupId>
+                <artifactId>org.lorainelab.igb.tools.sort</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
     <build>
         <pluginManagement>
             <plugins>
@@ -450,16 +512,16 @@
         <module>menus/org.lorainelab.igb.menu.recentfile</module>
         <module>org.lorainelab.igb.data.model</module>
         
-        <module>datasources/org.lorainelab.igb.datasource.local</module>
-        <module>datasources/org.lorainelab.igb.datasource.http</module>
         
         <module>org.lorainelab.igb.selections</module>
         <module>org.lorainelab.igb.filehandler.registry</module>
         <module>org.lorainelab.igb.recentfiles.registry</module>
         
+        <module>tools/org.lorainelab.igb.tools.sort</module>
         <module>filetypeHandlers/org.lorainelab.igb.filehandler.bed</module>
         <module>filetypeHandlers/org.lorainelab.igb.filehandler.bigwig</module>
         <module>filetypeHandlers/org.lorainelab.igb.filehandler.bam</module>
+        <module>filetypeHandlers/org.lorainelab.igb.filehandler.tabix</module>
         
         <module>org.lorainelab.igb.visualization</module>
         
@@ -476,13 +538,28 @@
         <module>org.lorainelab.igb.search.api</module>
         <module>preferences/org.lorainelab.igb.preferencemanager.api</module>
         <module>org.lorainelab.igb.datasetloadingservice</module>
+        <module>org.lorainelab.igb.bookmark</module>
         <module>org.lorainelab.igb.kar</module>
-    
     </modules>
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <karaf.version>4.0.5</karaf.version>
         <jackson.version>2.6.3</jackson.version>
+        <htsjdk_version>2.6.1</htsjdk_version>
+        <controlsfx_version>8.40.11</controlsfx_version>
+        <commons-lang3_version>3.4</commons-lang3_version>
+        <guava_version>19.0</guava_version>
+        <fontawesomefx_version>8.9</fontawesomefx_version>
+        <miglayout_version>5.0</miglayout_version>
+        <reactfx_version>2.0-M4u1</reactfx_version>
+        <lucene_version>6.0.0_1</lucene_version>
+        <jakarta-regexp_version>1.4_1</jakarta-regexp_version>
+        <colt_version>1.2.0</colt_version>
+        <jts_version>1.13</jts_version>
+        <commons-io_version>2.4</commons-io_version>
+        <commons-csv_version>1.4</commons-csv_version>
+        <commons-codec_version>1.10</commons-codec_version>
+        <commons-compress_version>1.2</commons-compress_version>
     </properties>
 </project>

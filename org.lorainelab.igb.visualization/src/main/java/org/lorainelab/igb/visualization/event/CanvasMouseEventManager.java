@@ -3,6 +3,7 @@ package org.lorainelab.igb.visualization.event;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
+import com.google.common.collect.Range;
 import java.time.Duration;
 import java.util.Optional;
 import javafx.beans.property.ReadOnlyDoubleProperty;
@@ -12,17 +13,13 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-import org.lorainelab.igb.data.model.View;
 import org.lorainelab.igb.selections.SelectionInfoService;
+import org.lorainelab.igb.view.api.ViewService;
 import org.lorainelab.igb.visualization.model.CanvasModel;
-import static org.lorainelab.igb.visualization.model.CanvasModel.MAX_ZOOM_MODEL_COORDINATES_X;
 import org.lorainelab.igb.visualization.model.TracksModel;
 import org.lorainelab.igb.visualization.ui.CanvasRegion;
 import org.lorainelab.igb.visualization.util.BoundsUtil;
 import static org.lorainelab.igb.visualization.util.BoundsUtil.enforceRangeBounds;
-import static org.lorainelab.igb.visualization.util.CanvasUtils.exponentialScaleTransform;
-import static org.lorainelab.igb.visualization.util.CanvasUtils.invertExpScaleTransform;
-import org.lorainelab.igb.visualization.widget.TrackRenderer;
 import org.lorainelab.igb.visualization.widget.ZoomableTrackRenderer;
 import org.reactfx.EventStream;
 import org.reactfx.EventStreams;
@@ -42,6 +39,7 @@ public class CanvasMouseEventManager {
     private SelectionInfoService selectionInfoService;
     private TracksModel tracksModel;
     private Canvas canvas;
+    private ViewService viewService;
 
     @Activate
     public void activate() {
@@ -128,7 +126,7 @@ public class CanvasMouseEventManager {
 
                 tr.getTrack().orElseThrow(() -> new NullPointerException("Track reference null")).getSelectedGlyphs().stream()
                         .findFirst().ifPresent(glyphToJumpZoom -> {
-                            jumpZoom(glyphToJumpZoom.getBoundingRect(), tr, event);
+                            viewService.setViewCoordinateRange(Range.closed(glyphToJumpZoom.getBoundingRect().getMinX(), glyphToJumpZoom.getBoundingRect().getMaxX()));
                             selectionInfoService.getSelectedGlyphs().add(glyphToJumpZoom);
                         });
             });
@@ -161,7 +159,7 @@ public class CanvasMouseEventManager {
                     double xfactor = canvasModel.getxFactor().doubleValue();
                     double lastMouseDragX = lastMouseDragLocation.getX() / xfactor;
                     double lastMouseClickX = dragStartPoint.getX() / xfactor;
-                    double minX = tr.getView().getBoundingRect().getMinX();
+                    double minX = tr.getView().modelCoordRect().getMinX();
                     double x1 = minX + lastMouseClickX;
                     double x2 = minX + lastMouseDragX;
                     if (x1 > x2) {
@@ -169,8 +167,12 @@ public class CanvasMouseEventManager {
                         x1 = x2;
                         x2 = x1old;
                     }
+                    double maxX = tr.getView().modelCoordRect().getMaxX();
+                    if(x2 > maxX){
+                        x2 = maxX;
+                    }
                     final Rectangle2D zoomFocus = new Rectangle2D(x1, 0, x2 - x1, Double.MAX_VALUE);
-                    jumpZoom(zoomFocus, tr, event);
+                    viewService.setViewCoordinateRange(Range.closed(zoomFocus.getMinX(), zoomFocus.getMaxX()));
                 }
             });
 
@@ -242,26 +244,6 @@ public class CanvasMouseEventManager {
         return new Point2D(event.getScreenX(), event.getScreenY());
     }
 
-    private void jumpZoom(Rectangle2D focusRect, TrackRenderer eventLocationReference, MouseEvent event) {
-        View view = eventLocationReference.getView();
-        double modelWidth = canvasModel.getModelWidth().doubleValue();
-        double minX = Math.max(focusRect.getMinX(), view.getBoundingRect().getMinX());
-        double maxX = Math.min(focusRect.getMaxX(), view.getBoundingRect().getMaxX());
-        double width = maxX - minX;
-        if (width < MAX_ZOOM_MODEL_COORDINATES_X) {
-            width = Math.max(width * 1.1, MAX_ZOOM_MODEL_COORDINATES_X);
-            minX = Math.max((minX + focusRect.getWidth() / 2) - (width / 2), 0);
-        }
-        final double scaleXalt = eventLocationReference.getCanvasContext().getBoundingRect().getWidth() / width;
-        double scrollPosition = (minX / (modelWidth - width)) * 100;
-        final double scrollXValue = enforceRangeBounds(scrollPosition, 0, 100);
-        double newHSlider = invertExpScaleTransform(canvasRegion.getCanvas().getWidth(), canvasModel.getModelWidth().get(), scaleXalt);
-        double xFactor = exponentialScaleTransform(canvasRegion.getCanvas().getWidth(), canvasModel.getModelWidth().get(), newHSlider);
-        canvasModel.resetZoomStripe();
-        canvasModel.setxFactor(xFactor);
-        canvasModel.setScrollX(scrollXValue);
-    }
-
     @Reference
     public void setCanvasModel(CanvasModel canvasModel) {
         this.canvasModel = canvasModel;
@@ -270,6 +252,11 @@ public class CanvasMouseEventManager {
     @Reference
     public void setCanvasRegion(CanvasRegion canvasRegion) {
         this.canvasRegion = canvasRegion;
+    }
+
+    @Reference
+    public void setViewService(ViewService viewService) {
+        this.viewService = viewService;
     }
 
     @Reference

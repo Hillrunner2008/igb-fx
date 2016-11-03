@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.lorainelab</groupId>
+    <artifactId>org.lorainelab.igb.bookmark</artifactId>
+    <packaging>bundle</packaging>
+    
+    <parent>
+        <groupId>org.lorainelab</groupId>
+        <artifactId>org.lorainelab.igb</artifactId>
+        <version>0.0.1</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>biz.aQute.bnd</groupId>
+            <artifactId>bndlib</artifactId>
+        </dependency>  
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>de.jensd</groupId>
+            <artifactId>fontawesomefx</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.lorainelab</groupId>
+            <artifactId>org.lorainelab.igb.data.model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.lorainelab</groupId>
+            <artifactId>org.lorainelab.igb.tabs.api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.controlsfx</groupId>
+            <artifactId>controlsfx</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.lorainelab</groupId>
+            <artifactId>org.lorainelab.igb.utils</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.lorainelab.igb.view.api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Import-Package>
+                            !${project.artifactId}*,
+                            *
+                        </Import-Package>
+                        <Export-Package>org.lorainelab.igb.bookmarks.manager</Export-Package>
+                        <Bundle-ActivationPolicy>lazy</Bundle-ActivationPolicy>
+                        <Service-Component>*</Service-Component>
+                        <Private-Package>lorainelab.igb.bookmarks.*,org.lorainelab.igb.bookmarks.data.*,org.lorainelab.igb.bookmarks.manager.*</Private-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <name>org.lorainelab.igb.bookmark</name>
+</project>

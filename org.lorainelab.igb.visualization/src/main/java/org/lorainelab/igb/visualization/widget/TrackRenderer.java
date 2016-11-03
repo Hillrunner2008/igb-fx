@@ -7,6 +7,7 @@ package org.lorainelab.igb.visualization.widget;
 
 import java.util.Comparator;
 import java.util.Optional;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import org.lorainelab.igb.data.model.CanvasContext;
@@ -52,6 +53,8 @@ public interface TrackRenderer extends Widget {
     DoubleProperty stretchDelta();
 
     DoubleProperty activeStretchDelta();
+    
+    BooleanProperty hideLockToggle();
 
     default int getLabelHeight(double yFactor) {
         double height;

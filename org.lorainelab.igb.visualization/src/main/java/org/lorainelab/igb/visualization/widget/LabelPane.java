@@ -12,7 +12,6 @@ import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.collections.SetChangeListener;
 import javafx.geometry.Orientation;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
@@ -31,7 +30,6 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.transform.Transform;
-import org.lorainelab.igb.data.model.CanvasContext;
 import static org.lorainelab.igb.data.model.Track.MIN_TRACK_HEIGHT;
 import org.lorainelab.igb.visualization.model.CanvasModel;
 import org.lorainelab.igb.visualization.model.TrackLabel;
@@ -231,13 +229,6 @@ public class LabelPane extends ScrollPane {
         });
     }
 
-    private Rectangle2D getUpdatedContextBoundingRect(TrackLabel trackLabel, double updatedContextHeight) {
-        final CanvasContext canvasContext = trackLabel.getTrackRenderer().getCanvasContext();
-        Rectangle2D boundingRect = canvasContext.getBoundingRect();
-        final Rectangle2D updatedBounds = new Rectangle2D(boundingRect.getMinX(), boundingRect.getMinY(), boundingRect.getWidth(), updatedContextHeight);
-        return updatedBounds;
-    }
-
     private double getUpdatedContextHeight(TrackLabel trackLabel, double delta) {
         double initialContextHeight = trackLabel.getContent().getLayoutBounds().getHeight();
         double updatedContextHeight = initialContextHeight + (delta * canvasModel.getyFactor().doubleValue());
@@ -245,19 +236,6 @@ public class LabelPane extends ScrollPane {
             updatedContextHeight = MIN_TRACK_HEIGHT;
         }
         return updatedContextHeight;
-    }
-
-    private double getUpdatedTrackHeight(TrackLabel trackLabel, double updatedContextHeight) {
-        final CanvasContext canvasContext = trackLabel.getTrackRenderer().getCanvasContext();
-        Rectangle2D boundingRect = canvasContext.getBoundingRect();
-        double maxY = boundingRect.getMinY() + updatedContextHeight;
-        double trackHeight = canvasContext.getTrackHeight();
-        if (maxY > getBoundsInLocal().getMaxY()) {
-            double outOfViewDelta = (boundingRect.getMinY() + trackHeight) - getBoundsInLocal().getMaxY();
-            maxY = getBoundsInLocal().getMaxY();
-            trackHeight += outOfViewDelta;
-        }
-        return trackHeight;
     }
 
     @Reference

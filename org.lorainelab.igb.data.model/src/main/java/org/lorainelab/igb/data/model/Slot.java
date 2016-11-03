@@ -82,7 +82,7 @@ public class Slot {
     }
 
     private boolean isSlotInView(View view) {
-        Rectangle2D viewBoundingRect = view.getBoundingRect();
+        Rectangle2D viewBoundingRect = view.modelCoordRect();
         Range<Double> viewYRange = Range.closed(viewBoundingRect.getMinY(), viewBoundingRect.getMaxY());
         return Range.closed(slotYoffset, SLOT_HEIGHT + slotYoffset).isConnected(viewYRange);
     }

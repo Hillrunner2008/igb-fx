@@ -56,12 +56,12 @@ public interface Glyph {
 
     // aligns glyph within slot and clips to view bounds
     default Optional<Rectangle.Double> calculateDrawRect(View view, Rectangle2D slotRect) {
-        Rectangle2D viewRect = view.getBoundingRect();
+        Rectangle2D viewRect = view.modelCoordRect();
         Rectangle2D boundingRect = getBoundingRect();
         double alignedMinY = getAlignedMinY(boundingRect, slotRect);
         SHARED_RECT.setRect(boundingRect.getMinX(), alignedMinY, boundingRect.getWidth(), boundingRect.getHeight());
-        if (view.getMutableBoundingRect().intersects(SHARED_RECT)) {
-            intersect(view.getMutableBoundingRect(), SHARED_RECT, SHARED_RECT);
+        if (view.getMutableCoordRect().intersects(SHARED_RECT)) {
+            intersect(view.getMutableCoordRect(), SHARED_RECT, SHARED_RECT);
             SHARED_RECT.setRect(SHARED_RECT.x - viewRect.getMinX(), SHARED_RECT.y - viewRect.getMinY(), SHARED_RECT.width, SHARED_RECT.height);
             return Optional.of(SHARED_RECT);
         }
@@ -86,7 +86,7 @@ public interface Glyph {
                 break;
             case TOP_CENTER:
                 double centerY = slotRect.getMinY() + (SLOT_HEIGHT - boundingRect.getHeight()) / 2;
-                y = centerY - LABEL_OFFSET_PADDED_TOP;
+                y = centerY - LABEL_OFFSET_PADDED_BOTTOM;
                 break;
             case CUSTOM:
                 y = boundingRect.getMinY();

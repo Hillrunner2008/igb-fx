@@ -6,6 +6,7 @@ import aQute.bnd.annotation.component.Reference;
 import javafx.application.Platform;
 import javafx.scene.control.SplitPane;
 import javafx.scene.layout.AnchorPane;
+import org.controlsfx.control.action.Action;
 import org.lorainelab.igb.visualization.tabs.TabPaneManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,7 @@ public class MainSplitPane extends SplitPane {
     private AnchorPane rightSide;
 
     public MainSplitPane() {
+        Action a;
         leftSide = new AnchorPane();
         rightSide = new AnchorPane();
         SplitPane.setResizableWithParent(rightSide, Boolean.FALSE);

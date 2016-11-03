@@ -54,6 +54,10 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.lorainelab</groupId>
+            <artifactId>org.lorainelab.igb.search.api</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

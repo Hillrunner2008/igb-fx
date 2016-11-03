@@ -111,11 +111,13 @@ public class TracksModel {
     }
 
     private void loadDataSets(GenomeVersion gv, Chromosome chromosome) {
-        gv.getLoadedDataSets().forEach(dataSet -> {
-            if (dataSet.isGraphType()) {
+        gv.getLoadedDataSets().forEach(loadedDataSet -> {
+            if (loadedDataSet.isGraphType()) {
+                final ZoomableTrackRenderer graphTrackRenderer = new ZoomableTrackRenderer(canvasRegion.getCanvas(), loadedDataSet.getGraphTrack(), selectedChromosome);
+                trackRenderers.add(graphTrackRenderer);
             } else {
-                Track positiveStrandTrack = dataSet.getPositiveStrandTrack(chromosome.getName());
-                Track negativeStrandTrack = dataSet.getNegativeStrandTrack(gv.getSelectedChromosomeProperty().get().get().getName());
+                Track positiveStrandTrack = loadedDataSet.getPositiveStrandTrack(chromosome.getName());
+                Track negativeStrandTrack = loadedDataSet.getNegativeStrandTrack(gv.getSelectedChromosomeProperty().get().get().getName());
                 final ZoomableTrackRenderer positiveStrandTrackRenderer = new ZoomableTrackRenderer(canvasRegion.getCanvas(), positiveStrandTrack, chromosome);
                 positiveStrandTrackRenderer.setWeight(getMinWeight());
                 final ZoomableTrackRenderer negativeStrandTrackRenderer = new ZoomableTrackRenderer(canvasRegion.getCanvas(), negativeStrandTrack, chromosome);

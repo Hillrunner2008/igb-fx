@@ -3,8 +3,10 @@ package org.lorainelab.igb.visualization.widget;
 import com.google.common.collect.Range;
 import java.util.Optional;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
@@ -45,12 +47,14 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     private ReadOnlyBooleanProperty isHeightLocked;
     private DoubleProperty stretchDelta;
     private DoubleProperty activeStretchDelta;
+    private SimpleBooleanProperty hideLockToggle;
 
     public ZoomableTrackRenderer(Canvas canvas, Track track, Chromosome chromosome) {
         this.weight = 0;
         this.track = track;
         this.chromosome = chromosome;
         this.modelWidth = chromosome.getLength();
+        hideLockToggle = new SimpleBooleanProperty(track.allowLockToggle());
         stretchDelta = new SimpleDoubleProperty(0);
         activeStretchDelta = new SimpleDoubleProperty(0);
         canvasContext = new CanvasContext(canvas, DEFAULT_HEIGHT, 0);
@@ -85,7 +89,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
             final double visibleVirtualCoordinatesY = canvasContext.getBoundingRect().getHeight() / view.getYfactor();
             double xOffset = Math.round((scrollX / 100) * (modelWidth - visibleVirtualCoordinatesX));
             double yOffset = canvasContext.getRelativeTrackOffset() / view.getYfactor();
-            view.setBoundingRect(new Rectangle2D(xOffset, yOffset, visibleVirtualCoordinatesX, visibleVirtualCoordinatesY));
+            view.setModelCoordRect(new Rectangle2D(xOffset, yOffset, visibleVirtualCoordinatesX, visibleVirtualCoordinatesY));
             if (canvasContext.isVisible()) {
                 draw(canvasModel);
             }
@@ -97,6 +101,9 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         view.setXfactor(xFactor);
         if (canvasContext.isVisible()) {
             double scaleToY = canvasContext.getTrackHeight() / track.getModelHeight();
+            if (Double.isInfinite(scaleToY)) {
+                scaleToY = 1;
+            }
             view.setYfactor(scaleToY);
             updateView(canvasModel);
         }
@@ -185,26 +192,9 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     private Rectangle2D canvasToViewCoordinates(Point2D clickLocation) {
         double x = Math.floor(clickLocation.getX() / view.getXfactor());
         double y = Math.floor((clickLocation.getY() - canvasContext.getBoundingRect().getMinY()));
-        double offsetX = view.getBoundingRect().getMinX();
-//        double offsetY = view.getBoundingRect().getMinY();
+        double offsetX = view.modelCoordRect().getMinX();
         x += offsetX;
-//        y += offsetY;
         Rectangle2D mouseEventBoundingBox = new Rectangle2D(x, y, 1, 1);
-        return mouseEventBoundingBox;
-    }
-
-    private Rectangle2D canvasToViewCoordinates(Rectangle2D localSelectionRectangle) {
-        double minX = Math.floor(localSelectionRectangle.getMinX() / view.getXfactor());
-        double maxX = Math.floor(localSelectionRectangle.getMaxX() / view.getXfactor());
-        double minY = Math.floor((localSelectionRectangle.getMinY() - canvasContext.getBoundingRect().getMinY()) / view.getYfactor());
-        double maxY = Math.floor((localSelectionRectangle.getMaxY() - canvasContext.getBoundingRect().getMinY()) / view.getYfactor());
-        double offsetX = view.getBoundingRect().getMinX();
-        double offsetY = view.getBoundingRect().getMinY();
-        minX += offsetX;
-        maxX += offsetX;
-        minY += offsetY;
-        maxY += offsetY;
-        Rectangle2D mouseEventBoundingBox = new Rectangle2D(minX, minY, maxX - minX, maxY - minY);
         return mouseEventBoundingBox;
     }
 
@@ -275,5 +265,10 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     @Override
     public DoubleProperty activeStretchDelta() {
         return activeStretchDelta;
+    }
+
+    @Override
+    public BooleanProperty hideLockToggle() {
+        return hideLockToggle;
     }
 }

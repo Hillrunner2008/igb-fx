@@ -14,8 +14,11 @@ public class Palette {
     public static Color DEFAULT_LINE_FILL = Color.web("#A9B7C6");
     public static Color DEFAULT_GLYPH_FILL = Color.web("#0084B4");
     public static Color DEFAULT_LABEL_COLOR = Color.web("#A9B7C6");
-    
+
     public static Color SELECTION_COLOR = Color.web("#DC322F");
+
+    public static Color GRAPH_GRID_FILL = Color.web("#616060");
+    public static Color GRAPH_FILL = Color.web("#E24D42");
 
     public static Color CLICK_DRAG_HIGHLIGHT = Color.rgb(33, 150, 243, .3);
 

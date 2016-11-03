@@ -1,0 +1,37 @@
+.chart {
+    -fx-background-color: #1E1E1E;
+}
+.chart-content {
+    -fx-background-color: #1E1E1E;
+}
+
+.axis-label {
+    -fx-text-fill: #808080;
+}
+
+.chart-plot-background {
+    -fx-background-color: #1E1E1E;
+}
+.chart-vertical-grid-lines {
+    visibility: hidden;
+}
+.chart-horizontal-grid-lines {
+    visibility: hidden;
+}
+.chart-alternative-row-fill {
+    -fx-background-color: #1E1E1E;
+}
+.chart-alternative-column-fill {
+    -fx-background-color: #1E1E1E;
+}
+
+
+
+/*            plotContent.getStyleClass().setAll("plot-content");
+            plotBackground.getStyleClass().setAll("chart-plot-background");
+            verticalRowFill.getStyleClass().setAll("chart-alternative-column-fill");
+            horizontalRowFill.getStyleClass().setAll("chart-alternative-row-fill");
+            verticalGridLines.getStyleClass().setAll("chart-vertical-grid-lines");
+            horizontalGridLines.getStyleClass().setAll("chart-horizontal-grid-lines");
+            verticalZeroLine.getStyleClass().setAll("chart-vertical-zero-line");
+            horizontalZeroLine.getStyleClass().setAll("chart-horizontal-zero-line");*/
