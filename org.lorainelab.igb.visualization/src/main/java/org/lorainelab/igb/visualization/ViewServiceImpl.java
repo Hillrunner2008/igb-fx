@@ -7,6 +7,8 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import java.util.Optional;
 import javafx.geometry.Rectangle2D;
+import org.lorainelab.igb.data.model.Chromosome;
+import org.lorainelab.igb.data.model.GenomeVersionRegistry;
 import org.lorainelab.igb.data.model.View;
 import org.lorainelab.igb.data.model.action.AbstractIgbAction;
 import org.lorainelab.igb.data.model.action.IgbAction;
@@ -29,6 +31,7 @@ public class ViewServiceImpl extends AbstractIgbAction implements ViewService, I
     private CanvasModel canvasModel;
     private TracksModel tracksModel;
     private CanvasRegion canvasRegion;
+    private GenomeVersionRegistry genomeVersionRegistry;
 
     public ViewServiceImpl() {
         setText("Refresh Main View");
@@ -54,9 +57,9 @@ public class ViewServiceImpl extends AbstractIgbAction implements ViewService, I
     public Optional<Range<Double>> getViewCoordinates() {
         final Optional<CoordinateTrackRenderer> coordinateTrackRenderer = tracksModel.getCoordinateTrackRenderer();
         if (coordinateTrackRenderer.isPresent()) {
-            Rectangle2D boundingRect = coordinateTrackRenderer.get().getCanvasContext().getBoundingRect();
+            Rectangle2D boundingRect = coordinateTrackRenderer.get().getView().modelCoordRect();
             return Optional.of(Range.closed(boundingRect.getMinX(), boundingRect.getMaxX()));
-        }
+        }   
         return Optional.empty();
     }
 
@@ -66,8 +69,8 @@ public class ViewServiceImpl extends AbstractIgbAction implements ViewService, I
             final double canvasRegionWidth = canvasRegion.getCanvas().getWidth();
             View view = tr.getView();
             double modelWidth = canvasModel.getModelWidth().doubleValue();
-            double minX = Math.max(range.lowerEndpoint(), view.modelCoordRect().getMinX());
-            double maxX = Math.min(range.upperEndpoint(), view.modelCoordRect().getMaxX());
+            double minX = range.lowerEndpoint();//Math.max(range.lowerEndpoint(), view.modelCoordRect().getMinX());
+            double maxX = range.upperEndpoint();//Math.min(range.upperEndpoint(), view.modelCoordRect().getMaxX());
             double width = maxX - minX;
             double rangeCenter = minX + Math.round(width / 2);
             double maxZoom = exponentialScaleTransform(canvasRegion.getWidth(), modelWidth, 100);
@@ -94,4 +97,16 @@ public class ViewServiceImpl extends AbstractIgbAction implements ViewService, I
         this.canvasRegion = canvasRegion;
     }
 
+    @Override
+    public void setViewCoordinateRange(Range<Double> range, Chromosome chromosome) {
+        genomeVersionRegistry.getSelectedGenomeVersion().get().ifPresent(gv -> {
+            gv.setSelectedChromosome(chromosome);
+            setViewCoordinateRange(range);
+        });
+    }
+
+    @Reference
+    public void setGenomeVersionRegistry(GenomeVersionRegistry genomeVersionRegistry) {
+        this.genomeVersionRegistry = genomeVersionRegistry;
+    }
 }

@@ -1,6 +1,5 @@
 package lorainelab.igb.bookmarks;
 
-import org.lorainelab.igb.bookmarks.data.Bookmark;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
@@ -39,6 +38,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
 import javafx.util.Callback;
+import org.lorainelab.igb.bookmarks.data.Bookmark;
 import org.lorainelab.igb.bookmarks.data.BookmarkFolder;
 import org.lorainelab.igb.bookmarks.manager.BookmarkManager;
 import org.lorainelab.igb.tabs.api.TabDockingPosition;
@@ -194,7 +194,7 @@ public class BookmarksTab implements TabProvider {
             if (newValue != null) {
                 selectedBookmark = newValue.getValue();
                 populateDetails(selectedBookmark);
-            }else{
+            } else {
                 selectedBookmark = null;
             }
         });
@@ -205,9 +205,9 @@ public class BookmarksTab implements TabProvider {
         TreeItem<Bookmark> rootItem = new TreeItem<>(root);
         root.setParent(null);
         rootItem.setExpanded(true);
-
+        TreeItem<Bookmark> item = addBookmarks(root);
         Platform.runLater(() -> {
-            bookMarkTree.setRoot(addBookmarks(root));
+            bookMarkTree.setRoot(item);
             bookMarkTree.layout();
         });
     }
@@ -223,21 +223,26 @@ public class BookmarksTab implements TabProvider {
         }
     }
 
+    ListChangeListener changeListener = new ListChangeListener<Bookmark>() {
+        @Override
+        public void onChanged(ListChangeListener.Change<? extends Bookmark> c) {
+            setData();
+        }
+    };
+
     private TreeItem<Bookmark> addBookmarks(Bookmark bookmark) {
         TreeItem item = new TreeItem(bookmark);
         item.expandedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
             bookmark.setExpanded(newValue);
         });
-        bookmark.getChildren().ifPresent(data -> {
+        bookmark.getChildren().ifPresent((ObservableList<Bookmark> data) -> {
             data.stream().forEach(b -> {
                 if (b.getChildren() != null) {
                     item.getChildren().add(addBookmarks(b));
                 }
             });
-
-            data.addListener((ListChangeListener.Change<? extends Bookmark> c) -> {
-                    setData();
-            });
+            data.removeListener(changeListener);
+            data.addListener(changeListener);
             item.setExpanded(bookmark.isExpanded());
         });
         return item;
@@ -263,87 +268,94 @@ public class BookmarksTab implements TabProvider {
         this.bookmarkManager = bookmarkManager;
     }
 
-}
-
-class CustomTreeCell extends TreeCell<Bookmark> {
-
-    Bookmark bookmark;
-    TreeView<Bookmark> parent;
     static Bookmark draggedBookmark;
 
-    public CustomTreeCell(TreeView<Bookmark> param) {
-        parent = param;
+    class CustomTreeCell extends TreeCell<Bookmark> {
 
-        setOnDragDetected((MouseEvent event) -> {
-            if (bookmark == null) {
-                return;
-            }
-            draggedBookmark = bookmark;
-            Dragboard dragBoard = startDragAndDrop(TransferMode.MOVE);
-            ClipboardContent content = new ClipboardContent();
-            content.put(DataFormat.PLAIN_TEXT, bookmark.getName().get());
-            dragBoard.setContent(content);
-            event.consume();
-        });
+        Bookmark bookmark;
+        TreeView<Bookmark> parent;
 
-        setOnDragOver((DragEvent dragEvent) -> {
-            if (bookmark != draggedBookmark) {
-                dragEvent.acceptTransferModes(TransferMode.MOVE);
-            }
-            if (dragEvent.getDragboard().hasString()) {
-                String valueToMove = dragEvent.getDragboard().getString();
-                if (!valueToMove.matches(bookmark.getName().get())) {
+        public CustomTreeCell(TreeView<Bookmark> param) {
+            parent = param;
+
+            setOnDragDetected((MouseEvent event) -> {
+                if (bookmark == null) {
+                    return;
                 }
-            }
-            dragEvent.consume();
-        });
+                draggedBookmark = bookmark;
+                Dragboard dragBoard = startDragAndDrop(TransferMode.MOVE);
+                ClipboardContent content = new ClipboardContent();
+                content.put(DataFormat.PLAIN_TEXT, bookmark.getName().get());
+                dragBoard.setContent(content);
+                event.consume();
+            });
 
-        setOnDragDropped((DragEvent event) -> {
-            if (draggedBookmark != null) {
-                Bookmark p = bookmark;
-                while ((p = p.getParent()) != null) {
-                    if (p.equals(draggedBookmark)) {
-                        Platform.runLater(() -> {
-                            Alert dlg = new Alert(Alert.AlertType.INFORMATION);
-                            dlg.setWidth(600);
-                            dlg.setTitle("Operation not allowed");
-                            dlg.setHeaderText("Operation not allowed");
-                            dlg.setContentText("Cannot move parent into its child");
-                            dlg.show();
+            setOnDragOver((DragEvent dragEvent) -> {
+                if (bookmark != draggedBookmark) {
+                    dragEvent.acceptTransferModes(TransferMode.MOVE);
+                }
+                if (dragEvent.getDragboard().hasString()) {
+                    String valueToMove = dragEvent.getDragboard().getString();
+                }
+                dragEvent.consume();
+            });
+
+            setOnDragDropped((DragEvent event) -> {
+                if (draggedBookmark != null) {
+                    Bookmark p = bookmark;
+                    while ((p = p.getParent()) != null) {
+                        if (p.equals(draggedBookmark)) {
+                            Platform.runLater(() -> {
+                                Alert dlg = new Alert(Alert.AlertType.INFORMATION);
+                                dlg.setWidth(600);
+                                dlg.setTitle("Operation not allowed");
+                                dlg.setHeaderText("Operation not allowed");
+                                dlg.setContentText("Cannot move parent into its child");
+                                dlg.show();
+                            });
+                            return;
+                        }
+                    }
+                    draggedBookmark.getParent().getChildren().get().remove(draggedBookmark);
+                    if (!bookmark.isLeaf()) {
+                        bookmark.addChild(draggedBookmark);
+                        draggedBookmark.setParent(bookmark);
+                    } else {
+                        bookmark.getParent().getChildren().ifPresent((ObservableList<Bookmark> children) -> {
+                            int position = children.indexOf(bookmark);
+                            children.add(position + 1, draggedBookmark);
+                            draggedBookmark.setParent(bookmark.getParent());
                         });
-                        return;
                     }
                 }
-                draggedBookmark.getParent().getChildren().get().remove(draggedBookmark);
-                if (!bookmark.isLeaf()) {
-                    bookmark.addChild(draggedBookmark);
-                    draggedBookmark.setParent(bookmark);
-                } else {
-                    bookmark.getParent().getChildren().ifPresent((ObservableList<Bookmark> children) -> {
-                        int position = children.indexOf(bookmark);
-                        children.add(position + 1, draggedBookmark);
-                        draggedBookmark.setParent(bookmark.getParent());
-                    });
-                }
-            }
-        });
-    }
+                event.consume();
+            });
 
-    @Override
-    protected void updateItem(Bookmark item, boolean empty) {
-        super.updateItem(item, empty);
-        bookmark = item;
-        if (empty || bookmark == null) {
-            setText(null);
-            setGraphic(null);
-        } else {
-            bookmark.getName().addListener(new ChangeListener<String>() {
-                @Override
-                public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                    setText(newValue);
+            setOnMouseClicked((MouseEvent event) -> {
+                if (bookmark.isLeaf() && event.getClickCount() > 1) {
+                    bookmarkManager.restoreBookmark(bookmark);
+                    event.consume();
                 }
             });
-            setText(getItem() == null ? "" : getItem().getName().get());
+
+        }
+
+        @Override
+        protected void updateItem(Bookmark item, boolean empty) {
+            super.updateItem(item, empty);
+            bookmark = item;
+            if (empty || bookmark == null) {
+                setText(null);
+                setGraphic(null);
+            } else {
+                bookmark.getName().addListener(new ChangeListener<String>() {
+                    @Override
+                    public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                        setText(newValue);
+                    }
+                });
+                setText(getItem() == null ? "" : getItem().getName().get());
+            }
         }
     }
 }
