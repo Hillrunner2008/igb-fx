@@ -168,6 +168,9 @@ public class CanvasMouseEventManager {
                         x2 = x1old;
                     }
                     double maxX = tr.getView().modelCoordRect().getMaxX();
+                    if(x1<minX){
+                        x1 = minX;
+                    }
                     if(x2 > maxX){
                         x2 = maxX;
                     }
