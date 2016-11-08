@@ -46,6 +46,11 @@
             <groupId>org.lorainelab</groupId>
             <artifactId>org.lorainelab.igb.preferences</artifactId>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.lorainelab.igb.recentgenome.registry</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

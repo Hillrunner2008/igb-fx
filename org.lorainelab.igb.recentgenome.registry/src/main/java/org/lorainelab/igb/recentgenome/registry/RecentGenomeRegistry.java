@@ -6,6 +6,7 @@
 package org.lorainelab.igb.recentgenome.registry;
 
 import javafx.beans.property.ReadOnlyListWrapper;
+import org.lorainelab.igb.data.model.GenomeVersion;
 
 /**
  *
@@ -13,9 +14,9 @@ import javafx.beans.property.ReadOnlyListWrapper;
  */
 public interface RecentGenomeRegistry {
 
-    ReadOnlyListWrapper<String> getRecentGenomes();
+    ReadOnlyListWrapper<GenomeVersion> getRecentGenomes();
 
-    void addRecentGenome(String recentFile);
+    void addRecentGenome(GenomeVersion recentGenomeVersion);
 
     void clearRecentGenomes();
 }
