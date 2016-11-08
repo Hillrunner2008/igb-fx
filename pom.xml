@@ -185,7 +185,7 @@
                 <artifactId>org.apache.servicemix.bundles.jakarta-regexp</artifactId>
                 <version>${jakarta-regexp_version}</version>
             </dependency>
-             <dependency>
+            <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-compress</artifactId>
                 <version>${commons-compress_version}</version>
@@ -331,6 +331,18 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.menu.recentgenome</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.menu.recentfile</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>org.lorainelab.igb.menu.loadurl</artifactId>
                 <version>${project.version}</version>
                 <scope>provided</scope>
@@ -424,6 +436,11 @@
             </dependency>
             <dependency>
                 <groupId>org.lorainelab</groupId>
+                <artifactId>org.lorainelab.igb.recentgenome.registry</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.lorainelab</groupId>
                 <artifactId>org.lorainelab.igb.tools.sort</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -510,6 +527,7 @@
         <module>menus/org.lorainelab.igb.menu.about</module>
         <module>menus/org.lorainelab.igb.menu.customgenome</module>
         <module>menus/org.lorainelab.igb.menu.recentfile</module>
+        <module>menus/org.lorainelab.igb.menu.recentgenome</module>
         <module>org.lorainelab.igb.data.model</module>
         
         
@@ -539,6 +557,7 @@
         <module>preferences/org.lorainelab.igb.preferencemanager.api</module>
         <module>org.lorainelab.igb.datasetloadingservice</module>
         <module>org.lorainelab.igb.bookmark</module>
+        <module>org.lorainelab.igb.recentgenome.registry</module>
         <module>org.lorainelab.igb.kar</module>
     </modules>
     <properties>
