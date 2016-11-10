@@ -76,6 +76,7 @@ public class RecentGenomeMenuEntry implements MenuBarEntryProvider {
         if (new File(fileName).exists()) {
             menuItem.setOnAction(action -> {
                 //load genome
+                recentGenomeRegistry.addRecentGenome(recentGenome);
                 genomeVersionRegistry.setSelectedGenomeVersion(recentGenome);
             });
         } else {

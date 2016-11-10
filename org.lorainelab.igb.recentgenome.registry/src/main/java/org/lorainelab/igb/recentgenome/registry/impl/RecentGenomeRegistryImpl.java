@@ -24,8 +24,6 @@ import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import static java.util.stream.Collectors.toList;
 import javafx.beans.property.ReadOnlyListWrapper;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
@@ -66,12 +64,13 @@ public class RecentGenomeRegistryImpl implements RecentGenomeRegistry {
     @Activate
     public void activate() {
         initializeFromPreferences();
-        selectionInfoService.getSelectedGenomeVersion().addListener(new ChangeListener<Optional<GenomeVersion>>() {
-            @Override
-            public void changed(ObservableValue<? extends Optional<GenomeVersion>> observable, Optional<GenomeVersion> oldValue, Optional<GenomeVersion> newValue) {
-                newValue.ifPresent(newGenome -> addRecentGenome(newGenome));
-            }
-        });
+        //Add if non-custom genomes are to be stored in recent
+//        selectionInfoService.getSelectedGenomeVersion().addListener(new ChangeListener<Optional<GenomeVersion>>() {
+//            @Override
+//            public void changed(ObservableValue<? extends Optional<GenomeVersion>> observable, Optional<GenomeVersion> oldValue, Optional<GenomeVersion> newValue) {
+//                newValue.ifPresent(newGenome -> addRecentGenome(newGenome));
+//            }
+//        });
 
         genomeVersionRegistry.getRegisteredGenomeVersions().addListener(new SetChangeListener<GenomeVersion>() {
             @Override
