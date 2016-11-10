@@ -17,18 +17,23 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import static java.util.stream.Collectors.toList;
 import javafx.beans.property.ReadOnlyListWrapper;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.SetChangeListener;
 import org.lorainelab.igb.data.model.GenomeVersion;
 import org.lorainelab.igb.data.model.GenomeVersionRegistry;
 import org.lorainelab.igb.preferences.PreferenceUtils;
 import org.lorainelab.igb.recentgenome.registry.RecentGenomeRegistry;
+import org.lorainelab.igb.selections.SelectionInfoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,16 +55,33 @@ public class RecentGenomeRegistryImpl implements RecentGenomeRegistry {
     private static final Comparator<? super RecentGenomeEntry> comparator = (o1, o2) -> o1.timeStamp.compareTo(o2.timeStamp);
     private static final int oldFileCountLimit = 5;
     private GenomeVersionRegistry genomeVersionRegistry;
+    private SelectionInfoService selectionInfoService;
 
     public RecentGenomeRegistryImpl() {
         md5HashFunction = Hashing.md5();
         recentFiles = EvictingQueue.create(oldFileCountLimit);
         modulePreferencesNode = PreferenceUtils.getPackagePrefsNode(RecentGenomeRegistryImpl.class);
     }
-    
+
     @Activate
-    public void activate(){
-         initializeFromPreferences();
+    public void activate() {
+        initializeFromPreferences();
+        selectionInfoService.getSelectedGenomeVersion().addListener(new ChangeListener<Optional<GenomeVersion>>() {
+            @Override
+            public void changed(ObservableValue<? extends Optional<GenomeVersion>> observable, Optional<GenomeVersion> oldValue, Optional<GenomeVersion> newValue) {
+                newValue.ifPresent(newGenome -> addRecentGenome(newGenome));
+            }
+        });
+
+        genomeVersionRegistry.getRegisteredGenomeVersions().addListener(new SetChangeListener<GenomeVersion>() {
+            @Override
+            public void onChanged(SetChangeListener.Change<? extends GenomeVersion> change) {
+                if (change.wasRemoved()) {
+                    removeRecentFileFromPreferences(change.getElementRemoved());
+                    initializeFromPreferences();
+                }
+            }
+        });
     }
 
     private void removeRecentFileFromPreferences(GenomeVersion recentFile) {
@@ -165,6 +187,11 @@ public class RecentGenomeRegistryImpl implements RecentGenomeRegistry {
         this.genomeVersionRegistry = genomeVersionRegistry;
     }
 
+    @Reference
+    public void setSelectionInfoService(SelectionInfoService selectionInfoService) {
+        this.selectionInfoService = selectionInfoService;
+    }
+
     private class RecentGenomeEntry implements Comparator<RecentGenomeEntry> {
 
         private GenomeVersion genome;
@@ -190,6 +217,28 @@ public class RecentGenomeRegistryImpl implements RecentGenomeRegistry {
         @Override
         public int compare(RecentGenomeEntry o1, RecentGenomeEntry o2) {
             return o1.timeStamp.compareTo(o2.timeStamp);
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 5;
+            hash = 29 * hash + Objects.hashCode(this.genome);
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final RecentGenomeEntry other = (RecentGenomeEntry) obj;
+            return genome.equals(other.genome);
         }
 
     }

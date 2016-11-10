@@ -43,6 +43,11 @@
             <artifactId>org.lorainelab.igb.data.model</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.lorainelab.igb.selections</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

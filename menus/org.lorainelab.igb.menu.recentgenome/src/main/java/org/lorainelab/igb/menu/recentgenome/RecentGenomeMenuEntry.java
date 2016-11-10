@@ -9,7 +9,6 @@ import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Lists;
-import com.google.common.io.Files;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
@@ -73,7 +72,7 @@ public class RecentGenomeMenuEntry implements MenuBarEntryProvider {
 
     private MenuItem createRecentFileMenuItem(GenomeVersion recentGenome) {
         String fileName = recentGenome.getReferenceSequenceProvider().getPath();
-        final MenuItem menuItem = new MenuItem(Files.getNameWithoutExtension(fileName) + "." + Files.getFileExtension(fileName));
+        final MenuItem menuItem = new MenuItem(recentGenome.getName().get());
         if (new File(fileName).exists()) {
             menuItem.setOnAction(action -> {
                 //load genome
