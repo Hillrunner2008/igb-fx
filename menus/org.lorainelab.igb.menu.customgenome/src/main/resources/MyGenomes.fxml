@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+
+
+<AnchorPane fx:id="anchroPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <TableView fx:id="genomesTable" prefHeight="365.0" prefWidth="600.0" AnchorPane.bottomAnchor="35.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <columns>
+          <TableColumn fx:id="speciesColumn" prefWidth="135.0" text="Species" />
+          <TableColumn fx:id="versionColumn" prefWidth="151.0" text="Version" />
+            <TableColumn fx:id="filePathCoulmn" prefWidth="290.0" text="Sequence file" />
+            <TableColumn fx:id="deleteColumn" minWidth="0.0" prefWidth="21.0" />
+        </columns>
+      </TableView>
+      <Button fx:id="saveButton" layoutX="149.0" layoutY="371.0" mnemonicParsing="false" text="Save" />
+      <Button fx:id="cancelButton" layoutX="381.0" layoutY="372.0" mnemonicParsing="false" text="Cancel" />
+   </children>
+</AnchorPane>
