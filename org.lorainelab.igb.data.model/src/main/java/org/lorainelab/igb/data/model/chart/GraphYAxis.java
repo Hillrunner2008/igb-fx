@@ -96,7 +96,7 @@ public class GraphYAxis {
             gc.save();
             final Rectangle2D canvasCoordRect = view.getCanvasContext().getBoundingRect();
             gc.setGlobalAlpha(.7);
-            gc.setFill(GRAPH_GRID_FILL);
+            gc.setFill(GRAPH_GRID_FILL.get());
             final double minX = yAxisWidth / view.getXfactor();
             final double width = (canvasCoordRect.getWidth() / view.getXfactor()) - minX;
             final double height = 1 / view.getYfactor();

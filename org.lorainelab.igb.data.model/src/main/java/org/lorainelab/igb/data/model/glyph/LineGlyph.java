@@ -32,12 +32,12 @@ public class LineGlyph implements Glyph {
 
     @Override
     public Color getFill() {
-        return DEFAULT_LINE_FILL;
+        return DEFAULT_LINE_FILL.get();
     }
 
     @Override
     public Color getStrokeColor() {
-        return DEFAULT_LINE_FILL;
+        return DEFAULT_LINE_FILL.get();
     }
 
     @Override
@@ -46,8 +46,8 @@ public class LineGlyph implements Glyph {
     }
 
     @Override
-    public void draw(GraphicsContext gc, View view, Rectangle2D slotBoundingViewRect) {
-        calculateDrawRect(view, slotBoundingViewRect).ifPresent(drawRect -> {
+    public void draw(GraphicsContext gc, View view, double slotMinY) {
+        calculateDrawRect(view, slotMinY).ifPresent(drawRect -> {
             double x = drawRect.getMinX();
             double y = drawRect.getMinY();
             double width = drawRect.getWidth();

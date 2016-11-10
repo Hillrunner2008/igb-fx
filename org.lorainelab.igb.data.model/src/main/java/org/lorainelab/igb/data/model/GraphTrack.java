@@ -43,7 +43,7 @@ public class GraphTrack implements Track {
         double trackPositionOffset = canvasContext.getBoundingRect().getMinY() / view.getYfactor();
         gc.save();
         gc.translate(0, trackPositionOffset);
-        glyphs.forEach(child -> child.getChildren().forEach(c -> c.draw(gc, view, view.modelCoordRect())));
+        glyphs.forEach(child -> child.getChildren().forEach(c -> c.draw(gc, view, view.modelCoordRect().getMinY())));
         gc.restore();
     }
 

@@ -5,15 +5,30 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import java.io.IOException;
 import java.net.URL;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.control.Label;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import static org.lorainelab.igb.data.model.util.ColorUtils.toHex;
+import org.lorainelab.igb.data.model.util.Palette;
+import static org.lorainelab.igb.data.model.util.Palette.DEFAULT_GLYPH_FILL;
+import static org.lorainelab.igb.data.model.util.Palette.DEFAULT_LABEL_COLOR;
 import static org.lorainelab.igb.utils.FXUtilities.runAndWait;
 import org.lorainelab.igb.visualization.widget.CoordinateTrackRenderer;
 import org.lorainelab.igb.visualization.widget.TrackRenderer;
@@ -56,15 +71,32 @@ public class TrackLabel {
         this.isHeightLocked = isHeightLocked;
         this.trackRenderer = trackRenderer;
         this.trackLabelText = trackLabelText;
-        final URL resource = TrackLabel.class.getClassLoader().getResource("trackLabelAlt.fxml");
+        final URL resource = TrackLabel.class.getClassLoader().getResource("trackLabel.fxml");
         FXMLLoader fxmlLoader = new FXMLLoader(resource);
         fxmlLoader.setClassLoader(this.getClass().getClassLoader());
         fxmlLoader.setController(this);
         runAndWait(() -> {
             try {
                 fxmlLoader.load();
+                trackLabel.textFillProperty().bind(Palette.DEFAULT_LABEL_COLOR);
+                root.setBackground(TRACK_LABEL_BG.get());
+                root.setStyle("-fx-border-color:" + toHex(DEFAULT_LABEL_COLOR.get()) + "; -fx-border-width: 0 0 1 0;");
+                leftSideColorIndicator.setStyle("-fx-background-color:" + toHex(DEFAULT_GLYPH_FILL.get()));
+                TRACK_LABEL_BG.addListener((ObservableValue<? extends Background> observable, Background oldValue, Background updatedBg) -> {
+                    root.setBackground(updatedBg);
+                    root.setStyle("-fx-border-color:" + toHex(DEFAULT_LABEL_COLOR.get()) + "; -fx-border-width: 0 0 1 0;");
+                    leftSideColorIndicator.setStyle("-fx-background-color:" + toHex(DEFAULT_GLYPH_FILL.get()));
+                });
+                TRACK_LABEL_BG.addListener(new InvalidationListener() {
+                    @Override
+                    public void invalidated(Observable observable) {
+                        root.setStyle("-fx-border-color:" + toHex(DEFAULT_LABEL_COLOR.get()) + "; -fx-border-width: 0 0 1 0;");
+                        leftSideColorIndicator.setStyle("-fx-background-color:" + toHex(DEFAULT_GLYPH_FILL.get()));
+                    }
+                });
                 lockIcon = new FontAwesomeIconView(FontAwesomeIcon.LOCK);
-                lockIcon.setFill(unLockIcon.getFill());
+                unLockIcon.fillProperty().bind(DEFAULT_LABEL_COLOR);
+                lockIcon.fillProperty().bind(DEFAULT_LABEL_COLOR);
                 lockIcon.setSize(unLockIcon.getSize());
                 if (trackRenderer.hideLockToggle().get()) {
                     lockIconContainer.getChildren().remove(unLockIcon);
@@ -139,4 +171,26 @@ public class TrackLabel {
         this.trackLabelText = trackLabelText;
     }
 
+    private static final ObjectProperty<Background> TRACK_LABEL_BG = new SimpleObjectProperty<>(new Background(new BackgroundFill(Palette.DEFAULT_CANVAS_BG.get(), CornerRadii.EMPTY, Insets.EMPTY)));
+
+    static {
+        Palette.DEFAULT_CANVAS_BG.addListener(new ChangeListener<Color>() {
+            @Override
+            public void changed(ObservableValue<? extends Color> observable, Color oldValue, Color newValue) {
+                TRACK_LABEL_BG.set(new Background(new BackgroundFill(newValue, CornerRadii.EMPTY, Insets.EMPTY)));
+            }
+        });
+        Palette.DEFAULT_LABEL_COLOR.addListener(new ChangeListener<Color>() {
+            @Override
+            public void changed(ObservableValue<? extends Color> observable, Color oldValue, Color newValue) {
+                TRACK_LABEL_BG.set(new Background(new BackgroundFill(Palette.DEFAULT_CANVAS_BG.get(), CornerRadii.EMPTY, Insets.EMPTY)));
+            }
+        });
+        Palette.DEFAULT_GLYPH_FILL.addListener(new ChangeListener<Color>() {
+            @Override
+            public void changed(ObservableValue<? extends Color> observable, Color oldValue, Color newValue) {
+                TRACK_LABEL_BG.set(new Background(new BackgroundFill(Palette.DEFAULT_CANVAS_BG.get(), CornerRadii.EMPTY, Insets.EMPTY)));
+            }
+        });
+    }
 }

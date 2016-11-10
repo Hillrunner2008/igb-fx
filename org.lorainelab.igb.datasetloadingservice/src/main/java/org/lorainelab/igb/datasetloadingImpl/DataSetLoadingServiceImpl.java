@@ -121,8 +121,7 @@ public class DataSetLoadingServiceImpl implements DataSetLoadingService {
                     return new FileChooser.ExtensionFilter(fileTypeHandler.getName(), fileTypeHandler.getSupportedExtensions().stream().map(ext -> "*." + ext).collect(Collectors.toList()));
                 })
                 .forEach(extensionFilter -> fileChooser.getExtensionFilters().add(extensionFilter));
-        List<String> allSupportedFileExtensions = fileTypeHandlerRegistry.getFileTypeHandlers().stream().flatMap(fileTypeHandler -> fileTypeHandler.getSupportedExtensions().stream().map(ext -> "*." + ext))
-                .collect(Collectors.toList());
+        List<String> allSupportedFileExtensions = fileTypeHandlerRegistry.getAllSupportedFileExtensions().stream().map(ext -> "*." + ext).collect(Collectors.toList());
         final FileChooser.ExtensionFilter defaultExtensionFilter = new FileChooser.ExtensionFilter(DEFAULT_FILE_EXTENSION_FILTER_NAME, allSupportedFileExtensions);
         fileChooser.getExtensionFilters().add(defaultExtensionFilter);
         fileChooser.setSelectedExtensionFilter(defaultExtensionFilter);

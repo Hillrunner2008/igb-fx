@@ -3,111 +3,58 @@
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.shape.Circle?>
-<?import javafx.scene.shape.Rectangle?>
 
-<StackPane fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="25.0" prefHeight="200.0" prefWidth="150.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
-    <children>
-        <GridPane>
-            <columnConstraints>
-                <ColumnConstraints fillWidth="false" hgrow="NEVER" maxWidth="25.0" minWidth="25.0" prefWidth="25.0" />
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="5.0" prefWidth="100.0" />
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-            </columnConstraints>
-            <rowConstraints>
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            </rowConstraints>
-            <children>
-                <StackPane fx:id="leftSideColorIndicator" opacity="0.45" prefHeight="150.0" prefWidth="200.0" style="-fx-background-color: #1e90ff;" GridPane.rowSpan="4" />
-            </children>
-        </GridPane>
-        <GridPane fx:id="gridPane">
-            <columnConstraints>
-                <ColumnConstraints fillWidth="false" hgrow="NEVER" maxWidth="25.0" minWidth="25.0" prefWidth="25.0" />
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="5.0" prefWidth="100.0" />
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-            </columnConstraints>
-            <rowConstraints>
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            </rowConstraints>
-            <children>
-                <StackPane fx:id="dragGrip" prefHeight="150.0" prefWidth="200.0">
-                    <children>
-                        <HBox prefHeight="100.0" prefWidth="200.0" StackPane.alignment="CENTER">
-                            <children>
-                                <VBox alignment="CENTER_RIGHT" prefHeight="200.0" prefWidth="100.0">
-                                    <children>
-                                        <Circle fill="GREY" radius="2.0" stroke="BLACK" strokeType="INSIDE" GridPane.halignment="CENTER" GridPane.rowIndex="0">
-                                            <VBox.margin>
-                                                <Insets left="5.0" right="1.0" top="5.0" />
-                                            </VBox.margin>
-                                        </Circle>
-                                        <Circle fill="GREY" radius="2.0" stroke="BLACK" strokeType="INSIDE" GridPane.halignment="CENTER" GridPane.rowIndex="1"> 
-                                            <VBox.margin>
-                                                <Insets left="5.0" right="1.0" top="1.0" />
-                                            </VBox.margin>
-                                        </Circle>
-                                        <Circle fill="GREY" radius="2.0" stroke="BLACK" strokeType="INSIDE" GridPane.halignment="CENTER" GridPane.rowIndex="2"> 
-                                            <VBox.margin>
-                                                <Insets left="5.0" right="1.0" top="1.0" />
-                                            </VBox.margin>
-                                        </Circle>
-                                        <Circle fill="GREY" radius="2.0" stroke="BLACK" strokeType="INSIDE" GridPane.halignment="CENTER" GridPane.rowIndex="3"> 
-                                            <VBox.margin>
-                                                <Insets bottom="0.5" left="5.0" right="1.0" top="1.0" />
-                                            </VBox.margin>
-                                        </Circle>
-                                    </children>
-                                </VBox>
-                                <VBox alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="100.0">
-                                    <children>
-                                        <Circle fill="GREY" radius="2.0" stroke="BLACK" strokeType="INSIDE" GridPane.halignment="CENTER" GridPane.rowIndex="0">
-                                            <VBox.margin>
-                                                <Insets left="1.0" right="5.0" top="5.0" />
-                                            </VBox.margin>
-                                        </Circle>
-                                        <Circle fill="GREY" radius="2.0" stroke="BLACK" strokeType="INSIDE" GridPane.halignment="CENTER" GridPane.rowIndex="1"> 
-                                            <VBox.margin>
-                                                <Insets left="1.0" right="5.0" top="1.0" />
-                                            </VBox.margin>
-                                        </Circle>
-                                        <Circle fill="GREY" radius="2.0" stroke="BLACK" strokeType="INSIDE" GridPane.halignment="CENTER" GridPane.rowIndex="2"> 
-                                            <VBox.margin>
-                                                <Insets left="1.0" right="5.0" top="1.0" />
-                                            </VBox.margin>
-                                        </Circle>
-                                        <Circle fill="GREY" radius="2.0" stroke="BLACK" strokeType="INSIDE" GridPane.halignment="CENTER" GridPane.rowIndex="3"> 
-                                            <VBox.margin>
-                                                <Insets bottom="0.5" left="1.0" right="5.0" top="1.0" />
-                                            </VBox.margin>
-                                        </Circle>
-                                    </children>
-                                </VBox>
-                            </children>
-                        </HBox>
-                    </children>
-                </StackPane>
-                <Label fx:id="trackLabel" text="Label" textOverrun="WORD_ELLIPSIS" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
-                <Rectangle fx:id="colorChooserRect" arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="15.0" stroke="BLACK" strokeType="INSIDE" width="15.0" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="BOTTOM">
-                    <GridPane.margin>
-                        <Insets bottom="5.0" />
-                    </GridPane.margin>
-                </Rectangle>
-                <FontAwesomeIconView fx:id="unLockIcon" glyphName="UNLOCK" size="20" GridPane.columnIndex="3" GridPane.halignment="CENTER" />
-            </children>
-        </GridPane>
-    </children>
+<StackPane fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="50.0" minWidth="100.0" prefHeight="330.0" prefWidth="208.0" style="-fx-border-color: #585858; -fx-border-width: 0 0 1 0;" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <HBox prefHeight="100.0" prefWidth="200.0">
+         <children>
+            <VBox fx:id="leftSideColorIndicator" alignment="CENTER" maxWidth="30.0" minWidth="30.0" prefHeight="330.0" prefWidth="30.0" >
+               <children>
+                  <HBox alignment="CENTER" prefHeight="30.0" prefWidth="30.0">
+                     <children>
+                        <FontAwesomeIconView fx:id="dragGrip" fill="WHITE" glyphName="ARROWS" size="24" />
+                     </children>
+                     <VBox.margin>
+                        <Insets top="5.0" />
+                     </VBox.margin>
+                  </HBox>
+               </children>
+            </VBox>
+            <StackPane HBox.hgrow="ALWAYS">
+               <children>
+                  <BorderPane>
+                     <center>
+                        <Label fx:id="trackLabel" text="Label" textFill="#f8f8f8" />
+                     </center>
+                  </BorderPane>
+                  <BorderPane fx:id="resizeHandleContainer" prefHeight="200.0" prefWidth="200.0">
+                     <bottom>
+                        <VBox fx:id="bottomDragGrip" alignment="CENTER" maxHeight="15.0" maxWidth="40.0" minHeight="15.0" minWidth="40.0" prefHeight="15.0" prefWidth="40.0" spacing="0.1" style="-fx-background-color: #8d8d8d;" BorderPane.alignment="CENTER">
+                           <children>
+                              <FontAwesomeIconView fill="WHITE" glyphName="ELLIPSIS_H" size="18" />
+                           </children>
+                        </VBox>
+                     </bottom>
+                  </BorderPane>
+               </children>
+            </StackPane>
+            <VBox fx:id="lockIconContainer" alignment="TOP_CENTER" maxWidth="20.0" minWidth="20.0" prefWidth="20.0">
+               <children>
+                  <FontAwesomeIconView fx:id="unLockIcon" fill="#8d8d8d" glyphName="UNLOCK" size="18">
+                     <VBox.margin>
+                        <Insets />
+                     </VBox.margin>
+                  </FontAwesomeIconView>
+               </children>
+               <HBox.margin>
+                  <Insets right="1.0" top="3.0" />
+               </HBox.margin>
+            </VBox>
+         </children>
+      </HBox>
+   </children>
 </StackPane>

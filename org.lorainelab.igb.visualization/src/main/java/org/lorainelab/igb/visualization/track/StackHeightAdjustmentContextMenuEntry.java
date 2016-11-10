@@ -65,7 +65,6 @@ public class StackHeightAdjustmentContextMenuEntry implements TrackLabelContextM
                 stage.setTitle("Set Track Stack Height");
                 stage.setResizable(false);
                 Scene scene = new Scene(root);
-                root.getStylesheets().add(bc.getBundle().getEntry("styles/Styles.css").toExternalForm());
                 stage.setScene(scene);
             } catch (IOException exception) {
                 throw new RuntimeException(exception);

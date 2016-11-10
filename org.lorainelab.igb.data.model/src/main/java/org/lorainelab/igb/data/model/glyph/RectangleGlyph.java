@@ -37,8 +37,8 @@ public class RectangleGlyph implements Glyph {
     public static final double THICK_RECTANGLE_HEIGHT = MAX_GLYPH_HEIGHT;
     public static final double DEFAULT_RECTANGLE_HEIGHT = THICK_RECTANGLE_HEIGHT * .75;
 
-    private Color fill = DEFAULT_GLYPH_FILL;
-    private Color strokeColor = DEFAULT_GLYPH_FILL;
+    private Color fill = DEFAULT_GLYPH_FILL.get();
+    private Color strokeColor = DEFAULT_GLYPH_FILL.get();
 
     private final Rectangle2D boundingRect;
     private final Optional<Function<String, String>> innerTextRefSeqTranslator;
@@ -105,8 +105,8 @@ public class RectangleGlyph implements Glyph {
     }
 
     @Override
-    public void draw(GraphicsContext gc, View view, Rectangle2D slotBoundingViewRect) {
-        calculateDrawRect(view, slotBoundingViewRect).ifPresent(sharedRect -> {
+    public void draw(GraphicsContext gc, View view, double slotMinY) {
+        calculateDrawRect(view, slotMinY).ifPresent(sharedRect -> {
             Rectangle2D viewRect = view.modelCoordRect();
             gc.setFill(fill);
             gc.setStroke(strokeColor);
@@ -115,14 +115,14 @@ public class RectangleGlyph implements Glyph {
 
             if (view.modelCoordRect().getWidth() < 250) {
                 gc.fillRect(SHARED_RECT.x, SHARED_RECT.y, SHARED_RECT.width, SHARED_RECT.height);
-                drawText(view, viewRect, gc, sharedRect, slotBoundingViewRect);
+                drawText(view, viewRect, gc, sharedRect);
             } else {
                 gc.fillRect(SHARED_RECT.x, SHARED_RECT.y, SHARED_RECT.width, SHARED_RECT.height);
             }
         });
     }
 
-    private void drawText(View view, Rectangle2D viewRect, GraphicsContext gc, java.awt.Rectangle.Double sharedRect, Rectangle2D slotRect) {
+    private void drawText(View view, Rectangle2D viewRect, GraphicsContext gc, java.awt.Rectangle.Double sharedRect) {
         try {
             gc.save();
             gc.scale(1, 1 / view.getYfactor());

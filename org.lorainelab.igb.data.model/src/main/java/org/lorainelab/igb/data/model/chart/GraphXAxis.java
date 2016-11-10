@@ -17,7 +17,7 @@ public class GraphXAxis {
         try {
             gc.save();
             gc.setGlobalAlpha(.7);
-            gc.setFill(GRAPH_GRID_FILL);
+            gc.setFill(GRAPH_GRID_FILL.get());
 
             double minTrackY = 0; //already translated to canvas rect minY
             double maxTrackY = canvasCoordRect.getHeight() / view.getYfactor();

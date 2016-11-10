@@ -146,9 +146,19 @@
                 <scope>provided</scope>
             </dependency>
             <dependency>
+                <groupId>net.sf.jsi</groupId>
+                <artifactId>jsi</artifactId>
+                <version>${JSI_VERSION}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.vividsolutions</groupId>
                 <artifactId>jts</artifactId>
                 <version>${jts_version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.sf.trove4j</groupId>
+                <artifactId>trove4j</artifactId>
+                <version>${trove4j_version}</version>
             </dependency>
             <dependency>
                 <groupId>colt</groupId>
@@ -185,7 +195,7 @@
                 <artifactId>org.apache.servicemix.bundles.jakarta-regexp</artifactId>
                 <version>${jakarta-regexp_version}</version>
             </dependency>
-             <dependency>
+            <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-compress</artifactId>
                 <version>${commons-compress_version}</version>
@@ -556,10 +566,16 @@
         <lucene_version>6.0.0_1</lucene_version>
         <jakarta-regexp_version>1.4_1</jakarta-regexp_version>
         <colt_version>1.2.0</colt_version>
+        <rtree_version>0.8-RC10</rtree_version>
+        <guava_mini_version>0.1</guava_mini_version>
         <jts_version>1.13</jts_version>
         <commons-io_version>2.4</commons-io_version>
         <commons-csv_version>1.4</commons-csv_version>
         <commons-codec_version>1.10</commons-codec_version>
         <commons-compress_version>1.2</commons-compress_version>
+        <rx_java_version>1.1.4</rx_java_version>
+        <rxjava-extras_version>0.7</rxjava-extras_version>
+        <JSI_VERSION>1.0.1</JSI_VERSION>
+        <trove4j_version>3.0.3</trove4j_version>
     </properties>
 </project>
