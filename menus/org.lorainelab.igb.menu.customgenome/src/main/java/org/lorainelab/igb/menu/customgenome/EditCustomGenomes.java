@@ -23,7 +23,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -134,8 +133,8 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
         FontAwesomeIconView trash = new FontAwesomeIconView(FontAwesomeIcon.TRASH);
         genomesTable.setEditable(true);
         genomesTable.setItems(genomeVersionList);//FXCollections.observableArrayList(genomeVersions));
-        speciesColumn.setCellFactory(TextFieldTableCell.forTableColumn()); //TextFieldTableCell
-        deleteColumn.setCellValueFactory(param -> trash);
+//        speciesColumn.setCellFactory(TextFieldTableCell.forTableColumn()); //TextFieldTableCell
+//        deleteColumn.setCellValueFactory(param -> trash);
 
         speciesColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<GenomeVersion, String>, ObservableValue<String>>() {
             @Override
