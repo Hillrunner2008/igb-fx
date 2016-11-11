@@ -165,9 +165,9 @@ public class RectangleGlyph implements Glyph {
 
                 double charWidth = fontReference.getCharWidth() / view.getXfactor();
                 double minY = sharedRect.getMinY();
-                double height = boundingRect.getHeight();
+                double height = sharedRect.getHeight();
                 final double textHeight = fontReference.getAscent();
-                double center = minY + boundingRect.getHeight() / 2;
+                double center = minY + sharedRect.getHeight() / 2;
                 double scaledTextminY = (center * view.getYfactor()) - (textHeight / 2);
                 scaledTextminY += textHeight - 1;
                 double i = 0;
