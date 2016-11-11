@@ -74,11 +74,11 @@ public class Slot {
 
     // no check for trimming first and last index to range is done, this is great for general rendering speed.
     public List<CompositionGlyph> getGlyphsInXrangeQuick(Range<Double> queryRange) {
-        List<CompositionGlyph> subList = Collections.EMPTY_LIST;
+        List<CompositionGlyph> subList = new ArrayList<>();
         synchronized (glyphs) {
             int startIndex = findStartIndex(queryRange.lowerEndpoint());
             int endIndex = findEndIndex(queryRange.upperEndpoint());
-            subList = glyphs.subList(startIndex, endIndex);
+            subList.addAll(glyphs.subList(startIndex, endIndex));
         }
         return subList;
     }
