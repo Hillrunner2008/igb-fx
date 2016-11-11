@@ -202,6 +202,25 @@ public class CompositionGlyph implements Glyph {
         }
     }
 
+    public Rectangle.Double getDrawSummaryRect(GraphicsContext gc, Rectangle.Double glyphViewIntersectionBounds, double slotMinY) {
+        final double centerOffset = (SLOT_HEIGHT - glyphViewIntersectionBounds.getHeight() / 2) / 2;
+        double minY;
+        switch (glyphAlignment) {
+            case BOTTOM_CENTER:
+                double centerPos = slotMinY + centerOffset;
+                minY = centerPos + LABEL_OFFSET;
+                break;
+            case TOP_CENTER:
+                double centerY = slotMinY + centerOffset;
+                minY = centerY - LABEL_OFFSET;
+                break;
+            default:
+                minY = slotMinY + centerOffset;
+        }
+        SHARED_RECT.setRect(glyphViewIntersectionBounds.getMinX(), minY, glyphViewIntersectionBounds.getWidth(), glyphViewIntersectionBounds.getHeight() / 2);
+        return SHARED_RECT;
+    }
+
     public void drawSummaryRectangle(GraphicsContext gc, Rectangle.Double glyphViewIntersectionBounds, double slotMinY) {
         gc.save();
         gc.setFill(DEFAULT_GLYPH_FILL.get());

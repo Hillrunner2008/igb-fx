@@ -1,9 +1,8 @@
 package org.lorainelab.igb.data.model;
 
+import cern.colt.list.IntArrayList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
-import com.google.common.collect.RangeMap;
-import com.google.common.collect.TreeRangeMap;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -17,14 +16,15 @@ import static org.lorainelab.igb.data.model.glyph.Glyph.SLOT_HEIGHT;
  */
 public class Slot {
 
-    private RangeMap<Double, CompositionGlyph> glyphs;
+    private List<CompositionGlyph> glyphs;
+    private IntArrayList x = new IntArrayList();
     private double slotYoffset;
     private double maxX;
 
     public Slot() {
         slotYoffset = 0;
         maxX = -1;
-        glyphs = TreeRangeMap.create();
+        glyphs = Lists.newArrayList();
     }
 
     public double getSlotYoffset() {
@@ -33,6 +33,8 @@ public class Slot {
 
     public void setSlotYoffset(double slotYoffset) {
         this.slotYoffset = slotYoffset;
+        x.trimToSize();
+        x.sort();
     }
 
     public double getMaxX() {
@@ -41,19 +43,41 @@ public class Slot {
 
     public void addGlyph(CompositionGlyph glyph) {
         synchronized (glyphs) {
-            glyphs.put(Range.closed(glyph.getBoundingRect().getMinX(), glyph.getBoundingRect().getMaxX()), glyph);
+            glyphs.add(glyph);
+            x.add((int) glyph.getBoundingRect().getMinX());
             maxX = glyph.getBoundingRect().getMaxX();
         }
     }
 
-    //subRangeMap returns in O(1) time, and the RangeMap it returns has O(log n) additive cost for each of its query operations 
-    //that is, all of its operations still take O(log n), just with a higher constant factor.
     public List<CompositionGlyph> getGlyphsInXrange(Range<Double> queryRange) {
         final List<CompositionGlyph> newArrayList;
         synchronized (glyphs) {
-            newArrayList = Lists.newArrayList(glyphs.subRangeMap(queryRange).asMapOfRanges().values());
+            int startIndex = findStartIndex(queryRange.lowerEndpoint());
+            int endIndex = findEndIndex(queryRange.upperEndpoint());
+            newArrayList = glyphs.subList(startIndex, endIndex);
         }
         return newArrayList;
+    }
+
+    private int findStartIndex(double xmin) {
+        int index = x.binarySearch((int) Math.floor(xmin));
+        if (index >= 0) {
+            return index;
+        }
+        index = Math.max(0, (-index - 2));
+        return index;
+    }
+
+    private int findEndIndex(double xmax) {
+        int index = x.binarySearch((int) Math.ceil(xmax));
+        if (index >= 0) {
+            return index;
+        }
+        index = -index - 1;
+        index = Math.min(index, x.size() - 1);
+        index = Math.max(0, index);
+        return index;
+
     }
 
     //complexity is O(log n) in x dimension, but linear in y
@@ -68,7 +92,7 @@ public class Slot {
     }
 
     public Collection<CompositionGlyph> getAllGlyphs() {
-        return glyphs.asMapOfRanges().values();
+        return glyphs;
     }
 
     public Rectangle2D getSlotBoundingRect(Rectangle2D viewBoundingRect, boolean isNegative) {
