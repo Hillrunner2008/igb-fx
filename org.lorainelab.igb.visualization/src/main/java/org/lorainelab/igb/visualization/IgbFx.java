@@ -4,9 +4,11 @@ import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
+import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.lorainelab.igb.stage.provider.api.StageProvider;
 import static org.lorainelab.igb.utils.FXUtilities.runAndWait;
 import org.lorainelab.igb.visualization.ui.Root;
@@ -26,22 +28,30 @@ public class IgbFx {
     public void activate(BundleContext bc) {
         Platform.setImplicitExit(false);
         runAndWait(() -> {
-            stageProvider.getSplashStage().hide();
-            Scene scene = new Scene(root);
-            root.getStyleClass().add("theme-dark");
-            scene.getStylesheets().add(bc.getBundle().getEntry("styles/dark-theme.css").toExternalForm());
-            //For runtime hot reloading this is left in place commented out
+            Stage splashStage = stageProvider.getSplashStage();
+
+            PauseTransition delay = new PauseTransition(Duration.seconds(2.5));
+            delay.setOnFinished(event -> {
+                Platform.runLater(() -> {
+                    splashStage.close();
+                    Scene scene = new Scene(root);
+                    stage.setMinWidth(800);
+                    stage.setMinHeight(400);
+                    root.getStyleClass().add("theme-dark");
+                    scene.getStylesheets().add(bc.getBundle().getEntry("styles/dark-theme.css").toExternalForm());
+                    //For runtime hot reloading this is left in place commented out
 //            try {
 //                scene.getStylesheets().add(new File("/home/dcnorris/NetBeansProjects/igb-fx/org.lorainelab.igb.visualization/src/main/resources/styles/dark-theme.css").toURL().toExternalForm());
 //            } catch (MalformedURLException ex) {
 //                LOG.error(ex.getMessage(), ex);
 //            }
-            stage.setTitle("IGBfx");
-            stage.setScene(scene);
-        });
-        //splitting this piece off since it has occasionally caused the stage to never start and block the bundle activation from completing
-        Platform.runLater(() -> {
-            stage.show();
+                    stage.setTitle("IGBfx");
+                    stage.setScene(scene);
+                    stage.show();
+                });
+            });
+            delay.play();
+
         });
     }
 
