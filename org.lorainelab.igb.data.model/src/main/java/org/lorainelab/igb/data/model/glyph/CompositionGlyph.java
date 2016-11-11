@@ -348,6 +348,7 @@ public class CompositionGlyph implements Glyph {
             gc.lineTo(minX, maxY);
             gc.lineTo(minX, minY);
             gc.scale(1 / view.getXfactor(), 1 / view.getYfactor());
+            gc.setLineWidth(4);
             gc.stroke();
             gc.scale(view.getXfactor(), view.getYfactor());
 //            gc.fillRect(minX, minY, width, SELECTION_RECTANGLE_WIDTH); //top
