@@ -53,8 +53,8 @@ public class StackedGlyphTrack implements Track {
         this.stackHeight = Math.max(stackHeight, 0);
         //handles case when stackHeight is set to 0 i.e. unlimited
         this.modelHeight = Math.max(SLOT_HEIGHT * stackHeight, SLOT_HEIGHT);
-        slots = Lists.newCopyOnWriteArrayList();
-        glyphs = Lists.newCopyOnWriteArrayList();
+        slots = Lists.newArrayList();
+        glyphs = Lists.newArrayList();
 
     }
 

@@ -25,7 +25,7 @@ public class Slot {
     public Slot() {
         slotYoffset = 0;
         maxX = -1;
-        glyphs = Lists.newCopyOnWriteArrayList();
+        glyphs = Lists.newArrayList();
     }
 
     public double getSlotYoffset() {
@@ -43,25 +43,29 @@ public class Slot {
     }
 
     public void addGlyph(CompositionGlyph glyph) {
-        glyphs.add(glyph);
-        x.add((int) glyph.getBoundingRect().getMinX());
-        maxX = glyph.getBoundingRect().getMaxX();
+        synchronized (glyphs) {
+            glyphs.add(glyph);
+            x.add((int) glyph.getBoundingRect().getMinX());
+            maxX = glyph.getBoundingRect().getMaxX();
+        }
     }
 
     public List<CompositionGlyph> getGlyphsInXrange(Range<Double> queryRange) {
         final List<CompositionGlyph> glyphsInRange = new ArrayList<>();
-        int startIndex = findStartIndex(queryRange.lowerEndpoint());
-        int endIndex = findEndIndex(queryRange.upperEndpoint());
-        glyphsInRange.addAll(glyphs.subList(startIndex, endIndex));
-        if (!glyphsInRange.isEmpty()) {
-            Range<Double> startIndexGlyphRange = Range.closed(glyphsInRange.get(0).getBoundingRect().getMinX(), glyphsInRange.get(0).getBoundingRect().getMaxX());
-            if (!startIndexGlyphRange.isConnected(queryRange)) {
-                glyphsInRange.remove(0);
-            }
-            if (glyphsInRange.size() > 1) {
-                Range<Double> endIndexGlyphRange = Range.closed(glyphsInRange.get(glyphsInRange.size()).getBoundingRect().getMinX(), glyphsInRange.get(0).getBoundingRect().getMaxX());
-                if (!endIndexGlyphRange.isConnected(queryRange)) {
-                    glyphsInRange.remove(glyphsInRange.size());
+        synchronized (glyphs) {
+            int startIndex = findStartIndex(queryRange.lowerEndpoint());
+            int endIndex = findEndIndex(queryRange.upperEndpoint());
+            glyphsInRange.addAll(glyphs.subList(startIndex, endIndex));
+            if (!glyphsInRange.isEmpty()) {
+                Range<Double> startIndexGlyphRange = Range.closed(glyphsInRange.get(0).getBoundingRect().getMinX(), glyphsInRange.get(0).getBoundingRect().getMaxX());
+                if (!startIndexGlyphRange.isConnected(queryRange)) {
+                    glyphsInRange.remove(0);
+                }
+                if (glyphsInRange.size() > 1) {
+                    Range<Double> endIndexGlyphRange = Range.closed(glyphsInRange.get(glyphsInRange.size()).getBoundingRect().getMinX(), glyphsInRange.get(0).getBoundingRect().getMaxX());
+                    if (!endIndexGlyphRange.isConnected(queryRange)) {
+                        glyphsInRange.remove(glyphsInRange.size());
+                    }
                 }
             }
         }
@@ -70,9 +74,13 @@ public class Slot {
 
     // no check for trimming first and last index to range is done, this is great for general rendering speed.
     public List<CompositionGlyph> getGlyphsInXrangeQuick(Range<Double> queryRange) {
-        int startIndex = findStartIndex(queryRange.lowerEndpoint());
-        int endIndex = findEndIndex(queryRange.upperEndpoint());
-        return glyphs.subList(startIndex, endIndex);
+        List<CompositionGlyph> subList = Collections.EMPTY_LIST;
+        synchronized (glyphs) {
+            int startIndex = findStartIndex(queryRange.lowerEndpoint());
+            int endIndex = findEndIndex(queryRange.upperEndpoint());
+            subList = glyphs.subList(startIndex, endIndex);
+        }
+        return subList;
     }
 
     private int findStartIndex(double xmin) {
