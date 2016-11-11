@@ -5,7 +5,6 @@ import htsjdk.tribble.readers.AsciiLineReader;
 import htsjdk.tribble.readers.LineIteratorImpl;
 import htsjdk.tribble.readers.TabixIteratorLineReader;
 import htsjdk.tribble.readers.TabixReader;
-import java.util.Set;
 import org.lorainelab.igb.data.model.Chromosome;
 import static org.lorainelab.igb.data.model.util.DataSourceUtils.getStreamFor;
 import org.slf4j.Logger;
@@ -24,8 +23,6 @@ public class TabixUtils {
         try {
             try {
                 final TabixReader tabixReader = new TabixReader(dataSourceReference);
-                Set<String> chromosomes = tabixReader.getChromosomes();
-                chromosomes.forEach(System.out::println);
                 final TabixReader.Iterator queryResults = tabixReader.query(chromosome.getName(), range.lowerEndpoint(), range.upperEndpoint());
                 iterator = new LineIteratorImpl(new TabixIteratorLineReader(queryResults));
             } catch (Throwable ex) {
