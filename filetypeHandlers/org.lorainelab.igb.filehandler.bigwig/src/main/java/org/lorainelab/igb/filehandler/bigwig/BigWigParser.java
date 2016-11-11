@@ -74,9 +74,6 @@ public class BigWigParser implements FileTypeHandler {
         } catch (IOException ex) {
             LOG.error(ex.getMessage(), ex);
         }
-        x.trimToSize();
-        w.trimToSize();
-        y.trimToSize();
         int dataSize = x.size();
         int[] xData = Arrays.copyOf(x.elements(), dataSize);
         int[] wData = Arrays.copyOf(w.elements(), dataSize);
