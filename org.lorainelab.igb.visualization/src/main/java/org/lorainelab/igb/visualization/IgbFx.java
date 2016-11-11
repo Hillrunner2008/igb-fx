@@ -30,28 +30,32 @@ public class IgbFx {
         runAndWait(() -> {
             Stage splashStage = stageProvider.getSplashStage();
 
-            PauseTransition delay = new PauseTransition(Duration.seconds(2.5));
-            delay.setOnFinished(event -> {
-                Platform.runLater(() -> {
-                    splashStage.close();
-                    Scene scene = new Scene(root);
-                    stage.setMinWidth(800);
-                    stage.setMinHeight(400);
-                    root.getStyleClass().add("theme-dark");
-                    scene.getStylesheets().add(bc.getBundle().getEntry("styles/dark-theme.css").toExternalForm());
-                    //For runtime hot reloading this is left in place commented out
+            Platform.runLater(() -> {
+                Scene scene = new Scene(root);
+                stage.setMinWidth(800);
+                stage.setMinHeight(400);
+                root.getStyleClass().add("theme-dark");
+                scene.getStylesheets().add(bc.getBundle().getEntry("styles/dark-theme.css").toExternalForm());
+                //For runtime hot reloading this is left in place commented out
 //            try {
 //                scene.getStylesheets().add(new File("/home/dcnorris/NetBeansProjects/igb-fx/org.lorainelab.igb.visualization/src/main/resources/styles/dark-theme.css").toURL().toExternalForm());
 //            } catch (MalformedURLException ex) {
 //                LOG.error(ex.getMessage(), ex);
 //            }
-                    stage.setTitle("IGBfx");
-                    stage.setScene(scene);
-                    stage.show();
+                stage.setTitle("IGBfx");
+                stage.setScene(scene);
+
+            });
+            PauseTransition delay = new PauseTransition(Duration.seconds(1.5));
+            delay.setOnFinished(event -> {
+                Platform.runLater(() -> {
+                    splashStage.close();
                 });
             });
             delay.play();
-
+            Platform.runLater(() -> {
+                stage.show();
+            });
         });
     }
 
