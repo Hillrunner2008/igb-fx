@@ -42,7 +42,7 @@ public class LoadDataButton extends Button {
                         }).exceptionally(ex -> {
                             LOG.error(ex.getMessage(), ex);
                             return null;
-                        }); ;
+                        });
                     });
                 });
             });
