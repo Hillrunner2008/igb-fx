@@ -24,7 +24,7 @@ public class Slot {
     public Slot() {
         slotYoffset = 0;
         maxX = -1;
-        glyphs = Lists.newArrayList();
+        glyphs = Lists.newCopyOnWriteArrayList();
     }
 
     public double getSlotYoffset() {
@@ -42,20 +42,16 @@ public class Slot {
     }
 
     public void addGlyph(CompositionGlyph glyph) {
-        synchronized (glyphs) {
             glyphs.add(glyph);
             x.add((int) glyph.getBoundingRect().getMinX());
             maxX = glyph.getBoundingRect().getMaxX();
-        }
     }
 
     public List<CompositionGlyph> getGlyphsInXrange(Range<Double> queryRange) {
         final List<CompositionGlyph> newArrayList;
-        synchronized (glyphs) {
             int startIndex = findStartIndex(queryRange.lowerEndpoint());
             int endIndex = findEndIndex(queryRange.upperEndpoint());
             newArrayList = glyphs.subList(startIndex, endIndex);
-        }
         return newArrayList;
     }
 
