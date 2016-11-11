@@ -4,8 +4,6 @@ import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
-import java.awt.DisplayMode;
-import java.awt.GraphicsEnvironment;
 import javafx.application.Platform;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
