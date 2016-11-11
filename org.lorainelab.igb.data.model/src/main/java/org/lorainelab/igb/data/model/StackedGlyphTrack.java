@@ -263,15 +263,16 @@ public class StackedGlyphTrack implements Track {
             final Range<Double> mouseEventXrange = Range.closed(selectionRectangle.getMinX(), selectionRectangle.getMaxX());
             final Stream<CompositionGlyph> glyphsInXRange = slot.getGlyphsInXrange(mouseEventXrange).stream();
             Rectangle2D slotBoundingViewRect = slot.getSlotBoundingRect(viewBoundingRect, isNegative);
+            final Range<Double> mouseEventYrange = Range.closed(selectionRectangle.getMinY(), selectionRectangle.getMaxY());
             glyphsInXRange.filter(glyph -> {
-                final Range<Double> mouseEventYrange = Range.closed(selectionRectangle.getMinY(), selectionRectangle.getMaxY());
                 final Rectangle.Double glyphViewRect = glyph.calculateDrawRect(view, slotBoundingViewRect.getMinY()).orElse(null);
                 if (glyphViewRect == null) {
                     return false;
                 }
                 final double minY = glyphViewRect.getMinY() * view.getYfactor();
                 final double maxY = glyphViewRect.getMaxY() * view.getYfactor();
-                return Range.closed(minY, maxY).isConnected(mouseEventYrange);
+                final boolean connected = Range.closed(minY, maxY).isConnected(mouseEventYrange);
+                return connected;
             }).forEach(glyph -> selections.add(glyph));
         }
 

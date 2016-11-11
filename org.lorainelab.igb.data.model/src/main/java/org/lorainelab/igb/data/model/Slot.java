@@ -3,6 +3,7 @@ package org.lorainelab.igb.data.model;
 import cern.colt.list.IntArrayList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -42,17 +43,36 @@ public class Slot {
     }
 
     public void addGlyph(CompositionGlyph glyph) {
-            glyphs.add(glyph);
-            x.add((int) glyph.getBoundingRect().getMinX());
-            maxX = glyph.getBoundingRect().getMaxX();
+        glyphs.add(glyph);
+        x.add((int) glyph.getBoundingRect().getMinX());
+        maxX = glyph.getBoundingRect().getMaxX();
     }
 
     public List<CompositionGlyph> getGlyphsInXrange(Range<Double> queryRange) {
-        final List<CompositionGlyph> newArrayList;
-            int startIndex = findStartIndex(queryRange.lowerEndpoint());
-            int endIndex = findEndIndex(queryRange.upperEndpoint());
-            newArrayList = glyphs.subList(startIndex, endIndex);
-        return newArrayList;
+        final List<CompositionGlyph> glyphsInRange = new ArrayList<>();
+        int startIndex = findStartIndex(queryRange.lowerEndpoint());
+        int endIndex = findEndIndex(queryRange.upperEndpoint());
+        glyphsInRange.addAll(glyphs.subList(startIndex, endIndex));
+        if (!glyphsInRange.isEmpty()) {
+            Range<Double> startIndexGlyphRange = Range.closed(glyphsInRange.get(0).getBoundingRect().getMinX(), glyphsInRange.get(0).getBoundingRect().getMaxX());
+            if (!startIndexGlyphRange.isConnected(queryRange)) {
+                glyphsInRange.remove(0);
+            }
+            if (glyphsInRange.size() > 1) {
+                Range<Double> endIndexGlyphRange = Range.closed(glyphsInRange.get(glyphsInRange.size()).getBoundingRect().getMinX(), glyphsInRange.get(0).getBoundingRect().getMaxX());
+                if (!endIndexGlyphRange.isConnected(queryRange)) {
+                    glyphsInRange.remove(glyphsInRange.size());
+                }
+            }
+        }
+        return glyphsInRange;
+    }
+
+    // no check for trimming first and last index to range is done, this is great for general rendering speed.
+    public List<CompositionGlyph> getGlyphsInXrangeQuick(Range<Double> queryRange) {
+        int startIndex = findStartIndex(queryRange.lowerEndpoint());
+        int endIndex = findEndIndex(queryRange.upperEndpoint());
+        return glyphs.subList(startIndex, endIndex);
     }
 
     private int findStartIndex(double xmin) {
@@ -81,7 +101,7 @@ public class Slot {
     //so it should be possible to eliminate based on row and not filter using slow rectangle intersection math in y dimension inside this 
     public List<CompositionGlyph> getGlyphsInView(View view) {
         if (isSlotInView(view)) {
-            return getGlyphsInXrange(view.getXrange());
+            return getGlyphsInXrangeQuick(view.getXrange());
         } else {
             return Collections.EMPTY_LIST;
         }
