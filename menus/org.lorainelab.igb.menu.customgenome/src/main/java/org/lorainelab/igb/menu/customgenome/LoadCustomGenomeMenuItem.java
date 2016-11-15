@@ -108,7 +108,7 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
                 File file = new File(SessionPreferences.getRecentSelectedFilePath());
                 String simpleFileName = file.getParent();
                 homeDirectory = new File(simpleFileName);
-            } else {
+            } else {    
                 homeDirectory = new File(System.getProperty("user.home"));
             }
             fileChooser.setInitialDirectory(homeDirectory);
@@ -157,15 +157,15 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
                             Platform.runLater(() -> {
                                 ButtonType switchBtn = new ButtonType("Switch");
                                 ButtonType cancelBtn = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
-                                Alert dlg = new Alert(AlertType.CONFIRMATION, "This sequence file is already mapped to the \n\"" + 
-                                        duplicate.get().getName().get() + "\" genome."+
-                                        "\n Choose Switch to load it");
+                                Alert dlg = new Alert(AlertType.CONFIRMATION, "This sequence file is already mapped to the \n\""
+                                        + duplicate.get().getName().get() + "\" genome."
+                                        + "\n Choose Switch to load it.");
                                 dlg.initModality(stage.getModality());
                                 dlg.initOwner(stage.getOwner());
                                 dlg.setTitle("Cannot add duplicate genome version");
                                 dlg.getButtonTypes().setAll(switchBtn, cancelBtn);
                                 Optional<ButtonType> result = dlg.showAndWait();
-                                if(result.get() == switchBtn){
+                                if (result.get() == switchBtn) {
                                     genomeVersionRegistry.setSelectedGenomeVersion(duplicate.get());
                                 }
                             });

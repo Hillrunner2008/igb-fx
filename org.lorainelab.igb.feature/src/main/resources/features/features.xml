@@ -62,6 +62,7 @@
      
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.menu.loadurl/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.menu.openfile/${project.version}</bundle>
+        <bundle>mvn:${project.groupId}/org.lorainelab.igb.menu.recentgenome/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.menu.recentfile/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.datasetloadingservice/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.menu.customgenome/${project.version}</bundle>
@@ -69,6 +70,7 @@
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.tools.sort/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.filehandler.registry/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.recentfiles.registry/${project.version}</bundle>
+        <bundle>mvn:${project.groupId}/org.lorainelab.igb.recentgenome.registry/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.filehandler.bed/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.filehandler.bigwig/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.filehandler.bam/${project.version}</bundle>
