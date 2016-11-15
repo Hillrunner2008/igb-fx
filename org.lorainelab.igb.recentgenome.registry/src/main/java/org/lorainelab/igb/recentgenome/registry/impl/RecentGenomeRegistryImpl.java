@@ -72,9 +72,6 @@ public class RecentGenomeRegistryImpl implements RecentGenomeRegistry {
         });
 
         genomeVersionRegistry.getRegisteredGenomeVersions().addListener((SetChangeListener.Change<? extends GenomeVersion> change) -> {
-            if (change.wasRemoved()) {
-                removeRecentFileFromPreferences(change.getElementRemoved());
-            }
             initializeFromPreferences();
         });
         initializeFromPreferences();

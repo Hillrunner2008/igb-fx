@@ -62,7 +62,6 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
     private static int CUSTOM_GENOME_COUNTER = 1;
     private SelectionInfoService selectionInfoService;
     private CustomGenomePersistenceManager customGenomePersistenceManager;
-//    private RecentGenomeRegistry recentGenomeRegistry;
 
     public LoadCustomGenomeMenuItem() {
         menuItem = new WeightedMenuItem(1, "Load Custom Genome");
@@ -154,7 +153,6 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
                             SessionPreferences.setRecentSelectedFilePath(sequenceFileUrl);
                             customGenomeAdded[0] = genomeVersionRegistry.getRegisteredGenomeVersions().add(customGenome);
                             genomeVersionRegistry.setSelectedGenomeVersion(customGenome);
-//                            recentGenomeRegistry.addRecentGenome(customGenome);
                         } else {
                             Platform.runLater(() -> {
                                 ButtonType switchBtn = new ButtonType("Switch");
@@ -264,11 +262,6 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
     public void setSelectionInfoService(SelectionInfoService selectionInfoService) {
         this.selectionInfoService = selectionInfoService;
     }
-
-//    @Reference
-//    public void setRecentGenomeRegistry(RecentGenomeRegistry recentGenomeRegistry) {
-//        this.recentGenomeRegistry = recentGenomeRegistry;
-//    }
 
     private void addFileExtensionFilters(FileChooser fileChooser) {
         //TODO setup dynamic registry for ReferenceSequenceProvider ... will require ReferenceSequenceProvider to hold supported extensions

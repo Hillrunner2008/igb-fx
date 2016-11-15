@@ -11,6 +11,7 @@ import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Optional;
+import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.scene.control.MenuItem;
 import org.lorainelab.igb.data.model.GenomeVersion;
@@ -47,11 +48,11 @@ public class RecentGenomeMenuEntry implements MenuBarEntryProvider {
     public void activate() {
         buildRecentFileMenu();
         recentGenomeRegistry.getRecentGenomes().addListener((ListChangeListener.Change<? extends GenomeVersion> c) -> {
-            buildRecentFileMenu();
+            Platform.runLater(() -> buildRecentFileMenu());
         });
         clearMenuItem.setOnAction(action -> {
             recentGenomeRegistry.clearRecentGenomes();
-            recentGenomeMenu.setDisable(true);
+            Platform.runLater(() -> recentGenomeMenu.setDisable(true));
         });
 
     }
