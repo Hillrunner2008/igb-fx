@@ -4,8 +4,6 @@ import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Lists;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -17,6 +15,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -60,11 +59,13 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
     @FXML
     private TableColumn filePathCoulmn;
     @FXML
-    private TableColumn deleteColumn;
+    private Button openButton;
     @FXML
-    private Button saveButton;
+    private Button editButton;
     @FXML
     private Button cancelButton;
+    @FXML
+    private Button deleteButton;
 
     private SelectionInfoService selectionInfoService;
     private CustomGenomePersistenceManager customGenomePersistenceManager;
@@ -81,7 +82,6 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
         runAndWait(() -> {
             try {
                 fxmlLoader.load();
-//                initComponents();
             } catch (IOException exception) {
                 throw new RuntimeException(exception);
             }
@@ -128,13 +128,28 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
             }
         });
 
-//        refSeqBrowseBtn = new Button("Choose File\u2026");
-//        refSeqBrowseBtn.setDisable(true);
-        FontAwesomeIconView trash = new FontAwesomeIconView(FontAwesomeIcon.TRASH);
+        openButton.setOnAction((ActionEvent event) -> {
+            ObservableList selectedItems = genomesTable.getSelectionModel().getSelectedItems();
+            if (selectedItems.size() != 0) {
+                genomeVersionRegistry.setSelectedGenomeVersion((GenomeVersion) selectedItems.get(0));
+//                stage.hide();
+            }
+        });
+
+        cancelButton.setOnAction((ActionEvent event) -> stage.hide());
+        
+        deleteButton.setOnAction((ActionEvent event) -> {
+            ObservableList selectedItems = genomesTable.getSelectionModel().getSelectedItems();
+            if (selectedItems.size() != 0) {
+                genomeVersionRegistry.getRegisteredGenomeVersions().remove((GenomeVersion) selectedItems.get(0));
+//                stage.hide();
+            }
+        });
+        
+        
+
         genomesTable.setEditable(true);
         genomesTable.setItems(genomeVersionList);//FXCollections.observableArrayList(genomeVersions));
-//        speciesColumn.setCellFactory(TextFieldTableCell.forTableColumn()); //TextFieldTableCell
-//        deleteColumn.setCellValueFactory(param -> trash);
 
         speciesColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<GenomeVersion, String>, ObservableValue<String>>() {
             @Override
@@ -175,6 +190,7 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
 //
 //        });
         stage = new Stage();
+        stage.setResizable(true);
         stage.setTitle("My Genomes");
     }
 
