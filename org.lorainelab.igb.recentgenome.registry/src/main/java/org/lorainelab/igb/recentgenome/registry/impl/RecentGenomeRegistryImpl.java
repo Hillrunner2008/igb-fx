@@ -64,18 +64,20 @@ public class RecentGenomeRegistryImpl implements RecentGenomeRegistry {
 
     @Activate
     public void activate() {
-        initializeFromPreferences();
+        observableRecentFiles = FXCollections.observableArrayList();
+        readOnlyListWrapper = new ReadOnlyListWrapper<>(observableRecentFiles);
         //Add if non-custom genomes are to be stored in recent
         selectionInfoService.getSelectedGenomeVersion().addListener((ObservableValue<? extends Optional<GenomeVersion>> observable, Optional<GenomeVersion> oldValue, Optional<GenomeVersion> newValue) -> {
             newValue.ifPresent(newGenome -> addRecentGenome(newGenome));
         });
-        
+
         genomeVersionRegistry.getRegisteredGenomeVersions().addListener((SetChangeListener.Change<? extends GenomeVersion> change) -> {
             if (change.wasRemoved()) {
-                    removeRecentFileFromPreferences(change.getElementRemoved());
-                    initializeFromPreferences();
-                }
+                removeRecentFileFromPreferences(change.getElementRemoved());
+            }
+            initializeFromPreferences();
         });
+        initializeFromPreferences();
     }
 
     private void removeRecentFileFromPreferences(GenomeVersion recentFile) {
@@ -114,6 +116,7 @@ public class RecentGenomeRegistryImpl implements RecentGenomeRegistry {
 
     private void initializeFromPreferences() {
         try {
+            recentFiles.clear();
             Arrays.stream(modulePreferencesNode.childrenNames())
                     .map(nodeName -> modulePreferencesNode.node(nodeName))
                     .forEach(node -> {
@@ -134,8 +137,8 @@ public class RecentGenomeRegistryImpl implements RecentGenomeRegistry {
         }
 
         final List<GenomeVersion> collect = recentFiles.stream().sorted(comparator.reversed()).map(entry -> entry.genome).collect(toList());
-        observableRecentFiles = FXCollections.observableArrayList(collect);
-        readOnlyListWrapper = new ReadOnlyListWrapper<>(observableRecentFiles);
+        observableRecentFiles.clear(); //= FXCollections.observableArrayList(collect);
+        observableRecentFiles.addAll(collect);
     }
 
     @Override
