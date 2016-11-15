@@ -9,7 +9,6 @@ import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Lists;
-import java.io.File;
 import java.util.List;
 import java.util.Optional;
 import javafx.collections.ListChangeListener;
@@ -51,17 +50,17 @@ public class RecentGenomeMenuEntry implements MenuBarEntryProvider {
             buildRecentFileMenu();
         });
         clearMenuItem.setOnAction(action -> {
-            recentGenomeRegistry.getRecentGenomes();
+            recentGenomeRegistry.clearRecentGenomes();
             recentGenomeMenu.setDisable(true);
         });
-        
+
     }
 
     private void buildRecentFileMenu() {
         recentGenomeMenu.getItems().clear();
         recentGenomeRegistry.getRecentGenomes()
                 .stream().map(recentGenome -> createRecentFileMenuItem(recentGenome))
-                .forEach(menuItem -> recentGenomeMenu.getItems().add(menuItem));
+                .forEach(menuItem -> menuItem.ifPresent(it -> recentGenomeMenu.getItems().add(it)));
         if (recentGenomeMenu.getItems().isEmpty()) {
             recentGenomeMenu.setDisable(true);
         } else {
@@ -70,19 +69,20 @@ public class RecentGenomeMenuEntry implements MenuBarEntryProvider {
         }
     }
 
-    private MenuItem createRecentFileMenuItem(GenomeVersion recentGenome) {
+    private Optional<MenuItem> createRecentFileMenuItem(GenomeVersion recentGenome) {
         String fileName = recentGenome.getReferenceSequenceProvider().getPath();
         final MenuItem menuItem = new MenuItem(recentGenome.getName().get());
-        if (new File(fileName).exists()) {
+        if (genomeVersionRegistry.getRegisteredGenomeVersions().contains(recentGenome)) {
             menuItem.setOnAction(action -> {
                 //load genome
                 recentGenomeRegistry.addRecentGenome(recentGenome);
                 genomeVersionRegistry.setSelectedGenomeVersion(recentGenome);
             });
         } else {
-            //option for user to delete entry
+            //genome not available
+            return Optional.empty();
         }
-        return menuItem;
+        return Optional.of(menuItem);
     }
 
     @Override

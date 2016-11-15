@@ -24,6 +24,7 @@ import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import static java.util.stream.Collectors.toList;
 import javafx.beans.property.ReadOnlyListWrapper;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
@@ -65,21 +66,15 @@ public class RecentGenomeRegistryImpl implements RecentGenomeRegistry {
     public void activate() {
         initializeFromPreferences();
         //Add if non-custom genomes are to be stored in recent
-//        selectionInfoService.getSelectedGenomeVersion().addListener(new ChangeListener<Optional<GenomeVersion>>() {
-//            @Override
-//            public void changed(ObservableValue<? extends Optional<GenomeVersion>> observable, Optional<GenomeVersion> oldValue, Optional<GenomeVersion> newValue) {
-//                newValue.ifPresent(newGenome -> addRecentGenome(newGenome));
-//            }
-//        });
-
-        genomeVersionRegistry.getRegisteredGenomeVersions().addListener(new SetChangeListener<GenomeVersion>() {
-            @Override
-            public void onChanged(SetChangeListener.Change<? extends GenomeVersion> change) {
-                if (change.wasRemoved()) {
+        selectionInfoService.getSelectedGenomeVersion().addListener((ObservableValue<? extends Optional<GenomeVersion>> observable, Optional<GenomeVersion> oldValue, Optional<GenomeVersion> newValue) -> {
+            newValue.ifPresent(newGenome -> addRecentGenome(newGenome));
+        });
+        
+        genomeVersionRegistry.getRegisteredGenomeVersions().addListener((SetChangeListener.Change<? extends GenomeVersion> change) -> {
+            if (change.wasRemoved()) {
                     removeRecentFileFromPreferences(change.getElementRemoved());
                     initializeFromPreferences();
                 }
-            }
         });
     }
 
@@ -127,8 +122,7 @@ public class RecentGenomeRegistryImpl implements RecentGenomeRegistry {
                                 LocalDateTime timeStamp = LocalDateTime.parse(timeStampString);
                                 Optional<GenomeVersion> optional = genomeVersionRegistry.getRegisteredGenomeVersions().stream().filter(gv -> gv.getReferenceSequenceProvider().getPath().equals(recentFile)).findFirst();
                                 if (!optional.isPresent()) {
-                                    //delete pref node if genome no more loaded
-                                    removeRecentFileFromPreferences(node);
+                                    //handle if genome not loaded
                                 } else {
                                     recentFiles.add(new RecentGenomeEntry(optional.get(), timeStamp));
                                 }

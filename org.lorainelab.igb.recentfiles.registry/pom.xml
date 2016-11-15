@@ -34,11 +34,6 @@
             <groupId>org.lorainelab</groupId>
             <artifactId>org.lorainelab.igb.preferences</artifactId>
         </dependency>
-        <dependency>
-            <groupId>commons-collections</groupId>
-            <artifactId>commons-collections</artifactId>
-            <version>20040102.233541</version>
-        </dependency>
     </dependencies>
 
     <build>
