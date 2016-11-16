@@ -72,7 +72,7 @@ public class RecentGenomeMenuEntry implements MenuBarEntryProvider {
 
     private Optional<MenuItem> createRecentFileMenuItem(GenomeVersion recentGenome) {
         String fileName = recentGenome.getReferenceSequenceProvider().getPath();
-        final MenuItem menuItem = new MenuItem(recentGenome.getName().get());
+        final MenuItem menuItem = new MenuItem(recentGenome.name().get());
         if (genomeVersionRegistry.getRegisteredGenomeVersions().contains(recentGenome)) {
             menuItem.setOnAction(action -> {
                 //load genome
