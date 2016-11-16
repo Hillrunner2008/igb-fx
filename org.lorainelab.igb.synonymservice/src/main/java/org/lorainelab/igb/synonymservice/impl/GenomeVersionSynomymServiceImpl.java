@@ -10,6 +10,7 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.Set;
 import org.lorainelab.igb.synonymservice.GenomeVersionSynomymService;
 import org.slf4j.LoggerFactory;
 
@@ -58,6 +59,11 @@ public class GenomeVersionSynomymServiceImpl extends SynonymServiceImpl implemen
     @Override
     public Optional<String> getPreferredGenomeVersionName(String synonym) {
         return getBaseWord(synonym);
+    }
+
+    @Override
+    public Set<String> getSynonyms(String synonym) {
+        return getSynonyms(synonym);
     }
 
 }

@@ -58,7 +58,7 @@ public class SpeciesSynomymServiceImpl extends SynonymServiceImpl implements Spe
 
     @Override
     public Optional<String> getPreferredSpeciesName(String synonym) {
-        return getBaseWord(synonym);
+        return getSpeciesNameFromGenomeVersionName(synonym);
     }
 
 }

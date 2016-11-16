@@ -12,7 +12,11 @@ import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.lorainelab.igb.synonymservice.SynonymService;
 import org.lorainelab.igb.synonymservice.util.SynonymEntry;
 import org.slf4j.LoggerFactory;
@@ -22,6 +26,10 @@ import org.slf4j.LoggerFactory;
  * @author Devdatta Kulkarni
  */
 public class SynonymServiceImpl implements SynonymService {
+
+    private static final Pattern STANDARD_REGEX = Pattern.compile("^([a-zA-Z]+_[a-zA-Z]+).*$");
+    private static final Pattern UCSC_REGEX = Pattern.compile("^([a-zA-Z]{2,6})[\\d]+$");
+    private static final Pattern NON_STANDARD_REGEX = Pattern.compile("^([a-zA-Z]+_[a-zA-Z]+_[a-zA-Z]+).*$");
 
     public SynonymServiceImpl() {
 
@@ -46,9 +54,56 @@ public class SynonymServiceImpl implements SynonymService {
     @Override
     public Optional<String> getBaseWord(String synonym) {
         if (invertedMap.containsKey(synonym)) {
-            return Optional.of(invertedMap.get(synonym).iterator().next());
+            return Optional.of(synonym);
+        } else {
         }
         return Optional.empty();
+    }
+
+    public Optional<String> getSpeciesNameFromGenomeVersionName(String version) {
+        String species = getSpeciesName(version, STANDARD_REGEX).orElse(version);
+        if (species.equals(version)) {
+            species = getSpeciesName(version, NON_STANDARD_REGEX).orElse(version);
+        }
+        if (species.equals(version)) {
+            species = getSpeciesName(version, UCSC_REGEX).orElse(version);
+        }
+        Pattern pattern = Pattern.compile("(\\S+)(?>_(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)_\\d{4})");
+        Matcher m = pattern.matcher(species);
+        if (m.find()) {
+            species = m.group(1);
+        } else {
+            pattern = Pattern.compile("^([a-zA-Z]{2,6})[\\d]+$");
+            m = pattern.matcher(species);
+            if (m.find()) {
+                species = species.replaceAll("[\\d]+", "");
+            }
+        }
+
+        pattern = Pattern.compile("([a-zA-Z]+)((_[a-zA-Z]+).*)");
+        m = pattern.matcher(species);
+        if (m.find()) {
+            species = m.group(1) + m.group(2);
+        }
+        final String decodedSpecies = species;
+        return Optional.of(thesaurus.entries().stream()
+                .filter((Map.Entry<String, String> entry) -> entry.getValue().equalsIgnoreCase(decodedSpecies))
+                .map(entry -> entry.getKey())
+                .findFirst()
+                .orElse(species));
+    }
+
+    private Optional<String> getSpeciesName(String version, Pattern regex) {
+        Matcher matcher = regex.matcher(version);
+        String matched = null;
+        if (matcher.matches()) {
+            matched = matcher.group(1);
+        }
+        if (matched == null || matched.isEmpty()) {
+            return Optional.empty();
+        }
+        return getBaseWord(matched);
+
     }
 
     @Override
@@ -81,5 +136,10 @@ public class SynonymServiceImpl implements SynonymService {
             asList.forEach(l -> thesaurus.putAll(l.getPreferredName(), l.getSynomyms()));
             invertedMap = Multimaps.invertFrom(thesaurus, invertedMap);
         }
+    }
+
+    @Override
+    public Set<String> getSynonyms(String synonym) {
+        return thesaurus.get(synonym);
     }
 }

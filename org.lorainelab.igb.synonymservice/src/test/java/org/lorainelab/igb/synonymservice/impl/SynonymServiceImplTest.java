@@ -6,22 +6,22 @@
 package org.lorainelab.igb.synonymservice.impl;
 
 import java.io.IOException;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import org.lorainelab.igb.synonymservice.SpeciesSynomymService;
 
 /**
  *
  * @author Devdatta Kulkarni
  */
-public class SpeciesSynonymServiceImplTest {
+public class SynonymServiceImplTest {
 
     //private static SpeciesSynomymService service;
     private static SpeciesSynomymService service;
 
-    public SpeciesSynonymServiceImplTest() {
+    public SynonymServiceImplTest() {
     }
 
     @BeforeClass
@@ -54,10 +54,13 @@ public class SpeciesSynonymServiceImplTest {
     public void testGetBaseWord() {
         //species synonym is already loaded in setup
         String expResult = "Ailuropoda melanoleuca";
-        String synonym1 = "Giant panda";
+        String synonym1 = "A_melanoleuca_Dec_2009";
         String synonym2 = "ailMel";
         assertEquals(expResult, service.getPreferredSpeciesName(synonym1).get());
         assertEquals(expResult, service.getPreferredSpeciesName(synonym2).get());
+
+        String synonym3 = "G_max_Jan_2014";
+        assertEquals("Glycine max", service.getPreferredSpeciesName(synonym3).get());
     }
 
     @Test
@@ -79,5 +82,4 @@ public class SpeciesSynonymServiceImplTest {
 //        assertTrue(service.checkIfSynonym("DemoKeyJson", "demovalue4"));
 //
 //    }
-
 }

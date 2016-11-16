@@ -5,19 +5,25 @@
  */
 package org.lorainelab.igb.synonymservice;
 
-import java.io.InputStream;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  *
  * @author Devdatta Kulkarni
  */
 public interface SynonymService {
-    
+
     void loadSynonymJson(String synonymJson);
+
     void storeSynonym(String key, String synonym);
+
     Optional<String> getBaseWord(String synonym);
+
+    Set<String> getSynonyms(String synonym);
+
     void removeSynonym(String key, String synonym);
+
     boolean checkIfSynonym(String key, String synonym);
-    
+
 }
