@@ -234,7 +234,7 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
         version.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<GenomeVersion, String>, ObservableValue<String>>() {
             @Override
             public ObservableValue<String> call(TableColumn.CellDataFeatures<GenomeVersion, String> param) {
-                return param.getValue().getName();
+                return param.getValue().name();
             }
         });
         fileName.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<GenomeVersion, String>, ObservableValue<String>>() {
@@ -258,7 +258,7 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
             else if (focusedCell.getColumn() == 3) {
                 GenomeVersion genome = genomeVersionList.get(focusedCell.getRow());
                 speciesTextField.setText(genome.getSpeciesName().get());
-                versionTextField.setText(genome.getName().get());
+                versionTextField.setText(genome.name().get());
                 refSeqTextField.setText(genome.getReferenceSequenceProvider().getPath());
                 genomeToEdit = genome;
                 Platform.runLater(() -> editStage.show());

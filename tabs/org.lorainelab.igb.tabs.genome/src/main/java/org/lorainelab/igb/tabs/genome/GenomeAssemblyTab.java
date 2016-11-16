@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.beans.Observable;
+import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -172,7 +173,10 @@ public class GenomeAssemblyTab implements TabProvider {
                             .filter(genomeVersion -> genomeVersion.getSpeciesName().get().equalsIgnoreCase(change.getElementRemoved().getSpeciesName().get()))
                             .count();
                     if (otherGenomeOfSameSpecies <= 0) {
-                        speciesComboboxItems.remove(change.getElementAdded().getSpeciesName());
+                        final StringProperty speciesName = change.getElementAdded().getSpeciesName();
+                        if (speciesComboboxItems.contains(speciesName.get())) {
+                            speciesComboboxItems.remove(speciesName.get());
+                        }
                     }
                 }
             });

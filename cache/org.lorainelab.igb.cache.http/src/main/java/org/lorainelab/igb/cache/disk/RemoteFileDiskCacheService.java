@@ -343,7 +343,7 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
                 }
                 if (doDownload && tryDownload(url, path)) {
                     CacheStatus cacheStatus = getCacheStatus(url);
-                    if (cacheStatus.isDataExists() && !cacheStatus.isCorrupt()) {
+                    if (cacheStatus.isDataAvailable() && !cacheStatus.isCorrupt()) {
                         try {
                             return Optional.ofNullable(cacheStatus.getData());
                         } catch (Exception ex) {
@@ -477,7 +477,7 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
             LOG.error("Cache entry is corrupt: {}", path);
             return Optional.empty();
         }
-        if (cacheStatus.isDataExists() && !cacheStatus.isCorrupt()) {
+        if (cacheStatus.isDataAvailable() && !cacheStatus.isCorrupt()) {
             validateCacheInBackground(url);
             updateLastRequestDate(url);
             LOG.debug("cached data: {}", cacheStatus.getData().getAbsolutePath());
@@ -603,7 +603,7 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
 
     private void cleanupCache(String path) {
         CacheStatus cacheStatus = getCacheStatus(path);
-        if (cacheStatus.isDataExists()) {
+        if (cacheStatus.isDataAvailable()) {
             synchronized (this) {
                 setCurrentCacheSize(getCurrentCacheSize().subtract(getCacheEntrySizeInMB(cacheStatus.getData())));
             }
@@ -634,7 +634,7 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
     }
 
     private boolean validateCacheRemotely(CacheStatus cacheStatus, HttpHeader httpHeader, URL url) {
-        if (cacheStatus.isDataExists()) {
+        if (cacheStatus.isDataAvailable()) {
             if (httpHeader.responseCode >= 400) {
                 //If remote file is unavailable
                 return true;
@@ -691,17 +691,17 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
                 cacheStatus.setSize(getCacheEntrySizeInMB(data));
             } catch (IOException ex) {
                 LOG.error(ex.getMessage(), ex);
-                cacheStatus.setDataExists(false);
+                cacheStatus.setDataAvailable(false);
                 return cacheStatus;
             }
-            cacheStatus.setDataExists(true);
+            cacheStatus.setDataAvailable(true);
             return cacheStatus;
         } else if (data.exists()) {
             //Data file exists but missing metadata.  It is corrupted.
             cacheStatus.setIsCorrupt(true);
         }
 
-        cacheStatus.setDataExists(false);
+        cacheStatus.setDataAvailable(false);
         return cacheStatus;
     }
 
@@ -747,7 +747,7 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
     @Override
     public boolean cacheExists(URL url) {
         CacheStatus cacheStatus = getCacheStatus(getCacheFolderPath(generateKeyFromUrl(url)));
-        return cacheStatus.isDataExists();
+        return cacheStatus.isDataAvailable();
     }
 
     @Override
@@ -889,7 +889,7 @@ public class RemoteFileDiskCacheService implements RemoteFileCacheService {
     public CacheStatus getCacheStatus(URL url) {
         String path = getCacheFolderPath(generateKeyFromUrl(url));
         CacheStatus cacheStatus = getCacheStatus(path);
-        if (!cacheStatus.isDataExists()) {
+        if (!cacheStatus.isDataAvailable()) {
             HttpHeader httpHeader = getHttpHeadersOnly(url.toString());
             if (httpHeader.getSize() > 0) {
                 cacheStatus.setSize(BigInteger.valueOf(httpHeader.getSize()).divide(new BigInteger("1000000")));

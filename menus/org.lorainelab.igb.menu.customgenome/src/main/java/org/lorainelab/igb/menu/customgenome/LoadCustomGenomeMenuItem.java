@@ -33,6 +33,7 @@ import org.lorainelab.igb.menu.api.model.WeightedMenuEntry;
 import org.lorainelab.igb.menu.api.model.WeightedMenuItem;
 import org.lorainelab.igb.preferences.SessionPreferences;
 import org.lorainelab.igb.selections.SelectionInfoService;
+import org.lorainelab.igb.synonymservice.ChromosomeSynomymService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tbee.javafx.scene.layout.MigPane;
@@ -62,6 +63,7 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
     private static int CUSTOM_GENOME_COUNTER = 1;
     private SelectionInfoService selectionInfoService;
     private CustomGenomePersistenceManager customGenomePersistenceManager;
+    private ChromosomeSynomymService chromosomeSynomymService;
 
     public LoadCustomGenomeMenuItem() {
         menuItem = new WeightedMenuItem(1, "Load Custom Genome");
@@ -108,7 +110,7 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
                 File file = new File(SessionPreferences.getRecentSelectedFilePath());
                 String simpleFileName = file.getParent();
                 homeDirectory = new File(simpleFileName);
-            } else {    
+            } else {
                 homeDirectory = new File(System.getProperty("user.home"));
             }
             fileChooser.setInitialDirectory(homeDirectory);
@@ -146,7 +148,7 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
                         final Optional<GenomeVersion> duplicate = isDuplicate(sequenceFileUrl);
 
                         if (!duplicate.isPresent()) {
-                            ReferenceSequenceProvider twoBitProvider = (ReferenceSequenceProvider) new TwoBitParser(sequenceFileUrl);
+                            ReferenceSequenceProvider twoBitProvider = (ReferenceSequenceProvider) new TwoBitParser(sequenceFileUrl, chromosomeSynomymService);
                             GenomeVersion customGenome = new GenomeVersion(versionName, speciesName, twoBitProvider, versionName);
                             SessionPreferences.setRecentSelectedFilePath(sequenceFileUrl);
                             customGenomePersistenceManager.persistCustomGenome(customGenome);
@@ -158,8 +160,8 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
                                 ButtonType switchBtn = new ButtonType("Switch");
                                 ButtonType cancelBtn = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
                                 Alert dlg = new Alert(AlertType.CONFIRMATION, "This sequence file is already mapped to the \n\""
-                                        + duplicate.get().getName().get() + "\" genome."
-                                        + "\n Choose Switch to load it.");
+                                        + duplicate.get().name().get() + "\" genome."
+                                        + "\n Choose Switch to load it");
                                 dlg.initModality(stage.getModality());
                                 dlg.initOwner(stage.getOwner());
                                 dlg.setTitle("Cannot add duplicate genome version");
@@ -237,7 +239,6 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
     }
 
     @Override
-
     public Optional<List<WeightedMenuEntry>> getMenuItems() {
         final List<WeightedMenuEntry> menuItems = Lists.newArrayList(menuItem);
         return Optional.of(menuItems);
@@ -261,6 +262,11 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
     @Reference
     public void setSelectionInfoService(SelectionInfoService selectionInfoService) {
         this.selectionInfoService = selectionInfoService;
+    }
+
+    @Reference
+    public void setChromosomeSynomymService(ChromosomeSynomymService chromosomeSynomymService) {
+        this.chromosomeSynomymService = chromosomeSynomymService;
     }
 
     private void addFileExtensionFilters(FileChooser fileChooser) {

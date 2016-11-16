@@ -6,7 +6,7 @@ import htsjdk.tribble.readers.LineIteratorImpl;
 import htsjdk.tribble.readers.TabixIteratorLineReader;
 import htsjdk.tribble.readers.TabixReader;
 import org.lorainelab.igb.data.model.Chromosome;
-import static org.lorainelab.igb.data.model.util.DataSourceUtils.getStreamFor;
+import static org.lorainelab.igb.data.model.util.DataSourceUtilsImpl.getStreamFor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

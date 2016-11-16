@@ -51,6 +51,20 @@
             <groupId>colt</groupId>
             <artifactId>colt</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.lorainelab</groupId>
+            <artifactId>org.lorainelab.igb.cache.api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.lorainelab</groupId>
+            <artifactId>org.lorainelab.igb.preferences</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.lorainelab</groupId>
+            <artifactId>org.lorainelab.igb.synonymservice</artifactId>
+            <version>0.0.1</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -72,10 +86,13 @@
                         </Import-Package>
                         <Export-Package>
                             ${project.artifactId},
-                            ${project.artifactId}.*
+                            ${project.artifactId}.*,
+                            org.lorainelab.igb.dataprovider.api,
+                            org.lorainelab.igb.dataprovider.model
                         </Export-Package>
                         <Bundle-ActivationPolicy>lazy</Bundle-ActivationPolicy>
                         <Service-Component>*</Service-Component>
+                        <Private-Package>org.lorainelab.igb.data.model.*,org.lorainelab.igb.dataprovider.api.*,org.lorainelab.igb.dataprovider.model.*</Private-Package>
                     </instructions>
                 </configuration>
             </plugin>

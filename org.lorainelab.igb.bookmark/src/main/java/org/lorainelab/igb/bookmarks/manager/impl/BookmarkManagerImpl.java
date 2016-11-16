@@ -122,7 +122,7 @@ public class BookmarkManagerImpl implements BookmarkManager {
         positionOnlyRadio.setSelected(false);
         nameTextField.setDisable(true);
         genomeVersionRegistry.getSelectedGenomeVersion().get().ifPresent(gv -> {
-            nameTextField.setText(gv.getName().get());
+            nameTextField.setText(gv.name().get());
             gv.getSelectedChromosomeProperty().get().ifPresent(chr -> {
                 nameTextField.setText(nameTextField.getText() + " " + chr.getName());
             });
@@ -250,7 +250,7 @@ public class BookmarkManagerImpl implements BookmarkManager {
             bookmarkData.setDescription(descriptionTextArea.getText());
             Map<String, String> data = new HashMap<String, String>();
             genomeVersionRegistry.getSelectedGenomeVersion().get().ifPresent(gv -> {
-                data.put(GENOME_VERSION_KEY, gv.getName().get());
+                data.put(GENOME_VERSION_KEY, gv.name().get());
                 data.put(GENOME_SPECIES_KEY, gv.getSpeciesName().get());
                 gv.getSelectedChromosomeProperty().get().ifPresent(chr -> {
                     data.put(GENOME_CHROMOSOME_KEY, chr.getName());

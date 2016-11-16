@@ -40,24 +40,20 @@ public class SynonymServiceImpl implements SynonymService {
     protected SetMultimap<String, String> thesaurus
             = Multimaps.synchronizedSetMultimap(LinkedHashMultimap.<String, String>create());
 
-    protected SetMultimap<String, String> invertedMap
-            = Multimaps.synchronizedSetMultimap(LinkedHashMultimap.<String, String>create());
-
     @Override
     public void storeSynonym(String key, String synonym) {
         if (!(thesaurus.get(key).contains(synonym))) {
             thesaurus.put(key, synonym);
-            invertedMap.put(synonym, key);
         }
     }
 
     @Override
     public Optional<String> getBaseWord(String synonym) {
-        if (invertedMap.containsKey(synonym)) {
-            return Optional.of(synonym);
-        } else {
-        }
-        return Optional.empty();
+        return Optional.of(thesaurus.entries().stream()
+                .filter((Map.Entry<String, String> entry) -> entry.getValue().equalsIgnoreCase(synonym))
+                .map(entry -> entry.getKey())
+                .findFirst()
+                .orElse(synonym));
     }
 
     public Optional<String> getSpeciesNameFromGenomeVersionName(String version) {
@@ -109,7 +105,6 @@ public class SynonymServiceImpl implements SynonymService {
     @Override
     public void removeSynonym(String key, String synonym) {
         thesaurus.remove(key, synonym);
-        invertedMap.remove(synonym, key);
     }
 
     @Override
@@ -134,7 +129,6 @@ public class SynonymServiceImpl implements SynonymService {
 
         if (asList != null) {
             asList.forEach(l -> thesaurus.putAll(l.getPreferredName(), l.getSynomyms()));
-            invertedMap = Multimaps.invertFrom(thesaurus, invertedMap);
         }
     }
 

@@ -110,6 +110,12 @@
                 <scope>provided</scope>
             </dependency>
             <dependency>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>${gson_version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
                 <groupId>de.jensd</groupId>
                 <artifactId>fontawesomefx</artifactId>
                 <version>${fontawesomefx_version}</version>
@@ -419,7 +425,7 @@
                 <version>${project.version}</version>
                 <scope>provided</scope>
             </dependency>
-            <dependency>
+            <dependency>    
                 <groupId>org.lorainelab</groupId>
                 <artifactId>org.lorainelab.igb.search.api</artifactId>
                 <version>${project.version}</version>
@@ -443,6 +449,16 @@
                 <groupId>org.lorainelab</groupId>
                 <artifactId>org.lorainelab.igb.tools.sort</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.lorainelab</groupId>
+                <artifactId>org.lorainelab.igb.quickload</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.lorainelab</groupId>
+                <artifactId>org.lorainelab.igb.preferencemanager.api</artifactId>
+               <version>${project.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -550,7 +566,7 @@
         <module>cache/org.lorainelab.igb.cache.http</module> 
                
         <module>org.lorainelab.igb.preferences</module>
-        <module>org.lorainelab.igb.demo</module>
+        <module>org.lorainelab.igb.quickload</module>
         <module>org.lorainelab.igb.feature</module>
         <module>org.lorainelab.igb.search.lucene</module>
         <module>org.lorainelab.igb.search.api</module>
@@ -570,6 +586,7 @@
         <controlsfx_version>8.40.11</controlsfx_version>
         <commons-lang3_version>3.4</commons-lang3_version>
         <guava_version>19.0</guava_version>
+        <gson_version>2.7</gson_version>
         <fontawesomefx_version>8.9</fontawesomefx_version>
         <miglayout_version>5.0</miglayout_version>
         <reactfx_version>2.0-M4u1</reactfx_version>

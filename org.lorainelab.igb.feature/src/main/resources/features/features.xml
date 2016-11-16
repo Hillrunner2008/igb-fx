@@ -18,6 +18,7 @@
         <bundle>wrap:mvn:com.miglayout/miglayout-core/${miglayout_version}</bundle>
         <bundle>wrap:mvn:com.miglayout/miglayout-javafx/${miglayout_version}</bundle>
         <bundle>mvn:com.google.guava/guava/${guava_version}</bundle>
+        <bundle>mvn:com.google.code.gson/gson/${gson_version}</bundle>
         <bundle>wrap:mvn:de.jensd/fontawesomefx/${fontawesomefx_version}</bundle>
         <bundle>mvn:org.apache.commons/commons-lang3/${commons-lang3_version}</bundle>
         <bundle>mvn:commons-codec/commons-codec/${commons-codec_version}</bundle>
@@ -40,6 +41,10 @@
         <bundle>mvn:org.apache.commons/commons-compress/${commons-compress_version}</bundle>
         
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.utils/${project.version}</bundle>
+        
+        <bundle>mvn:${project.groupId}/org.lorainelab.igb.cache.api/${project.version}</bundle>
+        <bundle>mvn:${project.groupId}/org.lorainelab.igb.cache.http/${project.version}</bundle>
+        
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.search.api/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.search.lucene/${project.version}</bundle>
            
@@ -47,9 +52,6 @@
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.toolbar.api/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.synonymservice/${project.version}</bundle>
         
-
-        <bundle>mvn:${project.groupId}/org.lorainelab.igb.cache.api/${project.version}</bundle>
-
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.view.api/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.notifications.api/${project.version}</bundle>
      
@@ -78,16 +80,14 @@
 
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.visualization/${project.version}</bundle>
         
-        <bundle>mvn:${project.groupId}/org.lorainelab.igb.cache.http/${project.version}</bundle>
-        
-        
+   
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.tabs.genome/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.bookmark/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.tabs.selection/${project.version}</bundle>
 
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.preferencemanager.api/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.preferences.otheroptions/${project.version}</bundle>
-        <bundle>mvn:${project.groupId}/org.lorainelab.igb.demo/${project.version}</bundle>
+        <bundle>mvn:${project.groupId}/org.lorainelab.igb.quickload/${project.version}</bundle>
     </feature>
 
 </features>
