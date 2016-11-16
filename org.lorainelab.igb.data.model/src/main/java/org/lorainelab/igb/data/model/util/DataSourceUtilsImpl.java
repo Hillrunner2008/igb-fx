@@ -70,13 +70,13 @@ public class DataSourceUtilsImpl implements DataSourceUtils {
         if (path.startsWith("http")) {
             final URL url = new URL(path);
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-            return urlConnection.getInputStream();
+            return getStreamFor(urlConnection.getInputStream(), path);
         } else if (path.startsWith("ftp:")) {
-            return new SeekableFTPStream(new URL(path));
+            return getStreamFor(new SeekableFTPStream(new URL(path)), path);
         } else if (path.startsWith("file")) {
-            return new FileInputStream(new File(new URL(path).getPath()));
+            return getStreamFor(new FileInputStream(new File(new URL(path).getPath())), path);
         } else {
-            return new FileInputStream(new File(path));
+            return getStreamFor(new FileInputStream(new File(path)), path);
         }
     }
 

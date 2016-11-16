@@ -2,6 +2,7 @@ package org.lorainelab.igb.quickload;
 
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
+import aQute.bnd.annotation.component.Reference;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import java.io.IOException;
 import java.net.URL;
@@ -52,6 +53,8 @@ public class QuickloadRepositoryPreferencesTabProvider extends Tab implements Pr
     @FXML
     private Button removeBtn;
 
+    private QuickloadSiteManager quickloadSiteManager;
+
     //to ensure class import in manifest header
     private FontAwesomeIconView dummyIcon;
 
@@ -79,7 +82,6 @@ public class QuickloadRepositoryPreferencesTabProvider extends Tab implements Pr
     }
 
     @Override
-
     public Tab getPreferencesTab() {
         return this;
     }
@@ -87,6 +89,11 @@ public class QuickloadRepositoryPreferencesTabProvider extends Tab implements Pr
     @Override
     public int getTabWeight() {
         return WEIGHT;
+    }
+
+    @Reference
+    public void setQuickloadSiteManager(QuickloadSiteManager quickloadSiteManager) {
+        this.quickloadSiteManager = quickloadSiteManager;
     }
 
 }

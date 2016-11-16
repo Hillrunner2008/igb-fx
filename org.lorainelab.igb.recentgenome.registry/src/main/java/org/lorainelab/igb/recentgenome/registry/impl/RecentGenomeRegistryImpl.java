@@ -23,6 +23,7 @@ import java.util.Queue;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import static java.util.stream.Collectors.toList;
+import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyListWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -72,7 +73,9 @@ public class RecentGenomeRegistryImpl implements RecentGenomeRegistry {
         });
 
         genomeVersionRegistry.getRegisteredGenomeVersions().addListener((SetChangeListener.Change<? extends GenomeVersion> change) -> {
-            initializeFromPreferences();
+            Platform.runLater(() -> {
+                initializeFromPreferences();
+            });
         });
         initializeFromPreferences();
     }
@@ -112,30 +115,32 @@ public class RecentGenomeRegistryImpl implements RecentGenomeRegistry {
     }
 
     private void initializeFromPreferences() {
-        try {
-            recentFiles.clear();
-            Arrays.stream(modulePreferencesNode.childrenNames())
-                    .map(nodeName -> modulePreferencesNode.node(nodeName))
-                    .forEach(node -> {
-                        Optional.ofNullable(node.get(FILE_NAME, null)).ifPresent(recentFile -> {
-                            Optional.ofNullable(node.get(TIME_STAMP, null)).ifPresent(timeStampString -> {
-                                LocalDateTime timeStamp = LocalDateTime.parse(timeStampString);
-                                Optional<GenomeVersion> optional = genomeVersionRegistry.getRegisteredGenomeVersions().stream().filter(gv -> gv.getReferenceSequenceProvider().getPath().equals(recentFile)).findFirst();
-                                if (!optional.isPresent()) {
-                                    //handle if genome not loaded
-                                } else {
-                                    recentFiles.add(new RecentGenomeEntry(optional.get(), timeStamp));
-                                }
+        Platform.runLater(() -> {
+            try {
+                recentFiles.clear();
+                Arrays.stream(modulePreferencesNode.childrenNames())
+                        .map(nodeName -> modulePreferencesNode.node(nodeName))
+                        .forEach(node -> {
+                            Optional.ofNullable(node.get(FILE_NAME, null)).ifPresent(recentFile -> {
+                                Optional.ofNullable(node.get(TIME_STAMP, null)).ifPresent(timeStampString -> {
+                                    LocalDateTime timeStamp = LocalDateTime.parse(timeStampString);
+                                    Optional<GenomeVersion> optional = genomeVersionRegistry.getRegisteredGenomeVersions().stream().filter(gv -> gv.getReferenceSequenceProvider().getPath().equals(recentFile)).findFirst();
+                                    if (!optional.isPresent()) {
+                                        //handle if genome not loaded
+                                    } else {
+                                        recentFiles.add(new RecentGenomeEntry(optional.get(), timeStamp));
+                                    }
+                                });
                             });
                         });
-                    });
-        } catch (BackingStoreException ex) {
-            LOG.error(ex.getMessage(), ex);
-        }
+            } catch (BackingStoreException ex) {
+                LOG.error(ex.getMessage(), ex);
+            }
 
-        final List<GenomeVersion> collect = recentFiles.stream().sorted(comparator.reversed()).map(entry -> entry.genome).collect(toList());
-        observableRecentFiles.clear(); //= FXCollections.observableArrayList(collect);
-        observableRecentFiles.addAll(collect);
+            final List<GenomeVersion> collect = recentFiles.stream().sorted(comparator.reversed()).map(entry -> entry.genome).collect(toList());
+            observableRecentFiles.clear();
+            observableRecentFiles.addAll(collect);
+        });
     }
 
     @Override

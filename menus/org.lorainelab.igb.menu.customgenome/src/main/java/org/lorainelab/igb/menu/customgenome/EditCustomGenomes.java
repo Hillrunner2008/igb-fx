@@ -80,6 +80,7 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
 
     public EditCustomGenomes() {
         menuItem = new WeightedMenuItem(2, "Manage Custom Genomes");
+        genomeVersionList = FXCollections.observableArrayList();
     }
 
     @Override
@@ -114,18 +115,24 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
     }
 
     private void initComponents() {
-
-        genomeVersionList = FXCollections.observableArrayList(genomeVersionRegistry.getRegisteredGenomeVersions());
-        //Convert to lambda ?? 
+        Platform.runLater(() -> {
+            genomeVersionList.addAll(genomeVersionRegistry.getRegisteredGenomeVersions());
+        });
         genomeVersionRegistry.getRegisteredGenomeVersions().addListener(new SetChangeListener<GenomeVersion>() {
             @Override
             public void onChanged(SetChangeListener.Change<? extends GenomeVersion> change) {
-                if (change.wasAdded()) {
-                    genomeVersionList.add(change.getElementAdded());
-                }
-                if (change.wasRemoved()) {
-                    genomeVersionList.remove(change.getElementRemoved());
-                }
+                Platform.runLater(() -> {
+                    if (change.wasAdded()) {
+                        if (!genomeVersionList.contains(change.getElementAdded())) {
+                            final GenomeVersion elementAdded = change.getElementAdded();
+                            genomeVersionList.add(elementAdded);
+                        }
+                    }
+                    if (change.wasRemoved()) {
+                        final GenomeVersion elementRemoved = change.getElementRemoved();
+                        genomeVersionList.remove(elementRemoved);
+                    }
+                });
             }
         });
 

@@ -173,7 +173,7 @@ public class GenomeAssemblyTab implements TabProvider {
                             .filter(genomeVersion -> genomeVersion.getSpeciesName().get().equalsIgnoreCase(change.getElementRemoved().getSpeciesName().get()))
                             .count();
                     if (otherGenomeOfSameSpecies <= 0) {
-                        final StringProperty speciesName = change.getElementAdded().getSpeciesName();
+                        final StringProperty speciesName = change.getElementRemoved().getSpeciesName();
                         if (speciesComboboxItems.contains(speciesName.get())) {
                             speciesComboboxItems.remove(speciesName.get());
                         }

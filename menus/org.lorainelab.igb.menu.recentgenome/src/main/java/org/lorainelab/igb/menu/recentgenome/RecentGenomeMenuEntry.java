@@ -48,7 +48,7 @@ public class RecentGenomeMenuEntry implements MenuBarEntryProvider {
     public void activate() {
         buildRecentFileMenu();
         recentGenomeRegistry.getRecentGenomes().addListener((ListChangeListener.Change<? extends GenomeVersion> c) -> {
-            Platform.runLater(() -> buildRecentFileMenu());
+            buildRecentFileMenu();
         });
         clearMenuItem.setOnAction(action -> {
             recentGenomeRegistry.clearRecentGenomes();
@@ -58,16 +58,18 @@ public class RecentGenomeMenuEntry implements MenuBarEntryProvider {
     }
 
     private void buildRecentFileMenu() {
-        recentGenomeMenu.getItems().clear();
-        recentGenomeRegistry.getRecentGenomes()
-                .stream().map(recentGenome -> createRecentFileMenuItem(recentGenome))
-                .forEach(menuItem -> menuItem.ifPresent(it -> recentGenomeMenu.getItems().add(it)));
-        if (recentGenomeMenu.getItems().isEmpty()) {
-            recentGenomeMenu.setDisable(true);
-        } else {
-            recentGenomeMenu.setDisable(false);
-            recentGenomeMenu.getItems().add(clearMenuItem);
-        }
+        Platform.runLater(() -> {
+            recentGenomeMenu.getItems().clear();
+            recentGenomeRegistry.getRecentGenomes()
+                    .stream().map(recentGenome -> createRecentFileMenuItem(recentGenome))
+                    .forEach(menuItem -> menuItem.ifPresent(it -> recentGenomeMenu.getItems().add(it)));
+            if (recentGenomeMenu.getItems().isEmpty()) {
+                recentGenomeMenu.setDisable(true);
+            } else {
+                recentGenomeMenu.setDisable(false);
+                recentGenomeMenu.getItems().add(clearMenuItem);
+            }
+        });
     }
 
     private Optional<MenuItem> createRecentFileMenuItem(GenomeVersion recentGenome) {
