@@ -159,7 +159,10 @@ public class GenomeAssemblyTab implements TabProvider {
             Platform.runLater(() -> {
                 if (change.wasAdded()) {
                     if (!speciesComboboxItems.contains(change.getElementAdded().getSpeciesName())) {
-                        speciesComboboxItems.add(change.getElementAdded().getSpeciesName().get());
+                        final String speciesName = change.getElementAdded().getSpeciesName().get();
+                        if (!speciesComboboxItems.contains(speciesName)) {
+                            speciesComboboxItems.add(speciesName);
+                        }
                     } else {
                         //upde only version combo box
                         genomeVersionComboBox.getItems().add(change.getElementAdded());
