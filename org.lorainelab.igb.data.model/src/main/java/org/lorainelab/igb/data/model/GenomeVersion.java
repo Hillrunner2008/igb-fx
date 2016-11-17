@@ -3,6 +3,7 @@ package org.lorainelab.igb.data.model;
 import com.google.common.collect.Sets;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -10,7 +11,6 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 import org.lorainelab.igb.data.model.sequence.ReferenceSequenceProvider;
-import org.lorainelab.igb.dataprovider.model.DataContainer;
 
 /**
  *
@@ -24,10 +24,19 @@ public class GenomeVersion {
     private ReferenceSequenceProvider referenceSequenceProvider;
     private ObjectProperty<Optional<Chromosome>> selectedChromosomeProperty;
     private ObservableSet<DataSet> loadedDataSets;
-    private ObservableSet<DataContainer> dataContainers;
+    private ObservableSet<Chromosome> chromosomes;
+
+    public GenomeVersion(String name, String speciesName, ReferenceSequenceProvider referenceSequenceProvider, Set<Chromosome> chromosomes) {
+        this(name, speciesName, referenceSequenceProvider, "", chromosomes);
+    }
+
+    public GenomeVersion(String name, String speciesName, ReferenceSequenceProvider referenceSequenceProvider, String description, Set<Chromosome> chromosomes) {
+        this(name, speciesName, referenceSequenceProvider);
+        this.chromosomes.addAll(chromosomes);
+    }
 
     public GenomeVersion(String name, String speciesName, ReferenceSequenceProvider referenceSequenceProvider) {
-        this(name, speciesName, referenceSequenceProvider, null);
+        this(name, speciesName, referenceSequenceProvider, "");
     }
 
     public GenomeVersion(String name, String speciesName, ReferenceSequenceProvider referenceSequenceProvider, String description) {
@@ -37,7 +46,7 @@ public class GenomeVersion {
         this.referenceSequenceProvider = referenceSequenceProvider;
         selectedChromosomeProperty = new SimpleObjectProperty(Optional.empty());
         loadedDataSets = FXCollections.observableSet(Sets.newHashSet());
-        dataContainers = FXCollections.observableSet(Sets.newHashSet());
+        chromosomes = FXCollections.observableSet(Sets.newLinkedHashSet());
     }
 
     public StringProperty name() {
@@ -72,12 +81,15 @@ public class GenomeVersion {
         selectedChromosomeProperty.set(Optional.ofNullable(selectedChromosome));
     }
 
-    public ObservableSet<DataContainer> getDataContainers() {
-        return dataContainers;
-    }
-
     public ObservableSet<DataSet> getLoadedDataSets() {
         return loadedDataSets;
+    }
+
+    public ObservableSet<Chromosome> getChromosomes() {
+        if (chromosomes.isEmpty()) {
+            chromosomes.addAll(referenceSequenceProvider.getChromosomes());
+        }
+        return chromosomes;
     }
 
     @Override

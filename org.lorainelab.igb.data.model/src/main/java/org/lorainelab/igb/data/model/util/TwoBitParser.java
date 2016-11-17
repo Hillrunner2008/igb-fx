@@ -69,7 +69,6 @@ public class TwoBitParser implements ReferenceSequenceProvider {
                 long pos = readFourBytes(seekableStream);
                 seq2pos.put(seq_names[i], pos);
             }
-            initializeChromosomeInfo();
             isInitialized = true;
 //            CompletableFuture.supplyAsync(() -> {
 //                initializeChromosomeInfo();
@@ -344,7 +343,7 @@ public class TwoBitParser implements ReferenceSequenceProvider {
         if (!isInitialized) {
             initializeLazily();
         }
-        chromosomeId = seq2prefNameRef.get(chromosomeId);
+        chromosomeId = seq2prefNameRef.getOrDefault(chromosomeId, chromosomeId);
         String sequence = "";
         try (SeekableStream seekableStream = new SeekableBufferedStream(SeekableStreamFactory.getInstance().getBufferedStream(SeekableStreamFactory.getInstance().getStreamFor(path)))) {
             setCurrentSequence(seekableStream, chromosomeId);
@@ -381,6 +380,7 @@ public class TwoBitParser implements ReferenceSequenceProvider {
     public ObservableSet<Chromosome> getChromosomes() {
         if (!isInitialized) {
             initializeLazily();
+            initializeChromosomeInfo();
         }
         return chromosomes;
     }

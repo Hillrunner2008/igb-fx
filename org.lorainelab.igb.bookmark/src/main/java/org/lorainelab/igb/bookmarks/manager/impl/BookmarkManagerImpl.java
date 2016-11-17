@@ -195,7 +195,7 @@ public class BookmarkManagerImpl implements BookmarkManager {
         }
         genomeVersion = optionalGenomeVersion.get();
 
-        Optional<Chromosome> optionalChromosome = genomeVersion.getReferenceSequenceProvider().getChromosomes().stream().filter(gv
+        Optional<Chromosome> optionalChromosome = genomeVersion.getChromosomes().stream().filter(gv
                 -> gv.getReferenceSequenceProvider().getPath().equals(props.get(GENOME_REF_SEQ_KEY))).findFirst();
         if (!optionalGenomeVersion.isPresent()) {
             showInvalidBookmark("Chromosome not found");

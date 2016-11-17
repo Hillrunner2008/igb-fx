@@ -9,13 +9,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import org.lorainelab.igb.cache.api.RemoteFileCacheService;
+import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.GenomeVersion;
 import org.lorainelab.igb.data.model.GenomeVersionRegistry;
 import org.lorainelab.igb.data.model.sequence.ReferenceSequenceProvider;
 import org.lorainelab.igb.data.model.util.DataSourceUtilsImpl;
 import org.lorainelab.igb.data.model.util.TwoBitParser;
 import org.lorainelab.igb.dataprovider.api.DataProvider;
-import org.lorainelab.igb.dataprovider.model.DataContainer;
 import org.lorainelab.igb.notifications.api.StatusBarNotificationService;
 import org.lorainelab.igb.synonymservice.ChromosomeSynomymService;
 import org.lorainelab.igb.synonymservice.GenomeVersionSynomymService;
@@ -98,15 +98,13 @@ public class QuickloadSiteManager {
                             String speciesName = speciesSynomymService.getPreferredSpeciesName(gv).orElse(gv);
                             if (DataSourceUtilsImpl.resourceAvailable(seqFilePath.toURL())) {
                                 ReferenceSequenceProvider twoBitProvider = (ReferenceSequenceProvider) new TwoBitParser(seqFilePath.toURL().toExternalForm(), chromosomeSynomymService);
-                                genomeVersion = new GenomeVersion(preferredGenomeVersionName, speciesName, twoBitProvider, speciesName);
+                                Set<Chromosome> chromosomes = Sets.newLinkedHashSet();
+                                dataProvider.getAssemblyInfo(preferredGenomeVersionName).ifPresent(chromInfo -> chromInfo.entrySet().stream().forEach(entry -> {
+                                    chromosomes.add(new Chromosome(entry.getKey(), entry.getValue(), twoBitProvider));
+                                }));
+
+                                genomeVersion = new GenomeVersion(preferredGenomeVersionName, speciesName, twoBitProvider, chromosomes);
                                 genomeVersionRegistry.getRegisteredGenomeVersions().add(genomeVersion);
-                                genomeVersion.getDataContainers().add(new DataContainer(genomeVersion, dataProvider));
-                            } else {
-                                genomeVersionRegistry.getRegisteredGenomeVersions().stream()
-                                        .filter(genomeVersion -> genomeVersion.name().get().equalsIgnoreCase(preferredGenomeVersionName))
-                                        .findFirst().ifPresent(match -> {
-                                            match.getDataContainers().add(new DataContainer(match, dataProvider));
-                                        });
                             }
                         } catch (Exception ex) {
                             LOG.error(ex.getMessage(), ex);

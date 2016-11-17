@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 @Component(immediate = true, provide = QuickloadUtils.class)
 public class QuickloadUtils {
 
-    private static final Logger logger = LoggerFactory.getLogger(QuickloadUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(QuickloadUtils.class);
     private static final AnnotsParser ANNOTS_PARSER = new AnnotsParser();
     private DataSourceUtils dataSourceUtils;
     private GenomeVersionSynomymService genomeVersionSynomymService;
@@ -46,7 +46,7 @@ public class QuickloadUtils {
             urlString += QuickloadConstants.SYNONYMS_TXT;
             parseGenomeVersionSynonyms(dataSourceUtils.getStreamFor(urlString, true), genomeVersionSynonyms);
         } catch (Exception ex) {
-            logger.warn("Optional quickload synonyms.txt file could not be loaded from {}", urlString);
+            LOG.debug("Optional quickload synonyms.txt file could not be loaded from {}", urlString);
         }
 
     }
@@ -66,7 +66,7 @@ public class QuickloadUtils {
             urlString += QuickloadConstants.SPECIES_TXT;
             parseSpeciesInfo(dataSourceUtils.getStreamFor(urlString, true), speciesInfo);
         } catch (Exception ex) {
-            logger.warn("Optional species.txt could not be loaded from: {}", urlString);
+            LOG.debug("Optional species.txt could not be loaded from: {}", urlString);
         }
     }
 
@@ -95,7 +95,7 @@ public class QuickloadUtils {
             urlString += QuickloadConstants.CONTENTS_TXT;
             processContentsTextFile(dataSourceUtils.getStreamFor(urlString, true), supportedGenomeVersionInfo);
         } catch (Exception ex) {
-            logger.warn("Could not read contents.txt from: {}", urlString);
+            LOG.error("Could not read contents.txt from: {}", urlString);
             throw ex;
         }
     }
@@ -128,13 +128,13 @@ public class QuickloadUtils {
                     return Optional.of(Sets.newLinkedHashSet(annotsFiles));
                 } else {
 //                    ModalUtils.errorPanel("Could not read annots.xml or this file was empty. Skipping this genome version for quickload site (" + genomeVersionBaseUrl + ")");
-                    logger.error("Could not read annots.xml or this file was empty. Skipping this genome version for quickload site {}", genomeVersionBaseUrl);
+                    LOG.error("Could not read annots.xml or this file was empty. Skipping this genome version for quickload site {}", genomeVersionBaseUrl);
                     supportedGenomeVersionInfo.remove(genomeVersionName);
                 }
             }
         } catch (Exception ex) {
 //            ModalUtils.errorPanel("Could not read annots.xml or this file was empty. Skipping this genome version for quickload site (" + genomeVersionBaseUrl + ")");
-            logger.error("Missing required {} file for genome version {}, skipping this genome version for quickload site {}", ANNOTS_XML, genomeVersionName, genomeVersionBaseUrl, ex);
+            LOG.error("Missing required {} file for genome version {}, skipping this genome version for quickload site {}", ANNOTS_XML, genomeVersionName, genomeVersionBaseUrl, ex);
         }
         return Optional.empty();
     }

@@ -2,12 +2,12 @@ package org.lorainelab.igb.dataprovider.api;
 
 import com.google.common.collect.SetMultimap;
 import java.net.URI;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.StringProperty;
 import org.lorainelab.igb.data.model.DataSet;
-import org.lorainelab.igb.dataprovider.model.DataContainer;
 
 /**
  * TODO - add full description
@@ -27,9 +27,11 @@ public interface DataProvider {
      */
     void initialize();
 
-    Set<DataSet> getAvailableDataSets(DataContainer dataContainer);
+    Set<DataSet> getAvailableDataSets(String genomeVersionName);
 
     Set<String> getSupportedGenomeVersionNames();
+
+    Optional<Map<String, Integer>> getAssemblyInfo(String genomeVersionName);
 
     default Optional<SetMultimap<String, String>> getGenomeVersionSynonyms() {
         return Optional.empty();

@@ -122,10 +122,10 @@ public class GenomeAssemblyTab implements TabProvider {
                 genomeVersionRegistry.getSelectedGenomeVersion().addListener(selectedGenomeVersionChangeListener);
                 speciesComboBox.setValue(selectedGenomeVersion.getSpeciesName().get());
                 tableData.clear();
-                tableData.addAll(selectedGenomeVersion.getReferenceSequenceProvider().getChromosomes());
+                tableData.addAll(selectedGenomeVersion.getChromosomes());
             }
         });
-        selectedGenomeVersion.getReferenceSequenceProvider().getChromosomes().addListener((SetChangeListener.Change<? extends Chromosome> change) -> {
+        selectedGenomeVersion.getChromosomes().addListener((SetChangeListener.Change<? extends Chromosome> change) -> {
             Platform.runLater(() -> {
                 synchronized (tableData) {
                     if (change.wasAdded()) {
@@ -139,7 +139,7 @@ public class GenomeAssemblyTab implements TabProvider {
         sequenceInfoTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, selectedChromosome) -> {
             selectedGenomeVersion.setSelectedChromosome(selectedChromosome);
         });
-        selectedGenomeVersion.getReferenceSequenceProvider().getChromosomes().stream()
+        selectedGenomeVersion.getChromosomes().stream()
                 .findFirst()
                 .ifPresent(chromosome -> {
                     Platform.runLater(() -> {

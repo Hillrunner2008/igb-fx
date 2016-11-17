@@ -17,14 +17,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.lorainelab.igb.data.model.DataSet;
-import org.lorainelab.igb.data.model.GenomeVersion;
 import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandlerRegistry;
 import org.lorainelab.igb.dataprovider.api.BaseDataProvider;
 import org.lorainelab.igb.dataprovider.api.DataProvider;
 import org.lorainelab.igb.dataprovider.api.ResourceStatus;
 import static org.lorainelab.igb.dataprovider.api.ResourceStatus.Initialized;
 import org.lorainelab.igb.dataprovider.api.SpeciesInfo;
-import org.lorainelab.igb.dataprovider.model.DataContainer;
+import static org.lorainelab.igb.quickload.QuickloadConstants.GENOME_TXT;
 import org.lorainelab.igb.quickload.model.QuickloadFile;
 import org.lorainelab.igb.quickload.util.QuickloadUtils;
 import org.slf4j.Logger;
@@ -36,8 +35,7 @@ import org.slf4j.LoggerFactory;
  */
 public class QuickloadDataProvider extends BaseDataProvider implements DataProvider {
 
-    private static final Logger logger = LoggerFactory.getLogger(QuickloadDataProvider.class);
-
+    private static final Logger LOG = LoggerFactory.getLogger(QuickloadDataProvider.class);
     private final Set<SpeciesInfo> speciesInfo;
     private final SetMultimap<String, String> genomeVersionSynonyms;
     private final Map<String, Optional<String>> supportedGenomeVersionInfo;
@@ -65,7 +63,7 @@ public class QuickloadDataProvider extends BaseDataProvider implements DataProvi
         if (status == ResourceStatus.Disabled) {
             return;
         }
-        logger.info("Initializing Quickload Server {}", url().get());
+        LOG.info("Initializing Quickload Server {}", url().get());
         populateSupportedGenomeVersionInfo();
         loadOptionalQuickloadFiles();
         if (status != ResourceStatus.NotResponding) {
@@ -94,11 +92,22 @@ public class QuickloadDataProvider extends BaseDataProvider implements DataProvi
 //                useMirror = true;
 //                initialize();
 //            } else {
-            logger.warn("Missing required quickload file, or could not reach source. This quickloak source will be disabled for this session.");
+            LOG.error("Missing required quickload file, or could not reach source. This quickloak source will be disabled for this session.");
             status = ResourceStatus.NotResponding;
 //                useMirror = false; //reset to default url since mirror may have been tried
 //            }
         }
+    }
+
+    @Override
+    public Optional<Map<String, Integer>> getAssemblyInfo(String genomeVersionName) {
+        genomeVersionName = quickloadUtils.getContextRootKey(genomeVersionName, supportedGenomeVersionInfo.keySet()).orElse(genomeVersionName);
+        try {
+            return quickloadUtils.getAssemblyInfo(url.get(), genomeVersionName);
+        } catch (Exception ex) {
+            LOG.error("Missing required {} file for genome version {}, skipping this genome version for quickload site {}", GENOME_TXT, genomeVersionName, url().get());
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -121,24 +130,23 @@ public class QuickloadDataProvider extends BaseDataProvider implements DataProvi
     }
 
     @Override
-    public Set<DataSet> getAvailableDataSets(DataContainer dataProviderGenomeVersionPair) {
-        final GenomeVersion genomeVersion = dataProviderGenomeVersionPair.getGenomeVersion();
-        final String genomeVersionName = quickloadUtils.getContextRootKey(genomeVersion.name().get(), supportedGenomeVersionInfo.keySet()).orElse(genomeVersion.name().get());
-        final Optional<Set<QuickloadFile>> genomeVersionData = quickloadUtils.getGenomeVersionData(url().get(), genomeVersionName, supportedGenomeVersionInfo);
+    public Set<DataSet> getAvailableDataSets(String genomeVersionName) {
+        String internalgenomeVersionName = quickloadUtils.getContextRootKey(genomeVersionName, supportedGenomeVersionInfo.keySet()).orElse(genomeVersionName);
+        final Optional<Set<QuickloadFile>> genomeVersionData = quickloadUtils.getGenomeVersionData(url().get(), internalgenomeVersionName, supportedGenomeVersionInfo);
         if (genomeVersionData.isPresent()) {
             Set<QuickloadFile> versionFiles = genomeVersionData.get();
             LinkedHashSet<DataSet> dataSets = Sets.newLinkedHashSet();
 
             List<QuickloadFile> missingNameAttribute = versionFiles.stream().filter(file -> Strings.isNullOrEmpty(file.getName())).collect(Collectors.toList());
             if (!missingNameAttribute.isEmpty()) {
+                LOG.error("The " + genomeVersionName + " genome contains some missing name attributes in its annots.xml file on the quickload site (" + url().get() + ")");
 //                ModalUtils.errorPanel("The " + genomeVersionName + " genome contains some missing name attributes in its annots.xml file on the quickload site (" + url().get() + ")");
             }
-
             versionFiles.stream().filter(file -> !Strings.isNullOrEmpty(file.getName())).forEach((file) -> {
                 try {
                     URI uri;
                     if (!file.getName().startsWith("http")) {
-                        uri = new URI(url().get() + genomeVersionName + "/" + file.getName());
+                        uri = new URI(url().get() + internalgenomeVersionName + "/" + file.getName());
                     } else {
                         uri = new URI(file.getName());
                     }
@@ -148,7 +156,7 @@ public class QuickloadDataProvider extends BaseDataProvider implements DataProvi
                         dataSets.add(dataSet);
                     });
                 } catch (URISyntaxException | MalformedURLException ex) {
-                    logger.error(ex.getMessage(), ex);
+                    LOG.error(ex.getMessage(), ex);
                 }
             });
             return dataSets;
