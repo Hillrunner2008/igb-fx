@@ -3,12 +3,14 @@ package org.lorainelab.igb.menu.customgenome;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
@@ -19,23 +21,32 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import net.miginfocom.layout.CC;
 import org.lorainelab.igb.data.model.GenomeVersion;
 import org.lorainelab.igb.data.model.GenomeVersionRegistry;
 import org.lorainelab.igb.menu.api.MenuBarEntryProvider;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
 import org.lorainelab.igb.menu.api.model.WeightedMenuEntry;
 import org.lorainelab.igb.menu.api.model.WeightedMenuItem;
+import org.lorainelab.igb.preferences.SessionPreferences;
 import org.lorainelab.igb.selections.SelectionInfoService;
 import static org.lorainelab.igb.utils.FXUtilities.runAndWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tbee.javafx.scene.layout.MigPane;
 
 /**
  *
@@ -67,11 +78,25 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
     @FXML
     private Button deleteButton;
 
+    private Stage editStage;
+    private Button editCancelBtn;
+    private MigPane editMigPane;
+    private Button refSeqBrowseBtn;
+    private String recentFilePath = null;
+    private Button okBtn;
+    //private Button cancelBtn;
+    private Label refSeqLabel;
+    private TextField refSeqTextField;
+    private Label speciesLabel;
+    private TextField speciesTextField;
+    private Label versionLabel;
+    private TextField versionTextField;
+    private GenomeVersion genomeToEdit = null;
+
     private SelectionInfoService selectionInfoService;
     private CustomGenomePersistenceManager customGenomePersistenceManager;
     private GenomeVersionRegistry genomeVersionRegistry;
     private ObservableList<GenomeVersion> genomeVersionList;
-    private Button refSeqBrowseBtn;
 
     public EditCustomGenomes() {
         menuItem = new WeightedMenuItem(2, "My Genomes");
@@ -137,7 +162,7 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
         });
 
         cancelButton.setOnAction((ActionEvent event) -> stage.hide());
-        
+
         deleteButton.setOnAction((ActionEvent event) -> {
             ObservableList selectedItems = genomesTable.getSelectionModel().getSelectedItems();
             if (selectedItems.size() != 0) {
@@ -145,8 +170,20 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
 //                stage.hide();
             }
         });
-        
-        
+
+        editButton.setOnAction(ae -> {
+            ObservableList selectedItems = genomesTable.getSelectionModel().getSelectedItems();
+            if (selectedItems.size() == 0) {
+                return;
+//                stage.hide();
+            }
+            GenomeVersion genome = (GenomeVersion) selectedItems.get(0);
+            speciesTextField.setText(genome.getSpeciesName().get());
+            versionTextField.setText(genome.getName().get());
+            refSeqTextField.setText(genome.getReferenceSequenceProvider().getPath());
+            genomeToEdit = genome;
+            Platform.runLater(() -> editStage.show());
+        });
 
         genomesTable.setEditable(true);
         genomesTable.setItems(genomeVersionList);//FXCollections.observableArrayList(genomeVersions));
@@ -174,31 +211,146 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
             stage.hide();
         });
 
-//        genomesTable.setOnMouseClicked(event -> {
-//            TablePosition focusedCell = genomesTable.getFocusModel().getFocusedCell();
-//            //delete genome
-//            if (focusedCell.getColumn() == 3) {
-//                customGenomePersistenceManager.deleteCustomGenome(genomeVersionList.get(focusedCell.getRow()));
-//                genomeVersionRegistry.getRegisteredGenomeVersions().remove(genomeVersionList.get(focusedCell.getRow()));
-//            }
-//            Platform.runLater(() -> {
-//                genomesTable.requestFocus();
-//                if (!genomesTable.getSelectionModel().isEmpty()) {
-//                    genomesTable.getFocusModel().focus(0);
-//                }
-//            });
-//
-//        });
         stage = new Stage();
         stage.setResizable(true);
         stage.setTitle("My Genomes");
+
+        //init edit stage
+        editMigPane = new MigPane("fillx", "[]rel[grow]", "[][][]");
+        editStage = new Stage();
+        editStage.setTitle("Edit custom genome");
+        editStage.setMinWidth(440);
+        editStage.setMinHeight(165);
+        editStage.setHeight(165);
+        editStage.setMaxHeight(165);
+        editCancelBtn = new Button("Exit");
+        editCancelBtn.setOnAction(event -> {
+            editStage.hide();
+        });
+
+        speciesLabel = new Label("Species");
+        speciesTextField = new TextField();
+        versionLabel = new Label("Genome Version");
+        versionTextField = new TextField();
+        refSeqLabel = new Label("Reference Sequence");
+        refSeqTextField = new TextField();
+        refSeqTextField.setEditable(false);
+        refSeqBrowseBtn = new Button("Choose File\u2026");
+        refSeqBrowseBtn.setDisable(true);
+        refSeqBrowseBtn.setOnAction(event -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Choose Sequence File");
+            File homeDirectory;
+            if (SessionPreferences.getRecentSelectedFilePath() != null) {
+                File file = new File(SessionPreferences.getRecentSelectedFilePath());
+                String simpleFileName = file.getParent();
+                homeDirectory = new File(simpleFileName);
+            } else {
+                homeDirectory = new File(System.getProperty("user.home"));
+            }
+            fileChooser.setInitialDirectory(homeDirectory);
+            addFileExtensionFilters(fileChooser);
+            Optional.ofNullable(fileChooser.showOpenDialog(null)).ifPresent(selectedFile -> {
+                try {
+                    refSeqTextField.setText(selectedFile.getCanonicalPath());
+                } catch (Exception ex) {
+                    LOG.error(ex.getMessage(), ex);
+                }
+            });
+
+        });
+
+        okBtn = new Button("Ok");
+        okBtn.setOnAction(event -> {
+            boolean customGenomeEdited = true;
+            CompletableFuture.runAsync(() -> {
+                try {
+                    final String speciesName = speciesTextField.textProperty().get();
+                    final String versionName = versionTextField.textProperty().get();
+                    final String sequenceFileUrl = refSeqTextField.textProperty().get();
+                    if (!Strings.isNullOrEmpty(speciesName)
+                            || !Strings.isNullOrEmpty(versionName)
+                            || !Strings.isNullOrEmpty(sequenceFileUrl)) {
+
+                        //if file path not changed simply update
+                        if (genomeToEdit.getReferenceSequenceProvider().getPath().equals(sequenceFileUrl)) {
+                            genomeToEdit.setName(versionName);
+                            genomeToEdit.setSpeciesName(speciesName);
+                            customGenomePersistenceManager.persistCustomGenome(genomeToEdit);
+                        } else {
+                            //path changed to drop current genomne and re-create
+                            Optional<GenomeVersion> duplicate = genomeVersionRegistry.getRegisteredGenomeVersions().stream()
+                                    .filter(gv -> gv.getReferenceSequenceProvider().getPath().equalsIgnoreCase(sequenceFileUrl))
+                                    .findFirst();
+                            //check for duplicate with new file path
+                            if (duplicate.isPresent()) {
+                                Platform.runLater(() -> {
+                                    ButtonType cancelBtn = new ButtonType("Cancel", ButtonBar.ButtonData.OK_DONE);
+                                    Alert dlg = new Alert(Alert.AlertType.WARNING, "This sequence file is already mapped to the \n\""
+                                            + duplicate.get().getName().get() + "\" genome.");
+                                    dlg.initModality(stage.getModality());
+                                    dlg.initOwner(stage.getOwner());
+                                    dlg.setTitle("Cannot add duplicate genome version");
+                                    dlg.getButtonTypes().setAll(cancelBtn);
+                                    Optional<ButtonType> result = dlg.showAndWait();
+                                });
+
+                            } else {
+                                //delete and add new
+                                
+
+                            }
+                        }
+
+                        //Value change of item stored in list will not trigger any event.. need to delete and reinsert to trigger event.
+//                        int index = table.getItems().indexOf(genomeToEdit);
+//                        table.getItems().remove(genomeToEdit);
+//                        table.getItems().add(index, genomeToEdit);
+                    }
+                } catch (Exception ex) {
+                    LOG.error(ex.getMessage(), ex);
+                }
+            }).whenComplete((result, ex) -> {
+                //TODO show error in popup instead of hiding if it occurred
+                Platform.runLater(() -> {
+                    if (customGenomeEdited) {
+                        Alert dlg = new Alert(Alert.AlertType.INFORMATION, "Custom Genome edited");
+                        dlg.setWidth(600);
+                        dlg.initModality(editStage.getModality());
+                        dlg.initOwner(editStage.getOwner());
+                        dlg.setTitle("Genome Edited Successfully");
+                        dlg.show();
+                        dlg.setOnCloseRequest(closeEvent -> {
+                            editStage.hide();
+                        });
+                    } else {
+                        editStage.hide();
+                    }
+                });
+            });
+
+        });
+
     }
 
     private void layoutComponents() {
-        stage.setResizable(false);
         Scene scene = new Scene(anchroPane);
         stage.setScene(scene);
         stage.sizeToScene();
+
+        editMigPane.add(refSeqLabel);
+        editMigPane.add(refSeqTextField, "growx");
+        editMigPane.add(refSeqBrowseBtn, "wrap");
+        editMigPane.add(speciesLabel, "");
+        editMigPane.add(speciesTextField, "growx, wrap");
+        editMigPane.add(versionLabel, "");
+        editMigPane.add(versionTextField, "growx, wrap");
+        editMigPane.add(okBtn, new CC().gap("rel").x("container.x+150").span(3).tag("ok").split());
+        editMigPane.add(editCancelBtn, new CC().x("container.x+200").tag("ok"));
+        editStage.initModality(Modality.APPLICATION_MODAL);
+        editStage.setResizable(true);
+        Scene editScene = new Scene(editMigPane);
+        editStage.setScene(editScene);
     }
 
     @Reference
