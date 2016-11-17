@@ -1,0 +1,34 @@
+{
+    "prefs": {
+        "server": [
+            {
+                "name": "IGB Quickload",
+                "url": "http://igbquickload.org/quickload/",
+                "loadPriority": "0",
+                "mirror": "http://bioviz.org/quickload/",
+                "isEditable": "false"
+            },
+            {
+                "name": "Pollen",
+                "url": "http://www.igbquickload.org/pollen",
+                "loadPriority": "1",
+                "mirror": "http://bioviz.org/pollen/",
+                "isEditable": "false"
+            },
+            {
+                "name": "Cytokinin",
+                "url": "http://www.igbquickload.org/cyto",
+                "loadPriority": "2",
+                "mirror": "http://bioviz.org/cytopub/",
+                "isEditable": "false"
+            },
+            {
+                "name": "Blueberry",
+                "url": "http://www.igbquickload.org/blueberry",
+                "loadPriority": "3",
+                "mirror": "http://bioviz.org/berrypub/",
+                "isEditable": "false"
+            }
+        ]
+    }
+}

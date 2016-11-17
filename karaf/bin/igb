@@ -445,6 +445,7 @@ run() {
             -Dkaraf.restart.jvm.supported=true \
             -Djava.io.tmpdir="$KARAF_DATA/tmp" \
             -Djava.util.logging.config.file="$KARAF_BASE/etc/java.util.logging.properties" \
+	    -Dprism.forceGPU=true \
             $KARAF_OPTS $OPTS \
             -classpath "$CLASSPATH" \
             $MAIN "$@"

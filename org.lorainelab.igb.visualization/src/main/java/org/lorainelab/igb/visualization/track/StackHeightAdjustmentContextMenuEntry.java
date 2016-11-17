@@ -10,6 +10,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -29,6 +30,8 @@ import org.lorainelab.igb.menu.api.model.WeightedMenuEntry;
 import org.lorainelab.igb.menu.api.model.WeightedMenuItem;
 import static org.lorainelab.igb.utils.FXUtilities.runAndWait;
 import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -37,6 +40,7 @@ import org.osgi.framework.BundleContext;
 @Component(immediate = true)
 public class StackHeightAdjustmentContextMenuEntry implements TrackLabelContextMenuEntryProvider {
 
+    private static final Logger LOG = LoggerFactory.getLogger(StackHeightAdjustmentContextMenuEntry.class);
     @FXML
     private TextField stackHeightEntryField;
     @FXML
@@ -65,7 +69,6 @@ public class StackHeightAdjustmentContextMenuEntry implements TrackLabelContextM
                 stage.setTitle("Set Track Stack Height");
                 stage.setResizable(false);
                 Scene scene = new Scene(root);
-                root.getStylesheets().add(bc.getBundle().getEntry("styles/Styles.css").toExternalForm());
                 stage.setScene(scene);
             } catch (IOException exception) {
                 throw new RuntimeException(exception);
@@ -91,19 +94,11 @@ public class StackHeightAdjustmentContextMenuEntry implements TrackLabelContextM
             });
             stackHeightEntryField.setOnKeyPressed((KeyEvent ke) -> {
                 if (ke.getCode().equals(KeyCode.ENTER)) {
-                    Platform.runLater(() -> {
-                        stackedGlyphTrack.setMaxStackHeight(Integer.parseInt(stackHeightEntryField.getText()));
-                        refreshAction.run();
-                        stage.hide();
-                    });
+                    adjustStackHeightAction(stackedGlyphTrack, refreshAction);
                 }
             });
             okBtn.setOnAction(event -> {
-                Platform.runLater(() -> {
-                    stackedGlyphTrack.setMaxStackHeight(Integer.parseInt(stackHeightEntryField.getText()));
-                    refreshAction.run();
-                    stage.hide();
-                });
+                adjustStackHeightAction(stackedGlyphTrack, refreshAction);
             });
             cancelBtn.setOnAction(event -> {
                 stage.hide();
@@ -116,5 +111,21 @@ public class StackHeightAdjustmentContextMenuEntry implements TrackLabelContextM
             return Optional.ofNullable(Lists.newArrayList(adjustStackHeightMenuItem));
         }
         return Optional.empty();
+    }
+
+    private void adjustStackHeightAction(StackedGlyphTrack stackedGlyphTrack, Runnable refreshAction) {
+        stage.hide();
+        CompletableFuture.supplyAsync(() -> {
+            stackedGlyphTrack.setMaxStackHeight(Integer.parseInt(stackHeightEntryField.getText()));
+            return null;
+        }).whenComplete((u, t) -> {
+            Platform.runLater(() -> {
+                refreshAction.run();
+            });
+            if (t != null) {
+                Throwable ex = (Throwable) t;
+                LOG.error(ex.getMessage(), ex);
+            }
+        });
     }
 }

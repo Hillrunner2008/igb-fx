@@ -69,71 +69,70 @@ public class ColorPreferences implements PreferencesTabProvider {
                 StackPane root = fxmlLoader.load();
                 root.getStylesheets().add(bc.getBundle().getEntry("colorPreferences.css").toExternalForm());
                 tab.setContent(root);
-                canvasBg.setValue(Palette.DEFAULT_CANVAS_BG);
+                canvasBg.setValue(Palette.DEFAULT_CANVAS_BG.get());
                 canvasBg.setOnAction((ActionEvent event) -> {
                     Color selectedColor = canvasBg.getValue();
-                    Palette.DEFAULT_CANVAS_BG = selectedColor;
+                    Palette.DEFAULT_CANVAS_BG.set(selectedColor);
                     refreshAction.run();
                     //TODO persist to preferences
                 });
 
-                loadedRegionHighlight.setValue(Palette.LOADED_REGION_BG);
+                loadedRegionHighlight.setValue(Palette.LOADED_REGION_BG.get());
                 loadedRegionHighlight.setOnAction((ActionEvent event) -> {
                     Color selectedColor = loadedRegionHighlight.getValue();
-                    Palette.LOADED_REGION_BG = selectedColor;
-                    refreshAction.run();
+                    Palette.LOADED_REGION_BG.set(selectedColor);
                     //TODO persist to preferences
                 });
 
-                glyphFg.setValue(Palette.DEFAULT_GLYPH_FILL);
+                glyphFg.setValue(Palette.DEFAULT_GLYPH_FILL.get());
                 glyphFg.setOnAction((ActionEvent event) -> {
                     Color selectedColor = glyphFg.getValue();
-                    Palette.DEFAULT_GLYPH_FILL = selectedColor;
+                    Palette.DEFAULT_GLYPH_FILL.set(selectedColor);
                     refreshAction.run();
                     //TODO persist to preferences
                 });
                 
-                glyphLine.setValue(Palette.DEFAULT_LINE_FILL);
+                glyphLine.setValue(Palette.DEFAULT_LINE_FILL.get());
                 glyphLine.setOnAction((ActionEvent event) -> {
                     Color selectedColor = glyphLine.getValue();
-                    Palette.DEFAULT_LINE_FILL = selectedColor;
+                    Palette.DEFAULT_LINE_FILL.set(selectedColor);
                     refreshAction.run();
                     //TODO persist to preferences
                 });
 
-                annotationLabel.setValue(Palette.DEFAULT_LABEL_COLOR);
+                annotationLabel.setValue(Palette.DEFAULT_LABEL_COLOR.get());
                 annotationLabel.setOnAction((ActionEvent event) -> {
                     Color selectedColor = annotationLabel.getValue();
-                    Palette.DEFAULT_LABEL_COLOR = selectedColor;
+                    Palette.DEFAULT_LABEL_COLOR.set(selectedColor);
                     refreshAction.run();
                     //TODO persist to preferences
                 });
 
-                a_color.setValue(Palette.A_COLOR);
+                a_color.setValue(Palette.A_COLOR.get());
                 a_color.setOnAction((ActionEvent event) -> {
                     Color selectedColor = a_color.getValue();
-                    Palette.A_COLOR = selectedColor;
+                    Palette.A_COLOR.set(selectedColor);
                     refreshAction.run();
                     //TODO persist to preferences
                 });
-                t_color.setValue(Palette.T_COLOR);
+                t_color.setValue(Palette.T_COLOR.get());
                 t_color.setOnAction((ActionEvent event) -> {
                     Color selectedColor = t_color.getValue();
-                    Palette.T_COLOR = selectedColor;
+                    Palette.T_COLOR.set(selectedColor);
                     refreshAction.run();
                     //TODO persist to preferences
                 });
-                g_color.setValue(Palette.G_COLOR);
+                g_color.setValue(Palette.G_COLOR.get());
                 g_color.setOnAction((ActionEvent event) -> {
                     Color selectedColor = g_color.getValue();
-                    Palette.G_COLOR = selectedColor;
+                    Palette.G_COLOR.set(selectedColor);
                     refreshAction.run();
                     //TODO persist to preferences
                 });
-                c_color.setValue(Palette.C_COLOR);
+                c_color.setValue(Palette.C_COLOR.get());
                 c_color.setOnAction((ActionEvent event) -> {
                     Color selectedColor = c_color.getValue();
-                    Palette.C_COLOR = selectedColor;
+                    Palette.C_COLOR.set(selectedColor);
                     refreshAction.run();
                     //TODO persist to preferences
                 });

@@ -9,7 +9,7 @@ public class CacheStatus {
     private long lastModified;
     private long cacheLastUpdate;
     private String etag;
-    private boolean dataExists;
+    private boolean dataAvailable;
     private String url;
     private File data;
     private BigInteger size;
@@ -63,12 +63,12 @@ public class CacheStatus {
         this.etag = etag;
     }
 
-    public boolean isDataExists() {
-        return dataExists;
+    public boolean isDataAvailable() {
+        return dataAvailable;
     }
 
-    public void setDataExists(boolean dataExists) {
-        this.dataExists = dataExists;
+    public void setDataAvailable(boolean dataExists) {
+        this.dataAvailable = dataExists;
     }
 
     public String getUrl() {

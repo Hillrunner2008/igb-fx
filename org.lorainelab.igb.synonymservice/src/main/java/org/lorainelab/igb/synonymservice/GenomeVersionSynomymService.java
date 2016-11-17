@@ -6,6 +6,7 @@
 package org.lorainelab.igb.synonymservice;
 
 import java.util.Optional;
+import java.util.Set;
 
 /**
  *
@@ -16,6 +17,8 @@ public interface GenomeVersionSynomymService {
     void addSynonym(String preferredGenomeVersionName, String synonym);
 
     Optional<String> getPreferredGenomeVersionName(String synonym);
+
+    Set<String> getSynonyms(String synonym);
 
     void removeSynonym(String preferredGenomeVersionName, String synonym);
 

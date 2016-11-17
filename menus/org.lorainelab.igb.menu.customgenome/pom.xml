@@ -54,6 +54,10 @@
             <groupId>de.jensd</groupId>
             <artifactId>fontawesomefx</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.lorainelab</groupId>        
+            <artifactId>org.lorainelab.igb.synonymservice</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

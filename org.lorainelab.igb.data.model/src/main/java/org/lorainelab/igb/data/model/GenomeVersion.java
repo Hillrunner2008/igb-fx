@@ -10,6 +10,7 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 import org.lorainelab.igb.data.model.sequence.ReferenceSequenceProvider;
+import org.lorainelab.igb.dataprovider.model.DataContainer;
 
 /**
  *
@@ -20,10 +21,10 @@ public class GenomeVersion {
     private StringProperty name;
     private StringProperty speciesName;
     private StringProperty description;
-//    private final UUID uuid;
     private ReferenceSequenceProvider referenceSequenceProvider;
     private ObjectProperty<Optional<Chromosome>> selectedChromosomeProperty;
     private ObservableSet<DataSet> loadedDataSets;
+    private ObservableSet<DataContainer> dataContainers;
 
     public GenomeVersion(String name, String speciesName, ReferenceSequenceProvider referenceSequenceProvider) {
         this(name, speciesName, referenceSequenceProvider, null);
@@ -33,20 +34,19 @@ public class GenomeVersion {
         this.name = new SimpleStringProperty(name);
         this.speciesName = new SimpleStringProperty(speciesName);
         this.description = new SimpleStringProperty(description);
-        this.referenceSequenceProvider = referenceSequenceProvider;        
+        this.referenceSequenceProvider = referenceSequenceProvider;
         selectedChromosomeProperty = new SimpleObjectProperty(Optional.empty());
         loadedDataSets = FXCollections.observableSet(Sets.newHashSet());
+        dataContainers = FXCollections.observableSet(Sets.newHashSet());
     }
 
-
-    public StringProperty getName() {
+    public StringProperty name() {
         return name;
     }
 
     public void setName(String name) {
         this.name.set(name);
     }
-
 
     public StringProperty getSpeciesName() {
         return speciesName;
@@ -55,6 +55,7 @@ public class GenomeVersion {
     public void setSpeciesName(String speciesName) {
         this.speciesName.set(speciesName);
     }
+
     public Optional<StringProperty> getDescription() {
         return Optional.ofNullable(description);
     }
@@ -69,6 +70,10 @@ public class GenomeVersion {
 
     public void setSelectedChromosome(Chromosome selectedChromosome) {
         selectedChromosomeProperty.set(Optional.ofNullable(selectedChromosome));
+    }
+
+    public ObservableSet<DataContainer> getDataContainers() {
+        return dataContainers;
     }
 
     public ObservableSet<DataSet> getLoadedDataSets() {
@@ -99,7 +104,5 @@ public class GenomeVersion {
         }
         return true;
     }
-
-
 
 }

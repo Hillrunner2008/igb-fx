@@ -19,7 +19,6 @@ import static org.lorainelab.igb.data.model.util.Palette.DEFAULT_GLYPH_FILL;
  * @author jeckstei
  */
 public class GlyphFactory {
-    final static Color DEFAULT_TEXT_COLOR = Color.BLACK;
 
     public static CompositionGlyph generateCompositionGlyph(String label, Map<String, String> tooltipData, List<Glyph> children) {
         CompositionGlyph cg = new CompositionGlyph(label, tooltipData, children);
@@ -28,9 +27,8 @@ public class GlyphFactory {
 
     public static RectangleGlyph generateRectangleGlyph(org.lorainelab.igb.data.model.shapes.Rectangle rectangle) {
         RectangleGlyph toReturn = new RectangleGlyph(rectangle);
-        Color color = (Color) rectangle.getColor().orElse(DEFAULT_GLYPH_FILL);
+        Color color = (Color) rectangle.getColor().orElse(DEFAULT_GLYPH_FILL.get());
         toReturn.setFill(color);
-        toReturn.setStrokeColor(DEFAULT_TEXT_COLOR);
         return toReturn;
     }
 

@@ -124,7 +124,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     private void highlightLoadedRegions() {
         gc.save();
         gc.scale(view.getXfactor(), 1);
-        gc.setFill(LOADED_REGION_BG);
+        gc.setFill(LOADED_REGION_BG.get());
 
         track.getDataSet().getLoadedRegions(chromosome.getName()).asRanges().forEach(range -> {
             final Range<Integer> viewXRange = Range.closed(view.getXrange().lowerEndpoint().intValue(), view.getXrange().upperEndpoint().intValue());

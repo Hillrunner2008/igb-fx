@@ -110,6 +110,12 @@
                 <scope>provided</scope>
             </dependency>
             <dependency>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>${gson_version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
                 <groupId>de.jensd</groupId>
                 <artifactId>fontawesomefx</artifactId>
                 <version>${fontawesomefx_version}</version>
@@ -185,7 +191,7 @@
                 <artifactId>org.apache.servicemix.bundles.jakarta-regexp</artifactId>
                 <version>${jakarta-regexp_version}</version>
             </dependency>
-             <dependency>
+            <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-compress</artifactId>
                 <version>${commons-compress_version}</version>
@@ -331,6 +337,18 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.menu.recentgenome</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.menu.recentfile</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>org.lorainelab.igb.menu.loadurl</artifactId>
                 <version>${project.version}</version>
                 <scope>provided</scope>
@@ -407,7 +425,7 @@
                 <version>${project.version}</version>
                 <scope>provided</scope>
             </dependency>
-            <dependency>
+            <dependency>    
                 <groupId>org.lorainelab</groupId>
                 <artifactId>org.lorainelab.igb.search.api</artifactId>
                 <version>${project.version}</version>
@@ -424,8 +442,23 @@
             </dependency>
             <dependency>
                 <groupId>org.lorainelab</groupId>
+                <artifactId>org.lorainelab.igb.recentgenome.registry</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.lorainelab</groupId>
                 <artifactId>org.lorainelab.igb.tools.sort</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.lorainelab</groupId>
+                <artifactId>org.lorainelab.igb.quickload</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.lorainelab</groupId>
+                <artifactId>org.lorainelab.igb.preferencemanager.api</artifactId>
+               <version>${project.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -510,6 +543,7 @@
         <module>menus/org.lorainelab.igb.menu.about</module>
         <module>menus/org.lorainelab.igb.menu.customgenome</module>
         <module>menus/org.lorainelab.igb.menu.recentfile</module>
+        <module>menus/org.lorainelab.igb.menu.recentgenome</module>
         <module>org.lorainelab.igb.data.model</module>
         
         
@@ -532,30 +566,35 @@
         <module>cache/org.lorainelab.igb.cache.http</module> 
                
         <module>org.lorainelab.igb.preferences</module>
-        <module>org.lorainelab.igb.demo</module>
+        <module>org.lorainelab.igb.quickload</module>
         <module>org.lorainelab.igb.feature</module>
         <module>org.lorainelab.igb.search.lucene</module>
         <module>org.lorainelab.igb.search.api</module>
         <module>preferences/org.lorainelab.igb.preferencemanager.api</module>
         <module>org.lorainelab.igb.datasetloadingservice</module>
         <module>org.lorainelab.igb.bookmark</module>
+        <module>org.lorainelab.igb.recentgenome.registry</module>
         <module>org.lorainelab.igb.kar</module>
     </modules>
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        
         <karaf.version>4.0.5</karaf.version>
         <jackson.version>2.6.3</jackson.version>
         <htsjdk_version>2.6.1</htsjdk_version>
         <controlsfx_version>8.40.11</controlsfx_version>
         <commons-lang3_version>3.4</commons-lang3_version>
         <guava_version>19.0</guava_version>
+        <gson_version>2.7</gson_version>
         <fontawesomefx_version>8.9</fontawesomefx_version>
         <miglayout_version>5.0</miglayout_version>
         <reactfx_version>2.0-M4u1</reactfx_version>
         <lucene_version>6.0.0_1</lucene_version>
         <jakarta-regexp_version>1.4_1</jakarta-regexp_version>
         <colt_version>1.2.0</colt_version>
+        <rtree_version>0.8-RC10</rtree_version>
+        <guava_mini_version>0.1</guava_mini_version>
         <jts_version>1.13</jts_version>
         <commons-io_version>2.4</commons-io_version>
         <commons-csv_version>1.4</commons-csv_version>

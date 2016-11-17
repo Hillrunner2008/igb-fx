@@ -111,6 +111,7 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
                 throw new RuntimeException(exception);
             }
         });
+//        genomeVersionList = FXCollections.observableArrayList();
     }
 
     @Override
@@ -144,12 +145,18 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
         genomeVersionRegistry.getRegisteredGenomeVersions().addListener(new SetChangeListener<GenomeVersion>() {
             @Override
             public void onChanged(SetChangeListener.Change<? extends GenomeVersion> change) {
-                if (change.wasAdded()) {
-                    genomeVersionList.add(change.getElementAdded());
-                }
-                if (change.wasRemoved()) {
-                    genomeVersionList.remove(change.getElementRemoved());
-                }
+                Platform.runLater(() -> {
+                    if (change.wasAdded()) {
+                        if (!genomeVersionList.contains(change.getElementAdded())) {
+                            final GenomeVersion elementAdded = change.getElementAdded();
+                            genomeVersionList.add(elementAdded);
+                        }
+                    }
+                    if (change.wasRemoved()) {
+                        final GenomeVersion elementRemoved = change.getElementRemoved();
+                        genomeVersionList.remove(elementRemoved);
+                    }
+                });
             }
         });
 
@@ -179,7 +186,7 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
             }
             GenomeVersion genome = (GenomeVersion) selectedItems.get(0);
             speciesTextField.setText(genome.getSpeciesName().get());
-            versionTextField.setText(genome.getName().get());
+//            versionTextField.setText(genome.getName().get());
             refSeqTextField.setText(genome.getReferenceSequenceProvider().getPath());
             genomeToEdit = genome;
             Platform.runLater(() -> editStage.show());
@@ -197,7 +204,7 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
         versionColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<GenomeVersion, String>, ObservableValue<String>>() {
             @Override
             public ObservableValue<String> call(TableColumn.CellDataFeatures<GenomeVersion, String> param) {
-                return param.getValue().getName();
+                return param.getValue().name();
             }
         });
         filePathCoulmn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<GenomeVersion, String>, ObservableValue<String>>() {
@@ -287,7 +294,7 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
                                 Platform.runLater(() -> {
                                     ButtonType cancelBtn = new ButtonType("Cancel", ButtonBar.ButtonData.OK_DONE);
                                     Alert dlg = new Alert(Alert.AlertType.WARNING, "This sequence file is already mapped to the \n\""
-                                            + duplicate.get().getName().get() + "\" genome.");
+                                            + duplicate.get().name().get() + "\" genome.");
                                     dlg.initModality(stage.getModality());
                                     dlg.initOwner(stage.getOwner());
                                     dlg.setTitle("Cannot add duplicate genome version");
@@ -297,7 +304,6 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
 
                             } else {
                                 //delete and add new
-                                
 
                             }
                         }
@@ -330,7 +336,6 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
             });
 
         });
-
     }
 
     private void layoutComponents() {
@@ -494,7 +499,7 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
 //    private void initComponents() {
 //
 //        genomeVersionList = FXCollections.observableArrayList(genomeVersionRegistry.getRegisteredGenomeVersions());
-//        //Convert to lambda ?? 
+//        //Convert to lambda ??
 //        genomeVersionRegistry.getRegisteredGenomeVersions().addListener(new SetChangeListener<GenomeVersion>() {
 //            @Override
 //            public void onChanged(SetChangeListener.Change<? extends GenomeVersion> change) {

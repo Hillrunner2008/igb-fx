@@ -14,7 +14,6 @@ import static org.lorainelab.igb.data.model.chart.GraphXAxis.drawXAxisGridLines;
 import org.lorainelab.igb.data.model.chart.GraphYAxis;
 import org.lorainelab.igb.data.model.chart.IntervalChart;
 import org.lorainelab.igb.data.model.util.Palette;
-import static org.lorainelab.igb.data.model.util.Palette.GRAPH_FILL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,12 +38,12 @@ public class GraphGlyph implements Glyph {
 
     @Override
     public Color getFill() {
-        return Palette.DEFAULT_GLYPH_FILL;
+        return Palette.GRAPH_FILL.get();
     }
 
     @Override
     public Color getStrokeColor() {
-        return Palette.DEFAULT_GLYPH_FILL;
+        return Palette.DEFAULT_GLYPH_FILL.get();
     }
 
     @Override
@@ -53,7 +52,7 @@ public class GraphGlyph implements Glyph {
     }
 
     @Override
-    public void draw(GraphicsContext gc, View view, Rectangle2D slotBoundingViewRect) {
+    public void draw(GraphicsContext gc, View view, double slotMinY) {
         try {
             gc.save();
             drawXAxisGridLines(gc, view, boundingRect);
@@ -66,7 +65,7 @@ public class GraphGlyph implements Glyph {
     }
 
     @Override
-    public Optional<Rectangle.Double> calculateDrawRect(View view, Rectangle2D slotBoundingViewRect) {
+    public Optional<Rectangle.Double> calculateDrawRect(View view, double slotMinY) {
         SHARED_RECT.setRect(view.getMutableCoordRect());
         return Optional.of(SHARED_RECT);
     }
@@ -111,7 +110,7 @@ public class GraphGlyph implements Glyph {
         double maxGraphY = boundingRect.getMaxY() - topCutOff;
 
         final double zeroPosition = maxGraphY - boundingRect.getMinY();
-        gc.setFill(GRAPH_FILL);
+        gc.setFill(getFill());
         gc.beginPath();
         gc.moveTo(0, zeroPosition);
         for (Coordinate c : dataInRange) {
@@ -129,7 +128,7 @@ public class GraphGlyph implements Glyph {
     }
 
     private void drawGrawLine(GraphicsContext gc, View view, final List<Coordinate> dataInRange) {
-        gc.setStroke(GRAPH_FILL);
+        gc.setStroke(getFill());
         gc.setLineWidth(2);
         java.awt.geom.Rectangle2D.Double modelCoordRect = view.getMutableCoordRect();
         final Rectangle2D canvasCoordRect = view.getCanvasContext().getBoundingRect();
