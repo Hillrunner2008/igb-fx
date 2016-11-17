@@ -99,6 +99,7 @@ public class CustomGenomePersistenceManager {
         Preferences node = modulePreferencesNode.node(nodeName);
         try {
             node.removeNode();
+            genomeVersionRegistry.getRegisteredGenomeVersions().remove(customGenome);
         } catch (BackingStoreException ex) {
             java.util.logging.Logger.getLogger(CustomGenomePersistenceManager.class.getName()).log(Level.SEVERE, null, ex);
         }

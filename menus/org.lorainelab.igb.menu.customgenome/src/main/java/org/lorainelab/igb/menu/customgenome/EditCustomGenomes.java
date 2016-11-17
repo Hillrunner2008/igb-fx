@@ -23,12 +23,12 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -37,12 +37,15 @@ import javafx.util.Callback;
 import net.miginfocom.layout.CC;
 import org.lorainelab.igb.data.model.GenomeVersion;
 import org.lorainelab.igb.data.model.GenomeVersionRegistry;
+import org.lorainelab.igb.data.model.sequence.ReferenceSequenceProvider;
+import org.lorainelab.igb.data.model.util.TwoBitParser;
 import org.lorainelab.igb.menu.api.MenuBarEntryProvider;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
 import org.lorainelab.igb.menu.api.model.WeightedMenuEntry;
 import org.lorainelab.igb.menu.api.model.WeightedMenuItem;
 import org.lorainelab.igb.preferences.SessionPreferences;
 import org.lorainelab.igb.selections.SelectionInfoService;
+import org.lorainelab.igb.synonymservice.ChromosomeSynomymService;
 import static org.lorainelab.igb.utils.FXUtilities.runAndWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,6 +99,7 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
     private SelectionInfoService selectionInfoService;
     private CustomGenomePersistenceManager customGenomePersistenceManager;
     private GenomeVersionRegistry genomeVersionRegistry;
+    private ChromosomeSynomymService chromosomeSynomymService;
     private ObservableList<GenomeVersion> genomeVersionList;
 
     public EditCustomGenomes() {
@@ -173,7 +177,8 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
         deleteButton.setOnAction((ActionEvent event) -> {
             ObservableList selectedItems = genomesTable.getSelectionModel().getSelectedItems();
             if (selectedItems.size() != 0) {
-                genomeVersionRegistry.getRegisteredGenomeVersions().remove((GenomeVersion) selectedItems.get(0));
+                //confirmation?
+                customGenomePersistenceManager.deleteCustomGenome((GenomeVersion) selectedItems.get(0));
 //                stage.hide();
             }
         });
@@ -186,7 +191,7 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
             }
             GenomeVersion genome = (GenomeVersion) selectedItems.get(0);
             speciesTextField.setText(genome.getSpeciesName().get());
-//            versionTextField.setText(genome.getName().get());
+            versionTextField.setText(genome.name().get());
             refSeqTextField.setText(genome.getReferenceSequenceProvider().getPath());
             genomeToEdit = genome;
             Platform.runLater(() -> editStage.show());
@@ -243,7 +248,7 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
         refSeqTextField = new TextField();
         refSeqTextField.setEditable(false);
         refSeqBrowseBtn = new Button("Choose File\u2026");
-        refSeqBrowseBtn.setDisable(true);
+//        refSeqBrowseBtn.setDisable(true);
         refSeqBrowseBtn.setOnAction(event -> {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Choose Sequence File");
@@ -267,9 +272,13 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
 
         });
 
+        refSeqTextField.setOnKeyPressed(this::handleKeyEvent);
+        speciesTextField.setOnKeyPressed(this::handleKeyEvent);
+        versionTextField.setOnKeyPressed(this::handleKeyEvent);
+
         okBtn = new Button("Ok");
         okBtn.setOnAction(event -> {
-            boolean customGenomeEdited = true;
+            boolean[] customGenomeEdited = {false};
             CompletableFuture.runAsync(() -> {
                 try {
                     final String speciesName = speciesTextField.textProperty().get();
@@ -284,6 +293,7 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
                             genomeToEdit.setName(versionName);
                             genomeToEdit.setSpeciesName(speciesName);
                             customGenomePersistenceManager.persistCustomGenome(genomeToEdit);
+                            customGenomeEdited[0] = true;
                         } else {
                             //path changed to drop current genomne and re-create
                             Optional<GenomeVersion> duplicate = genomeVersionRegistry.getRegisteredGenomeVersions().stream()
@@ -292,26 +302,27 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
                             //check for duplicate with new file path
                             if (duplicate.isPresent()) {
                                 Platform.runLater(() -> {
-                                    ButtonType cancelBtn = new ButtonType("Cancel", ButtonBar.ButtonData.OK_DONE);
+//                                    ButtonType cancelBtn = new ButtonType("Cancel", ButtonBar.ButtonData.OK_DONE);
                                     Alert dlg = new Alert(Alert.AlertType.WARNING, "This sequence file is already mapped to the \n\""
                                             + duplicate.get().name().get() + "\" genome.");
                                     dlg.initModality(stage.getModality());
                                     dlg.initOwner(stage.getOwner());
                                     dlg.setTitle("Cannot add duplicate genome version");
-                                    dlg.getButtonTypes().setAll(cancelBtn);
+//                                    dlg.getButtonTypes().setAll(cancelBtn);
                                     Optional<ButtonType> result = dlg.showAndWait();
                                 });
-
                             } else {
                                 //delete and add new
+                                customGenomePersistenceManager.deleteCustomGenome(genomeToEdit);
+                                ReferenceSequenceProvider twoBitProvider = (ReferenceSequenceProvider) new TwoBitParser(sequenceFileUrl, chromosomeSynomymService);
+                                GenomeVersion customGenome = new GenomeVersion(versionName, speciesName, twoBitProvider, versionName);
+                                customGenomePersistenceManager.persistCustomGenome(customGenome);
+                                SessionPreferences.setRecentSelectedFilePath(sequenceFileUrl);
+                                customGenomeEdited[0] = genomeVersionRegistry.getRegisteredGenomeVersions().add(customGenome);
+                                genomeVersionRegistry.setSelectedGenomeVersion(customGenome);
 
                             }
                         }
-
-                        //Value change of item stored in list will not trigger any event.. need to delete and reinsert to trigger event.
-//                        int index = table.getItems().indexOf(genomeToEdit);
-//                        table.getItems().remove(genomeToEdit);
-//                        table.getItems().add(index, genomeToEdit);
                     }
                 } catch (Exception ex) {
                     LOG.error(ex.getMessage(), ex);
@@ -319,7 +330,8 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
             }).whenComplete((result, ex) -> {
                 //TODO show error in popup instead of hiding if it occurred
                 Platform.runLater(() -> {
-                    if (customGenomeEdited) {
+                    if (customGenomeEdited[0]) {
+                        customGenomeEdited[0] = false;
                         Alert dlg = new Alert(Alert.AlertType.INFORMATION, "Custom Genome edited");
                         dlg.setWidth(600);
                         dlg.initModality(editStage.getModality());
@@ -336,6 +348,21 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
             });
 
         });
+    }
+
+    private void handleKeyEvent(KeyEvent event) {
+        switch (event.getCode()) {
+            case ENTER:
+                okBtn.fire();
+                break;
+            case ESCAPE:
+                cancelButton.fire();
+                break;
+            case K:
+                if (event.isControlDown()) {
+                    ((TextField) event.getSource()).deleteText(((TextField) event.getSource()).getCaretPosition(), ((TextField) event.getSource()).getLength());
+                }
+        }
     }
 
     private void layoutComponents() {
@@ -371,6 +398,11 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
     @Reference
     public void setSelectionInfoService(SelectionInfoService selectionInfoService) {
         this.selectionInfoService = selectionInfoService;
+    }
+
+    @Reference
+    public void setChromosomeSynomymService(ChromosomeSynomymService chromosomeSynomymService) {
+        this.chromosomeSynomymService = chromosomeSynomymService;
     }
 
     private void addFileExtensionFilters(FileChooser fileChooser) {
