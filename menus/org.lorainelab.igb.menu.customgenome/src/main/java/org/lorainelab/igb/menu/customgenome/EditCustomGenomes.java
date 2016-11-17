@@ -168,7 +168,7 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
             ObservableList selectedItems = genomesTable.getSelectionModel().getSelectedItems();
             if (selectedItems.size() != 0) {
                 genomeVersionRegistry.setSelectedGenomeVersion((GenomeVersion) selectedItems.get(0));
-//                stage.hide();
+                stage.hide();
             }
         });
 
@@ -179,7 +179,6 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
             if (selectedItems.size() != 0) {
                 //confirmation?
                 customGenomePersistenceManager.deleteCustomGenome((GenomeVersion) selectedItems.get(0));
-//                stage.hide();
             }
         });
 
@@ -197,8 +196,7 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
             Platform.runLater(() -> editStage.show());
         });
 
-        genomesTable.setEditable(true);
-        genomesTable.setItems(genomeVersionList);//FXCollections.observableArrayList(genomeVersions));
+        genomesTable.setItems(genomeVersionList);
 
         speciesColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<GenomeVersion, String>, ObservableValue<String>>() {
             @Override
@@ -248,7 +246,6 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
         refSeqTextField = new TextField();
         refSeqTextField.setEditable(false);
         refSeqBrowseBtn = new Button("Choose File\u2026");
-//        refSeqBrowseBtn.setDisable(true);
         refSeqBrowseBtn.setOnAction(event -> {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Choose Sequence File");
@@ -302,13 +299,11 @@ public class EditCustomGenomes implements MenuBarEntryProvider {
                             //check for duplicate with new file path
                             if (duplicate.isPresent()) {
                                 Platform.runLater(() -> {
-//                                    ButtonType cancelBtn = new ButtonType("Cancel", ButtonBar.ButtonData.OK_DONE);
                                     Alert dlg = new Alert(Alert.AlertType.WARNING, "This sequence file is already mapped to the \n\""
                                             + duplicate.get().name().get() + "\" genome.");
                                     dlg.initModality(stage.getModality());
                                     dlg.initOwner(stage.getOwner());
                                     dlg.setTitle("Cannot add duplicate genome version");
-//                                    dlg.getButtonTypes().setAll(cancelBtn);
                                     Optional<ButtonType> result = dlg.showAndWait();
                                 });
                             } else {

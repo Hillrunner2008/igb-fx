@@ -161,7 +161,7 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
                                 ButtonType cancelBtn = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
                                 Alert dlg = new Alert(AlertType.CONFIRMATION, "This sequence file is already mapped to the \n\""
                                         + duplicate.get().name().get() + "\" genome."
-                                        + "\n Choose Switch to load it");
+                                        + "\n Choose Switch to load it.");
                                 dlg.initModality(stage.getModality());
                                 dlg.initOwner(stage.getOwner());
                                 dlg.setTitle("Cannot add duplicate genome version");
