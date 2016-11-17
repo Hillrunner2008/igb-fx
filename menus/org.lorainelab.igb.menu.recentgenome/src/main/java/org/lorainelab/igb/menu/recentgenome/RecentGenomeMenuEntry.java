@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 public class RecentGenomeMenuEntry implements MenuBarEntryProvider {
 
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(RecentGenomeMenuEntry.class);
-    private static final int RECENT_FILE_MENU_ENTRY_WEIGHT = 3;
+    private static final int RECENT_FILE_MENU_ENTRY_WEIGHT = 5;
     private RecentGenomeRegistry recentGenomeRegistry;
     private final WeightedMenu recentGenomeMenu;
     private final MenuItem clearMenuItem;
