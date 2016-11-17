@@ -78,9 +78,6 @@ public class RecentGenomeRegistryImpl implements RecentGenomeRegistry {
             });
         });
 
-//        genomeVersionRegistry.getRegisteredGenomeVersions().addListener((Observable observable) -> {
-//            initializeFromPreferences();
-//        });
         initializeFromPreferences();
     }
 

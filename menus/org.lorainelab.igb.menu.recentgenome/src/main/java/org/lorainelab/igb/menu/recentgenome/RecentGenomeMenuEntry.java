@@ -12,7 +12,6 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Optional;
 import javafx.application.Platform;
-import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.collections.ListChangeListener;
 import javafx.scene.control.MenuItem;
@@ -78,11 +77,8 @@ public class RecentGenomeMenuEntry implements MenuBarEntryProvider {
     private Optional<MenuItem> createRecentFileMenuItem(GenomeVersion recentGenome) {
         String fileName = recentGenome.getReferenceSequenceProvider().getPath();
         final MenuItem menuItem = new MenuItem(recentGenome.name().get());
-        recentGenome.name().addListener(new InvalidationListener() {
-            @Override
-            public void invalidated(Observable observable) {
-                Platform.runLater(() -> menuItem.setText(recentGenome.name().get()));
-            }
+        recentGenome.name().addListener((Observable observable) -> {
+            Platform.runLater(() -> menuItem.setText(recentGenome.name().get()));
         });
         if (genomeVersionRegistry.getRegisteredGenomeVersions().contains(recentGenome)) {
             menuItem.setOnAction(action -> {
