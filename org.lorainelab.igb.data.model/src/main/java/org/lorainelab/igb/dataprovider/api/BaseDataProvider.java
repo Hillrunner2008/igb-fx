@@ -47,22 +47,23 @@ public abstract class BaseDataProvider implements DataProvider {
     protected ResourceStatus status;
     protected boolean useMirror;
 
-    public BaseDataProvider(String url, String name, int loadPriority) {
-        this.url = new SimpleStringProperty(checkNotNull(url));
-        this.name = new SimpleStringProperty(checkNotNull(name));
-        this.loadPriority = new SimpleIntegerProperty(loadPriority);
-        preferencesNode = getDataProviderNode(url);
-        setupPropertyListeners();
-        loadPersistedConfiguration();
-        initializePreferences();
-    }
-
     public BaseDataProvider(String url, String name, String mirrorUrl, int loadPriority) {
         this.url = new SimpleStringProperty(checkNotNull(url));
         this.name = new SimpleStringProperty(checkNotNull(name));
         this.loadPriority = new SimpleIntegerProperty(loadPriority);
         this.mirrorUrl = checkNotNull(mirrorUrl);
         preferencesNode = getDataProviderNode(url);
+        setupPropertyListeners();
+        loadPersistedConfiguration();
+        initializePreferences();
+    }
+
+    public BaseDataProvider(String url, String name, int loadPriority) {
+        this.url = new SimpleStringProperty(checkNotNull(url));
+        this.name = new SimpleStringProperty(checkNotNull(name));
+        this.loadPriority = new SimpleIntegerProperty(loadPriority);
+        preferencesNode = getDataProviderNode(url);
+        setupPropertyListeners();
         loadPersistedConfiguration();
         initializePreferences();
     }

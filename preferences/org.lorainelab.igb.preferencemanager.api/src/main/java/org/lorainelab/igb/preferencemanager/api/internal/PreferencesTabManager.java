@@ -7,9 +7,10 @@ package org.lorainelab.igb.preferencemanager.api.internal;
 
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
+import com.google.common.collect.Lists;
+import java.util.Collections;
 import java.util.Comparator;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.List;
 import java.util.stream.Collectors;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.AnchorPane;
@@ -26,12 +27,12 @@ import org.slf4j.LoggerFactory;
 public class PreferencesTabManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(PreferencesTabManager.class);
-    private Set<PreferencesTabProvider> tabs;
+    private List<PreferencesTabProvider> tabs;
     private TabPane pane;
 
     public PreferencesTabManager() {
         pane = new TabPane();
-        tabs = new TreeSet<PreferencesTabProvider>(Comparator.comparingInt(x -> x.getTabWeight()));
+        tabs = Lists.newArrayList();
         setAnchorPaneConstraints(pane);
     }
 
@@ -39,6 +40,7 @@ public class PreferencesTabManager {
     public void addTab(PreferencesTabProvider tabProvider) {
         runAndWait(() -> {
             tabs.add(tabProvider);
+            Collections.sort(tabs, Comparator.comparingInt(x -> x.getTabWeight()));
             pane.getTabs().clear();
             pane.getTabs().addAll(tabs.stream().map(tab -> tab.getPreferencesTab()).collect(Collectors.toList()));
         });
@@ -47,6 +49,7 @@ public class PreferencesTabManager {
     public void removeTab(PreferencesTabProvider tabProvider) {
         runAndWait(() -> {
             tabs.remove(tabProvider);
+            Collections.sort(tabs, Comparator.comparingInt(x -> x.getTabWeight()));
             pane.getTabs().remove(tabProvider.getPreferencesTab());
         });
     }

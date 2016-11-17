@@ -9,50 +9,53 @@
 <?import javafx.scene.layout.VBox?>
 
 <VBox xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
-   <children>
-      <VBox VBox.vgrow="ALWAYS">
-         <children>
-            <HBox VBox.vgrow="ALWAYS">
-               <children>
-                  <TableView fx:id="repoTable" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" HBox.hgrow="ALWAYS">
-                    <columns>
-                      <TableColumn fx:id="refreshColumn" maxWidth="65.0" minWidth="65.0" prefWidth="65.0" resizable="false">
-                           <graphic>
-                              <FontAwesomeIconView glyphName="REFRESH" />
-                           </graphic>
-                        </TableColumn>
-                      <TableColumn fx:id="nameColomn" maxWidth="1.7976931348623157E308" prefWidth="251.0"  text="Name" />
-                        <TableColumn fx:id="urlColumn" maxWidth="1.7976931348623157E308" prefWidth="251.0" text="URL" />
-                        <TableColumn fx:id="enabledColumn" minWidth="70.0" prefWidth="70.0" text="Enabled" />
-                    </columns>
-                  </TableView>
-               </children>
-            </HBox>
-            <HBox maxHeight="40.0" minHeight="40.0" nodeOrientation="RIGHT_TO_LEFT" prefHeight="40.0" prefWidth="600.0" spacing="5.0">
-               <children>
-                  <Button fx:id="enterPasswordBtn" mnemonicParsing="false" text="Remove..." />
-                  <Button fx:id="passwordBtn" mnemonicParsing="false" text="Enter Password" />
-                  <Button fx:id="editBtn" mnemonicParsing="false" text="Edit..." />
-                  <Button fx:id="addBtn" mnemonicParsing="false" prefWidth="56.0" text="Add..." />
-                  <Button fx:id="downBtn" mnemonicParsing="false">
-                     <graphic>
-                        <FontAwesomeIconView glyphName="SORT_DOWN" />
-                     </graphic>
-                  </Button>
-                <Button fx:id="upBtn" maxWidth="32.0" minHeight="25.0" minWidth="32.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="25.0">
-                     <graphic>
-                        <FontAwesomeIconView glyphName="SORT_UP" />
-                     </graphic>
-                  </Button>
-               </children>
-               <padding>
-                  <Insets top="5.0" />
-               </padding>
-            </HBox>
-         </children>
-         <VBox.margin>
-            <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
-         </VBox.margin>
-      </VBox>
-   </children>
+    <children>
+        <VBox VBox.vgrow="ALWAYS">
+            <children>
+                <HBox VBox.vgrow="ALWAYS">
+                    <children>
+                        <TableView fx:id="repoTable" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" HBox.hgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="refreshColumn" maxWidth="65.0" minWidth="65.0" prefWidth="65.0" resizable="false" style="-fx-alignment: CENTER;">
+                                    <graphic>
+                                        <FontAwesomeIconView glyphName="REFRESH" />
+                                    </graphic>
+                                </TableColumn>
+                                <TableColumn fx:id="nameColumn" maxWidth="1.7976931348623157E308" minWidth="75.0" prefWidth="115.0" text="Name" />
+                                <TableColumn fx:id="urlColumn" maxWidth="1.7976931348623157E308" minWidth="150.0" prefWidth="348.0" text="URL" />
+                                <TableColumn fx:id="enabledColumn" maxWidth="70.0" minWidth="70.0" prefWidth="70.0" resizable="false" text="Enabled" />
+                            </columns>
+                     <columnResizePolicy>
+                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                     </columnResizePolicy>
+                        </TableView>
+                    </children>
+                </HBox>
+                <HBox maxHeight="40.0" minHeight="40.0" nodeOrientation="RIGHT_TO_LEFT" prefHeight="40.0" prefWidth="600.0" spacing="5.0">
+                    <children>
+                        <Button fx:id="enterPasswordBtn" mnemonicParsing="false" text="Remove..." />
+                        <Button fx:id="passwordBtn" mnemonicParsing="false" text="Enter Password" />
+                        <Button fx:id="editBtn" mnemonicParsing="false" text="Edit..." />
+                        <Button fx:id="addBtn" mnemonicParsing="false" prefWidth="56.0" text="Add..." />
+                        <Button fx:id="downBtn" mnemonicParsing="false">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="SORT_DOWN" />
+                            </graphic>
+                        </Button>
+                        <Button fx:id="upBtn" maxWidth="32.0" minHeight="25.0" minWidth="32.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="25.0">
+                            <graphic>
+                                <FontAwesomeIconView glyphName="SORT_UP" />
+                            </graphic>
+                        </Button>
+                    </children>
+                    <padding>
+                        <Insets top="5.0" />
+                    </padding>
+                </HBox>
+            </children>
+            <VBox.margin>
+                <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
+            </VBox.margin>
+        </VBox>
+    </children>
 </VBox>

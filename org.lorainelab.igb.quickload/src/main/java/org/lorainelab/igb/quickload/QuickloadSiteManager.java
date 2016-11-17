@@ -5,10 +5,13 @@ import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Sets;
 import java.net.URI;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import org.lorainelab.igb.cache.api.RemoteFileCacheService;
+import static java.util.stream.Collectors.toList;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableSet;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.GenomeVersion;
 import org.lorainelab.igb.data.model.GenomeVersionRegistry;
@@ -16,7 +19,6 @@ import org.lorainelab.igb.data.model.sequence.ReferenceSequenceProvider;
 import org.lorainelab.igb.data.model.util.DataSourceUtilsImpl;
 import org.lorainelab.igb.data.model.util.TwoBitParser;
 import org.lorainelab.igb.dataprovider.api.DataProvider;
-import org.lorainelab.igb.notifications.api.StatusBarNotificationService;
 import org.lorainelab.igb.synonymservice.ChromosomeSynomymService;
 import org.lorainelab.igb.synonymservice.GenomeVersionSynomymService;
 import org.lorainelab.igb.synonymservice.SpeciesSynomymService;
@@ -32,39 +34,17 @@ public class QuickloadSiteManager {
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(QuickloadSiteManager.class);
     private GenomeVersionRegistry genomeVersionRegistry;
     private GenomeVersion genomeVersion;
-    private RemoteFileCacheService cacheService;
-    private StatusBarNotificationService notificationService;
-    private static final Set<DataProvider> dataProviders = Sets.newConcurrentHashSet();
+    private final ObservableSet<DataProvider> dataProviders;
     private GenomeVersionSynomymService genomeVersionSynomymService;
     private SpeciesSynomymService speciesSynomymService;
     private ChromosomeSynomymService chromosomeSynomymService;
 
     public QuickloadSiteManager() throws Exception {
+        dataProviders = FXCollections.observableSet(Sets.newConcurrentHashSet());
     }
 
     @Activate
     public void activate() {
-        CompletableFuture<Void> initializeTask = CompletableFuture.runAsync(() -> {
-            try {
-
-//                cacheService.getFilebyUrl(new URL("http://igbquickload.org/H_sapiens_Dec_2013/H_sapiens_Dec_2013.2bit")).ifPresent(cachedFile -> {
-//                    try {
-//                        ReferenceSequenceProvider twoBitProvider = (ReferenceSequenceProvider) new TwoBitParser(cachedFile.toString());
-//                        humanGenome = new GenomeVersion("H_sapiens_Dec_2013", "Homo sapiens", twoBitProvider, "Human");
-//                        genomeVersionRegistry.getRegisteredGenomeVersions().add(humanGenome);
-//                    } catch (Exception ex) {
-//                        LOG.error(ex.getMessage(), ex);
-//                    }
-//                });
-            } catch (Exception ex) {
-                LOG.error(ex.getMessage(), ex);
-            }
-        }).whenComplete((result, ex) -> {
-            if (ex != null) {
-                LOG.error(ex.getMessage(), ex);
-            }
-        });
-//        notificationService.submitTask(genomeRegistrationTask);
     }
 
     @Reference(optional = true, multiple = true, dynamic = true, unbind = "removeDataProvider")
@@ -73,7 +53,32 @@ public class QuickloadSiteManager {
         initializeDataProvider(dataProvider);
     }
 
-    private void initializeDataProvider(DataProvider dataProvider) {
+    public void removeDataProvider(DataProvider dataProvider) {
+        dataProviders.remove(dataProvider);
+        removeAssociatedGenomeVersions(dataProvider);
+    }
+
+    public void removeAssociatedGenomeVersions(DataProvider dataProvider) {
+        CompletableFuture.supplyAsync(() -> {
+            dataProvider.getSupportedGenomeVersionNames().stream().forEach(gv -> {
+                final Optional<URI> sequenceFilePath = dataProvider.getSequenceFilePath(gv);
+                sequenceFilePath.ifPresent(seqFilePath -> {
+                    List<GenomeVersion> toRemove = genomeVersionRegistry.getRegisteredGenomeVersions().stream().filter(genomeVersion -> genomeVersion.getReferenceSequenceProvider().getPath().equals(seqFilePath))
+                            .collect(toList());
+                    genomeVersionRegistry.getRegisteredGenomeVersions().removeAll(toRemove);
+                });
+            });
+
+            return null;
+        }).whenComplete((u, t) -> {
+            if (t != null) {
+                Throwable ex = (Throwable) t;
+                LOG.error(ex.getMessage(), ex);
+            }
+        });
+    }
+
+    public void initializeDataProvider(DataProvider dataProvider) {
         CompletableFuture.supplyAsync(() -> {
             dataProvider.initialize();
             return null;
@@ -121,23 +126,13 @@ public class QuickloadSiteManager {
         });
     }
 
-    public void removeDataProvider(DataProvider dataProvider) {
-        dataProviders.remove(dataProvider);
+    public ObservableSet<DataProvider> getDataProviders() {
+        return dataProviders;
     }
 
     @Reference
     public void setGenomeVersionRegistry(GenomeVersionRegistry genomeVersionRegistry) {
         this.genomeVersionRegistry = genomeVersionRegistry;
-    }
-
-    @Reference
-    public void setRemoteFileCacheService(RemoteFileCacheService cacheService) {
-        this.cacheService = cacheService;
-    }
-
-    @Reference
-    public void setStatusBarNotificationService(StatusBarNotificationService notificationService) {
-        this.notificationService = notificationService;
     }
 
     @Reference

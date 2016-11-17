@@ -91,7 +91,7 @@ public class ColorPreferences implements PreferencesTabProvider {
                     refreshAction.run();
                     //TODO persist to preferences
                 });
-                
+
                 glyphLine.setValue(Palette.DEFAULT_LINE_FILL.get());
                 glyphLine.setOnAction((ActionEvent event) -> {
                     Color selectedColor = glyphLine.getValue();
@@ -156,7 +156,7 @@ public class ColorPreferences implements PreferencesTabProvider {
 
     @Override
     public int getTabWeight() {
-        return 5;
+        return 4;
     }
 
 }
