@@ -1,7 +1,6 @@
 package org.lorainelab.igb.dataprovider.api;
 
 import com.google.common.collect.SetMultimap;
-import java.net.URI;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -19,6 +18,8 @@ public interface DataProvider {
     StringProperty name();
 
     StringProperty url();
+
+    boolean isEditable();
 
     /**
      * It is expected this method will be called before any DataProvider content is loaded.
@@ -74,6 +75,6 @@ public interface DataProvider {
 
     void setPassword(String password);
 
-    Optional<URI> getSequenceFilePath(String name);
+    Optional<String> getSequenceFilePath(String name);
 
 }

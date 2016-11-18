@@ -43,8 +43,8 @@ public class QuickloadDataProvider extends BaseDataProvider implements DataProvi
     private FileTypeHandlerRegistry fileTypeHandlerRegistry;
     private QuickloadUtils quickloadUtils;
 
-    QuickloadDataProvider(String url, String name, int loadPriority) {
-        super(QuickloadUtils.toExternalForm(url), name, loadPriority);
+    QuickloadDataProvider(String url, String name, boolean isEditable, int loadPriority) {
+        super(QuickloadUtils.toExternalForm(url), name, isEditable, loadPriority);
         supportedGenomeVersionInfo = Maps.newConcurrentMap();
         speciesInfo = Sets.newHashSet();
         genomeVersionSynonyms = HashMultimap.create();
@@ -166,17 +166,10 @@ public class QuickloadDataProvider extends BaseDataProvider implements DataProvi
     }
 
     @Override
-    public Optional<URI> getSequenceFilePath(String name) {
+    public Optional<String> getSequenceFilePath(String name) {
         final String genomeVersionName = quickloadUtils.getContextRootKey(name, supportedGenomeVersionInfo.keySet()).orElse(name);
         final String sequenceFileLocation = quickloadUtils.getGenomeVersionBaseUrl(url().get(), genomeVersionName) + genomeVersionName + ".2bit";
-        URI uri = null;
-        try {
-            uri = new URI(sequenceFileLocation);
-            return Optional.of(uri);
-        } catch (Exception ex) {
-            //do nothing
-        }
-        return Optional.empty();
+        return Optional.of(sequenceFileLocation);
     }
 
     public void setFileTypeHandlerRegistry(FileTypeHandlerRegistry fileTypeHandlerRegistry) {

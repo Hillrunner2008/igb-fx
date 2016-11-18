@@ -8,6 +8,7 @@ import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -15,6 +16,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import static org.lorainelab.igb.dataprovider.api.DataProviderPrefKeys.IS_EDITABLE;
 import static org.lorainelab.igb.dataprovider.api.DataProviderPrefKeys.LOAD_PRIORITY;
 import static org.lorainelab.igb.dataprovider.api.DataProviderPrefKeys.LOGIN;
 import static org.lorainelab.igb.dataprovider.api.DataProviderPrefKeys.MIRROR_URL;
@@ -36,7 +38,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class BaseDataProvider implements DataProvider {
 
-    private static final Logger logger = LoggerFactory.getLogger(BaseDataProvider.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BaseDataProvider.class);
     private Preferences preferencesNode;
     protected final StringProperty url;
     protected String mirrorUrl;
@@ -46,22 +48,27 @@ public abstract class BaseDataProvider implements DataProvider {
     protected IntegerProperty loadPriority;
     protected ResourceStatus status;
     protected boolean useMirror;
+    protected final boolean isEditable;
 
-    public BaseDataProvider(String url, String name, String mirrorUrl, int loadPriority) {
+    public BaseDataProvider(String url, String name, String mirrorUrl, boolean isEditable, int loadPriority) {
         this.url = new SimpleStringProperty(checkNotNull(url));
         this.name = new SimpleStringProperty(checkNotNull(name));
         this.loadPriority = new SimpleIntegerProperty(loadPriority);
         this.mirrorUrl = checkNotNull(mirrorUrl);
+        this.isEditable = isEditable;
+        status = NotInitialized;
         preferencesNode = getDataProviderNode(url);
         setupPropertyListeners();
         loadPersistedConfiguration();
         initializePreferences();
     }
 
-    public BaseDataProvider(String url, String name, int loadPriority) {
+    public BaseDataProvider(String url, String name, boolean isEditable, int loadPriority) {
         this.url = new SimpleStringProperty(checkNotNull(url));
         this.name = new SimpleStringProperty(checkNotNull(name));
         this.loadPriority = new SimpleIntegerProperty(loadPriority);
+        this.isEditable = isEditable;
+        status = NotInitialized;
         preferencesNode = getDataProviderNode(url);
         setupPropertyListeners();
         loadPersistedConfiguration();
@@ -94,12 +101,19 @@ public abstract class BaseDataProvider implements DataProvider {
         preferencesNode.put(PRIMARY_URL, url.get());
         preferencesNode.put(PROVIDER_NAME, name.get());
         preferencesNode.putInt(LOAD_PRIORITY, loadPriority.get());
+        preferencesNode.putBoolean(IS_EDITABLE, isEditable);
         if (!Strings.isNullOrEmpty(mirrorUrl)) {
             preferencesNode.put(MIRROR_URL, mirrorUrl);
         }
+        flushPrefNode();
     }
 
     protected abstract void disable();
+
+    @Override
+    public boolean isEditable() {
+        return isEditable;
+    }
 
     @Override
     public StringProperty name() {
@@ -129,6 +143,7 @@ public abstract class BaseDataProvider implements DataProvider {
         } else if (preferencesNode.getBoolean(REMEMBER_CREDENTIALS, false)) {
             preferencesNode.put(LOGIN, login);
         }
+        flushPrefNode();
     }
 
     @Override
@@ -148,7 +163,7 @@ public abstract class BaseDataProvider implements DataProvider {
                 preferencesNode.put(PASSWORD, password);
             }
         }
-
+        flushPrefNode();
     }
 
     @Override
@@ -160,6 +175,7 @@ public abstract class BaseDataProvider implements DataProvider {
     public void setStatus(ResourceStatus status) {
         this.status = status;
         preferencesNode.put(STATUS, status.toString());
+        flushPrefNode();
         if (status == Disabled) {
             useMirror = false;
             disable();
@@ -188,6 +204,19 @@ public abstract class BaseDataProvider implements DataProvider {
         return true;
     }
 
+    public static Optional<Preferences> getDataProviderNodeIfExist(String url) {
+        final String convertUrlToHash = convertUrlToHash(url);
+        final Preferences rootNode = PreferenceUtils.getClassPrefsNode(BaseDataProvider.class);
+        try {
+            if (rootNode.nodeExists(convertUrlToHash)) {
+                return Optional.ofNullable(rootNode.node(convertUrlToHash));
+            }
+        } catch (BackingStoreException ex) {
+            LOG.error(ex.getMessage(), ex);
+        }
+        return Optional.empty();
+    }
+
     public static Preferences getDataProviderNode(String url) {
         return PreferenceUtils.getClassPrefsNode(BaseDataProvider.class).node(convertUrlToHash(url));
     }
@@ -203,20 +232,32 @@ public abstract class BaseDataProvider implements DataProvider {
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
                 preferencesNode.put(PROVIDER_NAME, newValue);
+                flushPrefNode();
             }
         });
         url.addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
                 preferencesNode.put(PRIMARY_URL, newValue);
+                flushPrefNode();
+
             }
         });
         loadPriority.addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
                 preferencesNode.putInt(LOAD_PRIORITY, newValue.intValue());
+                flushPrefNode();
             }
         });
+    }
+
+    private void flushPrefNode() {
+        try {
+            preferencesNode.flush();
+        } catch (BackingStoreException ex) {
+            LOG.error(ex.getMessage(), ex);
+        }
     }
 
 }

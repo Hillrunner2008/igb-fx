@@ -33,18 +33,18 @@
                 </HBox>
                 <HBox maxHeight="40.0" minHeight="40.0" nodeOrientation="RIGHT_TO_LEFT" prefHeight="40.0" prefWidth="600.0" spacing="5.0">
                     <children>
-                        <Button fx:id="enterPasswordBtn" mnemonicParsing="false" text="Remove..." />
-                        <Button fx:id="passwordBtn" mnemonicParsing="false" text="Enter Password" />
+                        <Button fx:id="removeBtn" mnemonicParsing="false" text="Remove..." />
+                        <Button fx:id="enterPasswordBtn" mnemonicParsing="false" text="Enter Password" />
                         <Button fx:id="editBtn" mnemonicParsing="false" text="Edit..." />
                         <Button fx:id="addBtn" mnemonicParsing="false" prefWidth="56.0" text="Add..." />
-                        <Button fx:id="downBtn" mnemonicParsing="false">
+                        <Button fx:id="downBtn" maxWidth="40.0" minWidth="40.0" mnemonicParsing="false" prefWidth="40.0">
                             <graphic>
-                                <FontAwesomeIconView glyphName="SORT_DOWN" />
+                                <FontAwesomeIconView glyphName="SORT_DOWN" size="15" translateY="-4.0" />
                             </graphic>
                         </Button>
-                        <Button fx:id="upBtn" maxWidth="32.0" minHeight="25.0" minWidth="32.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="25.0">
+                        <Button fx:id="upBtn" maxWidth="40.0" minHeight="25.0" minWidth="40.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="40.0">
                             <graphic>
-                                <FontAwesomeIconView glyphName="SORT_UP" />
+                                <FontAwesomeIconView glyphName="SORT_UP" size="15" translateY="4.0" />
                             </graphic>
                         </Button>
                     </children>

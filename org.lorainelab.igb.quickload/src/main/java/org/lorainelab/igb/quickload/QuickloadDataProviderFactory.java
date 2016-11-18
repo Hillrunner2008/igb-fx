@@ -16,12 +16,23 @@ public class QuickloadDataProviderFactory {
 
     private FileTypeHandlerRegistry fileTypeHandlerRegistry;
     private QuickloadUtils quickloadUtils;
+    private QuickloadSiteManager quickloadSiteManager;
+
+    public DataProvider createDataProvider(String url, String name, boolean isEditable, int loadPriority) {
+        url = toExternalForm(url);
+        QuickloadDataProvider quickloadDataProvider = new QuickloadDataProvider(url, name, isEditable, loadPriority);
+        quickloadDataProvider.setFileTypeHandlerRegistry(fileTypeHandlerRegistry);
+        quickloadDataProvider.setQuickloadUtils(quickloadUtils);
+        quickloadSiteManager.addDataProvider(quickloadDataProvider);
+        return quickloadDataProvider;
+    }
 
     public DataProvider createDataProvider(String url, String name, int loadPriority) {
         url = toExternalForm(url);
-        QuickloadDataProvider quickloadDataProvider = new QuickloadDataProvider(url, name, loadPriority);
+        QuickloadDataProvider quickloadDataProvider = new QuickloadDataProvider(url, name, true, loadPriority);
         quickloadDataProvider.setFileTypeHandlerRegistry(fileTypeHandlerRegistry);
         quickloadDataProvider.setQuickloadUtils(quickloadUtils);
+        quickloadSiteManager.addDataProvider(quickloadDataProvider);
         return quickloadDataProvider;
     }
 
@@ -33,6 +44,11 @@ public class QuickloadDataProviderFactory {
     @Reference
     public void setQuickloadUtils(QuickloadUtils quickloadUtils) {
         this.quickloadUtils = quickloadUtils;
+    }
+
+    @Reference
+    public void setQuickloadSiteManager(QuickloadSiteManager quickloadSiteManager) {
+        this.quickloadSiteManager = quickloadSiteManager;
     }
 
 }

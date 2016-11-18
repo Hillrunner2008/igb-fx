@@ -32,6 +32,7 @@ public class PreferencesTabManager {
 
     public PreferencesTabManager() {
         pane = new TabPane();
+        pane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
         tabs = Lists.newArrayList();
         setAnchorPaneConstraints(pane);
     }

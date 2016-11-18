@@ -11,6 +11,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
 import java.util.zip.GZIPInputStream;
@@ -34,10 +35,13 @@ public class DataSourceUtilsImpl implements DataSourceUtils {
     @Override
     public InputStream getStreamFor(final String path, boolean forceCache) throws IOException {
         URL url = null;
-        if (path.startsWith("http") || path.startsWith("ftp:") || path.startsWith("file:")) {
+        if (path.startsWith("http") || path.startsWith("ftp:")) {
             url = new URL(path);
+        } else if (path.startsWith("file:")) {
+            return getStreamFor(new FileInputStream(new File(path)), path);
         } else {
             url = new File(path).toURI().toURL();
+            return getStreamFor(new FileInputStream(new File(path)), path);
         }
         Optional<File> filebyUrl = cacheService.getFilebyUrl(url);
         if (filebyUrl.isPresent()) {
@@ -116,8 +120,26 @@ public class DataSourceUtilsImpl implements DataSourceUtils {
         }
     }
 
+    public static boolean resourceAvailable(final String path) {
+        if (path.startsWith("http")) {
+            try {
+                return HttpUtils.resourceAvailable(new URL(path));
+            } catch (MalformedURLException ex) {
+                LOG.error(ex.getMessage(), ex);
+                return false;
+            }
+        } else {
+            return new File(path).exists();
+        }
+    }
+
     public static boolean resourceAvailable(final URL url) {
-        return HttpUtils.resourceAvailable(url);
+        String path = url.toExternalForm();
+        if (path.startsWith("http")) {
+            return HttpUtils.resourceAvailable(url);
+        } else {
+            return new File(path).exists();
+        }
     }
 
     @Reference

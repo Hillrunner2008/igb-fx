@@ -4,7 +4,6 @@ import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Sets;
-import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -19,6 +18,7 @@ import org.lorainelab.igb.data.model.sequence.ReferenceSequenceProvider;
 import org.lorainelab.igb.data.model.util.DataSourceUtilsImpl;
 import org.lorainelab.igb.data.model.util.TwoBitParser;
 import org.lorainelab.igb.dataprovider.api.DataProvider;
+import org.lorainelab.igb.dataprovider.api.ResourceStatus;
 import org.lorainelab.igb.synonymservice.ChromosomeSynomymService;
 import org.lorainelab.igb.synonymservice.GenomeVersionSynomymService;
 import org.lorainelab.igb.synonymservice.SpeciesSynomymService;
@@ -49,8 +49,10 @@ public class QuickloadSiteManager {
 
     @Reference(optional = true, multiple = true, dynamic = true, unbind = "removeDataProvider")
     public void addDataProvider(DataProvider dataProvider) {
-        dataProviders.add(dataProvider);
-        initializeDataProvider(dataProvider);
+        if (!dataProviders.stream().anyMatch(dp -> dp.url().get().equalsIgnoreCase(dataProvider.url().get()))) {
+            dataProviders.add(dataProvider);
+            initializeDataProvider(dataProvider);
+        }
     }
 
     public void removeDataProvider(DataProvider dataProvider) {
@@ -58,15 +60,24 @@ public class QuickloadSiteManager {
         removeAssociatedGenomeVersions(dataProvider);
     }
 
-    public void removeAssociatedGenomeVersions(DataProvider dataProvider) {
-        CompletableFuture.supplyAsync(() -> {
+    public void disableDataProvider(DataProvider dataProvider) {
+        removeAssociatedGenomeVersions(dataProvider).whenComplete((u, t) -> {
+            dataProvider.setStatus(ResourceStatus.Disabled);
+            if (t != null) {
+                Throwable ex = (Throwable) t;
+                LOG.error(ex.getMessage(), ex);
+            }
+        });
+    }
+
+    public CompletableFuture<Object> removeAssociatedGenomeVersions(DataProvider dataProvider) {
+        return CompletableFuture.supplyAsync(() -> {
             dataProvider.getSupportedGenomeVersionNames().stream().forEach(gv -> {
-                final Optional<URI> sequenceFilePath = dataProvider.getSequenceFilePath(gv);
-                sequenceFilePath.ifPresent(seqFilePath -> {
-                    List<GenomeVersion> toRemove = genomeVersionRegistry.getRegisteredGenomeVersions().stream().filter(genomeVersion -> genomeVersion.getReferenceSequenceProvider().getPath().equals(seqFilePath))
-                            .collect(toList());
+                final Optional<String> sequenceFilePath = dataProvider.getSequenceFilePath(gv);
+                if (sequenceFilePath.isPresent()) {
+                    List<GenomeVersion> toRemove = genomeVersionRegistry.getRegisteredGenomeVersions().stream().filter(genomeVersion -> genomeVersion.getReferenceSequenceProvider().getPath().equalsIgnoreCase(sequenceFilePath.get())).collect(toList());
                     genomeVersionRegistry.getRegisteredGenomeVersions().removeAll(toRemove);
-                });
+                }
             });
 
             return null;
@@ -96,13 +107,13 @@ public class QuickloadSiteManager {
         dataProvider.getSupportedGenomeVersionNames().stream().forEach(gv -> {
             CompletableFuture<Void> initializeTask = CompletableFuture.runAsync(() -> {
                 try {
-                    final Optional<URI> sequenceFilePath = dataProvider.getSequenceFilePath(gv);
+                    final Optional<String> sequenceFilePath = dataProvider.getSequenceFilePath(gv);
                     sequenceFilePath.ifPresent(seqFilePath -> {
                         try {
                             String preferredGenomeVersionName = genomeVersionSynomymService.getPreferredGenomeVersionName(gv).orElse(gv);
                             String speciesName = speciesSynomymService.getPreferredSpeciesName(gv).orElse(gv);
-                            if (DataSourceUtilsImpl.resourceAvailable(seqFilePath.toURL())) {
-                                ReferenceSequenceProvider twoBitProvider = (ReferenceSequenceProvider) new TwoBitParser(seqFilePath.toURL().toExternalForm(), chromosomeSynomymService);
+                            if (DataSourceUtilsImpl.resourceAvailable(seqFilePath)) {
+                                ReferenceSequenceProvider twoBitProvider = (ReferenceSequenceProvider) new TwoBitParser(seqFilePath, chromosomeSynomymService);
                                 Set<Chromosome> chromosomes = Sets.newLinkedHashSet();
                                 dataProvider.getAssemblyInfo(preferredGenomeVersionName).ifPresent(chromInfo -> chromInfo.entrySet().stream().forEach(entry -> {
                                     chromosomes.add(new Chromosome(entry.getKey(), entry.getValue(), twoBitProvider));
