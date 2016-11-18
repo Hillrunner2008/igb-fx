@@ -116,7 +116,8 @@ public class QuickloadSiteManager {
                                 ReferenceSequenceProvider twoBitProvider = (ReferenceSequenceProvider) new TwoBitParser(seqFilePath, chromosomeSynomymService);
                                 Set<Chromosome> chromosomes = Sets.newLinkedHashSet();
                                 dataProvider.getAssemblyInfo(preferredGenomeVersionName).ifPresent(chromInfo -> chromInfo.entrySet().stream().forEach(entry -> {
-                                    chromosomes.add(new Chromosome(entry.getKey(), entry.getValue(), twoBitProvider));
+                                    final String name = chromosomeSynomymService.getPreferredChromosomeName(entry.getKey()).orElse(entry.getKey());
+                                    chromosomes.add(new Chromosome(name, entry.getValue(), twoBitProvider));
                                 }));
 
                                 genomeVersion = new GenomeVersion(preferredGenomeVersionName, speciesName, twoBitProvider, chromosomes);
