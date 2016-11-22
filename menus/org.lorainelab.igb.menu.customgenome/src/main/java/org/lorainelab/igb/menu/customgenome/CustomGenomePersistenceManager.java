@@ -69,7 +69,7 @@ public class CustomGenomePersistenceManager {
                 || !Strings.isNullOrEmpty(sequenceFileUrl)) {
             try {
                 ReferenceSequenceProvider referenceSequenceProvider = (ReferenceSequenceProvider) new TwoBitParser(sequenceFileUrl, chromosomeSynomymService);
-                GenomeVersion customGenome = new GenomeVersion(versionName, speciesName, referenceSequenceProvider, versionName);
+                GenomeVersion customGenome = new GenomeVersion(versionName, speciesName, referenceSequenceProvider, versionName, true);
                 genomeVersionRegistry.getRegisteredGenomeVersions().add(customGenome);
             } catch (Exception ex) {
                 LOG.error(ex.getMessage(), ex);

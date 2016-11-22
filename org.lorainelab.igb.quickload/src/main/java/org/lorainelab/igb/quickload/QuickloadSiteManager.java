@@ -120,7 +120,7 @@ public class QuickloadSiteManager {
                                     chromosomes.add(new Chromosome(name, entry.getValue(), twoBitProvider));
                                 }));
 
-                                genomeVersion = new GenomeVersion(preferredGenomeVersionName, speciesName, twoBitProvider, chromosomes);
+                                genomeVersion = new GenomeVersion(preferredGenomeVersionName, speciesName, twoBitProvider, chromosomes, false);
                                 genomeVersionRegistry.getRegisteredGenomeVersions().add(genomeVersion);
                             }
                         } catch (Exception ex) {

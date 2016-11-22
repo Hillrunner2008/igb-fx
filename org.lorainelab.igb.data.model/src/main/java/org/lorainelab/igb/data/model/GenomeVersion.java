@@ -25,28 +25,34 @@ public class GenomeVersion {
     private ObjectProperty<Optional<Chromosome>> selectedChromosomeProperty;
     private ObservableSet<DataSet> loadedDataSets;
     private ObservableSet<Chromosome> chromosomes;
+    private boolean custom;
 
-    public GenomeVersion(String name, String speciesName, ReferenceSequenceProvider referenceSequenceProvider, Set<Chromosome> chromosomes) {
-        this(name, speciesName, referenceSequenceProvider, "", chromosomes);
+    public GenomeVersion(String name, String speciesName, ReferenceSequenceProvider referenceSequenceProvider, Set<Chromosome> chromosomes, boolean custom) {
+        this(name, speciesName, referenceSequenceProvider, "", chromosomes, custom);
     }
 
-    public GenomeVersion(String name, String speciesName, ReferenceSequenceProvider referenceSequenceProvider, String description, Set<Chromosome> chromosomes) {
-        this(name, speciesName, referenceSequenceProvider);
+    public GenomeVersion(String name, String speciesName, ReferenceSequenceProvider referenceSequenceProvider, String description, Set<Chromosome> chromosomes, boolean custom) {
+        this(name, speciesName, referenceSequenceProvider, custom);
         this.chromosomes.addAll(chromosomes);
     }
 
-    public GenomeVersion(String name, String speciesName, ReferenceSequenceProvider referenceSequenceProvider) {
-        this(name, speciesName, referenceSequenceProvider, "");
+    public GenomeVersion(String name, String speciesName, ReferenceSequenceProvider referenceSequenceProvider, boolean custom) {
+        this(name, speciesName, referenceSequenceProvider, "", custom);
     }
 
-    public GenomeVersion(String name, String speciesName, ReferenceSequenceProvider referenceSequenceProvider, String description) {
+    public GenomeVersion(String name, String speciesName, ReferenceSequenceProvider referenceSequenceProvider, String description, boolean custom) {
         this.name = new SimpleStringProperty(name);
         this.speciesName = new SimpleStringProperty(speciesName);
         this.description = new SimpleStringProperty(description);
         this.referenceSequenceProvider = referenceSequenceProvider;
+        this.custom = custom;
         selectedChromosomeProperty = new SimpleObjectProperty(Optional.empty());
         loadedDataSets = FXCollections.observableSet(Sets.newHashSet());
         chromosomes = FXCollections.observableSet(Sets.newLinkedHashSet());
+    }
+
+    public boolean isCustom() {
+        return custom;
     }
 
     public StringProperty name() {

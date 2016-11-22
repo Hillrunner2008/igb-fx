@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -150,12 +151,12 @@ public class MyGenomesMenuItem implements MenuBarEntryProvider {
             public void onChanged(SetChangeListener.Change<? extends GenomeVersion> change) {
                 Platform.runLater(() -> {
                     if (change.wasAdded()) {
-                        if (!genomeVersionList.contains(change.getElementAdded())) {
+                        if (change.getElementAdded().isCustom() && !genomeVersionList.contains(change.getElementAdded())) {
                             final GenomeVersion elementAdded = change.getElementAdded();
                             genomeVersionList.add(elementAdded);
                         }
                     }
-                    if (change.wasRemoved()) {
+                    if (change.wasRemoved() && change.getElementRemoved().isCustom()) {
                         final GenomeVersion elementRemoved = change.getElementRemoved();
                         genomeVersionList.remove(elementRemoved);
                     }
@@ -163,7 +164,7 @@ public class MyGenomesMenuItem implements MenuBarEntryProvider {
             }
         });
 
-        genomeVersionList.addAll(genomeVersionRegistry.getRegisteredGenomeVersions());
+        genomeVersionList.addAll(genomeVersionRegistry.getRegisteredGenomeVersions().stream().filter(gv -> gv.isCustom()).collect(Collectors.toList()));
         genomesTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         genomesTable.setItems(genomeVersionList);
 
@@ -309,7 +310,7 @@ public class MyGenomesMenuItem implements MenuBarEntryProvider {
                                 //delete and add new
                                 customGenomePersistenceManager.deleteCustomGenome(genomeToEdit);
                                 ReferenceSequenceProvider twoBitProvider = (ReferenceSequenceProvider) new TwoBitParser(sequenceFileUrl, chromosomeSynomymService);
-                                GenomeVersion customGenome = new GenomeVersion(versionName, speciesName, twoBitProvider, versionName);
+                                GenomeVersion customGenome = new GenomeVersion(versionName, speciesName, twoBitProvider, versionName, true);
                                 customGenomePersistenceManager.persistCustomGenome(customGenome);
                                 SessionPreferences.setRecentSelectedFilePath(sequenceFileUrl);
                                 customGenomeEdited = genomeVersionRegistry.getRegisteredGenomeVersions().add(customGenome);
