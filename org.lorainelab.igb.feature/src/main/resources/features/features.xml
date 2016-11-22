@@ -88,6 +88,7 @@
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.preferencemanager.api/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.preferences.otheroptions/${project.version}</bundle>
         <bundle>mvn:${project.groupId}/org.lorainelab.igb.quickload/${project.version}</bundle>
+        <bundle>mvn:${project.groupId}/org.lorainelab.igb.menu.opengenome/${project.version}</bundle>
     </feature>
 
 </features>

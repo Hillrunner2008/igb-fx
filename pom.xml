@@ -361,6 +361,12 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>org.lorainelab.igb.menu.opengenome</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>org.lorainelab.igb.menu.about</artifactId>
                 <version>${project.version}</version>
                 <scope>provided</scope>
@@ -458,7 +464,7 @@
             <dependency>
                 <groupId>org.lorainelab</groupId>
                 <artifactId>org.lorainelab.igb.preferencemanager.api</artifactId>
-               <version>${project.version}</version>
+                <version>${project.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -574,6 +580,7 @@
         <module>org.lorainelab.igb.datasetloadingservice</module>
         <module>org.lorainelab.igb.bookmark</module>
         <module>org.lorainelab.igb.recentgenome.registry</module>
+        <module>menus/org.lorainelab.igb.menu.opengenome</module>
         <module>org.lorainelab.igb.kar</module>
     </modules>
     <properties>
