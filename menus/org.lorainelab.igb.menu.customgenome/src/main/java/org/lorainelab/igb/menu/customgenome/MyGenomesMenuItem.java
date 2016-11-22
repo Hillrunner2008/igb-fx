@@ -215,9 +215,6 @@ public class MyGenomesMenuItem implements MenuBarEntryProvider {
                 return new SimpleStringProperty(param.getValue().getReferenceSequenceProvider().getPath());
             }
         });
-        cancelButton.setOnAction(event -> {
-            stage.hide();
-        });
 
         stage = new Stage();
         stage.setResizable(true);
