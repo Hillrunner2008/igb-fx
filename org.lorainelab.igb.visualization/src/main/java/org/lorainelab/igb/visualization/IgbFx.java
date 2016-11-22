@@ -50,12 +50,10 @@ public class IgbFx {
             delay.setOnFinished(event -> {
                 Platform.runLater(() -> {
                     splashStage.close();
+                    stage.show();
                 });
             });
             delay.play();
-            Platform.runLater(() -> {
-                stage.show();
-            });
         });
     }
 

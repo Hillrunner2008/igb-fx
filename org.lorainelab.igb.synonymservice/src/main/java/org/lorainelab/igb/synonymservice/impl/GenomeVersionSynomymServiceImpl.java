@@ -63,7 +63,7 @@ public class GenomeVersionSynomymServiceImpl extends SynonymServiceImpl implemen
 
     @Override
     public Set<String> getSynonyms(String synonym) {
-        return getSynonyms(synonym);
+        return super.getSynonyms(synonym);
     }
 
 }

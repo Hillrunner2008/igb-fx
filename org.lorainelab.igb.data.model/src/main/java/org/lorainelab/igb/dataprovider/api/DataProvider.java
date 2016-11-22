@@ -1,13 +1,12 @@
 package org.lorainelab.igb.dataprovider.api;
 
 import com.google.common.collect.SetMultimap;
-import java.net.URI;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.StringProperty;
 import org.lorainelab.igb.data.model.DataSet;
-import org.lorainelab.igb.dataprovider.model.DataContainer;
 
 /**
  * TODO - add full description
@@ -20,6 +19,8 @@ public interface DataProvider {
 
     StringProperty url();
 
+    boolean isEditable();
+
     /**
      * It is expected this method will be called before any DataProvider content is loaded.
      * The expectation is implementors will wait for a call to this method before making remote request
@@ -27,9 +28,11 @@ public interface DataProvider {
      */
     void initialize();
 
-    Set<DataSet> getAvailableDataSets(DataContainer dataContainer);
+    Set<DataSet> getAvailableDataSets(String genomeVersionName);
 
     Set<String> getSupportedGenomeVersionNames();
+
+    Optional<Map<String, Integer>> getAssemblyInfo(String genomeVersionName);
 
     default Optional<SetMultimap<String, String>> getGenomeVersionSynonyms() {
         return Optional.empty();
@@ -72,6 +75,6 @@ public interface DataProvider {
 
     void setPassword(String password);
 
-    Optional<URI> getSequenceFilePath(String name);
+    Optional<String> getSequenceFilePath(String name);
 
 }

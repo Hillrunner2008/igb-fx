@@ -54,7 +54,7 @@ public class BigWigParser implements FileTypeHandler {
         try {
             BBFileReader bbReader = new BBFileReader(dataSourceReference);
             BBFileHeader bbFileHdr = bbReader.getBBFileHeader();
-            String internalChrId = bbReader.getChromosomeNames().stream().filter(chrom -> chromosomeSynomymService.getPreferredChromosomeName(chrom).orElse("").equals(chrId)).findFirst().orElse(chrId);
+            String internalChrId = bbReader.getChromosomeNames().stream().filter(chrom -> chromosomeSynomymService.getPreferredChromosomeName(chrom).orElse("").equalsIgnoreCase(chrId)).findFirst().orElse(chrId);
             if (bbFileHdr.isBigWig()) {
                 BigWigIterator bigWigIterator = bbReader.getBigWigIterator(internalChrId, range.lowerEndpoint(), internalChrId, range.upperEndpoint(), true);
                 try {

@@ -105,10 +105,13 @@ public class GenomeAssemblyTab implements TabProvider {
             LOG.info("genomeVersionComboBox event fired");
             genomeVersionRegistry.setSelectedGenomeVersion(selectedGenomeVersion);
         });
-        selectedGenomeVersionChangeListener = (observable, oldValue, newValue) -> {
-            newValue.ifPresent(selectedGenomeVersion -> {
-                loadSelectedGenomeVersion(selectedGenomeVersion);
-            });
+        selectedGenomeVersionChangeListener = (observable, oldValue, selectedGenomeVersion) -> {
+            if (selectedGenomeVersion.isPresent()) {
+                loadSelectedGenomeVersion(selectedGenomeVersion.get());
+            } else {
+                tableData.clear();
+                genomeVersionComboBox.setValue(null);
+            }
         };
         genomeVersionRegistry.getSelectedGenomeVersion().addListener(selectedGenomeVersionChangeListener);
     }
@@ -122,10 +125,10 @@ public class GenomeAssemblyTab implements TabProvider {
                 genomeVersionRegistry.getSelectedGenomeVersion().addListener(selectedGenomeVersionChangeListener);
                 speciesComboBox.setValue(selectedGenomeVersion.getSpeciesName().get());
                 tableData.clear();
-                tableData.addAll(selectedGenomeVersion.getReferenceSequenceProvider().getChromosomes());
+                tableData.addAll(selectedGenomeVersion.getChromosomes());
             }
         });
-        selectedGenomeVersion.getReferenceSequenceProvider().getChromosomes().addListener((SetChangeListener.Change<? extends Chromosome> change) -> {
+        selectedGenomeVersion.getChromosomes().addListener((SetChangeListener.Change<? extends Chromosome> change) -> {
             Platform.runLater(() -> {
                 synchronized (tableData) {
                     if (change.wasAdded()) {
@@ -139,7 +142,7 @@ public class GenomeAssemblyTab implements TabProvider {
         sequenceInfoTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, selectedChromosome) -> {
             selectedGenomeVersion.setSelectedChromosome(selectedChromosome);
         });
-        selectedGenomeVersion.getReferenceSequenceProvider().getChromosomes().stream()
+        selectedGenomeVersion.getChromosomes().stream()
                 .findFirst()
                 .ifPresent(chromosome -> {
                     Platform.runLater(() -> {
@@ -169,6 +172,8 @@ public class GenomeAssemblyTab implements TabProvider {
                         genomeVersionComboBox.getItems().add(change.getElementAdded());
                     }
                 } else {
+                    final GenomeVersion elementRemoved = change.getElementRemoved();
+                    genomeVersionComboBox.getItems().add(elementRemoved);
                     long otherGenomeOfSameSpecies = genomeVersionRegistry.getRegisteredGenomeVersions().stream()
                             .filter(genomeVersion -> genomeVersion.getSpeciesName().get().equalsIgnoreCase(change.getElementRemoved().getSpeciesName().get()))
                             .count();
@@ -178,17 +183,20 @@ public class GenomeAssemblyTab implements TabProvider {
                             speciesComboboxItems.remove(speciesName.get());
                         }
                     }
+
                 }
             });
         });
         speciesComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+            boolean disableGenomeVersionSelection = newValue == null || newValue.equals(speciesComboBox.getPromptText());
             Platform.runLater(() -> {
-                boolean disableGenomeVersionSelection = newValue.equals(speciesComboBox.getPromptText());
                 if (!disableGenomeVersionSelection) {
                     genomeVersionComboBox.getItems().clear();
                     genomeVersionRegistry.getRegisteredGenomeVersions().stream()
                             .filter(genomeVersion -> genomeVersion.getSpeciesName().get().equalsIgnoreCase(newValue))
                             .forEach(genomeVersion -> genomeVersionComboBox.getItems().add(genomeVersion));
+                } else {
+                    genomeVersionRegistry.setSelectedGenomeVersion(null);
                 }
                 genomeVersionComboBox.setDisable(disableGenomeVersionSelection);
             });

@@ -8,19 +8,17 @@ package org.lorainelab.igb.preferencemanager.api.internal;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
-import java.util.ArrayList;
+import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Optional;
 import javafx.application.Platform;
 import javafx.scene.Scene;
-import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import org.lorainelab.igb.menu.api.MenuBarEntryProvider;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
-import org.lorainelab.igb.menu.api.model.WeightedMenuItem;
 import org.lorainelab.igb.menu.api.model.WeightedMenuEntry;
+import org.lorainelab.igb.menu.api.model.WeightedMenuItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,8 +36,6 @@ public class PreferenceProviderMenuEntry implements MenuBarEntryProvider {
     private PreferencesTabManager preferencesTabManager;
 
     public PreferenceProviderMenuEntry() {
-        menuItem = new WeightedMenuItem(30, "Preferences..");
-
         menuItem = new WeightedMenuItem(30, "Preferences");
     }
 
@@ -47,17 +43,10 @@ public class PreferenceProviderMenuEntry implements MenuBarEntryProvider {
     public void activate() {
         Platform.runLater(() -> {
             initComponents();
-            layoutComponents();
-            menuItem.setOnAction(event -> {
-                Platform.runLater(() -> {
-                    Platform.runLater(() -> {
-                        stage.show();
-                    });
-                });
-            });
             menuItem.setOnAction(event -> {
                 Platform.runLater(() -> {
                     stage.show();
+                    stage.toFront();
                 });
             });
         });
@@ -65,9 +54,7 @@ public class PreferenceProviderMenuEntry implements MenuBarEntryProvider {
 
     @Override
     public Optional<List<WeightedMenuEntry>> getMenuItems() {
-        List<WeightedMenuEntry> menuItems = new ArrayList<WeightedMenuEntry>();
-        menuItems.add(menuItem);
-        return Optional.of(menuItems);
+        return Optional.of(Lists.newArrayList(menuItem));
 
     }
 
@@ -89,9 +76,6 @@ public class PreferenceProviderMenuEntry implements MenuBarEntryProvider {
         stage.centerOnScreen();
         stage.setResizable(true);
         stage.setTitle("Preferences");
-    }
-
-    private void layoutComponents() {
         stage.setScene(new Scene(pane));
     }
 

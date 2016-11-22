@@ -7,6 +7,7 @@ import htsjdk.samtools.seekablestream.SeekableStream;
 import htsjdk.samtools.seekablestream.SeekableStreamFactory;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 import org.lorainelab.igb.data.model.Chromosome;
@@ -68,8 +69,8 @@ public class TwoBitParser implements ReferenceSequenceProvider {
                 seq_names[i] = new String(chars);
                 long pos = readFourBytes(seekableStream);
                 seq2pos.put(seq_names[i], pos);
+
             }
-            initializeChromosomeInfo();
             isInitialized = true;
 //            CompletableFuture.supplyAsync(() -> {
 //                initializeChromosomeInfo();
@@ -326,7 +327,7 @@ public class TwoBitParser implements ReferenceSequenceProvider {
         if (!isInitialized) {
             initializeLazily();
         }
-        chromosomeId = seq2prefNameRef.get(chromosomeId);
+        chromosomeId = getInternalChromosomeName(chromosomeId);
         String sequence = "";
         try (SeekableStream seekableStream = new SeekableBufferedStream(SeekableStreamFactory.getInstance().getBufferedStream(SeekableStreamFactory.getInstance().getStreamFor(path)))) {
             setCurrentSequence(seekableStream, chromosomeId);
@@ -339,12 +340,26 @@ public class TwoBitParser implements ReferenceSequenceProvider {
         return sequence;
     }
 
+    private String getInternalChromosomeName(final String chromosomeId) {
+        if (seq2pos.keySet().contains(chromosomeId)) {
+            return chromosomeId;
+        }
+        Optional<String> caseInsensitiveMatch = seq2pos.keySet().stream().filter(chr -> chr.equalsIgnoreCase(chromosomeId)).findFirst();
+        if (caseInsensitiveMatch.isPresent()) {
+            return caseInsensitiveMatch.get();
+        }
+        if (seq2prefNameRef.isEmpty()) {
+            initializeChromosomeInfo();
+        }
+        return seq2prefNameRef.getOrDefault(chromosomeId, chromosomeId);
+    }
+
     @Override
     public String getSequence(String chromosomeId, int start, int length) {
         if (!isInitialized) {
             initializeLazily();
         }
-        chromosomeId = seq2prefNameRef.get(chromosomeId);
+        chromosomeId = getInternalChromosomeName(chromosomeId);
         String sequence = "";
         try (SeekableStream seekableStream = new SeekableBufferedStream(SeekableStreamFactory.getInstance().getBufferedStream(SeekableStreamFactory.getInstance().getStreamFor(path)))) {
             setCurrentSequence(seekableStream, chromosomeId);
@@ -381,6 +396,7 @@ public class TwoBitParser implements ReferenceSequenceProvider {
     public ObservableSet<Chromosome> getChromosomes() {
         if (!isInitialized) {
             initializeLazily();
+            initializeChromosomeInfo();
         }
         return chromosomes;
     }
