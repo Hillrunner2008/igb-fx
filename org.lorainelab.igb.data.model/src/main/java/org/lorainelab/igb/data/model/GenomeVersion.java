@@ -55,10 +55,6 @@ public class GenomeVersion {
         return custom;
     }
 
-    public void setCustom(boolean custom) {
-        this.custom = custom;
-    }
-
     public StringProperty name() {
         return name;
     }
