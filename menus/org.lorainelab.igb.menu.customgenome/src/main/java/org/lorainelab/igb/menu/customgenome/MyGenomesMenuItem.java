@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -25,6 +27,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -65,7 +68,7 @@ public class MyGenomesMenuItem implements MenuBarEntryProvider {
     @FXML
     private AnchorPane anchroPane;
     @FXML
-    private TableView genomesTable;
+    private TableView<GenomeVersion> genomesTable;
     @FXML
     private TableColumn speciesColumn;
     @FXML
@@ -142,7 +145,7 @@ public class MyGenomesMenuItem implements MenuBarEntryProvider {
 
     private void initComponents() {
 
-        genomeVersionList = FXCollections.observableArrayList(genomeVersionRegistry.getRegisteredGenomeVersions());
+        genomeVersionList = FXCollections.observableArrayList();
         genomeVersionRegistry.getRegisteredGenomeVersions().addListener(new SetChangeListener<GenomeVersion>() {
             @Override
             public void onChanged(SetChangeListener.Change<? extends GenomeVersion> change) {
@@ -161,38 +164,37 @@ public class MyGenomesMenuItem implements MenuBarEntryProvider {
             }
         });
 
-        openButton.setOnAction((ActionEvent event) -> {
-            ObservableList selectedItems = genomesTable.getSelectionModel().getSelectedItems();
-            if (selectedItems.size() != 0) {
-                genomeVersionRegistry.setSelectedGenomeVersion((GenomeVersion) selectedItems.get(0));
-                stage.hide();
-            }
-        });
-
-        cancelButton.setOnAction((ActionEvent event) -> stage.hide());
-
-        deleteButton.setOnAction((ActionEvent event) -> {
-            ObservableList selectedItems = genomesTable.getSelectionModel().getSelectedItems();
-            if (selectedItems.size() != 0) {
-                //confirmation?
-                customGenomePersistenceManager.deleteCustomGenome((GenomeVersion) selectedItems.get(0));
-            }
-        });
-
-        editButton.setOnAction(ae -> {
-            ObservableList selectedItems = genomesTable.getSelectionModel().getSelectedItems();
-            if (selectedItems.size() == 0) {
-                return;
-            }
-            GenomeVersion genome = (GenomeVersion) selectedItems.get(0);
-            speciesTextField.setText(genome.getSpeciesName().get());
-            versionTextField.setText(genome.name().get());
-            refSeqTextField.setText(genome.getReferenceSequenceProvider().getPath());
-            genomeToEdit = genome;
-            Platform.runLater(() -> editStage.show());
-        });
-
+        genomeVersionList.addAll(genomeVersionRegistry.getRegisteredGenomeVersions());
+        genomesTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         genomesTable.setItems(genomeVersionList);
+
+        final BooleanBinding selectewdBinding = Bindings.isNull(genomesTable.getSelectionModel().selectedItemProperty());
+        openButton.disableProperty().bind(selectewdBinding);
+        deleteButton.disableProperty().bind(selectewdBinding);
+        editButton.disableProperty().bind(selectewdBinding);
+
+        openButton.setOnAction((ActionEvent event) -> {
+            genomeVersionRegistry.setSelectedGenomeVersion(genomesTable.getSelectionModel().getSelectedItem());
+            stage.hide();
+        });
+        cancelButton.setOnAction((ActionEvent event) -> {
+            Platform.runLater(() -> {
+                stage.hide();
+            });
+        });
+        deleteButton.setOnAction((ActionEvent event) -> {
+            customGenomePersistenceManager.deleteCustomGenome(genomesTable.getSelectionModel().getSelectedItem());
+        });
+        editButton.setOnAction(ae -> {
+            Platform.runLater(() -> {
+                GenomeVersion genome = genomesTable.getSelectionModel().getSelectedItem();
+                speciesTextField.setText(genome.getSpeciesName().get());
+                versionTextField.setText(genome.name().get());
+                refSeqTextField.setText(genome.getReferenceSequenceProvider().getPath());
+                genomeToEdit = genome;
+                editStage.show();
+            });
+        });
 
         speciesColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<GenomeVersion, String>, ObservableValue<String>>() {
             @Override
@@ -209,8 +211,7 @@ public class MyGenomesMenuItem implements MenuBarEntryProvider {
         filePathCoulmn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<GenomeVersion, String>, ObservableValue<String>>() {
             @Override
             public ObservableValue<String> call(TableColumn.CellDataFeatures<GenomeVersion, String> param) {
-                String[] path = param.getValue().getReferenceSequenceProvider().getPath().split(File.separator);
-                return new SimpleStringProperty(path[path.length - 1]);
+                return new SimpleStringProperty(param.getValue().getReferenceSequenceProvider().getPath());
             }
         });
         cancelButton.setOnAction(event -> {
@@ -221,6 +222,10 @@ public class MyGenomesMenuItem implements MenuBarEntryProvider {
         stage.setResizable(true);
         stage.setTitle("My Genomes");
 
+        initEditStage();
+    }
+
+    private void initEditStage() {
         //init edit stage
         editMigPane = new MigPane("fillx", "[]rel[grow]", "[][][]");
         editStage = new Stage();
@@ -255,12 +260,14 @@ public class MyGenomesMenuItem implements MenuBarEntryProvider {
             }
             fileChooser.setInitialDirectory(homeDirectory);
             addFileExtensionFilters(fileChooser);
-            Optional.ofNullable(fileChooser.showOpenDialog(null)).ifPresent(selectedFile -> {
-                try {
-                    refSeqTextField.setText(selectedFile.getCanonicalPath());
-                } catch (Exception ex) {
-                    LOG.error(ex.getMessage(), ex);
-                }
+            Platform.runLater(() -> {
+                Optional.ofNullable(fileChooser.showOpenDialog(null)).ifPresent(selectedFile -> {
+                    try {
+                        refSeqTextField.setText(selectedFile.getCanonicalPath());
+                    } catch (Exception ex) {
+                        LOG.error(ex.getMessage(), ex);
+                    }
+                });
             });
 
         });
@@ -319,7 +326,10 @@ public class MyGenomesMenuItem implements MenuBarEntryProvider {
                     LOG.error(ex.getMessage(), ex);
                 }
             }).whenComplete((result, ex) -> {
-                //TODO show error in popup instead of hiding if it occurred
+                if (ex != null) {
+                    Throwable t = (Throwable) ex;
+                    LOG.error(t.getMessage(), t);
+                }
                 Platform.runLater(() -> {
                     if (customGenomeEdited[0]) {
                         customGenomeEdited[0] = false;
