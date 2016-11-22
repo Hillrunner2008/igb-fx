@@ -9,7 +9,6 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import java.util.Arrays;
-import java.util.logging.Level;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import org.lorainelab.igb.data.model.GenomeVersion;
@@ -99,8 +98,9 @@ public class CustomGenomePersistenceManager {
         Preferences node = modulePreferencesNode.node(nodeName);
         try {
             node.removeNode();
+            genomeVersionRegistry.getRegisteredGenomeVersions().remove(customGenome);
         } catch (BackingStoreException ex) {
-            java.util.logging.Logger.getLogger(CustomGenomePersistenceManager.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.error(ex.getMessage(), ex);
         }
     }
 

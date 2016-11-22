@@ -77,6 +77,7 @@ public class RecentGenomeRegistryImpl implements RecentGenomeRegistry {
                 initializeFromPreferences();
             });
         });
+
         initializeFromPreferences();
     }
 

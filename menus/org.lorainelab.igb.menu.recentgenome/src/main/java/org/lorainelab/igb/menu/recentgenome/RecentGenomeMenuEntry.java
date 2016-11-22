@@ -12,6 +12,7 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Optional;
 import javafx.application.Platform;
+import javafx.beans.Observable;
 import javafx.collections.ListChangeListener;
 import javafx.scene.control.MenuItem;
 import org.lorainelab.igb.data.model.GenomeVersion;
@@ -32,7 +33,7 @@ import org.slf4j.LoggerFactory;
 public class RecentGenomeMenuEntry implements MenuBarEntryProvider {
 
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(RecentGenomeMenuEntry.class);
-    private static final int RECENT_FILE_MENU_ENTRY_WEIGHT = 3;
+    private static final int RECENT_FILE_MENU_ENTRY_WEIGHT = 5;
     private RecentGenomeRegistry recentGenomeRegistry;
     private final WeightedMenu recentGenomeMenu;
     private final MenuItem clearMenuItem;
@@ -50,6 +51,7 @@ public class RecentGenomeMenuEntry implements MenuBarEntryProvider {
         recentGenomeRegistry.getRecentGenomes().addListener((ListChangeListener.Change<? extends GenomeVersion> c) -> {
             buildRecentFileMenu();
         });
+
         clearMenuItem.setOnAction(action -> {
             recentGenomeRegistry.clearRecentGenomes();
             Platform.runLater(() -> recentGenomeMenu.setDisable(true));
@@ -75,6 +77,9 @@ public class RecentGenomeMenuEntry implements MenuBarEntryProvider {
     private Optional<MenuItem> createRecentFileMenuItem(GenomeVersion recentGenome) {
         String fileName = recentGenome.getReferenceSequenceProvider().getPath();
         final MenuItem menuItem = new MenuItem(recentGenome.name().get());
+        recentGenome.name().addListener((Observable observable) -> {
+            Platform.runLater(() -> menuItem.setText(recentGenome.name().get()));
+        });
         if (genomeVersionRegistry.getRegisteredGenomeVersions().contains(recentGenome)) {
             menuItem.setOnAction(action -> {
                 //load genome
