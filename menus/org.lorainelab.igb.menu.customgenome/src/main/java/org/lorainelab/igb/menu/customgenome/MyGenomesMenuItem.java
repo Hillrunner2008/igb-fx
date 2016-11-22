@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -175,7 +174,9 @@ public class MyGenomesMenuItem implements MenuBarEntryProvider {
 
         openButton.setOnAction((ActionEvent event) -> {
             genomeVersionRegistry.setSelectedGenomeVersion(genomesTable.getSelectionModel().getSelectedItem());
-            stage.hide();
+            Platform.runLater(() -> {
+                stage.hide();
+            });
         });
         cancelButton.setOnAction((ActionEvent event) -> {
             Platform.runLater(() -> {
@@ -278,8 +279,8 @@ public class MyGenomesMenuItem implements MenuBarEntryProvider {
 
         okBtn = new Button("Ok");
         okBtn.setOnAction(event -> {
-            boolean[] customGenomeEdited = {false};
-            CompletableFuture.runAsync(() -> {
+            Platform.runLater(() -> {
+                boolean customGenomeEdited = false;
                 try {
                     final String speciesName = speciesTextField.textProperty().get();
                     final String versionName = versionTextField.textProperty().get();
@@ -293,7 +294,7 @@ public class MyGenomesMenuItem implements MenuBarEntryProvider {
                             genomeToEdit.setName(versionName);
                             genomeToEdit.setSpeciesName(speciesName);
                             customGenomePersistenceManager.persistCustomGenome(genomeToEdit);
-                            customGenomeEdited[0] = true;
+                            customGenomeEdited = true;
                         } else {
                             //path changed to drop current genomne and re-create
                             Optional<GenomeVersion> duplicate = genomeVersionRegistry.getRegisteredGenomeVersions().stream()
@@ -301,14 +302,12 @@ public class MyGenomesMenuItem implements MenuBarEntryProvider {
                                     .findFirst();
                             //check for duplicate with new file path
                             if (duplicate.isPresent()) {
-                                Platform.runLater(() -> {
-                                    Alert dlg = new Alert(Alert.AlertType.WARNING, "This sequence file is already mapped to the \n\""
-                                            + duplicate.get().name().get() + "\" genome.");
-                                    dlg.initModality(stage.getModality());
-                                    dlg.initOwner(stage.getOwner());
-                                    dlg.setTitle("Cannot add duplicate genome version");
-                                    Optional<ButtonType> result = dlg.showAndWait();
-                                });
+                                Alert dlg = new Alert(Alert.AlertType.WARNING, "This sequence file is already mapped to the \n\""
+                                        + duplicate.get().name().get() + "\" genome.");
+                                dlg.initModality(stage.getModality());
+                                dlg.initOwner(stage.getOwner());
+                                dlg.setTitle("Cannot add duplicate genome version");
+                                Optional<ButtonType> result = dlg.showAndWait();
                             } else {
                                 //delete and add new
                                 customGenomePersistenceManager.deleteCustomGenome(genomeToEdit);
@@ -316,38 +315,29 @@ public class MyGenomesMenuItem implements MenuBarEntryProvider {
                                 GenomeVersion customGenome = new GenomeVersion(versionName, speciesName, twoBitProvider, versionName);
                                 customGenomePersistenceManager.persistCustomGenome(customGenome);
                                 SessionPreferences.setRecentSelectedFilePath(sequenceFileUrl);
-                                customGenomeEdited[0] = genomeVersionRegistry.getRegisteredGenomeVersions().add(customGenome);
+                                customGenomeEdited = genomeVersionRegistry.getRegisteredGenomeVersions().add(customGenome);
                                 genomeVersionRegistry.setSelectedGenomeVersion(customGenome);
-
                             }
                         }
                     }
                 } catch (Exception ex) {
                     LOG.error(ex.getMessage(), ex);
                 }
-            }).whenComplete((result, ex) -> {
-                if (ex != null) {
-                    Throwable t = (Throwable) ex;
-                    LOG.error(t.getMessage(), t);
-                }
-                Platform.runLater(() -> {
-                    if (customGenomeEdited[0]) {
-                        customGenomeEdited[0] = false;
-                        Alert dlg = new Alert(Alert.AlertType.INFORMATION, "Custom Genome edited");
-                        dlg.setWidth(600);
-                        dlg.initModality(editStage.getModality());
-                        dlg.initOwner(editStage.getOwner());
-                        dlg.setTitle("Genome Edited Successfully");
-                        dlg.show();
-                        dlg.setOnCloseRequest(closeEvent -> {
-                            editStage.hide();
-                        });
-                    } else {
+                if (customGenomeEdited) {
+                    customGenomeEdited = false;
+                    Alert dlg = new Alert(Alert.AlertType.INFORMATION, "Custom Genome edited");
+                    dlg.setWidth(600);
+                    dlg.initModality(editStage.getModality());
+                    dlg.initOwner(editStage.getOwner());
+                    dlg.setTitle("Genome Edited Successfully");
+                    dlg.show();
+                    dlg.setOnCloseRequest(closeEvent -> {
                         editStage.hide();
-                    }
-                });
+                    });
+                } else {
+                    editStage.hide();
+                }
             });
-
         });
     }
 
@@ -359,10 +349,6 @@ public class MyGenomesMenuItem implements MenuBarEntryProvider {
             case ESCAPE:
                 cancelButton.fire();
                 break;
-            case K:
-                if (event.isControlDown()) {
-                    ((TextField) event.getSource()).deleteText(((TextField) event.getSource()).getCaretPosition(), ((TextField) event.getSource()).getLength());
-                }
         }
     }
 
