@@ -25,19 +25,29 @@ public class GenomeVersion {
     private ObjectProperty<Optional<Chromosome>> selectedChromosomeProperty;
     private ObservableSet<DataSet> loadedDataSets;
     private ObservableSet<DataContainer> dataContainers;
+    private boolean custom;
 
-    public GenomeVersion(String name, String speciesName, ReferenceSequenceProvider referenceSequenceProvider) {
-        this(name, speciesName, referenceSequenceProvider, null);
+    public GenomeVersion(String name, String speciesName, ReferenceSequenceProvider referenceSequenceProvider, boolean custom) {
+        this(name, speciesName, referenceSequenceProvider, null, custom);
     }
 
-    public GenomeVersion(String name, String speciesName, ReferenceSequenceProvider referenceSequenceProvider, String description) {
+    public GenomeVersion(String name, String speciesName, ReferenceSequenceProvider referenceSequenceProvider, String description, boolean custom) {
         this.name = new SimpleStringProperty(name);
         this.speciesName = new SimpleStringProperty(speciesName);
         this.description = new SimpleStringProperty(description);
         this.referenceSequenceProvider = referenceSequenceProvider;
+        this.custom = custom;
         selectedChromosomeProperty = new SimpleObjectProperty(Optional.empty());
         loadedDataSets = FXCollections.observableSet(Sets.newHashSet());
         dataContainers = FXCollections.observableSet(Sets.newHashSet());
+    }
+
+    public boolean isCustom() {
+        return custom;
+    }
+
+    public void setCustom(boolean custom) {
+        this.custom = custom;
     }
 
     public StringProperty name() {

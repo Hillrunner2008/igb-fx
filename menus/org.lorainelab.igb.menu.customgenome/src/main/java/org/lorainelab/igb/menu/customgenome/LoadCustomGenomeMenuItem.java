@@ -147,7 +147,7 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
 
                         if (!duplicate.isPresent()) {
                             ReferenceSequenceProvider twoBitProvider = (ReferenceSequenceProvider) new TwoBitParser(sequenceFileUrl, chromosomeSynomymService);
-                            GenomeVersion customGenome = new GenomeVersion(versionName, speciesName, twoBitProvider, versionName);
+                            GenomeVersion customGenome = new GenomeVersion(versionName, speciesName, twoBitProvider, versionName, true);
                             SessionPreferences.setRecentSelectedFilePath(sequenceFileUrl);
                             customGenomePersistenceManager.persistCustomGenome(customGenome);
                             SessionPreferences.setRecentSelectedFilePath(sequenceFileUrl);

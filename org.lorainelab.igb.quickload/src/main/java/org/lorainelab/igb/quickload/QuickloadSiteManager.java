@@ -98,7 +98,7 @@ public class QuickloadSiteManager {
                             String speciesName = speciesSynomymService.getPreferredSpeciesName(gv).orElse(gv);
                             if (DataSourceUtilsImpl.resourceAvailable(seqFilePath.toURL())) {
                                 ReferenceSequenceProvider twoBitProvider = (ReferenceSequenceProvider) new TwoBitParser(seqFilePath.toURL().toExternalForm(), chromosomeSynomymService);
-                                genomeVersion = new GenomeVersion(preferredGenomeVersionName, speciesName, twoBitProvider, speciesName);
+                                genomeVersion = new GenomeVersion(preferredGenomeVersionName, speciesName, twoBitProvider, speciesName, false);
                                 genomeVersionRegistry.getRegisteredGenomeVersions().add(genomeVersion);
                                 genomeVersion.getDataContainers().add(new DataContainer(genomeVersion, dataProvider));
                             } else {
