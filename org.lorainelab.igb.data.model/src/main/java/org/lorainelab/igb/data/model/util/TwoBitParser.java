@@ -7,11 +7,12 @@ import htsjdk.samtools.seekablestream.SeekableStream;
 import htsjdk.samtools.seekablestream.SeekableStreamFactory;
 import java.io.IOException;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import java.util.Optional;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.sequence.ReferenceSequenceProvider;
+import org.lorainelab.igb.synonymservice.ChromosomeSynomymService;
 import org.slf4j.LoggerFactory;
 
 public class TwoBitParser implements ReferenceSequenceProvider {
@@ -38,11 +39,21 @@ public class TwoBitParser implements ReferenceSequenceProvider {
     private static final char[] BIT_CHARS = {'T', 'C', 'A', 'G'};
     private ObservableSet<Chromosome> chromosomes;
     private final String path;
+    private boolean isInitialized;
+    private final ChromosomeSynomymService chromosomeSynomymService;
+    private Map<String, String> seq2prefNameRef;
 
-    public TwoBitParser(String path) throws Exception {
+    public TwoBitParser(String path, ChromosomeSynomymService chromosomeSynomymService) throws Exception {
         this.path = path;
-        try (SeekableStream seekableStream = new SeekableBufferedStream(SeekableStreamFactory.getInstance().getBufferedStream(SeekableStreamFactory.getInstance().getStreamFor(path)))) {
-            seq2pos = Maps.newLinkedHashMap();
+        this.chromosomeSynomymService = chromosomeSynomymService;
+        seq2prefNameRef = Maps.newHashMap();
+        seq2pos = Maps.newLinkedHashMap();
+        chromosomes = FXCollections.observableSet(Sets.newTreeSet((o1, o2) -> o1.compareTo(o2)));
+        isInitialized = false;
+    }
+
+    private void initializeLazily() {
+        try (final SeekableStream seekableStream = SeekableStreamFactory.getInstance().getBufferedStream(SeekableStreamFactory.getInstance().getStreamFor(path))) {
             long sign = readFourBytes(seekableStream);
             reverse = isLittleEndianByteOrder(sign);
             readFourBytes(seekableStream);
@@ -58,15 +69,20 @@ public class TwoBitParser implements ReferenceSequenceProvider {
                 seq_names[i] = new String(chars);
                 long pos = readFourBytes(seekableStream);
                 seq2pos.put(seq_names[i], pos);
+
             }
-            chromosomes = FXCollections.observableSet(Sets.newTreeSet((o1, o2) -> o1.compareTo(o2)));
-            CompletableFuture.<Void>supplyAsync(() -> {
-                initializeChromosomeInfo();
-                return null;
-            }).exceptionally(ex -> {
-                LOG.error(ex.getMessage(), ex);
-                return null;
-            });
+            isInitialized = true;
+//            CompletableFuture.supplyAsync(() -> {
+//                initializeChromosomeInfo();
+//                return null;
+//            }).whenComplete((u, t) -> {
+//                if (t != null) {
+//                    Throwable ex = (Throwable) t;
+//                    LOG.error(ex.getMessage(), ex);
+//                }
+//            });
+        } catch (Exception ex) {
+            LOG.error("Could not read 2Bit file", ex);
         }
     }
 
@@ -86,7 +102,7 @@ public class TwoBitParser implements ReferenceSequenceProvider {
         return ret;
     }
 
-    public String[] getSequenceNames() {
+    private String[] getSequenceNames() {
         String[] ret = new String[seq_names.length];
         System.arraycopy(seq_names, 0, ret, 0, seq_names.length);
         return ret;
@@ -98,7 +114,7 @@ public class TwoBitParser implements ReferenceSequenceProvider {
      * @param seqName name of sequence (one of returned by getSequenceNames()).
      * @throws Exception
      */
-    public void setCurrentSequence(SeekableStream seekableStream, String seqName) throws Exception {
+    private void setCurrentSequence(SeekableStream seekableStream, String seqName) throws Exception {
         if (cur_seq_name != null) {
             throw new Exception("Sequence [" + cur_seq_name + "] was not closed");
         }
@@ -134,7 +150,7 @@ public class TwoBitParser implements ReferenceSequenceProvider {
     /**
      * Method resets current position to the begining of sequence stream.
      */
-    public synchronized void reset() throws IOException {
+    private synchronized void reset() throws IOException {
         cur_seq_pos = 0;
         cur_nn_block_num = (cur_nn_blocks.length > 0) ? 0 : -1;
         cur_mask_block_num = (cur_mask_blocks.length > 0) ? 0 : -1;
@@ -144,17 +160,7 @@ public class TwoBitParser implements ReferenceSequenceProvider {
         buffer_pos = -1;
     }
 
-    /**
-     * @return number (starting from 0) of next readable nucleotide in sequence stream.
-     */
-    public long getCurrentSequencePosition() {
-        if (cur_seq_name == null) {
-            throw new RuntimeException("Sequence is not set");
-        }
-        return cur_seq_pos;
-    }
-
-    public void setCurrentSequencePosition(SeekableStream seekableStream, long pos) throws IOException {
+    private void setCurrentSequencePosition(SeekableStream seekableStream, long pos) throws IOException {
         if (cur_seq_name == null) {
             throw new RuntimeException("Sequence is not set");
         }
@@ -188,7 +194,7 @@ public class TwoBitParser implements ReferenceSequenceProvider {
      * Method reads 1 nucleotide from sequence stream. You should set current sequence
      * before use it.
      */
-    public int read(SeekableStream seekableStream) throws IOException {
+    private int read(SeekableStream seekableStream) throws IOException {
         if (cur_seq_name == null) {
             throw new IOException("Sequence is not set");
         }
@@ -236,7 +242,7 @@ public class TwoBitParser implements ReferenceSequenceProvider {
      * Method skips n nucleotides in sequence stream. You should set current sequence
      * before use it.
      */
-    public synchronized long skip(SeekableStream seekableStream, long n) throws IOException {
+    private synchronized long skip(SeekableStream seekableStream, long n) throws IOException {
         if (cur_seq_name == null) {
             throw new IOException("Sequence is not set");
         }
@@ -292,14 +298,14 @@ public class TwoBitParser implements ReferenceSequenceProvider {
         startFilePos = -1;
     }
 
-    public int available() throws IOException {
+    private int available() throws IOException {
         if (cur_seq_name == null) {
             throw new IOException("Sequence is not set");
         }
         return (int) (cur_dna_size - cur_seq_pos);
     }
 
-    public String loadFragment(SeekableStream seekableStream, long seq_pos, int len) throws IOException {
+    private String loadFragment(SeekableStream seekableStream, long seq_pos, int len) throws IOException {
         if (cur_seq_name == null) {
             throw new IOException("Sequence is not set");
         }
@@ -318,26 +324,50 @@ public class TwoBitParser implements ReferenceSequenceProvider {
 
     @Override
     public String getSequence(String chromosomeId) {
+        if (!isInitialized) {
+            initializeLazily();
+        }
+        chromosomeId = getInternalChromosomeName(chromosomeId);
         String sequence = "";
         try (SeekableStream seekableStream = new SeekableBufferedStream(SeekableStreamFactory.getInstance().getBufferedStream(SeekableStreamFactory.getInstance().getStreamFor(path)))) {
             setCurrentSequence(seekableStream, chromosomeId);
             sequence = loadFragment(seekableStream, 0, available());
-            close();
         } catch (Exception ex) {
             LOG.error(ex.getMessage(), ex);
+        } finally {
+            close();
         }
         return sequence;
     }
 
+    private String getInternalChromosomeName(final String chromosomeId) {
+        if (seq2pos.keySet().contains(chromosomeId)) {
+            return chromosomeId;
+        }
+        Optional<String> caseInsensitiveMatch = seq2pos.keySet().stream().filter(chr -> chr.equalsIgnoreCase(chromosomeId)).findFirst();
+        if (caseInsensitiveMatch.isPresent()) {
+            return caseInsensitiveMatch.get();
+        }
+        if (seq2prefNameRef.isEmpty()) {
+            initializeChromosomeInfo();
+        }
+        return seq2prefNameRef.getOrDefault(chromosomeId, chromosomeId);
+    }
+
     @Override
     public String getSequence(String chromosomeId, int start, int length) {
+        if (!isInitialized) {
+            initializeLazily();
+        }
+        chromosomeId = getInternalChromosomeName(chromosomeId);
         String sequence = "";
         try (SeekableStream seekableStream = new SeekableBufferedStream(SeekableStreamFactory.getInstance().getBufferedStream(SeekableStreamFactory.getInstance().getStreamFor(path)))) {
             setCurrentSequence(seekableStream, chromosomeId);
             sequence = loadFragment(seekableStream, start, length);
-            close();
         } catch (Exception ex) {
             LOG.error(ex.getMessage(), ex);
+        } finally {
+            close();
         }
         return sequence;
     }
@@ -349,7 +379,10 @@ public class TwoBitParser implements ReferenceSequenceProvider {
                     long pos = seq2pos.get(entry.getKey());
                     seekableStream.seek(pos);
                     long size = readFourBytes(seekableStream);
-                    chromosomes.add(new Chromosome(entry.getKey(), (int) size, this));
+                    String chromosomeName = entry.getKey();
+                    chromosomeName = chromosomeSynomymService.getPreferredChromosomeName(chromosomeName).orElse(chromosomeName);
+                    seq2prefNameRef.put(chromosomeName, entry.getKey());
+                    chromosomes.add(new Chromosome(chromosomeName, (int) size, this));
                 } catch (Exception ex) {
                     LOG.error(ex.getMessage(), ex);
                 }
@@ -361,6 +394,10 @@ public class TwoBitParser implements ReferenceSequenceProvider {
 
     @Override
     public ObservableSet<Chromosome> getChromosomes() {
+        if (!isInitialized) {
+            initializeLazily();
+            initializeChromosomeInfo();
+        }
         return chromosomes;
     }
 

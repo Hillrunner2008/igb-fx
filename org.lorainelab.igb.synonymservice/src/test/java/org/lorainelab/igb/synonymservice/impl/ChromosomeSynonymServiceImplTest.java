@@ -6,10 +6,10 @@
 package org.lorainelab.igb.synonymservice.impl;
 
 import java.io.IOException;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import org.lorainelab.igb.synonymservice.ChromosomeSynomymService;
 
 /**
@@ -54,7 +54,7 @@ public class ChromosomeSynonymServiceImplTest {
         //species synonym is already loaded in setup
         String expResult = "chr6";
         String synonym1 = "chr06|12006";
-        String synonym2 = "6";
+        String synonym2 = "Chr6";
         assertEquals(expResult, service.getPreferredChromosomeName(synonym1).get());
         assertEquals(expResult, service.getPreferredChromosomeName(synonym2).get());
     }
@@ -78,5 +78,4 @@ public class ChromosomeSynonymServiceImplTest {
 //        assertTrue(service.checkIfSynonym("DemoKeyJson", "demovalue4"));
 //
 //    }
-
 }

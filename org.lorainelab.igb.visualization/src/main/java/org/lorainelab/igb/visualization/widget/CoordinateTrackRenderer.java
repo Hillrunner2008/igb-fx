@@ -17,6 +17,7 @@ import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.Track;
 import org.lorainelab.igb.data.model.View;
 import static org.lorainelab.igb.data.model.util.FontUtils.BASE_PAIR_FONT;
+import org.lorainelab.igb.data.model.util.Palette;
 import static org.lorainelab.igb.data.model.util.Palette.CLICK_DRAG_HIGHLIGHT;
 import static org.lorainelab.igb.data.model.util.Palette.getBaseColor;
 import org.lorainelab.igb.visualization.model.CanvasModel;
@@ -79,7 +80,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
                     final double lastMouseDragX = Math.floor(lastMouseDrag.getX() / xfactor);
                     if (lastMouseClickX >= 0 && lastMouseDragX >= 0) {
                         gc.save();
-                        gc.setFill(CLICK_DRAG_HIGHLIGHT);
+                        gc.setFill(CLICK_DRAG_HIGHLIGHT.get());
                         if (lastMouseClickX < lastMouseDragX) {
                             gc.fillRect(lastMouseClickX, viewBoundingRectangle.getMinY(), lastMouseDragX - lastMouseClickX, COORDINATE_CENTER_LINE + 2);
                         } else {
@@ -186,7 +187,8 @@ public class CoordinateTrackRenderer implements TrackRenderer {
             }
             gc.save();
             gc.scale(1 / xfactor, 1);
-            gc.setFill(Color.BLACK);
+            gc.setFill(Palette.DEFAULT_LABEL_COLOR.get());
+            gc.setStroke(Palette.DEFAULT_LABEL_COLOR.get());
             for (long i = startMajor; i < (viewBoundingRectangle.getMaxX() + 1); i += majorTickInterval) {
                 gc.scale(textScale, textScale);
                 double x = (i - viewBoundingRectangle.getMinX()) * xfactor;
@@ -217,6 +219,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
             if (viewBoundingRectangle.getMinY() + modelHeight < gc.getCanvas().getHeight()) {
                 y -= yOffset;
             }
+            gc.setStroke(Palette.DEFAULT_LABEL_COLOR.get());
             gc.strokeLine(0, y, viewBoundingRectangle.getWidth(), y);
             return;
         }
@@ -224,7 +227,6 @@ public class CoordinateTrackRenderer implements TrackRenderer {
 
     private void drawCoordinateBasePairs(CanvasModel canvasModel) {
         gc.save();
-
         final int baseRectOffset = 30;
         final int BASE_HEIGHT = 13;
         double yOffset = (modelHeight - viewBoundingRectangle.getHeight());
@@ -298,7 +300,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         double y = canvasContext.getBoundingRect().getMinY();
         final double height = canvasContext.getBoundingRect().getHeight();
         gc.clearRect(0, y, canvasContext.getBoundingRect().getWidth(), height);
-        gc.setFill(Color.WHITE);
+        gc.setFill(Palette.DEFAULT_CANVAS_BG.get());
         gc.fillRect(0, y, canvasContext.getBoundingRect().getWidth(), height);
         gc.restore();
     }

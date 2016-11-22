@@ -43,13 +43,13 @@ public class GlyphTest {
         when(view.isIsNegative())
                 .thenReturn(false);
         Rectangle2D slotRect = new Rectangle2D(0, 470, 1000, SLOT_HEIGHT);
-        Optional<java.awt.geom.Rectangle2D.Double> calculateDrawRect = g.calculateDrawRect(view, slotRect);
+        Optional<java.awt.geom.Rectangle2D.Double> calculateDrawRect = g.calculateDrawRect(view, 0);
         assertTrue(calculateDrawRect.isPresent());
         java.awt.geom.Rectangle2D.Double drawRect = calculateDrawRect.get();
         assertEquals(drawRect.width, 50, 0);
         assertEquals(drawRect.height, 10, 0);
         //x-y/2 + slot offset
-        final double centeredMinY = slotRect.getMinY() + (SLOT_HEIGHT - g.getBoundingRect().getHeight()) / 2;
+        final double centeredMinY = 0 + (SLOT_HEIGHT - g.getBoundingRect().getHeight()) / 2;
         assertEquals(drawRect.y, centeredMinY, 0);
     }
 
@@ -66,8 +66,7 @@ public class GlyphTest {
                 .thenReturn(new java.awt.geom.Rectangle2D.Double(viewBoundingRect.getMinX(), viewBoundingRect.getMinY(), viewBoundingRect.getWidth(), viewBoundingRect.getHeight()));
         when(view.isIsNegative())
                 .thenReturn(false);
-        Rectangle2D slotRect = new Rectangle2D(0, 470, 1000, SLOT_HEIGHT);
-        Optional<java.awt.geom.Rectangle2D.Double> calculateDrawRect = g.calculateDrawRect(view, slotRect);
+        Optional<java.awt.geom.Rectangle2D.Double> calculateDrawRect = g.calculateDrawRect(view, 470);
         assertFalse(calculateDrawRect.isPresent());
     }
 
@@ -76,7 +75,6 @@ public class GlyphTest {
         GlyphImpl g = new GlyphImpl();
         g.setBoundingRect(new Rectangle2D(0, 0, 50, 20));
         Rectangle2D viewBoundingRect = new Rectangle2D(0, 0, 1000, 490);
-        Rectangle2D slotRect = new Rectangle2D(0, 470, 1000, SLOT_HEIGHT);
         MockitoAnnotations.initMocks(this);
         View view = mock(View.class);
         when(view.modelCoordRect())
@@ -85,13 +83,13 @@ public class GlyphTest {
                 .thenReturn(new java.awt.geom.Rectangle2D.Double(viewBoundingRect.getMinX(), viewBoundingRect.getMinY(), viewBoundingRect.getWidth(), viewBoundingRect.getHeight()));
         when(view.isIsNegative())
                 .thenReturn(false);
-        Optional<java.awt.geom.Rectangle2D.Double> calculateDrawRect = g.calculateDrawRect(view, slotRect);
+        Optional<java.awt.geom.Rectangle2D.Double> calculateDrawRect = g.calculateDrawRect(view, 470);
         assertTrue(calculateDrawRect.isPresent());
         java.awt.geom.Rectangle2D.Double drawRect = calculateDrawRect.get();
         assertEquals(drawRect.width, 50, 0);
         assertEquals(drawRect.height, 5, 0);
         //x-y/2 + slot offset
-        final double centeredMinY = slotRect.getMinY() + (SLOT_HEIGHT - g.getBoundingRect().getHeight()) / 2;
+        final double centeredMinY = 470 + (SLOT_HEIGHT - g.getBoundingRect().getHeight()) / 2;
         assertEquals(drawRect.y, centeredMinY, 0);
     }
 
@@ -100,7 +98,6 @@ public class GlyphTest {
         GlyphImpl g = new GlyphImpl();
         g.setBoundingRect(new Rectangle2D(0, 0, 50, 20));
         Rectangle2D viewBoundingRect = new Rectangle2D(0, 430, 1000, 500);
-        Rectangle2D slotRect = new Rectangle2D(0, 410, 1000, SLOT_HEIGHT);
         MockitoAnnotations.initMocks(this);
         View view = mock(View.class);
         when(view.modelCoordRect())
@@ -109,7 +106,7 @@ public class GlyphTest {
                 .thenReturn(new java.awt.geom.Rectangle2D.Double(viewBoundingRect.getMinX(), viewBoundingRect.getMinY(), viewBoundingRect.getWidth(), viewBoundingRect.getHeight()));
         when(view.isIsNegative())
                 .thenReturn(false);
-        Optional<java.awt.geom.Rectangle2D.Double> calculateDrawRect = g.calculateDrawRect(view, slotRect);
+        Optional<java.awt.geom.Rectangle2D.Double> calculateDrawRect = g.calculateDrawRect(view, 410);
         assertTrue(calculateDrawRect.isPresent());
         java.awt.geom.Rectangle2D.Double drawRect = calculateDrawRect.get();
         assertEquals(drawRect.width, 50, 0);
@@ -122,7 +119,6 @@ public class GlyphTest {
         GlyphImpl g = new GlyphImpl();
         g.setBoundingRect(new Rectangle2D(0, 0, 50, 20));
         Rectangle2D viewBoundingRect = new Rectangle2D(0, 0, 45, 1000);
-        Rectangle2D slotRect = new Rectangle2D(0, 470, 1000, SLOT_HEIGHT);
         MockitoAnnotations.initMocks(this);
         View view = mock(View.class);
         when(view.modelCoordRect())
@@ -131,13 +127,13 @@ public class GlyphTest {
                 .thenReturn(new java.awt.geom.Rectangle2D.Double(viewBoundingRect.getMinX(), viewBoundingRect.getMinY(), viewBoundingRect.getWidth(), viewBoundingRect.getHeight()));
         when(view.isIsNegative())
                 .thenReturn(false);
-        Optional<java.awt.geom.Rectangle2D.Double> calculateDrawRect = g.calculateDrawRect(view, slotRect);
+        Optional<java.awt.geom.Rectangle2D.Double> calculateDrawRect = g.calculateDrawRect(view, 470);
         assertTrue(calculateDrawRect.isPresent());
         java.awt.geom.Rectangle2D.Double drawRect = calculateDrawRect.get();
         assertEquals(drawRect.width, 45, 0);
         assertEquals(drawRect.x, 0, 0);
         //x-y/2 + slot offset
-        final double centeredMinY = slotRect.getMinY() + (SLOT_HEIGHT - g.getBoundingRect().getHeight()) / 2;
+        final double centeredMinY = 470 + (SLOT_HEIGHT - g.getBoundingRect().getHeight()) / 2;
         assertEquals(drawRect.y, centeredMinY, 0);
     }
 
@@ -154,14 +150,13 @@ public class GlyphTest {
                 .thenReturn(new java.awt.geom.Rectangle2D.Double(viewBoundingRect.getMinX(), viewBoundingRect.getMinY(), viewBoundingRect.getWidth(), viewBoundingRect.getHeight()));
         when(view.isIsNegative())
                 .thenReturn(false);
-        Rectangle2D slotRect = new Rectangle2D(0, 470, 1000, SLOT_HEIGHT);
-        Optional<java.awt.geom.Rectangle2D.Double> calculateDrawRect = g.calculateDrawRect(view, slotRect);
+        Optional<java.awt.geom.Rectangle2D.Double> calculateDrawRect = g.calculateDrawRect(view, 470);
         assertTrue(calculateDrawRect.isPresent());
         java.awt.geom.Rectangle2D.Double drawRect = calculateDrawRect.get();
         assertEquals(drawRect.width, 45, 0);
         assertEquals(drawRect.x, 0, 0);
         //x-y/2 + slot offset
-        final double centeredMinY = slotRect.getMinY() + (SLOT_HEIGHT - g.getBoundingRect().getHeight()) / 2;
+        final double centeredMinY = 470 + (SLOT_HEIGHT - g.getBoundingRect().getHeight()) / 2;
         assertEquals(drawRect.y, centeredMinY, 0);
     }
 
@@ -185,7 +180,7 @@ public class GlyphTest {
             this.boundingRect = boundingRect;
         }
 
-        public void draw(GraphicsContext gc, View view, Rectangle2D slotBoundingViewRect) {
+        public void draw(GraphicsContext gc, View view, double slotMinY) {
         }
 
         @Override

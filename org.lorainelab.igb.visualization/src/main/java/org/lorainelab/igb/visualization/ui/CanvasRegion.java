@@ -47,7 +47,7 @@ public class CanvasRegion extends Region {
     public void clear() {
         final GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.save();
-        gc.setFill(DEFAULT_CANVAS_BG);
+        gc.setFill(DEFAULT_CANVAS_BG.get());
         gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
         gc.restore();
     }

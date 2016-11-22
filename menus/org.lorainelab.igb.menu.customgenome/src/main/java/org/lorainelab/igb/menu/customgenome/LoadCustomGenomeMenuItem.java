@@ -8,7 +8,6 @@ import com.google.common.collect.Lists;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -33,6 +32,7 @@ import org.lorainelab.igb.menu.api.model.WeightedMenuEntry;
 import org.lorainelab.igb.menu.api.model.WeightedMenuItem;
 import org.lorainelab.igb.preferences.SessionPreferences;
 import org.lorainelab.igb.selections.SelectionInfoService;
+import org.lorainelab.igb.synonymservice.ChromosomeSynomymService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tbee.javafx.scene.layout.MigPane;
@@ -62,9 +62,10 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
     private static int CUSTOM_GENOME_COUNTER = 1;
     private SelectionInfoService selectionInfoService;
     private CustomGenomePersistenceManager customGenomePersistenceManager;
+    private ChromosomeSynomymService chromosomeSynomymService;
 
     public LoadCustomGenomeMenuItem() {
-        menuItem = new WeightedMenuItem(1, "Load Custom Genome");
+        menuItem = new WeightedMenuItem(8, "Load Custom Genome");
     }
 
     @Activate
@@ -133,9 +134,8 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
         okBtn = new Button("Ok");
 
         okBtn.setOnAction(event -> {
-
-            boolean[] customGenomeAdded = {false};
-            CompletableFuture.runAsync(() -> {
+            Platform.runLater(() -> {
+                boolean customGenomeAdded = false;
                 try {
                     final String speciesName = speciesTextField.textProperty().get();
                     final String versionName = versionTextField.textProperty().get();
@@ -146,54 +146,48 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
                         final Optional<GenomeVersion> duplicate = isDuplicate(sequenceFileUrl);
 
                         if (!duplicate.isPresent()) {
-                            ReferenceSequenceProvider twoBitProvider = (ReferenceSequenceProvider) new TwoBitParser(sequenceFileUrl);
-                            GenomeVersion customGenome = new GenomeVersion(versionName, speciesName, twoBitProvider, versionName);
+                            ReferenceSequenceProvider twoBitProvider = (ReferenceSequenceProvider) new TwoBitParser(sequenceFileUrl, chromosomeSynomymService);
+                            GenomeVersion customGenome = new GenomeVersion(versionName, speciesName, twoBitProvider, versionName, true);
                             SessionPreferences.setRecentSelectedFilePath(sequenceFileUrl);
                             customGenomePersistenceManager.persistCustomGenome(customGenome);
                             SessionPreferences.setRecentSelectedFilePath(sequenceFileUrl);
-                            customGenomeAdded[0] = genomeVersionRegistry.getRegisteredGenomeVersions().add(customGenome);
+                            customGenomeAdded = genomeVersionRegistry.getRegisteredGenomeVersions().add(customGenome);
                             genomeVersionRegistry.setSelectedGenomeVersion(customGenome);
                         } else {
-                            Platform.runLater(() -> {
-                                ButtonType switchBtn = new ButtonType("Switch");
-                                ButtonType cancelBtn = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
-                                Alert dlg = new Alert(AlertType.CONFIRMATION, "This sequence file is already mapped to the \n\"" + 
-                                        duplicate.get().getName().get() + "\" genome."+
-                                        "\n Choose Switch to load it");
-                                dlg.initModality(stage.getModality());
-                                dlg.initOwner(stage.getOwner());
-                                dlg.setTitle("Cannot add duplicate genome version");
-                                dlg.getButtonTypes().setAll(switchBtn, cancelBtn);
-                                Optional<ButtonType> result = dlg.showAndWait();
-                                if(result.get() == switchBtn){
-                                    genomeVersionRegistry.setSelectedGenomeVersion(duplicate.get());
-                                }
-                            });
+                            ButtonType switchBtn = new ButtonType("Switch");
+                            ButtonType cancelBtn = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
+                            Alert dlg = new Alert(AlertType.CONFIRMATION, "This sequence file is already mapped to the \n\""
+                                    + duplicate.get().name().get() + "\" genome."
+                                    + "\n Choose Switch to load it.");
+                            dlg.initModality(stage.getModality());
+                            dlg.initOwner(stage.getOwner());
+                            dlg.setTitle("Cannot add duplicate genome version");
+                            dlg.getButtonTypes().setAll(switchBtn, cancelBtn);
+                            Optional<ButtonType> result = dlg.showAndWait();
+                            if (result.get() == switchBtn) {
+                                genomeVersionRegistry.setSelectedGenomeVersion(duplicate.get());
+                            }
                         }
                     }
                 } catch (Exception ex) {
                     LOG.error(ex.getMessage(), ex);
                 }
-            }).whenComplete((result, ex) -> {
-                //TODO show error in popup instead of hiding if it occurred
-                Platform.runLater(() -> {
-                    if (customGenomeAdded[0]) {
-                        Alert dlg = new Alert(AlertType.INFORMATION, "Custom Genome is Now available");
-                        dlg.setWidth(600);
-                        dlg.initModality(stage.getModality());
-                        dlg.initOwner(stage.getOwner());
-                        dlg.setTitle("Genome Added Successfully");
-                        dlg.show();
-                        dlg.setOnCloseRequest(closeEvent -> {
-                            stage.hide();
-                        });
-                    } else {
+                if (customGenomeAdded) {
+                    Alert dlg = new Alert(AlertType.INFORMATION, "Custom Genome is Now available");
+                    dlg.setWidth(600);
+                    dlg.initModality(stage.getModality());
+                    dlg.initOwner(stage.getOwner());
+                    dlg.setTitle("Genome Added Successfully");
+                    dlg.show();
+                    dlg.setOnCloseRequest(closeEvent -> {
                         stage.hide();
-                    }
-                });
+                    });
+                } else {
+                    stage.hide();
+                }
             });
-
         });
+
         cancelBtn = new Button("Cancel");
         cancelBtn.setOnAction(event -> {
             stage.hide();
@@ -237,7 +231,6 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
     }
 
     @Override
-
     public Optional<List<WeightedMenuEntry>> getMenuItems() {
         final List<WeightedMenuEntry> menuItems = Lists.newArrayList(menuItem);
         return Optional.of(menuItems);
@@ -261,6 +254,11 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
     @Reference
     public void setSelectionInfoService(SelectionInfoService selectionInfoService) {
         this.selectionInfoService = selectionInfoService;
+    }
+
+    @Reference
+    public void setChromosomeSynomymService(ChromosomeSynomymService chromosomeSynomymService) {
+        this.chromosomeSynomymService = chromosomeSynomymService;
     }
 
     private void addFileExtensionFilters(FileChooser fileChooser) {

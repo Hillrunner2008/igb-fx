@@ -46,6 +46,14 @@
             <groupId>org.lorainelab</groupId>
             <artifactId>org.lorainelab.igb.preferences</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.lorainelab</groupId>
+            <artifactId>org.lorainelab.igb.utils</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.lorainelab</groupId>        
+            <artifactId>org.lorainelab.igb.synonymservice</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

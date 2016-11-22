@@ -7,6 +7,7 @@ import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +40,9 @@ public class IntervalChart {
     }
 
     public List<Coordinate> getDataInRange(Rectangle2D.Double modelCoordRect, double modelCoordinatesPerPixel) {
+        if (x.length == 0) {
+            return Collections.EMPTY_LIST;
+        }
         int startIndex = findStartIndex(modelCoordRect.getMinX());
         int endIndex = findEndIndex(modelCoordRect.getMaxX());
 

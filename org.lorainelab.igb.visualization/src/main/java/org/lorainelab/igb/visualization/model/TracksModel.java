@@ -53,7 +53,8 @@ public class TracksModel {
 
     private void initializeChromosomeSelectionListener() {
         selectionInfoService.getSelectedChromosome().addListener((observable, oldValue, newValue) -> {
-            newValue.ifPresent(newChromosomeSelection -> {
+            if (newValue.isPresent()) {
+                Chromosome newChromosomeSelection = newValue.get();
                 if (selectedChromosome != newChromosomeSelection) {
                     selectionInfoService.getSelectedGenomeVersion().get().ifPresent(gv -> {
                         trackRenderers.clear();
@@ -64,19 +65,24 @@ public class TracksModel {
                         loadDataSets(gv, chromosome);
                     });
                 }
-            });
+            } else {
+                trackRenderers.clear();
+            }
         });
     }
 
     private void initializeGenomeVersionSelectionListener() {
         selectionInfoService.getSelectedGenomeVersion().addListener((observable, oldValue, newValue) -> {
             Platform.runLater(() -> {
-                newValue.ifPresent(genomeVersion -> {
+                if (newValue.isPresent()) {
+                    GenomeVersion genomeVersion = newValue.get();
                     if (selectedGenomeVersion != genomeVersion) {
                         selectedGenomeVersion = genomeVersion;
                         initializeDataSetListener(selectedGenomeVersion);
                     }
-                });
+                } else {
+                    selectedGenomeVersion = null;
+                }
             });
         });
     }

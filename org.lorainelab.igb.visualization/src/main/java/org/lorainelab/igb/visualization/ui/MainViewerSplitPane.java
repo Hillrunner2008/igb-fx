@@ -9,7 +9,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import org.controlsfx.control.action.Action;
 import org.lorainelab.igb.visualization.widget.LabelPane;
 
 /**
@@ -31,15 +30,14 @@ public class MainViewerSplitPane extends SplitPane {
     private OverlayRegion overlayRegion;
 
     public MainViewerSplitPane() {
-            Action action;
         canvasStackPane = new StackPane();
         setDividerPositions(0.25);
         leftSide = new HBox();
         leftSide.setMinWidth(50);
-        leftSide.setMaxWidth(600);
-        SplitPane.setResizableWithParent(leftSide, Boolean.FALSE);
+        leftSide.setMaxWidth(350);
         rightSide = new HBox();
-        rightSide.setMinWidth(350);
+        SplitPane.setResizableWithParent(leftSide, Boolean.FALSE);
+        rightSide.setMinWidth(300);
         rightSideVbox = new VBox();
         getItems().add(leftSide);
         getItems().add(rightSide);

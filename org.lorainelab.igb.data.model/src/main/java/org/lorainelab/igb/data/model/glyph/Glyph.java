@@ -52,13 +52,13 @@ public interface Glyph {
 
     void setGlyphAlignment(GlyphAlignment alignment);
 
-    void draw(GraphicsContext gc, View view, Rectangle2D slotBoundingViewRect);
+    void draw(GraphicsContext gc, View view, double slotMinY);
 
     // aligns glyph within slot and clips to view bounds
-    default Optional<Rectangle.Double> calculateDrawRect(View view, Rectangle2D slotRect) {
+    default Optional<Rectangle.Double> calculateDrawRect(View view, double slotOffset) {
         Rectangle2D viewRect = view.modelCoordRect();
         Rectangle2D boundingRect = getBoundingRect();
-        double alignedMinY = getAlignedMinY(boundingRect, slotRect);
+        double alignedMinY = getAlignedMinY(boundingRect, slotOffset);
         SHARED_RECT.setRect(boundingRect.getMinX(), alignedMinY, boundingRect.getWidth(), boundingRect.getHeight());
         if (view.getMutableCoordRect().intersects(SHARED_RECT)) {
             intersect(view.getMutableCoordRect(), SHARED_RECT, SHARED_RECT);
@@ -68,31 +68,31 @@ public interface Glyph {
         return Optional.empty();
     }
 
-    default double getAlignedMinY(Rectangle2D boundingRect, Rectangle2D slotRect) {
+    default double getAlignedMinY(Rectangle2D boundingRect, double slotOffset) {
         double y;
         switch (getGlyphAlignment()) {
             case BOTTOM:
-                y = slotRect.getMinY() + (SLOT_HEIGHT - boundingRect.getHeight());
+                y = slotOffset + (SLOT_HEIGHT - boundingRect.getHeight());
                 break;
             case BOTTOM_CENTER:
-                double centerPos = slotRect.getMinY() + (SLOT_HEIGHT - boundingRect.getHeight()) / 2;
+                double centerPos = slotOffset + (SLOT_HEIGHT - boundingRect.getHeight()) / 2;
                 y = centerPos + LABEL_OFFSET_PADDED_BOTTOM;
                 break;
             case CENTER:
-                y = slotRect.getMinY() + (SLOT_HEIGHT - boundingRect.getHeight()) / 2;
+                y = slotOffset+ (SLOT_HEIGHT - boundingRect.getHeight()) / 2;
                 break;
             case TOP:
-                y = slotRect.getMinY();
+                y = slotOffset;
                 break;
             case TOP_CENTER:
-                double centerY = slotRect.getMinY() + (SLOT_HEIGHT - boundingRect.getHeight()) / 2;
+                double centerY = slotOffset + (SLOT_HEIGHT - boundingRect.getHeight()) / 2;
                 y = centerY - LABEL_OFFSET_PADDED_BOTTOM;
                 break;
             case CUSTOM:
                 y = boundingRect.getMinY();
                 break;
             default:
-                y = slotRect.getMinY() + (SLOT_HEIGHT - boundingRect.getHeight()) / 2;
+                y = slotOffset + (SLOT_HEIGHT - boundingRect.getHeight()) / 2;
         }
         return y;
     }

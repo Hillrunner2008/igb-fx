@@ -301,6 +301,9 @@ public class BookmarksTab implements TabProvider {
             });
 
             setOnDragDropped((DragEvent event) -> {
+                if (bookmark == null) {
+                    return;
+                }
                 if (draggedBookmark != null) {
                     Bookmark p = bookmark;
                     while ((p = p.getParent()) != null) {
@@ -332,7 +335,7 @@ public class BookmarksTab implements TabProvider {
             });
 
             setOnMouseClicked((MouseEvent event) -> {
-                if (bookmark.isLeaf() && event.getClickCount() > 1) {
+                if (bookmark != null && bookmark.isLeaf() && event.getClickCount() > 1) {
                     bookmarkManager.restoreBookmark(bookmark);
                     event.consume();
                 }

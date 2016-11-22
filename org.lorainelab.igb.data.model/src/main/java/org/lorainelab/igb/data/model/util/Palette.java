@@ -1,5 +1,7 @@
 package org.lorainelab.igb.data.model.util;
 
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.paint.Color;
 
 /**
@@ -8,24 +10,19 @@ import javafx.scene.paint.Color;
  */
 public class Palette {
 
-    public static Color DEFAULT_CANVAS_BG = Color.web("#282828");
-
-    public static Color LOADED_REGION_BG = Color.web("#1E1E1E");
-    public static Color DEFAULT_LINE_FILL = Color.web("#A9B7C6");
-    public static Color DEFAULT_GLYPH_FILL = Color.web("#0084B4");
-    public static Color DEFAULT_LABEL_COLOR = Color.web("#A9B7C6");
-
-    public static Color SELECTION_COLOR = Color.web("#DC322F");
-
-    public static Color GRAPH_GRID_FILL = Color.web("#616060");
-    public static Color GRAPH_FILL = Color.web("#E24D42");
-
-    public static Color CLICK_DRAG_HIGHLIGHT = Color.rgb(33, 150, 243, .3);
-
-    public static Color A_COLOR = Color.rgb(151, 255, 179);
-    public static Color T_COLOR = Color.rgb(102, 211, 255);
-    public static Color G_COLOR = Color.rgb(255, 210, 0);
-    public static Color C_COLOR = Color.rgb(255, 176, 102);
+    public static ObjectProperty<Color> DEFAULT_CANVAS_BG = new SimpleObjectProperty<>(Color.web("#252526"));
+    public static ObjectProperty<Color> LOADED_REGION_BG = new SimpleObjectProperty<>(Color.web("#1E1E1E"));
+    public static ObjectProperty<Color> DEFAULT_LINE_FILL = new SimpleObjectProperty<>(Color.web("#A9B7C6"));
+    public static ObjectProperty<Color> DEFAULT_GLYPH_FILL = new SimpleObjectProperty<>(Color.web("#0084B4"));
+    public static ObjectProperty<Color> DEFAULT_LABEL_COLOR = new SimpleObjectProperty<>(Color.web("#A9B7C6"));
+    public static ObjectProperty<Color> SELECTION_COLOR = new SimpleObjectProperty<>(Color.web("#DC322F"));
+    public static ObjectProperty<Color> GRAPH_GRID_FILL = new SimpleObjectProperty<>(Color.web("#616060"));
+    public static ObjectProperty<Color> GRAPH_FILL = new SimpleObjectProperty<>(Color.web("#E24D42"));
+    public static ObjectProperty<Color> CLICK_DRAG_HIGHLIGHT = new SimpleObjectProperty<>(Color.rgb(33, 150, 243, .3));
+    public static ObjectProperty<Color> A_COLOR = new SimpleObjectProperty<>(Color.rgb(151, 255, 179));
+    public static ObjectProperty<Color> T_COLOR = new SimpleObjectProperty<>(Color.rgb(102, 211, 255));
+    public static ObjectProperty<Color> G_COLOR = new SimpleObjectProperty<>(Color.rgb(255, 210, 0));
+    public static ObjectProperty<Color> C_COLOR = new SimpleObjectProperty<>(Color.rgb(255, 176, 102));
 
     private Palette() {
     }
@@ -34,16 +31,16 @@ public class Palette {
         switch (base) {
             case 'a':
             case 'A':
-                return A_COLOR;
+                return A_COLOR.get();
             case 't':
             case 'T':
-                return T_COLOR;
+                return T_COLOR.get();
             case 'g':
             case 'G':
-                return G_COLOR;
+                return G_COLOR.get();
             case 'c':
             case 'C':
-                return C_COLOR;
+                return C_COLOR.get();
             default:
                 return Color.GRAY;
         }

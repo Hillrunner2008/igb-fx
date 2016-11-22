@@ -1,6 +1,7 @@
 package org.lorainelab.igb.filehandler.bigwig;
 
 import aQute.bnd.annotation.component.Component;
+import aQute.bnd.annotation.component.Reference;
 import cern.colt.list.DoubleArrayList;
 import cern.colt.list.IntArrayList;
 import com.google.common.collect.Lists;
@@ -20,6 +21,7 @@ import org.lorainelab.igb.data.model.filehandler.api.DataType;
 import org.lorainelab.igb.data.model.filehandler.api.FileTypeHandler;
 import org.lorainelab.igb.data.model.glyph.CompositionGlyph;
 import org.lorainelab.igb.data.model.glyph.GraphGlyph;
+import org.lorainelab.igb.synonymservice.ChromosomeSynomymService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +33,7 @@ import org.slf4j.LoggerFactory;
 public class BigWigParser implements FileTypeHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(BigWigParser.class);
+    private ChromosomeSynomymService chromosomeSynomymService;
 
     @Override
     public String getName() {
@@ -44,15 +47,16 @@ public class BigWigParser implements FileTypeHandler {
 
     @Override
     public Set<CompositionGlyph> getRegion(String dataSourceReference, Range<Integer> range, Chromosome chromosome) {
-        String chrId = chromosome.getName();
+        final String chrId = chromosome.getName();
         IntArrayList x = new IntArrayList();
         IntArrayList w = new IntArrayList();
         DoubleArrayList y = new DoubleArrayList();
         try {
             BBFileReader bbReader = new BBFileReader(dataSourceReference);
             BBFileHeader bbFileHdr = bbReader.getBBFileHeader();
+            String internalChrId = bbReader.getChromosomeNames().stream().filter(chrom -> chromosomeSynomymService.getPreferredChromosomeName(chrom).orElse("").equalsIgnoreCase(chrId)).findFirst().orElse(chrId);
             if (bbFileHdr.isBigWig()) {
-                BigWigIterator bigWigIterator = bbReader.getBigWigIterator(chrId, range.lowerEndpoint(), chrId, range.upperEndpoint(), true);
+                BigWigIterator bigWigIterator = bbReader.getBigWigIterator(internalChrId, range.lowerEndpoint(), internalChrId, range.upperEndpoint(), true);
                 try {
                     WigItem wigItem = null;
                     while (bigWigIterator.hasNext()) {
@@ -92,6 +96,11 @@ public class BigWigParser implements FileTypeHandler {
     @Override
     public Set<DataType> getDataTypes() {
         return Sets.newHashSet(DataType.GRAPH);
+    }
+
+    @Reference
+    public void setChromosomeSynomymService(ChromosomeSynomymService chromosomeSynomymService) {
+        this.chromosomeSynomymService = chromosomeSynomymService;
     }
 
 }

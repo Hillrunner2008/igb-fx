@@ -44,9 +44,12 @@ public class SelectionInfoServiceImpl implements SelectionInfoService {
     @Activate
     public void activate() {
         genomeVersionRegistry.getSelectedGenomeVersion().addListener((obs, oldValue, newValue) -> {
-            newValue.ifPresent(genomeVersion -> {
-                selectedChromosomeProperty.bind(genomeVersion.getSelectedChromosomeProperty());
-            });
+            if (newValue.isPresent()) {
+                selectedChromosomeProperty.bind(newValue.get().getSelectedChromosomeProperty());
+            } else {
+                selectedChromosomeProperty.unbind();
+                selectedChromosomeProperty.set(Optional.empty());
+            }
         });
     }
 

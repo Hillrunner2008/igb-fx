@@ -39,6 +39,9 @@ public class LoadDataButton extends Button {
                             Platform.runLater(() -> {
                                 canvasModel.forceRefresh();
                             });
+                        }).exceptionally(ex -> {
+                            LOG.error(ex.getMessage(), ex);
+                            return null;
                         });
                     });
                 });

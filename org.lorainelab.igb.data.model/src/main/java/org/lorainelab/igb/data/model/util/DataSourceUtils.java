@@ -1,32 +1,19 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package org.lorainelab.igb.data.model.util;
 
-import htsjdk.samtools.seekablestream.ISeekableStreamFactory;
-import htsjdk.samtools.seekablestream.SeekableStream;
-import htsjdk.samtools.seekablestream.SeekableStreamFactory;
-import htsjdk.samtools.util.BlockCompressedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.zip.GZIPInputStream;
 
 /**
  *
  * @author dcnorris
  */
-public class DataSourceUtils {
+public interface DataSourceUtils {
 
-    private static ISeekableStreamFactory streamFactory = SeekableStreamFactory.getInstance();
+    InputStream getStreamFor(final String path, boolean forceCache) throws IOException;
 
-    public static InputStream getStreamFor(String path) throws IOException {
-        final SeekableStream stream = streamFactory.getStreamFor(path);
-        if (path.endsWith("gz")) {
-            try {
-                if (BlockCompressedInputStream.isValidFile(stream)) {
-                    return new BlockCompressedInputStream(stream);
-                }
-            } catch (Throwable ex) {
-                return new GZIPInputStream(stream);
-            }
-        }
-        return stream;
-    }
 }

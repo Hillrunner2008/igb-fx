@@ -33,6 +33,7 @@ import static org.lorainelab.igb.data.model.util.TabixUtils.getLineIterator;
 import org.lorainelab.igb.data.model.view.Layer;
 import org.lorainelab.igb.data.model.view.Renderer;
 import org.lorainelab.igb.search.api.SearchService;
+import org.lorainelab.igb.synonymservice.ChromosomeSynomymService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +47,7 @@ public class BedParser implements FileTypeHandler {
     private static final Logger LOG = LoggerFactory.getLogger(BedParser.class);
     private Renderer<BedFeature> renderer;
     private SearchService searchService;
+    private ChromosomeSynomymService chromosomeSynomymService;
 
     public BedParser() {
         renderer = new BedRenderer();//TODO make it possible to swap this for alternative renderers
@@ -216,6 +218,7 @@ public class BedParser implements FileTypeHandler {
                 String line = iterator.next().trim();
                 List<String> fields = Splitter.on("\t").splitToList(line);
                 String annotaionChromId = fields.get(0);
+                annotaionChromId = chromosomeSynomymService.getPreferredChromosomeName(annotaionChromId).orElse(annotaionChromId);
                 if (annotaionChromId.equals(chromosomeId)) {
                     final BedFeature bedFeature = createAnnotation(fields);
                     if (bedFeature.getRange().isConnected(range)) {
@@ -289,6 +292,11 @@ public class BedParser implements FileTypeHandler {
     @Reference
     public void setSearchService(SearchService searchService) {
         this.searchService = searchService;
+    }
+
+    @Reference
+    public void setChromosomeSynomymService(ChromosomeSynomymService chromosomeSynomymService) {
+        this.chromosomeSynomymService = chromosomeSynomymService;
     }
 
 }

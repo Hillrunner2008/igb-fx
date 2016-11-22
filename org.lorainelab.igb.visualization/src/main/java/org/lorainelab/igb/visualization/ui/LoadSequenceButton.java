@@ -33,14 +33,16 @@ public class LoadSequenceButton extends Button {
                 CompletableFuture.supplyAsync(() -> {
                     chr.loadRegion(canvasModel.getCurrentModelCoordinatesInView());
                     return null;
-                }).thenRun(() -> {
+                }).whenComplete((u, t) -> {
+                    if (t != null) {
+                        Throwable ex = (Throwable) t;
+                        LOG.error(ex.getMessage(), ex);
+                    }
                     Platform.runLater(() -> {
                         canvasModel.forceRefresh();
                     });
-                }).exceptionally(ex -> {
-                    LOG.error(ex.getMessage(), ex);
-                    return null;
                 });
+
             });
 
         });
