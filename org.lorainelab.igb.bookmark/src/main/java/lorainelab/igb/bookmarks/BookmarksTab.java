@@ -353,14 +353,16 @@ public class BookmarksTab implements TabProvider {
                 setText(null);
                 setGraphic(null);
             } else {
-                bookmark.getName().addListener(new WeakChangeListener<>(new ChangeListener<String>() {
+                bookmarkNameChangeListener = new ChangeListener<String>() {
                     @Override
                     public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
                         setText(newValue);
                     }
-                }));
+                };
+                bookmark.getName().addListener(new WeakChangeListener<>(bookmarkNameChangeListener));
                 setText(getItem() == null ? "" : getItem().getName().get());
             }
         }
+        private ChangeListener<String> bookmarkNameChangeListener;
     }
 }

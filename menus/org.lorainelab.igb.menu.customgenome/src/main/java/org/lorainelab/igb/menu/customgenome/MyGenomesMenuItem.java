@@ -147,7 +147,7 @@ public class MyGenomesMenuItem implements MenuBarEntryProvider {
     private void initComponents() {
 
         genomeVersionList = FXCollections.observableArrayList();
-        genomeVersionRegistry.getRegisteredGenomeVersions().addListener(new WeakSetChangeListener<>(new SetChangeListener<GenomeVersion>() {
+        registeredGenomeVersionChangeListener = new SetChangeListener<GenomeVersion>() {
             @Override
             public void onChanged(SetChangeListener.Change<? extends GenomeVersion> change) {
                 Platform.runLater(() -> {
@@ -163,7 +163,8 @@ public class MyGenomesMenuItem implements MenuBarEntryProvider {
                     }
                 });
             }
-        }));
+        };
+        genomeVersionRegistry.getRegisteredGenomeVersions().addListener(new WeakSetChangeListener<>(registeredGenomeVersionChangeListener));
 
         genomeVersionList.addAll(genomeVersionRegistry.getRegisteredGenomeVersions().stream().filter(gv -> gv.isCustom()).collect(Collectors.toList()));
         genomesTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
@@ -224,6 +225,7 @@ public class MyGenomesMenuItem implements MenuBarEntryProvider {
 
         initEditStage();
     }
+    private SetChangeListener<GenomeVersion> registeredGenomeVersionChangeListener;
 
     private void initEditStage() {
         //init edit stage
