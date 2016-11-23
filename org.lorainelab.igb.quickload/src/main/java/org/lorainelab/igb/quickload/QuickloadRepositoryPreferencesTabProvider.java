@@ -20,6 +20,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
+import javafx.collections.WeakSetChangeListener;
 import javafx.collections.transformation.SortedList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -133,7 +134,7 @@ public class QuickloadRepositoryPreferencesTabProvider extends Tab implements Pr
     private void initializeRepoTableContent() {
         repoTable.setItems(sortedList);
         sortedList.comparatorProperty().bind(repoTable.comparatorProperty());
-        quickloadSiteManager.getDataProviders().addListener(new SetChangeListener<DataProvider>() {
+        quickloadSiteManager.getDataProviders().addListener(new WeakSetChangeListener<>(new SetChangeListener<DataProvider>() {
             @Override
             public void onChanged(SetChangeListener.Change<? extends DataProvider> change) {
                 Platform.runLater(() -> {
@@ -151,7 +152,7 @@ public class QuickloadRepositoryPreferencesTabProvider extends Tab implements Pr
                     Collections.sort(repoItems, new DataProviderComparator());
                 });
             }
-        });
+        }));
         Platform.runLater(() -> {
             repoItems.addAll(quickloadSiteManager.getDataProviders());
         });

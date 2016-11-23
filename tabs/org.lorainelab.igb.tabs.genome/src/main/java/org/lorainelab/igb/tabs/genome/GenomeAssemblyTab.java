@@ -12,6 +12,7 @@ import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.WeakChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
@@ -101,10 +102,10 @@ public class GenomeAssemblyTab implements TabProvider {
             }
         });
         genomeVersionComboBox.setDisable(true);
-        genomeVersionComboBox.valueProperty().addListener((observable, oldValue, selectedGenomeVersion) -> {
-            LOG.info("genomeVersionComboBox event fired");
+        genomeVersionComboboxChangeListener = (observable, oldValue, selectedGenomeVersion) -> {
             genomeVersionRegistry.setSelectedGenomeVersion(selectedGenomeVersion);
-        });
+        };
+        genomeVersionComboBox.valueProperty().addListener(new WeakChangeListener<>(genomeVersionComboboxChangeListener));
         selectedGenomeVersionChangeListener = (observable, oldValue, selectedGenomeVersion) -> {
             if (selectedGenomeVersion.isPresent()) {
                 loadSelectedGenomeVersion(selectedGenomeVersion.get());
@@ -115,6 +116,7 @@ public class GenomeAssemblyTab implements TabProvider {
         };
         genomeVersionRegistry.getSelectedGenomeVersion().addListener(selectedGenomeVersionChangeListener);
     }
+    private ChangeListener<GenomeVersion> genomeVersionComboboxChangeListener;
     private ChangeListener<Optional<GenomeVersion>> selectedGenomeVersionChangeListener;
 
     private void loadSelectedGenomeVersion(GenomeVersion selectedGenomeVersion) {
@@ -187,7 +189,7 @@ public class GenomeAssemblyTab implements TabProvider {
                 }
             });
         });
-        speciesComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+        speciesComboBoxChangeListener = (observable, oldValue, newValue) -> {
             boolean disableGenomeVersionSelection = newValue == null || newValue.equals(speciesComboBox.getPromptText());
             Platform.runLater(() -> {
                 if (!disableGenomeVersionSelection) {
@@ -200,8 +202,10 @@ public class GenomeAssemblyTab implements TabProvider {
                 }
                 genomeVersionComboBox.setDisable(disableGenomeVersionSelection);
             });
-        });
+        };
+        speciesComboBox.valueProperty().addListener(speciesComboBoxChangeListener);
     }
+    private ChangeListener<String> speciesComboBoxChangeListener;
     private ObservableList<String> speciesComboboxItems;
 
     @Override

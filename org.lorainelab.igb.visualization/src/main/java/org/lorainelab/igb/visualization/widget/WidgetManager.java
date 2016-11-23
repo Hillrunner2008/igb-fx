@@ -12,8 +12,11 @@ import java.util.Optional;
 import java.util.function.Function;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.beans.value.WeakChangeListener;
 import javafx.collections.SetChangeListener;
+import javafx.collections.WeakSetChangeListener;
 import javafx.geometry.Point2D;
 import org.lorainelab.igb.data.model.GenomeVersion;
 import org.lorainelab.igb.selections.SelectionInfoService;
@@ -69,57 +72,87 @@ public class WidgetManager {
             renderWidgets();
             isRefreshing.setValue(Boolean.FALSE);
         });
-        canvasModel.getxFactor().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+        xFactorListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             refreshViewStream.emit("xFactor");
-        });
-        canvasModel.getScrollX().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+        };
+        canvasModel.getxFactor().addListener(new WeakChangeListener<>(xFactorListener));
+        scrollXListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             refreshViewStream.emit("getScrollX");
-        });
-        canvasModel.getModelWidth().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+        };
+        canvasModel.getScrollX().addListener(new WeakChangeListener<>(scrollXListener));
+        modelWidthListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             refreshViewStream.emit("getModelWidth");
-        });
-        canvasModel.getZoomStripeCoordinate().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+        };
+        canvasModel.getModelWidth().addListener(new WeakChangeListener<>(modelWidthListener));
+        zoomStripCoordinateListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             if (newValue.intValue() != -1) {
                 overlayRefreshStream.emit(null);
             }
-        });
-        canvasModel.getyFactor().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+        };
+        canvasModel.getZoomStripeCoordinate().addListener(new WeakChangeListener<>(zoomStripCoordinateListener));
+        yFactorListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             refreshViewStream.emit("getyFactor");
-        });
-        canvasModel.getScrollY().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+        };
+        canvasModel.getyFactor().addListener(new WeakChangeListener<>(yFactorListener));
+        scrollYListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             refreshViewStream.emit("getScrollY");
-        });
-        canvasModel.getVisibleVirtualCoordinatesX().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+        };
+        canvasModel.getScrollY().addListener(new WeakChangeListener<>(scrollYListener));
+        visibleVirtualCoordinatesXListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             refreshViewStream.emit("getVisibleVirtualCoordinatesX");
-        });
-        canvasModel.getvSlider().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+        };
+        canvasModel.getVisibleVirtualCoordinatesX().addListener(new WeakChangeListener<>(visibleVirtualCoordinatesXListener));
+        vSliderChangeListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             refreshViewStream.emit("canvasModel.getvSlider");
-        });
-        canvasModel.getClickDragStartPosition().addListener((ObservableValue<? extends Optional<Point2D>> observable, Optional<Point2D> oldValue, Optional<Point2D> newValue) -> {
+        };
+        canvasModel.getvSlider().addListener(new WeakChangeListener<>(vSliderChangeListener));
+        clickDragStartPositionListener = (ObservableValue<? extends Optional<Point2D>> observable, Optional<Point2D> oldValue, Optional<Point2D> newValue) -> {
             overlayRefreshStream.emit(null);
-        });
-        canvasModel.getLastDragPosition().addListener((ObservableValue<? extends Optional<Point2D>> observable, Optional<Point2D> oldValue, Optional<Point2D> newValue) -> {
+        };
+        canvasModel.getClickDragStartPosition().addListener(new WeakChangeListener<>(clickDragStartPositionListener));
+        lastDragPositionListener = (ObservableValue<? extends Optional<Point2D>> observable, Optional<Point2D> oldValue, Optional<Point2D> newValue) -> {
             overlayRefreshStream.emit(null);
-        });
-        tracksModel.getTrackRenderers().addListener((SetChangeListener.Change<? extends TrackRenderer> change) -> {
+        };
+        canvasModel.getLastDragPosition().addListener(new WeakChangeListener<>(lastDragPositionListener));
+        trackRendererSetChangeListener = (SetChangeListener.Change<? extends TrackRenderer> change) -> {
             refreshViewStream.emit("trackRenderers change");
-        });
-        canvasRegion.widthProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+        };
+        tracksModel.getTrackRenderers().addListener(new WeakSetChangeListener<>(trackRendererSetChangeListener));
+        canvasRegionWidthListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             refreshViewStream.emit("canvasRegion.widthProperty");
-        });
-        canvasRegion.heightProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+        };
+        canvasRegion.widthProperty().addListener(new WeakChangeListener<>(canvasRegionWidthListener));
+        canvasRegionHeightListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             if (!canvasModel.getLabelResizingActive().get()) {
-                refreshViewStream.emit("canvasRegion.heightProperty");
+                refreshViewStream.emit("canvasRegionHeightListener");
             }
-        });
-        selectionInfoService.getSelectedGenomeVersion().addListener((ObservableValue<? extends Optional<GenomeVersion>> observable, Optional<GenomeVersion> oldValue, Optional<GenomeVersion> newValue) -> {
+        };
+        canvasRegion.heightProperty().addListener(new WeakChangeListener<>(canvasRegionHeightListener));
+        selectedGenomeVersionListener = (ObservableValue<? extends Optional<GenomeVersion>> observable, Optional<GenomeVersion> oldValue, Optional<GenomeVersion> newValue) -> {
             refreshViewStream.emit("selectedGenomeVersion change");
-        });
-        canvasModel.isforceRefresh().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+        };
+        selectionInfoService.getSelectedGenomeVersion().addListener(new WeakChangeListener<>(selectedGenomeVersionListener));
+        forceRefreshListener = (ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
             refreshViewStream.emit("forceRefresh");
-        });
+        };
+        canvasModel.isforceRefresh().addListener(new WeakChangeListener<>(forceRefreshListener));
 
     }
+    private ChangeListener<Number> xFactorListener;
+    private ChangeListener<Number> scrollXListener;
+    private ChangeListener<Number> modelWidthListener;
+    private ChangeListener<Number> zoomStripCoordinateListener;
+    private ChangeListener<Number> yFactorListener;
+    private ChangeListener<Number> scrollYListener;
+    private ChangeListener<Number> visibleVirtualCoordinatesXListener;
+    private ChangeListener<Number> vSliderChangeListener;
+    private ChangeListener<Optional<Point2D>> clickDragStartPositionListener;
+    private ChangeListener<Optional<Point2D>> lastDragPositionListener;
+    private SetChangeListener<TrackRenderer> trackRendererSetChangeListener;
+    private ChangeListener<Number> canvasRegionHeightListener;
+    private ChangeListener<Number> canvasRegionWidthListener;
+    private ChangeListener<Optional<GenomeVersion>> selectedGenomeVersionListener;
+    private ChangeListener<Boolean> forceRefreshListener;
 
     @Reference(multiple = true, unbind = "removeWidget", dynamic = true, optional = true)
     public void addWidget(Widget widget) {

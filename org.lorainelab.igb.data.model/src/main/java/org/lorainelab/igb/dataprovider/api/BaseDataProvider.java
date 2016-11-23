@@ -16,6 +16,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.beans.value.WeakChangeListener;
 import static org.lorainelab.igb.dataprovider.api.DataProviderPrefKeys.IS_EDITABLE;
 import static org.lorainelab.igb.dataprovider.api.DataProviderPrefKeys.LOAD_PRIORITY;
 import static org.lorainelab.igb.dataprovider.api.DataProviderPrefKeys.LOGIN;
@@ -228,28 +229,28 @@ public abstract class BaseDataProvider implements DataProvider {
     }
 
     private void setupPropertyListeners() {
-        name.addListener(new ChangeListener<String>() {
+        name.addListener(new WeakChangeListener<>(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
                 preferencesNode.put(PROVIDER_NAME, newValue);
                 flushPrefNode();
             }
-        });
-        url.addListener(new ChangeListener<String>() {
+        }));
+        url.addListener(new WeakChangeListener<>(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
                 preferencesNode.put(PRIMARY_URL, newValue);
                 flushPrefNode();
 
             }
-        });
-        loadPriority.addListener(new ChangeListener<Number>() {
+        }));
+        loadPriority.addListener(new WeakChangeListener<>(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
                 preferencesNode.putInt(LOAD_PRIORITY, newValue.intValue());
                 flushPrefNode();
             }
-        });
+        }));
     }
 
     private void flushPrefNode() {

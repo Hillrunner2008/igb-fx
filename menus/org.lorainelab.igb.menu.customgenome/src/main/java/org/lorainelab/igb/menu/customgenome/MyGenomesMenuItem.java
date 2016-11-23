@@ -19,6 +19,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
+import javafx.collections.WeakSetChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -146,7 +147,7 @@ public class MyGenomesMenuItem implements MenuBarEntryProvider {
     private void initComponents() {
 
         genomeVersionList = FXCollections.observableArrayList();
-        genomeVersionRegistry.getRegisteredGenomeVersions().addListener(new SetChangeListener<GenomeVersion>() {
+        genomeVersionRegistry.getRegisteredGenomeVersions().addListener(new WeakSetChangeListener<>(new SetChangeListener<GenomeVersion>() {
             @Override
             public void onChanged(SetChangeListener.Change<? extends GenomeVersion> change) {
                 Platform.runLater(() -> {
@@ -162,7 +163,7 @@ public class MyGenomesMenuItem implements MenuBarEntryProvider {
                     }
                 });
             }
-        });
+        }));
 
         genomeVersionList.addAll(genomeVersionRegistry.getRegisteredGenomeVersions().stream().filter(gv -> gv.isCustom()).collect(Collectors.toList()));
         genomesTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);

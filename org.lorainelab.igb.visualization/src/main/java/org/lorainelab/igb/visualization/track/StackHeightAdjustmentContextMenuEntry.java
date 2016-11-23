@@ -12,6 +12,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.WeakChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -88,10 +90,11 @@ public class StackHeightAdjustmentContextMenuEntry implements TrackLabelContextM
             StackedGlyphTrack stackedGlyphTrack = (StackedGlyphTrack) track;
             WeightedMenuItem adjustStackHeightMenuItem = new WeightedMenuItem(0);
             adjustStackHeightMenuItem.setText("Set Stack Height...");
-
-            stackHeightEntryField.textProperty().addListener((observable, oldValue, newValue) -> {
+            stackHeightEntryFieldChangeListener = (observable, oldValue, newValue) -> {
                 stackHeightEntryField.setText(CharMatcher.inRange('0', '9').retainFrom(newValue));
-            });
+            };
+
+            stackHeightEntryField.textProperty().addListener(new WeakChangeListener<>(stackHeightEntryFieldChangeListener));
             stackHeightEntryField.setOnKeyPressed((KeyEvent ke) -> {
                 if (ke.getCode().equals(KeyCode.ENTER)) {
                     adjustStackHeightAction(stackedGlyphTrack, refreshAction);
@@ -112,6 +115,7 @@ public class StackHeightAdjustmentContextMenuEntry implements TrackLabelContextM
         }
         return Optional.empty();
     }
+    private ChangeListener<String> stackHeightEntryFieldChangeListener;
 
     private void adjustStackHeightAction(StackedGlyphTrack stackedGlyphTrack, Runnable refreshAction) {
         stage.hide();

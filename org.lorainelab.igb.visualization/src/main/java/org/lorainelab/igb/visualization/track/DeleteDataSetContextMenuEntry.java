@@ -36,10 +36,10 @@ public class DeleteDataSetContextMenuEntry implements TrackLabelContextMenuEntry
 
         deleteMenuItem.setOnAction(evt -> {
             DataSet dataSet = track.getDataSet();
+            dataSet.clearData();
             selectionInfoService.getSelectedGenomeVersion().get().ifPresent(selectedGenomeVersion -> {
                 selectedGenomeVersion.getLoadedDataSets().remove(dataSet);
             });
-
         });
 
         return Optional.ofNullable(Lists.newArrayList(deleteMenuItem));

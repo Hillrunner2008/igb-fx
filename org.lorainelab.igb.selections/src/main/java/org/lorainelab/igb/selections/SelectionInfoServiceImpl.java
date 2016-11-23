@@ -8,6 +8,7 @@ import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Sets;
 import java.util.Optional;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
@@ -54,12 +55,12 @@ public class SelectionInfoServiceImpl implements SelectionInfoService {
     }
 
     @Override
-    public ObjectProperty<Optional<GenomeVersion>> getSelectedGenomeVersion() {
+    public ReadOnlyObjectProperty<Optional<GenomeVersion>> getSelectedGenomeVersion() {
         return genomeVersionRegistry.getSelectedGenomeVersion();
     }
 
     @Override
-    public ObjectProperty<Optional<Chromosome>> getSelectedChromosome() {
+    public ReadOnlyObjectProperty<Optional<Chromosome>> getSelectedChromosome() {
         return selectedChromosomeProperty;
     }
 

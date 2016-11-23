@@ -4,15 +4,19 @@ import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import com.google.common.collect.Sets;
+import java.util.List;
 import java.util.Optional;
 import static java.util.stream.Collectors.toList;
 import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.WeakChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
+import javafx.collections.WeakSetChangeListener;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.DataSet;
 import org.lorainelab.igb.data.model.GenomeVersion;
@@ -52,7 +56,7 @@ public class TracksModel {
     }
 
     private void initializeChromosomeSelectionListener() {
-        selectionInfoService.getSelectedChromosome().addListener((observable, oldValue, newValue) -> {
+        selectedChromosomeChangeListener = (observable, oldValue, newValue) -> {
             if (newValue.isPresent()) {
                 Chromosome newChromosomeSelection = newValue.get();
                 if (selectedChromosome != newChromosomeSelection) {
@@ -68,11 +72,13 @@ public class TracksModel {
             } else {
                 trackRenderers.clear();
             }
-        });
+        };
+        selectionInfoService.getSelectedChromosome().addListener(new WeakChangeListener<>(selectedChromosomeChangeListener));
     }
+    private ChangeListener<Optional<Chromosome>> selectedChromosomeChangeListener;
 
     private void initializeGenomeVersionSelectionListener() {
-        selectionInfoService.getSelectedGenomeVersion().addListener((observable, oldValue, newValue) -> {
+        selectedGenomeVersionListener = (observable, oldValue, newValue) -> {
             Platform.runLater(() -> {
                 if (newValue.isPresent()) {
                     GenomeVersion genomeVersion = newValue.get();
@@ -84,8 +90,10 @@ public class TracksModel {
                     selectedGenomeVersion = null;
                 }
             });
-        });
+        };
+        selectionInfoService.getSelectedGenomeVersion().addListener(new WeakChangeListener<>(selectedGenomeVersionListener));
     }
+    private ChangeListener<Optional<GenomeVersion>> selectedGenomeVersionListener;
 
     public ReadOnlyDoubleProperty getTotalTrackHeight() {
         return totalTrackHeight;
@@ -154,34 +162,41 @@ public class TracksModel {
     }
 
     private void initializeDataSetListener(GenomeVersion gv) {
-        gv.getLoadedDataSets().removeListener(selectedGenomeVersionDataSetListener);
-        gv.getLoadedDataSets().addListener(selectedGenomeVersionDataSetListener);
-    }
-    private SetChangeListener<DataSet> selectedGenomeVersionDataSetListener = (SetChangeListener.Change<? extends DataSet> change) -> {
-        selectionInfoService.getSelectedGenomeVersion().get().ifPresent(gv -> {
-            if (change.wasAdded()) {
-                if (gv.getSelectedChromosomeProperty().get().isPresent()) {
-                    Chromosome selectedChromosome = gv.getSelectedChromosomeProperty().get().get();
-                    final DataSet loadedDataSet = change.getElementAdded();
-                    if (loadedDataSet.isGraphType()) {
-                        final ZoomableTrackRenderer graphTrackRenderer = new ZoomableTrackRenderer(canvasRegion.getCanvas(), loadedDataSet.getGraphTrack(), selectedChromosome);
-                        trackRenderers.add(graphTrackRenderer);
+        if (selectedGenomeVersionWeakDataSetListener == null) {
+            selectedGenomeVersionDataSetListener = (SetChangeListener.Change<? extends DataSet> change) -> {
+                selectionInfoService.getSelectedGenomeVersion().get().ifPresent(selectedGenomeVersion -> {
+                    if (change.wasAdded()) {
+                        if (selectedGenomeVersion.getSelectedChromosomeProperty().get().isPresent()) {
+                            Chromosome selectedChromosome = selectedGenomeVersion.getSelectedChromosomeProperty().get().get();
+                            final DataSet loadedDataSet = change.getElementAdded();
+                            if (loadedDataSet.isGraphType()) {
+                                final ZoomableTrackRenderer graphTrackRenderer = new ZoomableTrackRenderer(canvasRegion.getCanvas(), loadedDataSet.getGraphTrack(), selectedChromosome);
+                                trackRenderers.add(graphTrackRenderer);
+                            } else {
+                                Track positiveStrandTrack = loadedDataSet.getPositiveStrandTrack(selectedChromosome.getName());
+                                Track negativeStrandTrack = change.getElementAdded().getNegativeStrandTrack(selectedGenomeVersion.getSelectedChromosomeProperty().get().get().getName());
+                                final ZoomableTrackRenderer positiveStrandTrackRenderer = new ZoomableTrackRenderer(canvasRegion.getCanvas(), positiveStrandTrack, selectedChromosome);
+                                positiveStrandTrackRenderer.setWeight(getMinWeight());
+                                final ZoomableTrackRenderer negativeStrandTrackRenderer = new ZoomableTrackRenderer(canvasRegion.getCanvas(), negativeStrandTrack, selectedChromosome);
+                                negativeStrandTrackRenderer.setWeight(getMaxWeight());
+                                trackRenderers.add(positiveStrandTrackRenderer);
+                                trackRenderers.add(negativeStrandTrackRenderer);
+                            }
+                        }
                     } else {
-                        Track positiveStrandTrack = loadedDataSet.getPositiveStrandTrack(selectedChromosome.getName());
-                        Track negativeStrandTrack = change.getElementAdded().getNegativeStrandTrack(gv.getSelectedChromosomeProperty().get().get().getName());
-                        final ZoomableTrackRenderer positiveStrandTrackRenderer = new ZoomableTrackRenderer(canvasRegion.getCanvas(), positiveStrandTrack, selectedChromosome);
-                        positiveStrandTrackRenderer.setWeight(getMinWeight());
-                        final ZoomableTrackRenderer negativeStrandTrackRenderer = new ZoomableTrackRenderer(canvasRegion.getCanvas(), negativeStrandTrack, selectedChromosome);
-                        negativeStrandTrackRenderer.setWeight(getMaxWeight());
-                        trackRenderers.add(positiveStrandTrackRenderer);
-                        trackRenderers.add(negativeStrandTrackRenderer);
+                        final DataSet removedDataSet = change.getElementRemoved();
+                        removedDataSet.clearData();
+                        final List<TrackRenderer> collect = trackRenderers.stream().filter(tr -> tr.getTrack().isPresent()).filter(tr -> tr.getTrack().get().getDataSet().equals(removedDataSet)).collect(toList());
+                        collect.stream().forEach(tr -> LOG.info(tr.getTrackLabelText() + " removed"));
+                        trackRenderers.removeAll(collect);
                     }
-                }
-            } else {
-                final DataSet removedDataSet = change.getElementRemoved();
-                trackRenderers.removeAll(trackRenderers.stream().filter(tr -> tr.getTrack().isPresent()).filter(tr -> tr.getTrack().get().getDataSet().equals(removedDataSet)).collect(toList()));
-            }
-        });
-    };
+                });
+            };
+            selectedGenomeVersionWeakDataSetListener = new WeakSetChangeListener<>(selectedGenomeVersionDataSetListener);
+        }
+        gv.getLoadedDataSets().addListener(selectedGenomeVersionWeakDataSetListener);
+    }
+    private WeakSetChangeListener<DataSet> selectedGenomeVersionWeakDataSetListener;
+    private SetChangeListener<DataSet> selectedGenomeVersionDataSetListener;
 
 }
