@@ -12,6 +12,9 @@ import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.net.URL;
 import java.text.Collator;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -141,6 +144,20 @@ public class OpenGenomeMenuItem implements MenuBarEntryProvider {
                     genomeVersionComboBox.getItems().clear();
                     genomeVersionRegistry.getRegisteredGenomeVersions().stream()
                             .filter(genomeVersion -> genomeVersion.getSpeciesName().get().equalsIgnoreCase(newValue))
+                            .sorted(new Comparator<GenomeVersion>() {
+                                SimpleDateFormat dateFormatter = new SimpleDateFormat("MMM_yyyy");
+
+                                @Override
+                                public int compare(GenomeVersion o1, GenomeVersion o2) {
+                                    try {
+                                        String name1 = o1.name().get();
+                                        String name2 = o2.name().get();
+                                        return -1 * dateFormatter.parse(name1, new ParsePosition(name1.length() - 8)).compareTo(dateFormatter.parse(name2, new ParsePosition(name2.length() - 8)));
+                                    } catch (Exception e) {
+                                        return 0;
+                                    }
+                                }
+                            })
                             .forEach(genomeVersion -> genomeVersionComboBox.getItems().add(genomeVersion));
                 } else {
                     genomeVersionRegistry.setSelectedGenomeVersion(null);
@@ -158,7 +175,7 @@ public class OpenGenomeMenuItem implements MenuBarEntryProvider {
 
         vertionChangeListner = (SetChangeListener.Change<? extends GenomeVersion> change) -> {
             Platform.runLater(() -> {
-                if (change.wasAdded()) {
+                if (change.wasAdded() && !change.getElementAdded().isCustom()) {
                     if (!speciesComboboxItems.contains(change.getElementAdded().getSpeciesName())) {
                         final String speciesName = change.getElementAdded().getSpeciesName().get();
                         if (!speciesComboboxItems.contains(speciesName)) {
@@ -168,7 +185,7 @@ public class OpenGenomeMenuItem implements MenuBarEntryProvider {
                         //upde only version combo box
                         genomeVersionComboBox.getItems().add(change.getElementAdded());
                     }
-                } else {
+                } else if (change.wasRemoved() && !change.getElementRemoved().isCustom()) {
                     final GenomeVersion elementRemoved = change.getElementRemoved();
                     genomeVersionComboBox.getItems().add(elementRemoved);
                     long otherGenomeOfSameSpecies = genomeVersionRegistry.getRegisteredGenomeVersions().stream()
@@ -187,10 +204,11 @@ public class OpenGenomeMenuItem implements MenuBarEntryProvider {
 
         genomeVersionRegistry.getRegisteredGenomeVersions().addListener(new WeakSetChangeListener<>(vertionChangeListner));
 
-        genomeVersionData.addAll(genomeVersionRegistry.getRegisteredGenomeVersions());
+        genomeVersionData.addAll(genomeVersionRegistry.getRegisteredGenomeVersions().stream().filter(gv -> !gv.isCustom()).collect(Collectors.toSet()));
         speciesComboboxItems.addAll(
                 genomeVersionRegistry.getRegisteredGenomeVersions()
                         .stream()
+                        .filter(gv -> !gv.isCustom())
                         .map(gv -> gv.getSpeciesName().get())
                         .collect(Collectors.toSet())
         );
