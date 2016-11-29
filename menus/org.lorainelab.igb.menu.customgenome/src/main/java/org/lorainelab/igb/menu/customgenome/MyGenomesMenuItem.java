@@ -105,7 +105,7 @@ public class MyGenomesMenuItem implements MenuBarEntryProvider {
     private ObservableList<GenomeVersion> genomeVersionList;
 
     public MyGenomesMenuItem() {
-        menuItem = new WeightedMenuItem(10, "My Genomes");
+        menuItem = new WeightedMenuItem(15, "My Genomes\u2026");
         final URL resource = MyGenomesMenuItem.class.getClassLoader().getResource("MyGenomes.fxml");
         FXMLLoader fxmlLoader = new FXMLLoader(resource);
         fxmlLoader.setClassLoader(this.getClass().getClassLoader());

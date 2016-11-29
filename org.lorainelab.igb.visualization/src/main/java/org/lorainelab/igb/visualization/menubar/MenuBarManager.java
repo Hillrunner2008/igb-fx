@@ -87,6 +87,7 @@ public class MenuBarManager {
     private void initGenomeMenu() {
         genomeMenu = new Menu("Genome");
         genomeMenu.setMnemonicParsing(true);
+        genomeMenuEntries.put(10, new SeparatorMenuItem());
     }
 
     private void initFileMenu() {
