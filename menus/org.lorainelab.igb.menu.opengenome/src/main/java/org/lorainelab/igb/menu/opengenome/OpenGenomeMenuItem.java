@@ -56,10 +56,10 @@ public class OpenGenomeMenuItem implements MenuBarEntryProvider {
     private Stage stage;
     private GenomeVersionRegistry genomeVersionRegistry;
     private static final Logger LOG = LoggerFactory.getLogger(OpenGenomeMenuItem.class);
-    private ChangeListener<Optional<GenomeVersion>> selectedGenomeVersionChangeListener;
-    private WeakChangeListener<Optional<GenomeVersion>> weakChangeListener;
     private final ObservableList<GenomeVersion> genomeVersionData;
     private ObservableList<String> speciesComboboxItems;
+    private SetChangeListener<GenomeVersion> vertionChangeListner;
+    private ChangeListener<String> speciesChangeListner;
 
     @FXML
     AnchorPane anchorPanne;
@@ -131,8 +131,6 @@ public class OpenGenomeMenuItem implements MenuBarEntryProvider {
         genomeVersionComboBox.setDisable(true);
     }
 
-    ChangeListener<String> speciesChangeListner;
-
     private void initializeSpeciesNameComboBox() {
 
         speciesComboBox.setItems(new SortedList<String>(speciesComboboxItems, Collator.getInstance()));
@@ -168,8 +166,6 @@ public class OpenGenomeMenuItem implements MenuBarEntryProvider {
 
         speciesComboBox.valueProperty().addListener(new WeakChangeListener<>(speciesChangeListner));
     }
-
-    SetChangeListener<GenomeVersion> vertionChangeListner;
 
     private void initComponents() {
 
