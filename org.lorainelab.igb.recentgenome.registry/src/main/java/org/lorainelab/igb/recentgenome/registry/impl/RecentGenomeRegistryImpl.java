@@ -25,10 +25,13 @@ import java.util.prefs.Preferences;
 import static java.util.stream.Collectors.toList;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyListWrapper;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.beans.value.WeakChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
+import javafx.collections.WeakSetChangeListener;
 import org.lorainelab.igb.data.model.GenomeVersion;
 import org.lorainelab.igb.data.model.GenomeVersionRegistry;
 import org.lorainelab.igb.preferences.PreferenceUtils;
@@ -67,19 +70,23 @@ public class RecentGenomeRegistryImpl implements RecentGenomeRegistry {
     public void activate() {
         observableRecentFiles = FXCollections.observableArrayList();
         readOnlyListWrapper = new ReadOnlyListWrapper<>(observableRecentFiles);
-        //Add if non-custom genomes are to be stored in recent
-        selectionInfoService.getSelectedGenomeVersion().addListener((ObservableValue<? extends Optional<GenomeVersion>> observable, Optional<GenomeVersion> oldValue, Optional<GenomeVersion> newValue) -> {
+        selectedGenomeVersionListener = (ObservableValue<? extends Optional<GenomeVersion>> observable, Optional<GenomeVersion> oldValue, Optional<GenomeVersion> newValue) -> {
             newValue.ifPresent(newGenome -> addRecentGenome(newGenome));
-        });
-
-        genomeVersionRegistry.getRegisteredGenomeVersions().addListener((SetChangeListener.Change<? extends GenomeVersion> change) -> {
+        };
+        //Add if non-custom genomes are to be stored in recent
+        selectionInfoService.getSelectedGenomeVersion().addListener(new WeakChangeListener<>(selectedGenomeVersionListener));
+        registeredGenomeVersionListener = (SetChangeListener.Change<? extends GenomeVersion> change) -> {
             Platform.runLater(() -> {
                 initializeFromPreferences();
             });
-        });
+        };
+
+        genomeVersionRegistry.getRegisteredGenomeVersions().addListener(new WeakSetChangeListener<>(registeredGenomeVersionListener));
 
         initializeFromPreferences();
     }
+    private SetChangeListener<GenomeVersion> registeredGenomeVersionListener;
+    private ChangeListener<Optional<GenomeVersion>> selectedGenomeVersionListener;
 
     private void removeRecentFileFromPreferences(GenomeVersion recentFile) {
         Preferences node = getPreferenceNode(recentFile.getReferenceSequenceProvider().getPath());

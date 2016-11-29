@@ -71,8 +71,22 @@
         <dependency>
             <groupId>de.jensd</groupId>
             <artifactId>fontawesomefx</artifactId>
-            <version>8.9</version>
-            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.lorainelab</groupId>
+            <artifactId>org.lorainelab.igb.tabs.api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.lorainelab</groupId>
+            <artifactId>org.lorainelab.igb.selections</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.controlsfx</groupId>
+            <artifactId>controlsfx</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jclarion</groupId>
+            <artifactId>image4j</artifactId>
         </dependency>
     </dependencies>
     <properties>

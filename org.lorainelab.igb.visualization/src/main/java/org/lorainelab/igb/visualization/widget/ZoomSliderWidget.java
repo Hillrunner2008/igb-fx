@@ -2,7 +2,9 @@ package org.lorainelab.igb.visualization.widget;
 
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Reference;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.beans.value.WeakChangeListener;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -223,16 +225,20 @@ public class ZoomSliderWidget extends HBox {
     }
 
     private void setupModelListeners() {
-        canvasModel.getxFactor().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+        xFactorChangeListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             if (xFactor != newValue.doubleValue()) {
                 syncWidgetSlider();
             }
-        });
-        canvasModel.getScrollX().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+        };
+        canvasModel.getxFactor().addListener(new WeakChangeListener<>(xFactorChangeListener));
+        scrollXChangeListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             if (scrollX != newValue.doubleValue()) {
                 syncWidgetSlider();
             }
-        });
+        };
+        canvasModel.getScrollX().addListener(new WeakChangeListener<>(scrollXChangeListener));
     }
+    private ChangeListener<Number> scrollXChangeListener;
+    private ChangeListener<Number> xFactorChangeListener;
 
 }

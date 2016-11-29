@@ -4,6 +4,7 @@ import aQute.bnd.annotation.component.Component;
 import com.google.common.collect.Sets;
 import java.util.Optional;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
@@ -34,7 +35,7 @@ public class GenomeVersionRegistryImpl implements GenomeVersionRegistry {
     }
 
     @Override
-    public ObjectProperty<Optional<GenomeVersion>> getSelectedGenomeVersion() {
+    public ReadOnlyObjectProperty<Optional<GenomeVersion>> getSelectedGenomeVersion() {
         return selectedGenomeVersionProperty;
     }
 

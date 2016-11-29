@@ -13,6 +13,8 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Optional;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.WeakChangeListener;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -20,6 +22,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import net.miginfocom.layout.CC;
+import org.lorainelab.igb.data.model.GenomeVersion;
 import org.lorainelab.igb.datasetloadingservice.api.DataSetLoadingService;
 import org.lorainelab.igb.menu.api.MenuBarEntryProvider;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
@@ -67,9 +70,10 @@ public class LoadUrlMenuItem implements MenuBarEntryProvider {
 
     private void initComponents() {
         menuItem.setDisable(!selectionInfoService.getSelectedGenomeVersion().get().isPresent());
-        selectionInfoService.getSelectedGenomeVersion().addListener((observable, oldValue, newValue) -> {
+        selectedGenomeVersionChangeListener = (observable, oldValue, newValue) -> {
             menuItem.setDisable(!selectionInfoService.getSelectedGenomeVersion().get().isPresent());
-        });
+        };
+        selectionInfoService.getSelectedGenomeVersion().addListener(new WeakChangeListener<>(selectedGenomeVersionChangeListener));
         migPane = new MigPane("fillx", "[]rel[grow]", "[][][]");
         stage = new Stage();
         stage.setMinWidth(300);
@@ -89,6 +93,7 @@ public class LoadUrlMenuItem implements MenuBarEntryProvider {
         cancelBtn.setOnAction(ae -> stage.hide());
 
     }
+    private ChangeListener<Optional<GenomeVersion>> selectedGenomeVersionChangeListener;
 
     private void layoutComponents() {
         migPane.add(messageLabel, "wrap");

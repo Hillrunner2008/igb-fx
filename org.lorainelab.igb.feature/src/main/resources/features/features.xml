@@ -28,6 +28,7 @@
         <bundle>mvn:org.controlsfx/controlsfx/${controlsfx_version}</bundle>
         <bundle>wrap:mvn:com.vividsolutions/jts/${jts_version}</bundle>
         <bundle>wrap:mvn:colt/colt/${colt_version}</bundle>
+        <bundle>wrap:mvn:org.jclarion/image4j/${image4j_version}</bundle>
         <bundle>mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
         <bundle>mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
         <bundle>mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>

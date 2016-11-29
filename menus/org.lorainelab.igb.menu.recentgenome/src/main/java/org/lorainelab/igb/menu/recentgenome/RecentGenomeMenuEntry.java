@@ -12,8 +12,11 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Optional;
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.WeakInvalidationListener;
 import javafx.collections.ListChangeListener;
+import javafx.collections.WeakListChangeListener;
 import javafx.scene.control.MenuItem;
 import org.lorainelab.igb.data.model.GenomeVersion;
 import org.lorainelab.igb.data.model.GenomeVersionRegistry;
@@ -48,9 +51,9 @@ public class RecentGenomeMenuEntry implements MenuBarEntryProvider {
     @Activate
     public void activate() {
         buildRecentFileMenu();
-        recentGenomeRegistry.getRecentGenomes().addListener((ListChangeListener.Change<? extends GenomeVersion> c) -> {
+        recentGenomeRegistry.getRecentGenomes().addListener(new WeakListChangeListener<>((ListChangeListener.Change<? extends GenomeVersion> c) -> {
             buildRecentFileMenu();
-        });
+        }));
 
         clearMenuItem.setOnAction(action -> {
             recentGenomeRegistry.clearRecentGenomes();
@@ -77,9 +80,10 @@ public class RecentGenomeMenuEntry implements MenuBarEntryProvider {
     private Optional<MenuItem> createRecentFileMenuItem(GenomeVersion recentGenome) {
         String fileName = recentGenome.getReferenceSequenceProvider().getPath();
         final MenuItem menuItem = new MenuItem(recentGenome.name().get());
-        recentGenome.name().addListener((Observable observable) -> {
+        recentGenomeNameInvalidationListener = (Observable observable) -> {
             Platform.runLater(() -> menuItem.setText(recentGenome.name().get()));
-        });
+        };
+        recentGenome.name().addListener(new WeakInvalidationListener(recentGenomeNameInvalidationListener));
         if (genomeVersionRegistry.getRegisteredGenomeVersions().contains(recentGenome)) {
             menuItem.setOnAction(action -> {
                 //load genome
@@ -92,6 +96,7 @@ public class RecentGenomeMenuEntry implements MenuBarEntryProvider {
         }
         return Optional.of(menuItem);
     }
+    private InvalidationListener recentGenomeNameInvalidationListener;
 
     @Override
     public Optional<List<WeightedMenuEntry>> getMenuItems() {

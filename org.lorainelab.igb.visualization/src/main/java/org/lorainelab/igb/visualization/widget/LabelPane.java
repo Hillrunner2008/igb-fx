@@ -11,6 +11,7 @@ import java.util.List;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.collections.SetChangeListener;
+import javafx.collections.WeakSetChangeListener;
 import javafx.geometry.Orientation;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
@@ -93,11 +94,13 @@ public class LabelPane extends ScrollPane {
     @Activate
     public void activate() {
         refreshLabelPaneContent();
-        tracksModel.getTrackRenderers().addListener((SetChangeListener.Change<? extends TrackRenderer> change) -> {
+        trackRenderersChangeListener = (SetChangeListener.Change<? extends TrackRenderer> change) -> {
             initializeScrollBarBinding();
             refreshLabelPaneContent();
-        });
+        };
+        tracksModel.getTrackRenderers().addListener(new WeakSetChangeListener<>(trackRenderersChangeListener));
     }
+    private SetChangeListener<TrackRenderer> trackRenderersChangeListener;
 
     public void updatedLabelBounds(CanvasModel canvasModel) {
         tracksModel.getTrackRenderers().forEach(tr -> tr.getTrackLabel().refreshSize(labelContainer, canvasModel.getyFactor().get()));
