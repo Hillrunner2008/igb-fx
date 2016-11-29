@@ -111,7 +111,7 @@ public class OpenGenomeMenuItem implements MenuBarEntryProvider {
     }
 
     private void initializeGenomeVersionComboBox() {
-        genomeVersionData.addAll(genomeVersionRegistry.getRegisteredGenomeVersions());
+
         genomeVersionComboBox.setItems(genomeVersionData);
         genomeVersionComboBox.setConverter(new StringConverter<GenomeVersion>() {
             @Override
@@ -128,14 +128,26 @@ public class OpenGenomeMenuItem implements MenuBarEntryProvider {
     }
 
     private void initializeSpeciesNameComboBox() {
-        speciesComboboxItems.clear();
-        speciesComboboxItems.addAll(
-                genomeVersionRegistry.getRegisteredGenomeVersions()
-                        .stream()
-                        .map(gv -> gv.getSpeciesName().get())
-                        .collect(Collectors.toSet())
-        );
+
         speciesComboBox.setItems(new SortedList<String>(speciesComboboxItems, Collator.getInstance()));
+
+        speciesComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+            Platform.runLater(() -> {
+                boolean disableGenomeVersionSelection = newValue == null || newValue.equals(speciesComboBox.getPromptText());
+                if (!disableGenomeVersionSelection) {
+                    genomeVersionComboBox.getItems().clear();
+                    genomeVersionRegistry.getRegisteredGenomeVersions().stream()
+                            .filter(genomeVersion -> genomeVersion.getSpeciesName().get().equalsIgnoreCase(newValue))
+                            .forEach(genomeVersion -> genomeVersionComboBox.getItems().add(genomeVersion));
+                } else {
+                    genomeVersionRegistry.setSelectedGenomeVersion(null);
+                }
+                genomeVersionComboBox.setDisable(disableGenomeVersionSelection);
+            });
+        });
+    }
+
+    private void initComponents() {
 
         genomeVersionRegistry.getRegisteredGenomeVersions().addListener((SetChangeListener.Change<? extends GenomeVersion> change) -> {
             Platform.runLater(() -> {
@@ -166,23 +178,13 @@ public class OpenGenomeMenuItem implements MenuBarEntryProvider {
             });
         });
 
-        speciesComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
-            Platform.runLater(() -> {
-                boolean disableGenomeVersionSelection = newValue == null || newValue.equals(speciesComboBox.getPromptText());
-                if (!disableGenomeVersionSelection) {
-                    genomeVersionComboBox.getItems().clear();
-                    genomeVersionRegistry.getRegisteredGenomeVersions().stream()
-                            .filter(genomeVersion -> genomeVersion.getSpeciesName().get().equalsIgnoreCase(newValue))
-                            .forEach(genomeVersion -> genomeVersionComboBox.getItems().add(genomeVersion));
-                } else {
-                    genomeVersionRegistry.setSelectedGenomeVersion(null);
-                }
-                genomeVersionComboBox.setDisable(disableGenomeVersionSelection);
-            });
-        });
-    }
-
-    private void initComponents() {
+        genomeVersionData.addAll(genomeVersionRegistry.getRegisteredGenomeVersions());
+        speciesComboboxItems.addAll(
+                genomeVersionRegistry.getRegisteredGenomeVersions()
+                        .stream()
+                        .map(gv -> gv.getSpeciesName().get())
+                        .collect(Collectors.toSet())
+        );
 
         openGenomeButton.setOnAction(ae -> {
             Platform.runLater(() -> {
