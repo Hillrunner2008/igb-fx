@@ -78,19 +78,17 @@ public class OpenGenomeMenuItem implements MenuBarEntryProvider {
         runAndWait(() -> {
             try {
                 fxmlLoader.load();
-                initComponents();
-
             } catch (IOException exception) {
                 throw new RuntimeException(exception);
             }
         });
+        menuItem = new WeightedMenuItem(1, "Open Genome\u2026");
     }
 
     @Activate
     public void activate() {
-        menuItem = new WeightedMenuItem(1, "Open Genome\u2026");
-        menuItem.setDisable(false);
         Platform.runLater(() -> {
+            initComponents();
             initializeSpeciesNameComboBox();
             initializeGenomeVersionComboBox();
         });
@@ -169,8 +167,8 @@ public class OpenGenomeMenuItem implements MenuBarEntryProvider {
         });
 
         speciesComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
-            boolean disableGenomeVersionSelection = newValue == null || newValue.equals(speciesComboBox.getPromptText());
             Platform.runLater(() -> {
+                boolean disableGenomeVersionSelection = newValue == null || newValue.equals(speciesComboBox.getPromptText());
                 if (!disableGenomeVersionSelection) {
                     genomeVersionComboBox.getItems().clear();
                     genomeVersionRegistry.getRegisteredGenomeVersions().stream()
@@ -187,13 +185,13 @@ public class OpenGenomeMenuItem implements MenuBarEntryProvider {
     private void initComponents() {
 
         openGenomeButton.setOnAction(ae -> {
-            GenomeVersion gv = genomeVersionComboBox.getSelectionModel().getSelectedItem();
-            if (gv != null) {
-                Platform.runLater(() -> {
+            Platform.runLater(() -> {
+                GenomeVersion gv = genomeVersionComboBox.getSelectionModel().getSelectedItem();
+                if (gv != null) {
                     genomeVersionRegistry.setSelectedGenomeVersion(gv);
                     stage.hide();
-                });
-            }
+                }
+            });
         });
 
         cancelButton.setOnAction(ae -> {
