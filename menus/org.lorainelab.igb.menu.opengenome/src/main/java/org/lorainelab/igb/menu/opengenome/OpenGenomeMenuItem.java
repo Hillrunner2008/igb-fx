@@ -22,6 +22,7 @@ import javafx.beans.value.WeakChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
+import javafx.collections.WeakSetChangeListener;
 import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -127,11 +128,13 @@ public class OpenGenomeMenuItem implements MenuBarEntryProvider {
         genomeVersionComboBox.setDisable(true);
     }
 
+    ChangeListener<String> speciesChangeListner;
+
     private void initializeSpeciesNameComboBox() {
 
         speciesComboBox.setItems(new SortedList<String>(speciesComboboxItems, Collator.getInstance()));
 
-        speciesComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+        speciesChangeListner = (observable, oldValue, newValue) -> {
             Platform.runLater(() -> {
                 boolean disableGenomeVersionSelection = newValue == null || newValue.equals(speciesComboBox.getPromptText());
                 if (!disableGenomeVersionSelection) {
@@ -144,12 +147,16 @@ public class OpenGenomeMenuItem implements MenuBarEntryProvider {
                 }
                 genomeVersionComboBox.setDisable(disableGenomeVersionSelection);
             });
-        });
+        };
+
+        speciesComboBox.valueProperty().addListener(new WeakChangeListener<>(speciesChangeListner));
     }
+
+    SetChangeListener<GenomeVersion> vertionChangeListner;
 
     private void initComponents() {
 
-        genomeVersionRegistry.getRegisteredGenomeVersions().addListener((SetChangeListener.Change<? extends GenomeVersion> change) -> {
+        vertionChangeListner = (SetChangeListener.Change<? extends GenomeVersion> change) -> {
             Platform.runLater(() -> {
                 if (change.wasAdded()) {
                     if (!speciesComboboxItems.contains(change.getElementAdded().getSpeciesName())) {
@@ -176,7 +183,9 @@ public class OpenGenomeMenuItem implements MenuBarEntryProvider {
 
                 }
             });
-        });
+        };
+
+        genomeVersionRegistry.getRegisteredGenomeVersions().addListener(new WeakSetChangeListener<>(vertionChangeListner));
 
         genomeVersionData.addAll(genomeVersionRegistry.getRegisteredGenomeVersions());
         speciesComboboxItems.addAll(
