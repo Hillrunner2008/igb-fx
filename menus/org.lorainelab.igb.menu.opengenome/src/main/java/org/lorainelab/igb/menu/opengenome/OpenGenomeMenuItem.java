@@ -32,8 +32,11 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 import javafx.util.StringConverter;
 import org.lorainelab.igb.data.model.GenomeVersion;
 import org.lorainelab.igb.data.model.GenomeVersionRegistry;
@@ -41,6 +44,7 @@ import org.lorainelab.igb.menu.api.MenuBarEntryProvider;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
 import org.lorainelab.igb.menu.api.model.WeightedMenuEntry;
 import org.lorainelab.igb.menu.api.model.WeightedMenuItem;
+import org.lorainelab.igb.synonymservice.SpeciesSynomymService;
 import static org.lorainelab.igb.utils.FXUtilities.runAndWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,6 +64,7 @@ public class OpenGenomeMenuItem implements MenuBarEntryProvider {
     private ObservableList<String> speciesComboboxItems;
     private SetChangeListener<GenomeVersion> vertionChangeListner;
     private ChangeListener<String> speciesChangeListner;
+    private SpeciesSynomymService speciesSynomymService;
 
     @FXML
     AnchorPane anchorPanne;
@@ -114,21 +119,50 @@ public class OpenGenomeMenuItem implements MenuBarEntryProvider {
         return ParentMenu.GENOME;
     }
 
+    //speciesSynomymService.getPreferredSpeciesName(item.getSpeciesName().get()).ifPresent(syn -> setTooltip(new Tooltip(syn)));
     private void initializeGenomeVersionComboBox() {
 
-        genomeVersionComboBox.setItems(genomeVersionData);
-        genomeVersionComboBox.setConverter(new StringConverter<GenomeVersion>() {
+        genomeVersionComboBox.setCellFactory(new Callback<ListView<GenomeVersion>, ListCell<GenomeVersion>>() {
             @Override
-            public String toString(GenomeVersion genomeVersion) {
+            public ListCell<GenomeVersion> call(ListView<GenomeVersion> param) {
+                final ListCell<GenomeVersion> cell = new ListCell<GenomeVersion>() {
+                    {
+                        super.setPrefWidth(100);
+                    }
+
+                    @Override
+                    public void updateItem(GenomeVersion item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (item != null) {
+                            setText(item.name().get());
+//                            textProperty().bindBidirectional(item.name());
+                        } else {
+                            setText(null);
+                        }
+                    }
+                };
+                return cell;
+            }
+        });
+        genomeVersionComboBox.setItems(genomeVersionData);
+
+        genomeVersionComboBox.setConverter(
+                new StringConverter<GenomeVersion>() {
+            @Override
+            public String toString(GenomeVersion genomeVersion
+            ) {
                 return genomeVersion.name().get();
             }
 
             @Override
-            public GenomeVersion fromString(String genomeVersionString) {
+            public GenomeVersion fromString(String genomeVersionString
+            ) {
                 return genomeVersionComboBox.getItems().filtered(gv -> gv.name().equals(genomeVersionString)).get(0);
             }
-        });
-        genomeVersionComboBox.setDisable(true);
+        }
+        );
+        genomeVersionComboBox.setDisable(
+                true);
     }
 
     private void initializeSpeciesNameComboBox() {
@@ -234,5 +268,10 @@ public class OpenGenomeMenuItem implements MenuBarEntryProvider {
     @Reference
     public void setGenomeVersionRegistry(GenomeVersionRegistry genomeVersionRegistry) {
         this.genomeVersionRegistry = genomeVersionRegistry;
+    }
+
+    @Reference
+    public void setSpeciesSynomymService(SpeciesSynomymService speciesSynomymService) {
+        this.speciesSynomymService = speciesSynomymService;
     }
 }
