@@ -77,7 +77,7 @@ public class OpenGenomeMenuItem implements MenuBarEntryProvider {
         FXMLLoader fxmlLoader = new FXMLLoader(resource);
         fxmlLoader.setClassLoader(this.getClass().getClassLoader());
         fxmlLoader.setController(this);
-        genomeVersionData = FXCollections.observableArrayList();//(GenomeVersion gv) -> new Observable[]{gv.name()});
+        genomeVersionData = FXCollections.observableArrayList();
         speciesComboboxItems = FXCollections.observableArrayList();
         runAndWait(() -> {
             try {
