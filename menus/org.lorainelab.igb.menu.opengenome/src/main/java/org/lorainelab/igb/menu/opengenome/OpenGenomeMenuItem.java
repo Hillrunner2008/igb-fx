@@ -201,9 +201,7 @@ public class OpenGenomeMenuItem implements MenuBarEntryProvider {
                 if (change.wasAdded() && !change.getElementAdded().isCustom()) {
                     if (!speciesComboboxItems.contains(change.getElementAdded().getSpeciesName())) {
                         final String speciesName = change.getElementAdded().getSpeciesName().get();
-                        if (!speciesComboboxItems.contains(speciesName)) {
-                            speciesComboboxItems.add(speciesName);
-                        }
+                        speciesComboboxItems.add(speciesName);
                     } else {
                         //update only version combo box
                         genomeVersionComboBox.getItems().add(change.getElementAdded());
