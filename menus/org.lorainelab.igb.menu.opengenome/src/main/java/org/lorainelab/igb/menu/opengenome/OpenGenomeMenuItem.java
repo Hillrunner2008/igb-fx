@@ -149,7 +149,7 @@ public class OpenGenomeMenuItem implements MenuBarEntryProvider {
                         super.updateItem(item, empty);
                         if (item != null) {
                             setText(item);
-                            speciesSynomymService.getPreferredSpeciesName(item).ifPresent(syn -> setTooltip(new Tooltip(syn)));
+                            speciesSynomymService.getCommonName(item).ifPresent(syn -> setTooltip(new Tooltip(syn)));
                         } else {
                             setText("");
                             setTooltip(null);
