@@ -199,7 +199,7 @@ public class OpenGenomeMenuItem implements MenuBarEntryProvider {
         versionChangeListner = (SetChangeListener.Change<? extends GenomeVersion> change) -> {
             Platform.runLater(() -> {
                 if (change.wasAdded() && !change.getElementAdded().isCustom()) {
-                    if (!speciesComboboxItems.contains(change.getElementAdded().getSpeciesName())) {
+                    if (!speciesComboboxItems.contains(change.getElementAdded().getSpeciesName().get())) {
                         final String speciesName = change.getElementAdded().getSpeciesName().get();
                         speciesComboboxItems.add(speciesName);
                     } else {
