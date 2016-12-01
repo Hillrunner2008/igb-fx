@@ -42,6 +42,7 @@ public class RecentGenomeMenuEntry implements MenuBarEntryProvider {
     private final MenuItem clearMenuItem;
     private SelectionInfoService selectionInfoService;
     private GenomeVersionRegistry genomeVersionRegistry;
+    private ListChangeListener<GenomeVersion> recentGenomeChangeListener;
 
     public RecentGenomeMenuEntry() {
         recentGenomeMenu = new WeightedMenu(RECENT_FILE_MENU_ENTRY_WEIGHT, "Open Recent Genome");
@@ -51,9 +52,10 @@ public class RecentGenomeMenuEntry implements MenuBarEntryProvider {
     @Activate
     public void activate() {
         buildRecentFileMenu();
-        recentGenomeRegistry.getRecentGenomes().addListener(new WeakListChangeListener<>((ListChangeListener.Change<? extends GenomeVersion> c) -> {
+        recentGenomeChangeListener = (ListChangeListener.Change<? extends GenomeVersion> c) -> {
             buildRecentFileMenu();
-        }));
+        };
+        recentGenomeRegistry.getRecentGenomes().addListener(new WeakListChangeListener<>(recentGenomeChangeListener));
 
         clearMenuItem.setOnAction(action -> {
             recentGenomeRegistry.clearRecentGenomes();

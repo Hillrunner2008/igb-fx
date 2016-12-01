@@ -18,6 +18,7 @@ import javafx.beans.value.WeakChangeListener;
 import javafx.collections.SetChangeListener;
 import javafx.collections.WeakSetChangeListener;
 import javafx.geometry.Point2D;
+import javafx.geometry.Rectangle2D;
 import org.lorainelab.igb.data.model.GenomeVersion;
 import org.lorainelab.igb.selections.SelectionInfoService;
 import org.lorainelab.igb.visualization.model.CanvasModel;
@@ -135,9 +136,15 @@ public class WidgetManager {
         forceRefreshListener = (ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
             refreshViewStream.emit("forceRefresh");
         };
+        selectionRectangleChangeListener = (ObservableValue<? extends Optional<Rectangle2D>> observable, Optional<Rectangle2D> oldValue, Optional<Rectangle2D> newValue) -> {
+           refreshViewStream.emit("selectionRectangleChangeListener");
+        };
+        canvasModel.getSelectionRectangle().addListener(new WeakChangeListener<>(selectionRectangleChangeListener));
+
         canvasModel.isforceRefresh().addListener(new WeakChangeListener<>(forceRefreshListener));
 
     }
+    private ChangeListener<Optional<Rectangle2D>> selectionRectangleChangeListener;
     private ChangeListener<Number> xFactorListener;
     private ChangeListener<Number> scrollXListener;
     private ChangeListener<Number> modelWidthListener;
