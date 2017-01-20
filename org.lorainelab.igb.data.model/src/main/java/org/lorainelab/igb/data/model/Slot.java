@@ -61,12 +61,13 @@ public class Slot {
                 if (!startIndexGlyphRange.isConnected(queryRange)) {
                     glyphsInRange.remove(0);
                 }
-                if (glyphsInRange.size() > 1) {
-                    Range<Double> endIndexGlyphRange = Range.closed(glyphsInRange.get(glyphsInRange.size()).getBoundingRect().getMinX(), glyphsInRange.get(0).getBoundingRect().getMaxX());
-                    if (!endIndexGlyphRange.isConnected(queryRange)) {
-                        glyphsInRange.remove(glyphsInRange.size());
-                    }
-                }
+                //What was reason for below code? throws out of bound exception
+//                if (glyphsInRange.size() > 1) {
+//                    Range<Double> endIndexGlyphRange = Range.closed(glyphsInRange.get(glyphsInRange.size()).getBoundingRect().getMinX(), glyphsInRange.get(0).getBoundingRect().getMaxX());
+//                    if (!endIndexGlyphRange.isConnected(queryRange)) {
+//                        glyphsInRange.remove(glyphsInRange.size());
+//                    }
+//                }
             }
         }
         return glyphsInRange;
