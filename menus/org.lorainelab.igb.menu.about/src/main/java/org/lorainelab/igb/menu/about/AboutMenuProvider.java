@@ -90,8 +90,8 @@ public final class AboutMenuProvider implements MenuBarEntryProvider {
     }
 
     private void setDescriptions() {
-        descriptionText.setText("IGB (pronouned ig-bee) is a fast, flexible, desktop genome browser first developed at [" + AFFYMETRIX_LINK.getValue() + "] "
-                + "for tiling arrays. IGB is now an open source software supported by grants and donations. "
+        descriptionText.setText("Integrated Genome Browser is a fast, flexible, desktop genome browser first developed at [" + AFFYMETRIX_LINK.getValue() + "] "
+                + "for tiling arrays. IGB is now open source software supported by grants and donations. "
                 + "To find out more, visit [" + BIOVIZ_LINK.getValue() + "].\n\n"
                 + "If you use IGB in your research, please cite: Freese NH, Norris DC, Loraine AE. [" + CITATION_LINK.getValue() + "] "
                 + "Bioinformatics.Epub:2016, March 16;1-7. 10.1093/bioinformatics/btw069.");

@@ -34,7 +34,7 @@ public class IgbFx {
                 Scene scene = new Scene(root);
                 stage.setMinWidth(800);
                 stage.setMinHeight(400);
-                root.getStyleClass().add("theme-dark");
+//                root.getStyleClass().add("theme-dark");
                 scene.getStylesheets().add(bc.getBundle().getEntry("styles/dark-theme.css").toExternalForm());
                 //For runtime hot reloading this is left in place commented out
 //            try {
