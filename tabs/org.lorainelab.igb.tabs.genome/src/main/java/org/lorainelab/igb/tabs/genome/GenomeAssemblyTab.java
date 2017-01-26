@@ -39,10 +39,6 @@ public class GenomeAssemblyTab implements TabProvider {
     private final Tab genomeAssemblyTab;
     @FXML
     private AnchorPane tabContent;
-//    @FXML
-//    private ComboBox<String> speciesComboBox;
-//    @FXML
-//    private ComboBox<GenomeVersion> genomeVersionComboBox;
     @FXML
     private TableView<Chromosome> sequenceInfoTable;
     @FXML
