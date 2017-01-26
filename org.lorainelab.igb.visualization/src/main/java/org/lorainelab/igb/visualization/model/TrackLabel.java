@@ -18,6 +18,7 @@ import javafx.beans.value.WeakChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Background;
@@ -42,10 +43,10 @@ import org.slf4j.LoggerFactory;
  * @author dcnorris
  */
 public class TrackLabel {
-
+    
     private static final Logger LOG = LoggerFactory.getLogger(TrackLabel.class);
-    @FXML
-    private VBox leftSideColorIndicator;
+//    @FXML
+//    private VBox leftSideColorIndicator;
     @FXML
     private Label trackLabel;
     @FXML
@@ -60,13 +61,13 @@ public class TrackLabel {
     private VBox lockIconContainer;
     @FXML
     private BorderPane resizeHandleContainer;
-
+    
     private final TrackRenderer trackRenderer;
     private String trackLabelText;
     private BooleanProperty isHeightLocked;
     private FontAwesomeIconView lockIcon;
-
-    public TrackLabel(TrackRenderer trackRenderer, String trackLabelText, BooleanProperty isHeightLocked) {
+    
+    public TrackLabel(TrackRenderer trackRenderer, String trackLabelText, BooleanProperty isHeightLocked, boolean isNegative) {
         checkNotNull(trackRenderer);
         checkNotNull(trackLabelText);
         checkNotNull(isHeightLocked);
@@ -83,18 +84,18 @@ public class TrackLabel {
                 trackLabel.textFillProperty().bind(Palette.DEFAULT_LABEL_COLOR);
                 root.setBackground(TRACK_LABEL_BG.get());
                 root.setStyle("-fx-border-color:" + toHex(DEFAULT_LABEL_COLOR.get()) + "; -fx-border-width: 0 0 1 0;");
-                leftSideColorIndicator.setStyle("-fx-background-color:" + toHex(DEFAULT_GLYPH_FILL.get()));
+//                leftSideColorIndicator.setStyle("-fx-background-color:" + toHex(DEFAULT_GLYPH_FILL.get()));
                 trackLabelBackgroundChangeListener = (ObservableValue<? extends Background> observable, Background oldValue, Background updatedBg) -> {
                     root.setBackground(updatedBg);
                     root.setStyle("-fx-border-color:" + toHex(DEFAULT_LABEL_COLOR.get()) + "; -fx-border-width: 0 0 1 0;");
-                    leftSideColorIndicator.setStyle("-fx-background-color:" + toHex(DEFAULT_GLYPH_FILL.get()));
+//                    leftSideColorIndicator.setStyle("-fx-background-color:" + toHex(DEFAULT_GLYPH_FILL.get()));
                 };
                 TRACK_LABEL_BG.addListener(new WeakChangeListener<>(trackLabelBackgroundChangeListener));
                 trackLabelBackgroundInvalidationListener = new InvalidationListener() {
                     @Override
                     public void invalidated(Observable observable) {
                         root.setStyle("-fx-border-color:" + toHex(DEFAULT_LABEL_COLOR.get()) + "; -fx-border-width: 0 0 1 0;");
-                        leftSideColorIndicator.setStyle("-fx-background-color:" + toHex(DEFAULT_GLYPH_FILL.get()));
+//                        leftSideColorIndicator.setStyle("-fx-background-color:" + toHex(DEFAULT_GLYPH_FILL.get()));
                     }
                 };
                 TRACK_LABEL_BG.addListener(new WeakInvalidationListener(trackLabelBackgroundInvalidationListener));
@@ -105,8 +106,12 @@ public class TrackLabel {
                 if (trackRenderer.hideLockToggle().get()) {
                     lockIconContainer.getChildren().remove(unLockIcon);
                 }
+                if (isNegative) {
+                    resizeHandleContainer.setAlignment(dragGrip, Pos.BOTTOM_LEFT);
+                }
                 if (trackRenderer instanceof CoordinateTrackRenderer) {
-                    resizeHandleContainer.setVisible(false);
+                    resizeHandleContainer.setAlignment(dragGrip, Pos.CENTER);
+                    bottomDragGrip.setVisible(false);
                 }
             } catch (IOException ex) {
                 LOG.error(ex.getMessage(), ex);
@@ -116,11 +121,11 @@ public class TrackLabel {
     }
     private InvalidationListener trackLabelBackgroundInvalidationListener;
     private ChangeListener<Background> trackLabelBackgroundChangeListener;
-
+    
     public void refreshSize(VBox labelContainer, double yFactor) {
         root.setPrefSize(labelContainer.getParent().getBoundsInLocal().getWidth(), trackRenderer.getLabelHeight(yFactor));
     }
-
+    
     private void initComponenets() {
         trackLabel.setText(trackLabelText);
         trackLabel.setWrapText(true);
@@ -140,48 +145,48 @@ public class TrackLabel {
             lockIconContainer.getChildren().add(unLockIcon);
         });
     }
-
+    
     public StackPane getContent() {
         return root;
     }
-
+    
     public FontAwesomeIconView getDragGrip() {
         return dragGrip;
     }
-
+    
     public FontAwesomeIconView getUnLockIcon() {
         return unLockIcon;
     }
-
+    
     public FontAwesomeIconView getLockIcon() {
         return lockIcon;
     }
-
+    
     public VBox getResizeDragGrip() {
         return bottomDragGrip;
     }
-
+    
     public TrackRenderer getTrackRenderer() {
         return trackRenderer;
     }
-
+    
     public String getTrackLabelText() {
         return trackLabelText;
     }
-
+    
     public ReadOnlyBooleanProperty getIsHeightLocked() {
         return isHeightLocked;
     }
-
+    
     public void setTrackLabelText(String trackLabelText) {
         this.trackLabelText = trackLabelText;
     }
-
+    
     private static final ObjectProperty<Background> TRACK_LABEL_BG = new SimpleObjectProperty<>(new Background(new BackgroundFill(Palette.DEFAULT_CANVAS_BG.get(), CornerRadii.EMPTY, Insets.EMPTY)));
     private static ChangeListener<Color> DEFAULT_CANVAS_BG_CHANGE_LISTENER;
     private static ChangeListener<Color> DEFAULT_LABEL_COLOR_CHANGE_LISTENER;
     private static ChangeListener<Color> DEFAULT_GLYPH_FILL_COLOR_CHANGE_LISTENER;
-
+    
     static {
         DEFAULT_CANVAS_BG_CHANGE_LISTENER = new ChangeListener<Color>() {
             @Override
