@@ -59,7 +59,7 @@ public class IgbFx {
                     @Override
                     public void changed(ObservableValue<? extends Optional<?>> observable, Optional<?> oldValue, Optional<?> newValue) {
                         String[] title = {"Integrated Genome Browser FX " + IgbVersion.getVersion()};
-                        selectionInfoService.getSelectedGenomeVersion().get().ifPresent(genome -> title[0] = "(" + genome.getSpeciesName().get() + ") - " + title[0]);
+                        selectionInfoService.getSelectedGenomeVersion().get().ifPresent(genome -> title[0] = " (" + genome.getSpeciesName().get() + ") - " + title[0]);
                         selectionInfoService.getSelectedChromosome().get().ifPresent(chromosome -> title[0] = chromosome.getName() + title[0]);
                         Platform.runLater(() -> stage.setTitle(title[0]));
                     }

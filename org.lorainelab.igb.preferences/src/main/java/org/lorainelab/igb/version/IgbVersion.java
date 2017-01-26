@@ -11,7 +11,7 @@ package org.lorainelab.igb.version;
  */
 public class IgbVersion {
 
-    private final static int MAJOR_VERSION = 1;
+    private final static int MAJOR_VERSION = 9;
     private final static int MINOR_VERSION = 0;
 
     public static String getVersion() {
