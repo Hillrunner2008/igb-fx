@@ -65,7 +65,7 @@ public class LoadCustomGenomeMenuItem implements MenuBarEntryProvider {
     private ChromosomeSynomymService chromosomeSynomymService;
 
     public LoadCustomGenomeMenuItem() {
-        menuItem = new WeightedMenuItem(8, "Load Custom Genome");
+        menuItem = new WeightedMenuItem(13, "New Genome\u2026");
     }
 
     @Activate

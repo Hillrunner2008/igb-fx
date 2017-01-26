@@ -3,10 +3,14 @@ package org.lorainelab.igb.quickload;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.concurrent.CompletableFuture;
 import static java.util.stream.Collectors.toList;
 import javafx.collections.FXCollections;
@@ -119,7 +123,6 @@ public class QuickloadSiteManager {
                                     final String name = chromosomeSynomymService.getPreferredChromosomeName(entry.getKey()).orElse(entry.getKey());
                                     chromosomes.add(new Chromosome(name, entry.getValue(), twoBitProvider));
                                 }));
-
                                 genomeVersion = new GenomeVersion(preferredGenomeVersionName, speciesName, twoBitProvider, chromosomes, false);
                                 genomeVersionRegistry.getRegisteredGenomeVersions().add(genomeVersion);
                             }
@@ -160,5 +163,66 @@ public class QuickloadSiteManager {
     @Reference
     public void setChromosomeSynomymService(ChromosomeSynomymService chromosomeSynomymService) {
         this.chromosomeSynomymService = chromosomeSynomymService;
+    }
+
+    public Optional<DataProvider> getServerFromRequestingUrl(String requestingUrl) {
+        SortedMap<Integer, DataProvider> bestMatchMap = Maps.newTreeMap();
+        dataProviders.stream().forEach(dataProvider -> {
+            bestMatchMap.put(longestSubstr(dataProvider.url().get(), requestingUrl), dataProvider);
+        });
+        int maxKey = bestMatchMap.lastKey();
+        if (maxKey == 0) {
+            return Optional.empty();
+        } else {
+            DataProvider bestMatch = bestMatchMap.get(maxKey);
+            String host = null;
+            String bestMatchHost = null;
+            try {
+                URL url = new URL(requestingUrl);
+                URL bestMatchUrl = new URL(bestMatch.url().get());
+                host = url.getHost();
+                bestMatchHost = bestMatchUrl.getHost();
+                if (host.equals(bestMatchHost)) {
+                    return Optional.of(bestMatchMap.get(maxKey));
+                }
+            } catch (MalformedURLException ex) {
+            }
+            return Optional.empty();
+
+        }
+    }
+
+    private static int longestSubstr(String first, String second) {
+        if (first == null || second == null || first.length() == 0 || second.length() == 0) {
+            return 0;
+        }
+
+        int maxLen = 0;
+        int fl = first.length();
+        int sl = second.length();
+        int[][] table = new int[fl + 1][sl + 1];
+
+        for (int s = 0; s <= sl; s++) {
+            table[0][s] = 0;
+        }
+        for (int f = 0; f <= fl; f++) {
+            table[f][0] = 0;
+        }
+
+        for (int i = 1; i <= fl; i++) {
+            for (int j = 1; j <= sl; j++) {
+                if (first.charAt(i - 1) == second.charAt(j - 1)) {
+                    if (i == 1 || j == 1) {
+                        table[i][j] = 1;
+                    } else {
+                        table[i][j] = table[i - 1][j - 1] + 1;
+                    }
+                    if (table[i][j] > maxLen) {
+                        maxLen = table[i][j];
+                    }
+                }
+            }
+        }
+        return maxLen;
     }
 }

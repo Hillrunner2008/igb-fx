@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 public class ConsoleTab extends Tab implements TabProvider, PaxAppender {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConsoleTab.class);
-    private static final String TAB_TITLE = "Console";
+    private static final String TAB_TITLE = "Warnings and Errors";
     private final int TAB_WEIGHT = 1;
     private TextArea consoleTextArea;
     private LogService logService;
@@ -89,10 +89,10 @@ public class ConsoleTab extends Tab implements TabProvider, PaxAppender {
     private void initializeGuiComponents() {
         Label errorCount = new Label();
         Label warnCount = new Label();
-        StringProperty errorCountPrefix = new SimpleStringProperty("Error Count: ");
-        StringProperty warnCountPrefix = new SimpleStringProperty("Warning Count: ");
-        errorCount.textProperty().bind(errorCountPrefix.concat(ERROR_COUNTER.asString()));
-        warnCount.textProperty().bind(warnCountPrefix.concat(WARN_COUNTER.asString()));
+        StringProperty errorCountSuffix = new SimpleStringProperty(" error(s)");
+        StringProperty warnCountSuffix = new SimpleStringProperty(" warning(s)");
+        errorCount.textProperty().bind(ERROR_COUNTER.asString().concat(errorCountSuffix.getValue()));
+        warnCount.textProperty().bind(WARN_COUNTER.asString().concat(warnCountSuffix.getValue()));
         StackPane leftSide = new StackPane(consoleTextArea);
         SplitPane split = new SplitPane();
         split.setDividerPositions(.90);

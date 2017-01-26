@@ -12,6 +12,5 @@ public class DataProviderPrefKeys {
     public static final String MIRROR_URL = "mirrorUrl";
     public static final String STATUS = "status";
     public static final String LOAD_PRIORITY = "loadPriority";
-    public static final String REMEMBER_CREDENTIALS = "rememberCredentials";
     public static final String IS_EDITABLE = "isEditable";
 }

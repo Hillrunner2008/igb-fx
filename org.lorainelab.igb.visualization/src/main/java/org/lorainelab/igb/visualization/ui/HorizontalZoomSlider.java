@@ -3,7 +3,9 @@ package org.lorainelab.igb.visualization.ui;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.beans.value.WeakChangeListener;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -44,7 +46,7 @@ public class HorizontalZoomSlider extends Slider {
     @Activate
     public void activate() {
         valueProperty().bindBidirectional(canvasModel.gethSlider());
-        valueProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+        valuePropertyChangeListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             if (!ignoreHSliderEvent) {
                 final boolean isSnapEvent = newValue.doubleValue() % getMajorTickUnit() == 0;
                 if (lastHSliderFire < 0 || Math.abs(lastHSliderFire - newValue.doubleValue()) > 1 || isSnapEvent) {
@@ -53,8 +55,9 @@ public class HorizontalZoomSlider extends Slider {
                     canvasModel.setxFactor(xFactor);
                 }
             }
-        });
-        canvasModel.getxFactor().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+        };
+        valueProperty().addListener(new WeakChangeListener<>(valuePropertyChangeListener));
+        xFactorChangeListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             if (xFactor != newValue.doubleValue()) {
                 double updatedHsliderPosition = invertExpScaleTransform(canvasRegion.getWidth(), canvasModel.getModelWidth().get(), newValue.doubleValue());
                 ignoreHSliderEvent = true;
@@ -62,12 +65,17 @@ public class HorizontalZoomSlider extends Slider {
                 ignoreHSliderEvent = false;
                 xFactor = newValue.doubleValue();
             }
-        });
-        canvasRegion.widthProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+        };
+        canvasModel.getxFactor().addListener(new WeakChangeListener<>(xFactorChangeListener));
+        widthPropertyChangeListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             xFactor = exponentialScaleTransform(canvasRegion.getWidth(), canvasModel.getModelWidth().get(), valueProperty().doubleValue());
             canvasModel.setxFactor(xFactor);
-        });
+        };
+        canvasRegion.widthProperty().addListener(new WeakChangeListener<>(widthPropertyChangeListener));
     }
+    private ChangeListener<Number> widthPropertyChangeListener;
+    private ChangeListener<Number> xFactorChangeListener;
+    private ChangeListener<Number> valuePropertyChangeListener;
 
     @Reference
     public void setCanvasModel(CanvasModel canvasModel) {

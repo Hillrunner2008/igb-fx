@@ -12,9 +12,11 @@ import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.beans.value.WeakChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.collections.WeakListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
@@ -223,30 +225,30 @@ public class BookmarksTab implements TabProvider {
         }
     }
 
-    ListChangeListener changeListener = new ListChangeListener<Bookmark>() {
-        @Override
-        public void onChanged(ListChangeListener.Change<? extends Bookmark> c) {
-            setData();
-        }
+    private ListChangeListener bookmarkChildrenChangeListener = (ListChangeListener<Bookmark>) (ListChangeListener.Change<? extends Bookmark> c) -> {
+        setData();
     };
+    private WeakListChangeListener bookmarkChildrenWeakChangeListener = new WeakListChangeListener(bookmarkChildrenChangeListener);
 
     private TreeItem<Bookmark> addBookmarks(Bookmark bookmark) {
         TreeItem item = new TreeItem(bookmark);
-        item.expandedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+        treeItemExpandedPropertyListener = (ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
             bookmark.setExpanded(newValue);
-        });
+        };
+        item.expandedProperty().addListener(new WeakChangeListener<>(treeItemExpandedPropertyListener));
         bookmark.getChildren().ifPresent((ObservableList<Bookmark> data) -> {
             data.stream().forEach(b -> {
                 if (b.getChildren() != null) {
                     item.getChildren().add(addBookmarks(b));
                 }
             });
-            data.removeListener(changeListener);
-            data.addListener(changeListener);
+            data.removeListener(bookmarkChildrenWeakChangeListener);
+            data.addListener(bookmarkChildrenWeakChangeListener);
             item.setExpanded(bookmark.isExpanded());
         });
         return item;
     }
+    private ChangeListener<Boolean> treeItemExpandedPropertyListener;
 
     @Override
     public Tab getTab() {
@@ -351,14 +353,16 @@ public class BookmarksTab implements TabProvider {
                 setText(null);
                 setGraphic(null);
             } else {
-                bookmark.getName().addListener(new ChangeListener<String>() {
+                bookmarkNameChangeListener = new ChangeListener<String>() {
                     @Override
                     public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
                         setText(newValue);
                     }
-                });
+                };
+                bookmark.getName().addListener(new WeakChangeListener<>(bookmarkNameChangeListener));
                 setText(getItem() == null ? "" : getItem().getName().get());
             }
         }
+        private ChangeListener<String> bookmarkNameChangeListener;
     }
 }

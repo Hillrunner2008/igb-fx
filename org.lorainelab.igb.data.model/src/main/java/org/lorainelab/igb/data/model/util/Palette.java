@@ -10,13 +10,13 @@ import javafx.scene.paint.Color;
  */
 public class Palette {
 
-    public static ObjectProperty<Color> DEFAULT_CANVAS_BG = new SimpleObjectProperty<>(Color.web("#252526"));
-    public static ObjectProperty<Color> LOADED_REGION_BG = new SimpleObjectProperty<>(Color.web("#1E1E1E"));
-    public static ObjectProperty<Color> DEFAULT_LINE_FILL = new SimpleObjectProperty<>(Color.web("#A9B7C6"));
+    public static ObjectProperty<Color> DEFAULT_CANVAS_BG = new SimpleObjectProperty<>(Color.WHITE);
+    public static ObjectProperty<Color> LOADED_REGION_BG = new SimpleObjectProperty<>(Color.WHITESMOKE);
+    public static ObjectProperty<Color> DEFAULT_LINE_FILL = new SimpleObjectProperty<>(Color.BLACK);
     public static ObjectProperty<Color> DEFAULT_GLYPH_FILL = new SimpleObjectProperty<>(Color.web("#0084B4"));
-    public static ObjectProperty<Color> DEFAULT_LABEL_COLOR = new SimpleObjectProperty<>(Color.web("#A9B7C6"));
+    public static ObjectProperty<Color> DEFAULT_LABEL_COLOR = new SimpleObjectProperty<>(Color.BLACK);
     public static ObjectProperty<Color> SELECTION_COLOR = new SimpleObjectProperty<>(Color.web("#DC322F"));
-    public static ObjectProperty<Color> GRAPH_GRID_FILL = new SimpleObjectProperty<>(Color.web("#616060"));
+    public static ObjectProperty<Color> GRAPH_GRID_FILL = new SimpleObjectProperty<>(Color.BLACK);
     public static ObjectProperty<Color> GRAPH_FILL = new SimpleObjectProperty<>(Color.web("#E24D42"));
     public static ObjectProperty<Color> CLICK_DRAG_HIGHLIGHT = new SimpleObjectProperty<>(Color.rgb(33, 150, 243, .3));
     public static ObjectProperty<Color> A_COLOR = new SimpleObjectProperty<>(Color.rgb(151, 255, 179));

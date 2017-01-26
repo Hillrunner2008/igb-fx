@@ -46,7 +46,6 @@ public class DataSetLoadingServiceImpl implements DataSetLoadingService {
     public void openHttpDataSet(String path) {
         fileTypeHandlerRegistry.getFileTypeHandler(path).ifPresent(fileTypeHandler -> {
             selectionInfoService.getSelectedGenomeVersion().get().ifPresent(gv -> {
-
                 gv.getLoadedDataSets().add(new DataSet(path, path, fileTypeHandler));
 //                indexDataSetForSearch(fileTypeHandler, dataSourceReference);
             });

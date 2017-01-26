@@ -74,7 +74,7 @@ public class SelectionTab implements TabProvider {
                 throw new RuntimeException(exception);
             }
         });
-        AwaitingEventStream<SetChangeListener.Change<? extends CompositionGlyph>> rebuildGridEventStream = EventStreams.changesOf(selectionInfoService.getSelectedGlyphs()).successionEnds(Duration.ofMillis(100));
+        AwaitingEventStream<SetChangeListener.Change<? extends CompositionGlyph>> rebuildGridEventStream = EventStreams.changesOf(selectionInfoService.getSelectedGlyphs()).successionEnds(Duration.ofMillis(10));
         rebuildGridEventStream.subscribe(change -> rebuildGridData());
         initializeSpreadSheet();
         selectionTab.setContent(tabContent);

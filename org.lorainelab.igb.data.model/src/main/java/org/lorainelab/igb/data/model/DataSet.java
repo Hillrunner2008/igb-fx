@@ -53,6 +53,15 @@ public class DataSet {
         return positiveStrandTrack;
     }
 
+    public void clearData() {
+        loadedAnnoations.clear();
+        loadedRegions.clear();
+        graphTrack = null;
+        positiveStrandTrack = null;
+        negativeStrandTrack = null;
+        combinedStrandTrack = null;
+    }
+
     private void refreshGraphTrack(String chrId) {
         graphTrack.clearGlyphs();
         graphTrack.addGlyphs(loadedAnnoations.get(chrId));

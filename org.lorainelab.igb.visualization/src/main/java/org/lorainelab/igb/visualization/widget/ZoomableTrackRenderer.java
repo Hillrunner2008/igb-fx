@@ -144,6 +144,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
 
     public void render(CanvasModel canvasModel) {
         processLastMouseClickedPosition(canvasModel);
+        processSelectionRectangle(canvasModel);
         scaleCanvas(canvasModel);
     }
 
@@ -270,5 +271,17 @@ public class ZoomableTrackRenderer implements TrackRenderer {
     @Override
     public BooleanProperty hideLockToggle() {
         return hideLockToggle;
+    }
+
+    private void processSelectionRectangle(CanvasModel canvasModel) {
+        canvasModel.getSelectionRectangle().get().ifPresent(selectionRectangle -> {
+            Rectangle2D viewSelectionRect = convertAndTrimToViewCoords(selectionRectangle);
+            track.processSelectionRectangle(selectionRectangle, view);
+        });
+    }
+
+    private Rectangle2D convertAndTrimToViewCoords(Rectangle2D selectionRectangle) {
+        //TODO write conversion code
+        return selectionRectangle;
     }
 }

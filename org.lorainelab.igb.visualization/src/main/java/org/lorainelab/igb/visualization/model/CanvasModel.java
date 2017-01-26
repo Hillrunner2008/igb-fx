@@ -14,7 +14,9 @@ import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.beans.value.WeakChangeListener;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import org.lorainelab.igb.data.model.Chromosome;
@@ -83,34 +85,42 @@ public class CanvasModel {
 
     @Activate
     public void activate() {
-        xFactor.addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+        xFactorChangeListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             final double previousVisibleCoordinatesX = Math.floor(canvasRegion.getWidth() / oldValue.doubleValue());
             final double updatedVisibleCoordinatesX = Math.floor(canvasRegion.getWidth() / newValue.doubleValue());
             visibleVirtualCoordinatesX.setValue(updatedVisibleCoordinatesX);
             updateScrollXPosition(previousVisibleCoordinatesX);
-        });
-        selectionInfoService.getSelectedChromosome().addListener((ObservableValue<? extends Optional<Chromosome>> observable, Optional<Chromosome> oldValue, Optional<Chromosome> newValue) -> {
+        };
+        xFactor.addListener(new WeakChangeListener<>(xFactorChangeListener));
+        selectedChromosomeListener = (ObservableValue<? extends Optional<Chromosome>> observable, Optional<Chromosome> oldValue, Optional<Chromosome> newValue) -> {
             newValue.ifPresent(selectedChromosome -> {
                 Platform.runLater(() -> {
                     modelWidth.set(selectedChromosome.getLength());
                     resetPositionalState();
                 });
             });
-        });
-        scrollX.addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+        };
+        selectionInfoService.getSelectedChromosome().addListener(new WeakChangeListener<>(selectedChromosomeListener));
+        scrollXChangeListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             double xOffset = Math.round((scrollX.get() / 100) * (modelWidth.get() - visibleVirtualCoordinatesX.get()));
             xOffset = enforceRangeBounds(xOffset, 0, modelWidth.get());
             this.xOffset.set(xOffset);
-        });
+        };
+        scrollX.addListener(new WeakChangeListener<>(scrollXChangeListener));
         scrollY.bind(verticalScrollBar.valueProperty());
-
-        vSlider.addListener((ObservableValue<? extends Number> observable, Number oldValue, Number vSliderValue) -> {
+        vSliderChangeListener = (ObservableValue<? extends Number> observable, Number oldValue, Number vSliderValue) -> {
             final double vSliderPercentage = 1 - (vSliderValue.doubleValue() / 100);
             double minScaleY = canvasRegion.getHeight();
             double maxScaleY = MAX_ZOOM_MODEL_COORDINATES_Y;
             yFactor.set(minScaleY / (maxScaleY + (minScaleY - maxScaleY) * vSliderPercentage));
-        });
+        };
+
+        vSlider.addListener(new WeakChangeListener<>(vSliderChangeListener));
     }
+    private ChangeListener<Number> vSliderChangeListener;
+    private ChangeListener<Number> scrollXChangeListener;
+    private ChangeListener<Optional<Chromosome>> selectedChromosomeListener;
+    private ChangeListener<Number> xFactorChangeListener;
 
     // this method corrects the scrollX position if zoom stripe centering is required
     private void updateScrollXPosition(final double previousVisibleCoordinatesX) {
@@ -216,7 +226,7 @@ public class CanvasModel {
     public Runnable getRefreshAction() {
         return refreshAction;
     }
-    
+
     public BooleanProperty getLabelResizingActive() {
         return labelResizingActive;
     }

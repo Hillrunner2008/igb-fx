@@ -67,13 +67,13 @@ public interface DataProvider {
 
     void setStatus(ResourceStatus status);
 
-    Optional<String> getLogin();
+    Optional<String> getUsername();
 
-    void setLogin(String login);
+    void setUsername(String login, boolean saveCredential);
 
     Optional<String> getPassword();
 
-    void setPassword(String password);
+    void setPassword(String password, boolean saveCredential);
 
     Optional<String> getSequenceFilePath(String name);
 
