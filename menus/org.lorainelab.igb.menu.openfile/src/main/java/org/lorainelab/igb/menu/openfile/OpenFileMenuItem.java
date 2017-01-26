@@ -8,6 +8,9 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import java.util.List;
 import java.util.Optional;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.WeakChangeListener;
+import org.lorainelab.igb.data.model.GenomeVersion;
 import org.lorainelab.igb.datasetloadingservice.api.DataSetLoadingService;
 import org.lorainelab.igb.menu.api.MenuBarEntryProvider;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
@@ -24,7 +27,6 @@ import org.lorainelab.igb.toolbar.api.WeightedButton;
 @Component(immediate = true)
 public class OpenFileMenuItem implements MenuBarEntryProvider, ToolbarButtonProvider {
 
-    
     private WeightedMenuItem menuItem;
     private WeightedButton openFileButton;
 
@@ -37,12 +39,14 @@ public class OpenFileMenuItem implements MenuBarEntryProvider, ToolbarButtonProv
         openFileButton = new WeightedButton(0, "", new FontAwesomeIconView(FontAwesomeIcon.FOLDER_OPEN));
         openFileButton.setOnAction(action -> fileOpener.openDataSet());
         menuItem.setDisable(!selectionInfoService.getSelectedGenomeVersion().get().isPresent());
-        selectionInfoService.getSelectedGenomeVersion().addListener((observable, oldValue, newValue) -> {
+        selectedGenomeVersionChangeListener = (observable, oldValue, newValue) -> {
             menuItem.setDisable(!selectionInfoService.getSelectedGenomeVersion().get().isPresent());
-        });
+        };
+        selectionInfoService.getSelectedGenomeVersion().addListener(new WeakChangeListener<>(selectedGenomeVersionChangeListener));
 
         menuItem.setOnAction(action -> fileOpener.openDataSet());
     }
+    private ChangeListener<Optional<GenomeVersion>> selectedGenomeVersionChangeListener;
 
     @Override
     public Optional<List<WeightedMenuEntry>> getMenuItems() {

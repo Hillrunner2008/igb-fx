@@ -16,6 +16,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.beans.value.WeakChangeListener;
 import static org.lorainelab.igb.dataprovider.api.DataProviderPrefKeys.IS_EDITABLE;
 import static org.lorainelab.igb.dataprovider.api.DataProviderPrefKeys.LOAD_PRIORITY;
 import static org.lorainelab.igb.dataprovider.api.DataProviderPrefKeys.LOGIN;
@@ -23,7 +24,6 @@ import static org.lorainelab.igb.dataprovider.api.DataProviderPrefKeys.MIRROR_UR
 import static org.lorainelab.igb.dataprovider.api.DataProviderPrefKeys.PASSWORD;
 import static org.lorainelab.igb.dataprovider.api.DataProviderPrefKeys.PRIMARY_URL;
 import static org.lorainelab.igb.dataprovider.api.DataProviderPrefKeys.PROVIDER_NAME;
-import static org.lorainelab.igb.dataprovider.api.DataProviderPrefKeys.REMEMBER_CREDENTIALS;
 import static org.lorainelab.igb.dataprovider.api.DataProviderPrefKeys.STATUS;
 import static org.lorainelab.igb.dataprovider.api.ResourceStatus.Disabled;
 import static org.lorainelab.igb.dataprovider.api.ResourceStatus.Initialized;
@@ -131,16 +131,16 @@ public abstract class BaseDataProvider implements DataProvider {
     }
 
     @Override
-    public Optional<String> getLogin() {
+    public Optional<String> getUsername() {
         return Optional.ofNullable(login);
     }
 
     @Override
-    public void setLogin(String login) {
+    public void setUsername(String login, boolean saveCredential) {
         this.login = login;
         if (login == null) {
             preferencesNode.remove(LOGIN);
-        } else if (preferencesNode.getBoolean(REMEMBER_CREDENTIALS, false)) {
+        } else if (saveCredential) {
             preferencesNode.put(LOGIN, login);
         }
         flushPrefNode();
@@ -152,11 +152,11 @@ public abstract class BaseDataProvider implements DataProvider {
     }
 
     @Override
-    public void setPassword(String password) {
+    public void setPassword(String password, boolean saveCredential) {
         this.password = password;
         if (password == null) {
             preferencesNode.remove(PASSWORD);
-        } else if (preferencesNode.getBoolean(REMEMBER_CREDENTIALS, false)) {
+        } else if (saveCredential) {
             if (password.isEmpty()) {
                 preferencesNode.put(PASSWORD, "");
             } else {
@@ -228,29 +228,34 @@ public abstract class BaseDataProvider implements DataProvider {
     }
 
     private void setupPropertyListeners() {
-        name.addListener(new ChangeListener<String>() {
+        nameChangeListener = new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
                 preferencesNode.put(PROVIDER_NAME, newValue);
                 flushPrefNode();
             }
-        });
-        url.addListener(new ChangeListener<String>() {
+        };
+        name.addListener(new WeakChangeListener<>(nameChangeListener));
+        urlChangeListener = new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
                 preferencesNode.put(PRIMARY_URL, newValue);
                 flushPrefNode();
-
             }
-        });
-        loadPriority.addListener(new ChangeListener<Number>() {
+        };
+        url.addListener(new WeakChangeListener<>(urlChangeListener));
+        loadPriorityChangeListener = new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
                 preferencesNode.putInt(LOAD_PRIORITY, newValue.intValue());
                 flushPrefNode();
             }
-        });
+        };
+        loadPriority.addListener(new WeakChangeListener<>(loadPriorityChangeListener));
     }
+    private ChangeListener<Number> loadPriorityChangeListener;
+    private ChangeListener<String> urlChangeListener;
+    private ChangeListener<String> nameChangeListener;
 
     private void flushPrefNode() {
         try {

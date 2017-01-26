@@ -20,6 +20,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
+import javafx.collections.WeakSetChangeListener;
 import javafx.collections.transformation.SortedList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -84,6 +85,7 @@ public class QuickloadRepositoryPreferencesTabProvider extends Tab implements Pr
     private QuickloadSiteManager quickloadSiteManager;
     private SortedList<DataProvider> sortedList;
     private QuickloadDataProviderFactory dataProviderFactory;
+    private QuickloadBasicAuthModal basicAuthModal;
 
     public QuickloadRepositoryPreferencesTabProvider() {
         setText("Quickload Repositories");
@@ -133,7 +135,7 @@ public class QuickloadRepositoryPreferencesTabProvider extends Tab implements Pr
     private void initializeRepoTableContent() {
         repoTable.setItems(sortedList);
         sortedList.comparatorProperty().bind(repoTable.comparatorProperty());
-        quickloadSiteManager.getDataProviders().addListener(new SetChangeListener<DataProvider>() {
+        dataProviderSetChangeListener = new SetChangeListener<DataProvider>() {
             @Override
             public void onChanged(SetChangeListener.Change<? extends DataProvider> change) {
                 Platform.runLater(() -> {
@@ -151,11 +153,13 @@ public class QuickloadRepositoryPreferencesTabProvider extends Tab implements Pr
                     Collections.sort(repoItems, new DataProviderComparator());
                 });
             }
-        });
+        };
+        quickloadSiteManager.getDataProviders().addListener(new WeakSetChangeListener<>(dataProviderSetChangeListener));
         Platform.runLater(() -> {
             repoItems.addAll(quickloadSiteManager.getDataProviders());
         });
     }
+    private SetChangeListener<DataProvider> dataProviderSetChangeListener;
 
     private void initializeTableCellFactories() {
         nameColumn.setCellFactory(new Callback<TableColumn<DataProvider, String>, TableCell<DataProvider, String>>() {
@@ -231,14 +235,6 @@ public class QuickloadRepositoryPreferencesTabProvider extends Tab implements Pr
         enabledColumn.setCellValueFactory((TableColumn.CellDataFeatures<DataProvider, Boolean> tc) -> {
             final DataProvider dataProvider = tc.getValue();
             SimpleBooleanProperty isEnabled = new SimpleBooleanProperty(!dataProvider.getStatus().equals(ResourceStatus.Disabled));
-            //doesn't work
-//            isEnabled.addListener((obs, old, isNowActive) -> {
-//                if (isNowActive) {
-//                    dataProvider.setStatus(ResourceStatus.NotInitialized);
-//                } else {
-//                    dataProvider.setStatus(ResourceStatus.Disabled);
-//                }
-//            });
             return isEnabled;
         });
         enabledColumn.setCellFactory(p -> {
@@ -254,6 +250,10 @@ public class QuickloadRepositoryPreferencesTabProvider extends Tab implements Pr
                         checkBox.setReference(dataProvider);
                         setGraphic(checkBox);
                         checkBox.setSelected(item);
+                        enabledColumn.setCellValueFactory((TableColumn.CellDataFeatures<DataProvider, Boolean> tc) -> {
+                            SimpleBooleanProperty isEnabled = new SimpleBooleanProperty(!dataProvider.getStatus().equals(ResourceStatus.Disabled));
+                            return isEnabled;
+                        });
                     }
                 }
             };
@@ -301,9 +301,10 @@ public class QuickloadRepositoryPreferencesTabProvider extends Tab implements Pr
             public void changed(ObservableValue<? extends DataProvider> observable, DataProvider oldValue, DataProvider newValue) {
                 Platform.runLater(() -> {
                     if (newValue != null) {
-                        removeBtn.setDisable(!newValue.isEditable());
-                        editBtn.setDisable(!newValue.isEditable());
-                        enterPasswordBtn.setDisable(!newValue.isEditable());
+                        final boolean isDefaultQuickloadServer = !newValue.isEditable();
+                        removeBtn.setDisable(isDefaultQuickloadServer);
+                        editBtn.setDisable(isDefaultQuickloadServer);
+                        enterPasswordBtn.setDisable(isDefaultQuickloadServer || !newValue.url().get().startsWith("http"));
                     } else {
                         removeBtn.setDisable(true);
                         editBtn.setDisable(true);
@@ -355,7 +356,12 @@ public class QuickloadRepositoryPreferencesTabProvider extends Tab implements Pr
             });
         });
         enterPasswordBtn.setOnAction(action -> {
-            DataProvider selectedItem = repoTable.getSelectionModel().getSelectedItem();
+            Platform.runLater(() -> {
+                DataProvider selectedItem = repoTable.getSelectionModel().getSelectedItem();
+                selectedItem.setUsername(null, false);
+                selectedItem.setPassword(null, false);
+                basicAuthModal.getPasswordAuthentication();
+            });
         });
         removeBtn.setOnAction(action -> {
             Platform.runLater(() -> {
@@ -379,4 +385,8 @@ public class QuickloadRepositoryPreferencesTabProvider extends Tab implements Pr
         this.dataProviderFactory = quickloadDataProviderFactory;
     }
 
+    @Reference
+    public void setQuickloadBasicAuthModal(QuickloadBasicAuthModal authModal) {
+        this.basicAuthModal = authModal;
+    }
 }

@@ -17,8 +17,14 @@ public interface SpeciesSynomymService {
 
     Optional<String> getPreferredSpeciesName(String synonym);
 
+    Optional<String> getCommonName(String synonym);
+
+    void setCommonName(String synonym, String commonName);
+
     void removeSynonym(String preferredSpeciesName, String synonym);
 
     boolean isSynonym(String preferredSpeciesName, String synonym);
+
+    boolean isCommonName(String synonym, String commonName);
 
 }

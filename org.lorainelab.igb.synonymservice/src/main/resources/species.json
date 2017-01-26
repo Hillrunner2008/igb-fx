@@ -1,494 +1,657 @@
 [{
         "preferredName": "Ailuropoda melanoleuca",
-        "synomyms": ["Ailuropoda melanoleuca", "Giant panda", "A_melanoleuca", "ailMel", "Ailuropoda_melanoleuca"]
+        "synomyms": ["Ailuropoda melanoleuca", "Giant panda", "A_melanoleuca", "ailMel", "Ailuropoda_melanoleuca"],
+        "commonName": "Giant panda"
     }, {
         "preferredName": "Alligator mississippiensis",
-        "synomyms": ["Alligator mississippiensis", "American alligator", "A_mississippiensis", "allMis"]
+        "synomyms": ["Alligator mississippiensis", "American alligator", "A_mississippiensis", "allMis"],
+        "commonName": "American alligator"
     }, {
         "preferredName": "Anolis carolinensis",
-        "synomyms": ["Anolis carolinensis", "Anole Lizard", "A_carolinensis", "anoCar", "Anolis_carolinensis"]
+        "synomyms": ["Anolis carolinensis", "Anole Lizard", "A_carolinensis", "anoCar", "Anolis_carolinensis"],
+        "commonName": "Anole Lizard"
     }, {
         "preferredName": "Anopheles gambiae",
-        "synomyms": ["Anopheles gambiae", "Mosquito", "A_gambiae", "anoGam"]
+        "synomyms": ["Anopheles gambiae", "Mosquito", "A_gambiae", "anoGam"],
+        "commonName": "Mosquito"
     }, {
         "preferredName": "Apis mellifera",
-        "synomyms": ["Apis mellifera", "European honey bee", "A. mellifera", "A_mellifera", "apiMel"]
+        "synomyms": ["Apis mellifera", "European honey bee", "A. mellifera", "A_mellifera", "apiMel"],
+        "commonName": "European honey bee"
     }, {
         "preferredName": "Aplysia californica",
-        "synomyms": ["Aplysia californica", "California sea hare", "A_californica", "aplCal"]
+        "synomyms": ["Aplysia californica", "California sea hare", "A_californica", "aplCal"],
+        "commonName": "California sea hare"
     }, {
         "preferredName": "Arabidopsis lyrata",
-        "synomyms": ["Arabidopsis lyrata", "Lyrate rockcress", "A. lyrata", "A_lyrata"]
+        "synomyms": ["Arabidopsis lyrata", "Lyrate rockcress", "A. lyrata", "A_lyrata"],
+        "commonName": "Lyrate rockcress"
     }, {
         "preferredName": "Aquilegia coerulea",
-        "synomyms": ["Aquilegia coerulea", "Colorado blue columbine", "A_coerulea"]
+        "synomyms": ["Aquilegia coerulea", "Colorado blue columbine", "A_coerulea"],
+        "commonName": "Colorado blue columbine"
     }, {
         "preferredName": "Arabidopsis thaliana",
-        "synomyms": ["Arabidopsis thaliana", "Thale cress", "A_thaliana"]
+        "synomyms": ["Arabidopsis thaliana", "Thale cress", "A_thaliana"],
+        "commonName": "Thale cress"
     }, {
         "preferredName": "Arbacia punctulata",
-        "synomyms": ["Arbacia punctulata", "Purple-spined sea urchin", "A_punctulata"]
+        "synomyms": ["Arbacia punctulata", "Purple-spined sea urchin", "A_punctulata"],
+        "commonName": "Purple-spined sea urchin"
     }, {
         "preferredName": "Balaenoptera acutorostrata",
-        "synomyms": ["Balaenoptera acutorostrata", "Minke whale", "B_acutorostrata", "balAcu"]
+        "synomyms": ["Balaenoptera acutorostrata", "Minke whale", "B_acutorostrata", "balAcu"],
+        "commonName": "Minke whale"
     }, {
         "preferredName": "Bos taurus",
-        "synomyms": ["Bos taurus", "Cow", "B_taurus", "bosTau", "Bos_taurus"]
+        "synomyms": ["Bos taurus", "Cow", "B_taurus", "bosTau", "Bos_taurus"],
+        "commonName": "Cow"
     }, {
         "preferredName": "Brachypodium distachyon",
-        "synomyms": ["Brachypodium distachyon", "Purple false brome", "B_distachyon"]
+        "synomyms": ["Brachypodium distachyon", "Purple false brome", "B_distachyon"],
+        "commonName": "Purple false brome"
     }, {
         "preferredName": "Branchiostoma floridae",
-        "synomyms": ["Branchiostoma floridae", "Lancet", "B_floridae", "braFlo"]
+        "synomyms": ["Branchiostoma floridae", "Lancet", "B_floridae", "braFlo"],
+        "commonName": "Lancet"
     }, {
         "preferredName": "Brassica rapa",
-        "synomyms": ["Brassica rapa", "Field mustard", "B_rapa"]
+        "synomyms": ["Brassica rapa", "Field mustard", "B_rapa"],
+        "commonName": "Field mustard"
     }, {
         "preferredName": "Caenorhabditis brenneri",
-        "synomyms": ["Caenorhabditis brenneri", "C. brenneri (nematode)", "C_brenneri", "caePb"]
+        "synomyms": ["Caenorhabditis brenneri", "C. brenneri (nematode)", "C_brenneri", "caePb"],
+        "commonName": "C. brenneri (nematode)"
     }, {
         "preferredName": "Caenorhabditis briggsae",
-        "synomyms": ["Caenorhabditis briggsae", "C. briggsae (nematode)", "C_briggsae", "cb"]
+        "synomyms": ["Caenorhabditis briggsae", "C. briggsae (nematode)", "C_briggsae", "cb"],
+        "commonName": "C. briggsae (nematode)"
     }, {
         "preferredName": "Caenorhabditis elegans",
-        "synomyms": ["Caenorhabditis elegans", "C. elegans (nematode)", "C_elegans", "ce", "Caenorhabditis_elegans"]
+        "synomyms": ["Caenorhabditis elegans", "C. elegans (nematode)", "C_elegans", "ce", "Caenorhabditis_elegans"],
+        "commonName": "C. elegans (nematode)"
     }, {
         "preferredName": "Caenorhabditis japonica",
-        "synomyms": ["Caenorhabditis japonica", "C. japonica (nematode)", "C_japonica", "caeJap"]
+        "synomyms": ["Caenorhabditis japonica", "C. japonica (nematode)", "C_japonica", "caeJap"],
+        "commonName": "C. japonica (nematode)"
     }, {
         "preferredName": "Caenorhabditis remanei",
-        "synomyms": ["Caenorhabditis remanei", "C. remanei (nematode)", "C_remanei", "caeRem"]
+        "synomyms": ["Caenorhabditis remanei", "C. remanei (nematode)", "C_remanei", "caeRem"],
+        "commonName": "C. remanei (nematode)"
     }, {
         "preferredName": "Callithrix jacchus",
-        "synomyms": ["Callithrix jacchus", "Common marmoset", "C_jacchus", "calJac", "Callithrix_jacchus"]
+        "synomyms": ["Callithrix jacchus", "Common marmoset", "C_jacchus", "calJac", "Callithrix_jacchus"],
+        "commonName": "Common marmoset"
     }, {
         "preferredName": "Callorhinchus milii",
-        "synomyms": ["Callorhinchus milii", "Elephant shark", "C_milii", "calMil"]
+        "synomyms": ["Callorhinchus milii", "Elephant shark", "C_milii", "calMil"],
+        "commonName": "Elephant shark"
     }, {
         "preferredName": "Candida albicans SC",
-        "synomyms": ["Candida albicans SC", "Yeast (Human Flora) SC", "C_albicans_SC"]
+        "synomyms": ["Candida albicans SC", "Yeast (Human Flora) SC", "C_albicans_SC"],
+        "commonName": "Yeast (Human Flora) SC"
     }, {
         "preferredName": "Candida albicans WO",
-        "synomyms": ["Candida albicans WO", "Yeast (Human Flora) WO", "C_albicans_WO"]
+        "synomyms": ["Candida albicans WO", "Yeast (Human Flora) WO", "C_albicans_WO"],
+        "commonName": "Yeast (Human Flora) WO"
     }, {
         "preferredName": "Canis lupus familiaris",
-        "synomyms": ["Canis lupus familiaris", "Dog", "C_familiaris", "canFam", "Canis_familiaris"]
+        "synomyms": ["Canis lupus familiaris", "Dog", "C_familiaris", "canFam", "Canis_familiaris"],
+        "commonName": "Dog"
     }, {
         "preferredName": "Capsella rubella",
-        "synomyms": ["Capsella rubella", "Red shepherd's purse", "C_rubella"]
+        "synomyms": ["Capsella rubella", "Red shepherd's purse", "C_rubella"],
+        "commonName": "Red shepherd's purse"
     }, {
         "preferredName": "Carica papaya",
-        "synomyms": ["Carica papaya", "Papaya", "C_papaya"]
+        "synomyms": ["Carica papaya", "Papaya", "C_papaya"],
+        "commonName": "Papaya"
     }, {
         "preferredName": "Cavia porcellus",
-        "synomyms": ["Cavia porcellus", "Guinea pig", "C_porcellus", "cavPor", "Cavia_porcellus"]
+        "synomyms": ["Cavia porcellus", "Guinea pig", "C_porcellus", "cavPor", "Cavia_porcellus"],
+        "commonName": "Guinea pig"
     }, {
         "preferredName": "Ceratotherium simum",
-        "synomyms": ["Ceratotherium simum", "White rhinoceros", "C_simum", "cerSim"]
+        "synomyms": ["Ceratotherium simum", "White rhinoceros", "C_simum", "cerSim"],
+        "commonName": "White rhinoceros"
     }, {
         "preferredName": "Chlamydomonas reinhardtii",
-        "synomyms": ["Chlamydomonas reinhardtii", "motile single-celled green alga", "C_reinhardtii"]
+        "synomyms": ["Chlamydomonas reinhardtii", "motile single-celled green alga", "C_reinhardtii"],
+        "commonName": "motile single-celled green alga"
     }, {
         "preferredName": "Choloepus hoffmanni",
-        "synomyms": ["Choloepus hoffmanni", "Two-toed sloth", "C_hoffmanni", "choHof", "Choloepus_hoffmanni"]
+        "synomyms": ["Choloepus hoffmanni", "Two-toed sloth", "C_hoffmanni", "choHof", "Choloepus_hoffmanni"],
+        "commonName": "Two-toed sloth"
     }, {
         "preferredName": "Chrysemys picta",
-        "synomyms": ["Chrysemys picta", "painted turtle", "C_picta", "Chrysemys_picta", "chrPic"]
+        "synomyms": ["Chrysemys picta", "painted turtle", "C_picta", "Chrysemys_picta", "chrPic"],
+        "commonName": "painted turtle"
     }, {
         "preferredName": "Citrus clementina",
-        "synomyms": ["Citrus clementina", "Clementine mandarin", "C_clementina"]
+        "synomyms": ["Citrus clementina", "Clementine mandarin", "C_clementina"],
+        "commonName": "Clementine mandarin"
     }, {
         "preferredName": "Citrus sinensis",
-        "synomyms": ["Citrus sinensis", "Sweet orange", "C_sinensis"]
+        "synomyms": ["Citrus sinensis", "Sweet orange", "C_sinensis"],
+        "commonName": "Sweet orange"
     }, {
         "preferredName": "Ciona intestinalis",
-        "synomyms": ["Ciona intestinalis", "vase tunicate (sea squirt)", "C_intestinalis", "ci", "Ciona_intestinalis"]
+        "synomyms": ["Ciona intestinalis", "vase tunicate (sea squirt)", "C_intestinalis", "ci", "Ciona_intestinalis"],
+        "commonName": "vase tunicate (sea squirt)"
     }, {
         "preferredName": "Ciona savignyi",
-        "synomyms": ["Ciona savignyi", "Pacific sea squirt C. savignyi", "C_savignyi", "Ciona_savignyi"]
+        "synomyms": ["Ciona savignyi", "Pacific sea squirt C. savignyi", "C_savignyi", "Ciona_savignyi"],
+        "commonName": "Pacific sea squirt C. savignyi"
     }, {
         "preferredName": "Cricetulus griseus",
-        "synomyms": ["Cricetulus griseus", "Chinese hamster", "C_griseus", "criGri"]
+        "synomyms": ["Cricetulus griseus", "Chinese hamster", "C_griseus", "criGri"],
+        "commonName": "Chinese hamster"
     }, {
         "preferredName": "Cucumis sativus",
-        "synomyms": ["Cucumis sativus", "Cucumber", "C_sativus"]
+        "synomyms": ["Cucumis sativus", "Cucumber", "C_sativus"],
+        "commonName": "Cucumber"
     }, {
         "preferredName": "Danio rerio",
-        "synomyms": ["Danio rerio", "Zebrafish", "D_rerio", "danRer", "Danio_rerio"]
+        "synomyms": ["Danio rerio", "Zebrafish", "D_rerio", "danRer", "Danio_rerio"],
+        "commonName": "Zebrafish"
     }, {
         "preferredName": "Dasypus novemcinctus",
-        "synomyms": ["Dasypus novemcinctus", "Nine-banded armadillo", "D_novemcinctus", "dasNov", "Dasypus_novemcinctus"]
+        "synomyms": ["Dasypus novemcinctus", "Nine-banded armadillo", "D_novemcinctus", "dasNov", "Dasypus_novemcinctus"],
+        "commonName": "Nine-banded armadillo"
     }, {
         "preferredName": "Dictyostelium discoideum",
-        "synomyms": ["Dictyostelium discoideum", "slime mold", "D_discoideum"]
+        "synomyms": ["Dictyostelium discoideum", "slime mold", "D_discoideum"],
+        "commonName": "slime mold"
     }, {
         "preferredName": "Drosophila ananassae",
-        "synomyms": ["Drosophila ananassae", "D. ananassae (fruit fly)", "D_ananassae", "droAna"]
+        "synomyms": ["Drosophila ananassae", "D. ananassae (fruit fly)", "D_ananassae", "droAna"],
+        "commonName": "D. ananassae (fruit fly)"
     }, {
         "preferredName": "Drosophila erecta",
-        "synomyms": ["Drosophila erecta", "D. erecta (fruit fly)", "D_erecta", "droEre"]
+        "synomyms": ["Drosophila erecta", "D. erecta (fruit fly)", "D_erecta", "droEre"],
+        "commonName": "D. erecta (fruit fly)"
     }, {
         "preferredName": "Drosophila grimshawi",
-        "synomyms": ["Drosophila grimshawi", "D. grimshawi (fruit fly)", "D_grimshawi", "droGri"]
+        "synomyms": ["Drosophila grimshawi", "D. grimshawi (fruit fly)", "D_grimshawi", "droGri"],
+        "commonName": "D. grimshawi (fruit fly)"
     }, {
         "preferredName": "Drosophila melanogaster",
-        "synomyms": ["Drosophila melanogaster", "Common fruit fly", "D. melanogaster", "D_melanogaster", "dm", "Drosophila_melanogaster"]
+        "synomyms": ["Drosophila melanogaster", "Common fruit fly", "D. melanogaster", "D_melanogaster", "dm", "Drosophila_melanogaster"],
+        "commonName": "Common fruit fly"
     }, {
         "preferredName": "Drosophila mojavensis",
-        "synomyms": ["Drosophila mojavensis", "D. mojavensis (fruit fly)", "D_mojavensis", "droMoj"]
+        "synomyms": ["Drosophila mojavensis", "D. mojavensis (fruit fly)", "D_mojavensis", "droMoj"],
+        "commonName": "D. mojavensis (fruit fly)"
     }, {
         "preferredName": "Drosophila persimilis",
-        "synomyms": ["Drosophila persimilis", "D. persimilis (fruit fly)", "D_persimilis", "droPer"]
+        "synomyms": ["Drosophila persimilis", "D. persimilis (fruit fly)", "D_persimilis", "droPer"],
+        "commonName": "D. persimilis (fruit fly)"
     }, {
         "preferredName": "Drosophila pseudoobscura",
-        "synomyms": ["Drosophila pseudoobscura", "D. pseudoobscura (fruit fly)", "D_pseudoobscura", "dp"]
+        "synomyms": ["Drosophila pseudoobscura", "D. pseudoobscura (fruit fly)", "D_pseudoobscura", "dp"],
+        "commonName": "D. pseudoobscura (fruit fly)"
     }, {
         "preferredName": "Drosophila sechellia",
-        "synomyms": ["Drosophila sechellia", "D. sechelia (fruit fly)", "D_sechellia", "droSec"]
+        "synomyms": ["Drosophila sechellia", "D. sechelia (fruit fly)", "D_sechellia", "droSec"],
+        "commonName": "D. sechelia (fruit fly)"
     }, {
         "preferredName": "Drosophila simulans",
-        "synomyms": ["Drosophila simulans", "D. simulans (fruit fly)", "D_simulans", "droSim"]
+        "synomyms": ["Drosophila simulans", "D. simulans (fruit fly)", "D_simulans", "droSim"],
+        "commonName": "D. simulans (fruit fly)"
     }, {
         "preferredName": "Drosophila virilis",
-        "synomyms": ["Drosophila virilis", "D. virilis (fruit fly)", "D_virilis", "droVir"]
+        "synomyms": ["Drosophila virilis", "D. virilis (fruit fly)", "D_virilis", "droVir"],
+        "commonName": "D. virilis (fruit fly)"
     }, {
         "preferredName": "Drosophila yakuba",
-        "synomyms": ["Drosophila yakuba", "D. yakuba (fruit fly)", "D_yakuba", "droYak"]
+        "synomyms": ["Drosophila yakuba", "D. yakuba (fruit fly)", "D_yakuba", "droYak"],
+        "commonName": "D. yakuba (fruit fly)"
     }, {
         "preferredName": "Dipodomys ordii",
-        "synomyms": ["Dipodomys ordii", "Kangaroo rat", "D_ordii", "dipOrd", "Dipodomys_ordii"]
+        "synomyms": ["Dipodomys ordii", "Kangaroo rat", "D_ordii", "dipOrd", "Dipodomys_ordii"],
+        "commonName": "Kangaroo rat"
     }, {
         "preferredName": "Ebola virus",
-        "synomyms": ["Ebola virus", "E_virus", "eboVir"]
+        "synomyms": ["Ebola virus", "E_virus", "eboVir"],
+        "commonName": "Ebola virus"
     }, {
         "preferredName": "Echinops telfairi",
-        "synomyms": ["Echinops telfairi", "Lesser hedgehog tenrec", "E_telfairi", "Echinops_telfairi", "echTel"]
+        "synomyms": ["Echinops telfairi", "Lesser hedgehog tenrec", "E_telfairi", "Echinops_telfairi", "echTel"],
+        "commonName": "Lesser hedgehog tenrec"
     }, {
         "preferredName": "Equus caballus",
-        "synomyms": ["Equus caballus", "Horse", "E_caballus", "equCab", "Equus_caballus"]
+        "synomyms": ["Equus caballus", "Horse", "E_caballus", "equCab", "Equus_caballus"],
+        "commonName": "Horse"
     }, {
         "preferredName": "Erinaceus europaeus",
-        "synomyms": ["Erinaceus europaeus", "European hedgehog", "E_europaeus", "eriEur", "Erinaceus_europaeus"]
+        "synomyms": ["Erinaceus europaeus", "European hedgehog", "E_europaeus", "eriEur", "Erinaceus_europaeus"],
+        "commonName": "European hedgehog"
     }, {
         "preferredName": "Escherichia coli K12-MG1655",
-        "synomyms": ["Escherichia coli K12-MG1655", "E. coli K12-MG1655", "E. coli", "E_coli"]
+        "synomyms": ["Escherichia coli K12-MG1655", "E. coli K12-MG1655", "E. coli", "E_coli"],
+        "commonName": "E. coli K12-MG1655"
     }, {
         "preferredName": "Euprymna scolopes",
-        "synomyms": ["Euprymna scolopes", "Hawaiian bobtail squid", "E_scolopes"]
+        "synomyms": ["Euprymna scolopes", "Hawaiian bobtail squid", "E_scolopes"],
+        "commonName": "Hawaiian bobtail squid"
     }, {
         "preferredName": "Eucalyptus grandis",
-        "synomyms": ["Eucalyptus grandis", "Eucalyptus", "E_grandis"]
+        "synomyms": ["Eucalyptus grandis", "Eucalyptus", "E_grandis"],
+        "commonName": "Eucalyptus"
     }, {
         "preferredName": "Felis catus",
-        "synomyms": ["Felis catus", "House Cat", "F_catus", "felCat", "Felis_catus"]
+        "synomyms": ["Felis catus", "House Cat", "F_catus", "felCat", "Felis_catus"],
+        "commonName": "House Cat"
     }, {
         "preferredName": "Fragaria vesca",
-        "synomyms": ["Fragaria vesca", "woodland strawberry", "F_vesca"]
+        "synomyms": ["Fragaria vesca", "woodland strawberry", "F_vesca"],
+        "commonName": "woodland strawberry"
     }, {
         "preferredName": "Gallus gallus",
-        "synomyms": ["Gallus gallus", "Chicken", "G_gallus", "galGal", "Gallus_gallus"]
+        "synomyms": ["Gallus gallus", "Chicken", "G_gallus", "galGal", "Gallus_gallus"],
+        "commonName": "Chicken"
     }, {
         "preferredName": "Gasterosteus aculeatus",
-        "synomyms": ["Gasterosteus aculeatus", "Stickleback", "G_aculeatus", "gasAcu", "Gasterosteus_aculeatus"]
+        "synomyms": ["Gasterosteus aculeatus", "Stickleback", "G_aculeatus", "gasAcu", "Gasterosteus_aculeatus"],
+        "commonName": "Stickleback"
     }, {
         "preferredName": "Geospiza fortis",
-        "synomyms": ["Geospiza fortis", "medium ground finch", "Geospiza_fortis", "G_fortis", "geoFor"]
+        "synomyms": ["Geospiza fortis", "medium ground finch", "Geospiza_fortis", "G_fortis", "geoFor"],
+        "commonName": "medium ground finch"
     }, {
         "preferredName": "Glycine max",
-        "synomyms": ["Glycine max", "Soybean", "G_max"]
+        "synomyms": ["Glycine max", "Soybean", "G_max"],
+        "commonName": "Soybean"
     }, {
         "preferredName": "Gorilla gorilla",
-        "synomyms": ["Gorilla gorilla", "Western gorilla", "G_gorilla", "gorGor", "Gorilla_gorilla"]
+        "synomyms": ["Gorilla gorilla", "Western gorilla", "G_gorilla", "gorGor", "Gorilla_gorilla"],
+        "commonName": "Western gorilla"
     }, {
         "preferredName": "Gadus morhua",
-        "synomyms": ["Gadus morhua", "Atlantic cod", "G_morhua", "gadMor"]
+        "synomyms": ["Gadus morhua", "Atlantic cod", "G_morhua", "gadMor"],
+        "commonName": "Atlantic cod"
     }, {
         "preferredName": "Gossypium hirsutum",
-        "synomyms": ["Gossypium hirsutum", "Upland cotton", "G_hirsutum"]
+        "synomyms": ["Gossypium hirsutum", "Upland cotton", "G_hirsutum"],
+        "commonName": "Upland cotton"
     }, {
         "preferredName": "Gossypium raimondii",
-        "synomyms": ["Gossypium raimondii", "Cotton D", "G_raimondii"]
+        "synomyms": ["Gossypium raimondii", "Cotton D", "G_raimondii"],
+        "commonName": "Cotton D"
     }, {
         "preferredName": "Heterocephalus glaber",
-        "synomyms": ["Heterocephalus glaber", "Naked mole rat", "Heterocephalus_glaber", "H_glaber", "hetGla"]
+        "synomyms": ["Heterocephalus glaber", "Naked mole rat", "Heterocephalus_glaber", "H_glaber", "hetGla"],
+        "commonName": "Naked mole rat"
     }, {
         "preferredName": "Homo sapiens",
-        "synomyms": ["Homo sapiens", "Human", "H_sapiens", "hg", "Homo_sapiens"]
+        "synomyms": ["Homo sapiens", "Human", "H_sapiens", "hg", "Homo_sapiens"],
+        "commonName": "Human"
     }, {
         "preferredName": "Hordeum vulgare",
-        "synomyms": ["Hordeum vulgare", "Barley", "H_vulgare"]
+        "synomyms": ["Hordeum vulgare", "Barley", "H_vulgare"],
+        "commonName": "Barley"
     }, {
         "preferredName": "Latimeria chalumnae",
-        "synomyms": ["Latimeria chalumnae", "Coelacanth", "L_chalumnae", "latCha"]
+        "synomyms": ["Latimeria chalumnae", "Coelacanth", "L_chalumnae", "latCha"],
+        "commonName": "Coelacanth"
     }, {
         "preferredName": "Lemna gibba",
-        "synomyms": ["Lemna gibba", "Gibbous duckweed", "L_gibba"]
+        "synomyms": ["Lemna gibba", "Gibbous duckweed", "L_gibba"],
+        "commonName": "Gibbous duckweed"
     }, {
         "preferredName": "Linum usitatissimum",
-        "synomyms": ["Linum usitatissimum", "flax", "L_usitatissimum"]
+        "synomyms": ["Linum usitatissimum", "flax", "L_usitatissimum"],
+        "commonName": "flax"
     }, {
         "preferredName": "Loligo pealeii",
-        "synomyms": ["Loligo pealeii", "Longfin inshore squid", "L_pealeii"]
+        "synomyms": ["Loligo pealeii", "Longfin inshore squid", "L_pealeii"],
+        "commonName": "Longfin inshore squid"
     }, {
         "preferredName": "Loxodonta africana",
-        "synomyms": ["Loxodonta africana", "African bush elephant", "L_africana", "loxAfr", "Loxodonta_africana"]
+        "synomyms": ["Loxodonta africana", "African bush elephant", "L_africana", "loxAfr", "Loxodonta_africana"],
+        "commonName": "African bush elephant"
     }, {
         "preferredName": "Lotus japonicus",
-        "synomyms": ["Lotus japonicus", "a model legume", "L_japonicus"]
+        "synomyms": ["Lotus japonicus", "a model legume", "L_japonicus"],
+        "commonName": "a model legume"
     }, {
         "preferredName": "Macaca mulatta",
-        "synomyms": ["Macaca mulatta", "Rhesus monkey", "M_mulatta", "rheMac", "Macaca_mulatta"]
+        "synomyms": ["Macaca mulatta", "Rhesus monkey", "M_mulatta", "rheMac", "Macaca_mulatta"],
+        "commonName": "Rhesus monkey"
     }, {
         "preferredName": "Macropus eugenii",
-        "synomyms": ["Macropus eugenii", "Tammar wallaby", "M_eugenii", "Macropus_eugenii", "macEug"]
+        "synomyms": ["Macropus eugenii", "Tammar wallaby", "M_eugenii", "Macropus_eugenii", "macEug"],
+        "commonName": "Tammar wallaby"
     }, {
         "preferredName": "Malus domestica",
-        "synomyms": ["Malus domestica", "Apple", "M_domestica"]
+        "synomyms": ["Malus domestica", "Apple", "M_domestica"],
+        "commonName": "Apple"
     }, {
         "preferredName": "Manihot esculenta",
-        "synomyms": ["Manihot esculenta", "Cassava", "M_esculenta"]
+        "synomyms": ["Manihot esculenta", "Cassava", "M_esculenta"],
+        "commonName": "Cassava"
     }, {
         "preferredName": "Medicago truncatula",
-        "synomyms": ["Medicago truncatula", "Barrel medic", "M_truncatula"]
+        "synomyms": ["Medicago truncatula", "Barrel medic", "M_truncatula"],
+        "commonName": "Barrel medic"
     }, {
         "preferredName": "Meleagris gallopavo",
-        "synomyms": ["Meleagris gallopavo", "Turkey", "M_gallopavo", "Meleagris_gallopavo", "melGal"]
+        "synomyms": ["Meleagris gallopavo", "Turkey", "M_gallopavo", "Meleagris_gallopavo", "melGal"],
+        "commonName": "Turkey"
     }, {
         "preferredName": "Melopsittacus undulatus",
-        "synomyms": ["Melopsittacus undulatus", "Budgie", "M_undulatus", "melUnd"]
+        "synomyms": ["Melopsittacus undulatus", "Budgie", "M_undulatus", "melUnd"],
+        "commonName": "Budgie"
     }, {
         "preferredName": "Microcebus murinus",
-        "synomyms": ["Microcebus murinus", "Gray mouse lemur", "M_murinus", "micMur", "Microcebus_murinus"]
+        "synomyms": ["Microcebus murinus", "Gray mouse lemur", "M_murinus", "micMur", "Microcebus_murinus"],
+        "commonName": "Gray mouse lemur"
     }, {
         "preferredName": "Mimulus guttatus",
-        "synomyms": ["Mimulus guttatus", "Monkey flower", "M_guttatus"]
+        "synomyms": ["Mimulus guttatus", "Monkey flower", "M_guttatus"],
+        "commonName": "Monkey flower"
     }, {
         "preferredName": "Monodelphis domestica",
-        "synomyms": ["Monodelphis domestica", "Opossum", "M_domestica", "monDom", "Monodelphis_domestica"]
+        "synomyms": ["Monodelphis domestica", "Opossum", "M_domestica", "monDom", "Monodelphis_domestica"],
+        "commonName": "Opossum"
     }, {
         "preferredName": "Monosiga brevicollis",
-        "synomyms": ["Monosiga brevicollis", "Choanoflagellates", "Monosiga_brevicollis"]
+        "synomyms": ["Monosiga brevicollis", "Choanoflagellates", "Monosiga_brevicollis"],
+        "commonName": "Choanoflagellates"
     }, {
         "preferredName": "Mus musculus",
-        "synomyms": ["Mus musculus", "House mouse", "M_musculus", "mm", "Mus_musculus"]
+        "synomyms": ["Mus musculus", "House mouse", "M_musculus", "mm", "Mus_musculus"],
+        "commonName": "House mouse"
     }, {
         "preferredName": "Mustela putorius furo",
-        "synomyms": ["Mustela putorius furo", "Domesticated ferret", "M_putorius", "musFur"]
+        "synomyms": ["Mustela putorius furo", "Domesticated ferret", "M_putorius", "musFur"],
+        "commonName": "Domesticated ferret"
     }, {
         "preferredName": "Mycobacterium abscessus",
-        "synomyms": ["Mycobacterium abscessus", "M. abcessus", "M_abscessus"]
+        "synomyms": ["Mycobacterium abscessus", "M. abcessus", "M_abscessus"],
+        "commonName": "M. abcessus"
     }, {
         "preferredName": "Mycobacterium smegmatis",
-        "synomyms": ["Mycobacterium smegmatis", "M. smegmatis", "M_smegmatis"]
+        "synomyms": ["Mycobacterium smegmatis", "M. smegmatis", "M_smegmatis"],
+        "commonName": "M. smegmatis"
     }, {
         "preferredName": "Mycobacterium tuberculosis",
-        "synomyms": ["Mycobacterium tuberculosis", "M. tuberculosis", "M_tuberculosis"]
+        "synomyms": ["Mycobacterium tuberculosis", "M. tuberculosis", "M_tuberculosis"],
+        "commonName": "M. tuberculosis"
     }, {
         "preferredName": "Myotis lucifugus",
-        "synomyms": ["Myotis lucifugus", "Little brown bat", "M_lucifugus", "Myotis_lucifugus", "myoLuc"]
+        "synomyms": ["Myotis lucifugus", "Little brown bat", "M_lucifugus", "Myotis_lucifugus", "myoLuc"],
+        "commonName": "Little brown bat"
     }, {
         "preferredName": "Nematostella vectensis",
-        "synomyms": ["Nematostella vectensis", "starlet sea anemone", "N_vectensis"]
+        "synomyms": ["Nematostella vectensis", "starlet sea anemone", "N_vectensis"],
+        "commonName": "starlet sea anemone"
     }, {
         "preferredName": "Nicotiana tabacum",
-        "synomyms": ["Nicotiana tabacum", "Tobacco", "N_tabacum"]
+        "synomyms": ["Nicotiana tabacum", "Tobacco", "N_tabacum"],
+        "commonName": "Tobacco"
     }, {
         "preferredName": "Nomascus leucogenys",
-        "synomyms": ["Nomascus leucogenys", "Northern white-cheeked gibbon", "Nomascus_leucogenys", "N_leucogenys", "nomLeu"]
+        "synomyms": ["Nomascus leucogenys", "Northern white-cheeked gibbon", "Nomascus_leucogenys", "N_leucogenys", "nomLeu"],
+        "commonName": "Northern white-cheeked gibbon"
     }, {
         "preferredName": "Ochotona princeps",
-        "synomyms": ["Ochotona princeps", "American pika", "O_princeps", "ochPri", "Ochotona_princeps"]
+        "synomyms": ["Ochotona princeps", "American pika", "O_princeps", "ochPri", "Ochotona_princeps"],
+        "commonName": "American pika"
     }, {
         "preferredName": "Oreochromis niloticus",
-        "synomyms": ["Oreochromis niloticus", "Nile tilapia", "O_niloticus", "oreNil"]
+        "synomyms": ["Oreochromis niloticus", "Nile tilapia", "O_niloticus", "oreNil"],
+        "commonName": "Nile tilapia"
     }, {
         "preferredName": "Ornithorhynchus anatinus",
-        "synomyms": ["Ornithorhynchus anatinus", "Platypus", "O_anatinus", "ornAna", "Ornithorhynchus_anatinus"]
+        "synomyms": ["Ornithorhynchus anatinus", "Platypus", "O_anatinus", "ornAna", "Ornithorhynchus_anatinus"],
+        "commonName": "Platypus"
     }, {
         "preferredName": "Oryctolagus cuniculus",
-        "synomyms": ["Oryctolagus cuniculus", "European rabbit", "O_cuniculus", "Oryctolagus_cuniculus", "oryCun"]
+        "synomyms": ["Oryctolagus cuniculus", "European rabbit", "O_cuniculus", "Oryctolagus_cuniculus", "oryCun"],
+        "commonName": "European rabbit"
     }, {
         "preferredName": "Oryza sativa indica",
-        "synomyms": ["Oryza sativa indica", "Rice (indica)", "O_sativa_indica"]
+        "synomyms": ["Oryza sativa indica", "Rice (indica)", "O_sativa_indica"],
+        "commonName": "Rice (indica)"
     }, {
         "preferredName": "Oryza sativa japonica",
-        "synomyms": ["Oryza sativa japonica", "Rice (japonica)", "O_sativa", "O_sativa_japonica"]
+        "synomyms": ["Oryza sativa japonica", "Rice (japonica)", "O_sativa", "O_sativa_japonica"],
+        "commonName": "Rice (japonica)"
     }, {
         "preferredName": "Oryzias latipes",
-        "synomyms": ["Oryzias latipes", "Medaka", "O_latipes", "oryLat", "Oryzias_latipes"]
+        "synomyms": ["Oryzias latipes", "Medaka", "O_latipes", "oryLat", "Oryzias_latipes"],
+        "commonName": "Medaka"
     }, {
         "preferredName": "Otolemur garnettii",
-        "synomyms": ["Otolemur garnettii", "Nothern greater galago", "O_garnettii", "otoGar", "Otolemur_garnettii"]
+        "synomyms": ["Otolemur garnettii", "Nothern greater galago", "O_garnettii", "otoGar", "Otolemur_garnettii"],
+        "commonName": "Nothern greater galago"
     }, {
         "preferredName": "Ostreococcus lucimarinus",
-        "synomyms": ["Ostreococcus lucimarinus", "O. lucimarinus", "O_lucimarinus"]
+        "synomyms": ["Ostreococcus lucimarinus", "O. lucimarinus", "O_lucimarinus"],
+        "commonName": "O. lucimarinus"
     }, {
         "preferredName": "Ovis aries",
-        "synomyms": ["Ovis aries", "sheep", "O_aries", "OAR", "oviAri"]
+        "synomyms": ["Ovis aries", "sheep", "O_aries", "OAR", "oviAri"],
+        "commonName": "sheep"
     }, {
         "preferredName": "Pan paniscus",
-        "synomyms": ["Pan paniscus", "Bonobo", "P_paniscus", "panPan"]
+        "synomyms": ["Pan paniscus", "Bonobo", "P_paniscus", "panPan"],
+        "commonName": "Bonobo"
     }, {
         "preferredName": "Pan troglodytes",
-        "synomyms": ["Pan troglodytes", "Chimp", "P_troglodytes", "panTro", "Pan_troglodytes"]
+        "synomyms": ["Pan troglodytes", "Chimp", "P_troglodytes", "panTro", "Pan_troglodytes"],
+        "commonName": "Chimp"
     }, {
         "preferredName": "Panicum virgatum",
-        "synomyms": ["Panicum virgatum", "Switchgrass", "P_virgatum"]
+        "synomyms": ["Panicum virgatum", "Switchgrass", "P_virgatum"],
+        "commonName": "Switchgrass"
     }, {
         "preferredName": "Papio anubis",
-        "synomyms": ["Papio anubis", "olive baboon", "P_anubis", "papAnu"]
+        "synomyms": ["Papio anubis", "olive baboon", "P_anubis", "papAnu"],
+        "commonName": "olive baboon"
     }, {
         "preferredName": "Papio hamadryas",
-        "synomyms": ["Papio hamadryas", "hamadryas baboon", "P_hamadryas", "papHam"]
+        "synomyms": ["Papio hamadryas", "hamadryas baboon", "P_hamadryas", "papHam"],
+        "commonName": "hamadryas baboon"
     }, {
         "preferredName": "Petromyzon marinus",
-        "synomyms": ["Petromyzon marinus", "Lamprey", "P_marinus", "petMar"]
+        "synomyms": ["Petromyzon marinus", "Lamprey", "P_marinus", "petMar"],
+        "commonName": "Lamprey"
     }, {
         "preferredName": "Phaseolus vulgaris",
-        "synomyms": ["Phaseolus vulgaris", "Common bean", "P_vulgaris"]
+        "synomyms": ["Phaseolus vulgaris", "Common bean", "P_vulgaris"],
+        "commonName": "Common bean"
     }, {
         "preferredName": "Physcomitrella patens",
-        "synomyms": ["Physcomitrella patens", "Moss", "P_patens"]
+        "synomyms": ["Physcomitrella patens", "Moss", "P_patens"],
+        "commonName": "Moss"
     }, {
         "preferredName": "Pinus taeda",
-        "synomyms": ["Pinus taeda", "Loblolly Pine", "P. taeda", "P_taeda"]
+        "synomyms": ["Pinus taeda", "Loblolly Pine", "P. taeda", "P_taeda"],
+        "commonName": "Loblolly Pine"
     }, {
         "preferredName": "Plasmodium falciparum",
-        "synomyms": ["Plasmodium falciparum", "P. falciparum", "P_falciparum", "Pfalciparum_3D7_plasmoDB-5.4", "Pfalciparum_3D7_plasmoDB-5.5"]
+        "synomyms": ["Plasmodium falciparum", "P. falciparum", "P_falciparum", "Pfalciparum_3D7_plasmoDB-5.4", "Pfalciparum_3D7_plasmoDB-5.5"],
+        "commonName": "P. falciparum"
     }, {
         "preferredName": "Pongo pygmaeus abelii",
-        "synomyms": ["Pongo pygmaeus abelii", "Orangutan", "P_abelii", "ponAbe", "Pongo_pygmaeus"]
+        "synomyms": ["Pongo pygmaeus abelii", "Orangutan", "P_abelii", "ponAbe", "Pongo_pygmaeus"],
+        "commonName": "Orangutan"
     }, {
         "preferredName": "Populus trichocarpa",
-        "synomyms": ["Populus trichocarpa", "Black cottonwood", "P_trichocarpa"]
+        "synomyms": ["Populus trichocarpa", "Black cottonwood", "P_trichocarpa"],
+        "commonName": "Black cottonwood"
     }, {
         "preferredName": "Pristionchus pacificus",
-        "synomyms": ["Pristionchus pacificus", "P. pacificus (nematode)", "P_pacificus", "priPac"]
+        "synomyms": ["Pristionchus pacificus", "P. pacificus (nematode)", "P_pacificus", "priPac"],
+        "commonName": "P. pacificus (nematode)"
     }, {
         "preferredName": "Procavia capensis",
-        "synomyms": ["Procavia capensis", "Rock hyrax", "P_capensis", "proCap", "Procavia_capensis"]
+        "synomyms": ["Procavia capensis", "Rock hyrax", "P_capensis", "proCap", "Procavia_capensis"],
+        "commonName": "Rock hyrax"
     }, {
         "preferredName": "Pseudomonas aeruginosa",
-        "synomyms": ["Pseudomonas aeruginosa", "P_aeruginosa", "P. aeruginosa"]
+        "synomyms": ["Pseudomonas aeruginosa", "P_aeruginosa", "P. aeruginosa"],
+        "commonName": "P_aeruginosa"
     }, {
         "preferredName": "Pteropus vampyrus",
-        "synomyms": ["Pteropus vampyrus", "Large flying fox", "P_vampyrus", "pteVam", "Pteropus_vampyrus"]
+        "synomyms": ["Pteropus vampyrus", "Large flying fox", "P_vampyrus", "pteVam", "Pteropus_vampyrus"],
+        "commonName": "Large flying fox"
     }, {
         "preferredName": "Prunus persica",
-        "synomyms": ["Prunus persica", "Peach", "P_persica"]
+        "synomyms": ["Prunus persica", "Peach", "P_persica"],
+        "commonName": "Peach"
     }, {
         "preferredName": "Rattus norvegicus",
-        "synomyms": ["Rattus norvegicus", "Rat", "R_norvegicus", "rn", "Rattus_norvegicus"]
+        "synomyms": ["Rattus norvegicus", "Rat", "R_norvegicus", "rn", "Rattus_norvegicus"],
+        "commonName": "Rat"
     }, {
         "preferredName": "Ricinus communis",
-        "synomyms": ["Ricinus communis", "Castor oil plant", "R_communis"]
+        "synomyms": ["Ricinus communis", "Castor oil plant", "R_communis"],
+        "commonName": "Castor oil plant"
     }, {
         "preferredName": "Saccharomyces cerevisiae",
-        "synomyms": ["Saccharomyces cerevisiae", "Budding Yeast", "S_cerevisiae", "sacCer", "Saccharomyces_cerevisiae"]
+        "synomyms": ["Saccharomyces cerevisiae", "Budding Yeast", "S_cerevisiae", "sacCer", "Saccharomyces_cerevisiae"],
+        "commonName": "Budding Yeast"
     }, {
         "preferredName": "Saimiri boliviensis",
-        "synomyms": ["Saimiri boliviensis", "squirrel monkey", "S_boliviensis", "saiBol"]
+        "synomyms": ["Saimiri boliviensis", "squirrel monkey", "S_boliviensis", "saiBol"],
+        "commonName": "squirrel monkey"
     }, {
         "preferredName": "Sarcophilus harrisii",
-        "synomyms": ["Sarcophilus harrisii", "Tasmanian devil", "Sarcophilus_harrisii", "S_harrisii", "sarHar"]
+        "synomyms": ["Sarcophilus harrisii", "Tasmanian devil", "Sarcophilus_harrisii", "S_harrisii", "sarHar"],
+        "commonName": "Tasmanian devil"
     }, {
         "preferredName": "Schizosaccharomyces pombe",
-        "synomyms": ["Schizosaccharomyces pombe", "Fission Yeast", "S_pombe"]
+        "synomyms": ["Schizosaccharomyces pombe", "Fission Yeast", "S_pombe"],
+        "commonName": "Fission Yeast"
     }, {
         "preferredName": "Selaginella moellendorffii",
-        "synomyms": ["Selaginella moellendorffii", "Spikemoss", "S. moellendorffii", "S_moellendorffii"]
+        "synomyms": ["Selaginella moellendorffii", "Spikemoss", "S. moellendorffii", "S_moellendorffii"],
+        "commonName": "Spikemoss"
     }, {
         "preferredName": "Setaria italica",
-        "synomyms": ["Setaria italica", "Foxtail millet", "S. italica", "S_italica"]
+        "synomyms": ["Setaria italica", "Foxtail millet", "S. italica", "S_italica"],
+        "commonName": "Foxtail millet"
     }, {
         "preferredName": "Sigmodon hispidus",
-        "synomyms": ["Sigmodon hispidus", "Cotton rat", "S_hispidus"]
+        "synomyms": ["Sigmodon hispidus", "Cotton rat", "S_hispidus"],
+        "commonName": "Cotton rat"
     }, {
         "preferredName": "Sodalis glossinidius",
-        "synomyms": ["Sodalis glossinidius", "S. glossinidius", "S_glossinidius"]
+        "synomyms": ["Sodalis glossinidius", "S. glossinidius", "S_glossinidius"],
+        "commonName": "S. glossinidius"
     }, {
         "preferredName": "Solanum lycopersicum",
-        "synomyms": ["Solanum lycopersicum", "Tomato", "S_lycopersicum"]
+        "synomyms": ["Solanum lycopersicum", "Tomato", "S_lycopersicum"],
+        "commonName": "Tomato"
     }, {
         "preferredName": "Sorex araneus",
-        "synomyms": ["Sorex araneus", "Eurasian shrew", "S_araneus", "sorAra", "Sorex_araneus"]
+        "synomyms": ["Sorex araneus", "Eurasian shrew", "S_araneus", "sorAra", "Sorex_araneus"],
+        "commonName": "Eurasian shrew"
     }, {
         "preferredName": "Sorghum bicolor",
-        "synomyms": ["Sorghum bicolor", "Sorghum", "S_bicolor"]
+        "synomyms": ["Sorghum bicolor", "Sorghum", "S_bicolor"],
+        "commonName": "Sorghum"
     }, {
         "preferredName": "Spermophilus tridecemlineatus",
-        "synomyms": ["Spermophilus tridecemlineatus", "Thirteen-lined ground squirrel", "S_tridecemlineatus", "speTri", "Spermophilus_tridecemlineatus"]
+        "synomyms": ["Spermophilus tridecemlineatus", "Thirteen-lined ground squirrel", "S_tridecemlineatus", "speTri", "Spermophilus_tridecemlineatus"],
+        "commonName": "Thirteen-lined ground squirrel"
     }, {
         "preferredName": "Strongylocentrotus purpuratus",
-        "synomyms": ["Strongylocentrotus purpuratus", "Purple sea urchin", "S_purpuratus", "strPur"]
+        "synomyms": ["Strongylocentrotus purpuratus", "Purple sea urchin", "S_purpuratus", "strPur"],
+        "commonName": "Purple sea urchin"
     }, {
         "preferredName": "Sus scrofa",
-        "synomyms": ["Sus scrofa", "Wild boar", "S_scrofa", "Sus_scrofa", "susScr"]
+        "synomyms": ["Sus scrofa", "Wild boar", "S_scrofa", "Sus_scrofa", "susScr"],
+        "commonName": "Wild boar"
     }, {
         "preferredName": "Taeniopygia guttata",
-        "synomyms": ["Taeniopygia guttata", "Zebra finch", "T_guttata", "taeGut", "Taeniopygia_guttata"]
+        "synomyms": ["Taeniopygia guttata", "Zebra finch", "T_guttata", "taeGut", "Taeniopygia_guttata"],
+        "commonName": "Zebra finch"
     }, {
         "preferredName": "Takifugu rubripes",
-        "synomyms": ["Takifugu rubripes", "Fugu", "T_rubripes", "fr", "Takifugu_rubripes"]
+        "synomyms": ["Takifugu rubripes", "Fugu", "T_rubripes", "fr", "Takifugu_rubripes"],
+        "commonName": "Fugu"
     }, {
         "preferredName": "Tarsius syrichta",
-        "synomyms": ["Tarsius syrichta", "Philippine tarsier", "T_syrichta", "tarSyr", "Tarsius_syrichta"]
+        "synomyms": ["Tarsius syrichta", "Philippine tarsier", "T_syrichta", "tarSyr", "Tarsius_syrichta"],
+        "commonName": "Philippine tarsier"
     }, {
         "preferredName": "Tetraodon nigroviridis",
-        "synomyms": ["Tetraodon nigroviridis", "Tetraodon", "T_nigroviridis", "tetNig", "Tetraodon_nigroviridis"]
+        "synomyms": ["Tetraodon nigroviridis", "Tetraodon", "T_nigroviridis", "tetNig", "Tetraodon_nigroviridis"],
+        "commonName": "Tetraodon"
     }, {
         "preferredName": "Thellungiella halophila",
-        "synomyms": ["Thellungiella halophila", "Salt cress", "T_halophila"]
+        "synomyms": ["Thellungiella halophila", "Salt cress", "T_halophila"],
+        "commonName": "Salt cress"
     }, {
         "preferredName": "Thellungiella parvula",
-        "synomyms": ["Thellungiella parvula", "Anatolian cress", "T_parvula"]
+        "synomyms": ["Thellungiella parvula", "Anatolian cress", "T_parvula"],
+        "commonName": "Anatolian cress"
     }, {
         "preferredName": "Thermococcus kodakaraensis KOD1",
-        "synomyms": ["Thermococcus kodakaraensis KOD1", "Hyperthermophilic Archaeon", "T_kodakaraensis_KOD1", "T. kodakaraensis_KOD1", "T_kodakaraensis_KOD"]
+        "synomyms": ["Thermococcus kodakaraensis KOD1", "Hyperthermophilic Archaeon", "T_kodakaraensis_KOD1", "T. kodakaraensis_KOD1", "T_kodakaraensis_KOD"],
+        "commonName": "Hyperthermophilic Archaeon"
     }, {
         "preferredName": "Tribolium castaneum",
-        "synomyms": ["Tribolium castaneum", "Red flour beetle", "T_castaneum"]
+        "synomyms": ["Tribolium castaneum", "Red flour beetle", "T_castaneum"],
+        "commonName": "Red flour beetle"
     }, {
         "preferredName": "Trichechus manatus latirostris",
-        "synomyms": ["Trichechus manatus latirostris", "West Indian manatee", "T_manatus", "triMan"]
+        "synomyms": ["Trichechus manatus latirostris", "West Indian manatee", "T_manatus", "triMan"],
+        "commonName": "West Indian manatee"
     }, {
         "preferredName": "Triticum aestivum",
-        "synomyms": ["Triticum aestivum", "Common wheat", "T_aestivum"]
+        "synomyms": ["Triticum aestivum", "Common wheat", "T_aestivum"],
+        "commonName": "Common wheat"
     }, {
         "preferredName": "Trypanosoma brucei",
-        "synomyms": ["Trypanosoma brucei", "Protozoan parasites", "T_brucei"]
+        "synomyms": ["Trypanosoma brucei", "Protozoan parasites", "T_brucei"],
+        "commonName": "Protozoan parasites"
     }, {
         "preferredName": "Tupaia belangeri",
-        "synomyms": ["Tupaia belangeri", "Northern tree shrew", "T_belangeri", "tupBel", "Tupaia_belangeri"]
+        "synomyms": ["Tupaia belangeri", "Northern tree shrew", "T_belangeri", "tupBel", "Tupaia_belangeri"],
+        "commonName": "Northern tree shrew"
     }, {
         "preferredName": "Tursiops truncatus",
-        "synomyms": ["Tursiops truncatus", "Bottlenose dolphin", "T_truncatus", "turTru", "Tursiops_truncatus"]
+        "synomyms": ["Tursiops truncatus", "Bottlenose dolphin", "T_truncatus", "turTru", "Tursiops_truncatus"],
+        "commonName": "Bottlenose dolphin"
     }, {
         "preferredName": "Vaccinium corymbosum",
-        "synomyms": ["Vaccinium corymbosum", "blueberry", "V_corymbosum"]
+        "synomyms": ["Vaccinium corymbosum", "blueberry", "V_corymbosum"],
+        "commonName": "blueberry"
     }, {
         "preferredName": "Vicugna pacos",
-        "synomyms": ["Vicugna pacos", "Alpaca", "V_pacos", "vicPac", "Vicugna_pacos"]
+        "synomyms": ["Vicugna pacos", "Alpaca", "V_pacos", "vicPac", "Vicugna_pacos"],
+        "commonName": "Alpaca"
     }, {
         "preferredName": "Vitis vinifera",
-        "synomyms": ["Vitis vinifera", "Common grape vine", "V_vinifera"]
+        "synomyms": ["Vitis vinifera", "Common grape vine", "V_vinifera"],
+        "commonName": "Common grape vine"
     }, {
         "preferredName": "Volvox carteri",
-        "synomyms": ["Volvox carteri", "Volvox", "V. carteri", "V_carteri"]
+        "synomyms": ["Volvox carteri", "Volvox", "V. carteri", "V_carteri"],
+        "commonName": "Volvox"
     }, {
         "preferredName": "Xenopus laevis",
-        "synomyms": ["Xenopus laevis", "African clawed frog", "X_laevis"]
+        "synomyms": ["Xenopus laevis", "African clawed frog", "X_laevis"],
+        "commonName": "African clawed frog"
     }, {
         "preferredName": "Xenopus tropicalis",
-        "synomyms": ["Xenopus tropicalis", "Pipid frog", "X_tropicalis", "xenTro", "Xenopus_tropicalis"]
+        "synomyms": ["Xenopus tropicalis", "Pipid frog", "X_tropicalis", "xenTro", "Xenopus_tropicalis"],
+        "commonName": "Pipid frog"
     }, {
         "preferredName": "Yersinia pestis",
-        "synomyms": ["Yersinia pestis", "Bubonic plague pathogen", "Y_pestis"]
+        "synomyms": ["Yersinia pestis", "Bubonic plague pathogen", "Y_pestis"],
+        "commonName": "Bubonic plague pathogen"
     }, {
         "preferredName": "Yersinia pseudotuberculosis",
-        "synomyms": ["Yersinia pseudotuberculosis", "Y. pseudotuberculosis", "Y_pseudotuberculosis"]
+        "synomyms": ["Yersinia pseudotuberculosis", "Y. pseudotuberculosis", "Y_pseudotuberculosis"],
+        "commonName": "Y. pseudotuberculosis"
     }, {
         "preferredName": "Zea mays B73",
-        "synomyms": ["Zea mays B73", "Maize B73", "Z_mays"]
+        "synomyms": ["Zea mays B73", "Maize B73", "Z_mays"],
+        "commonName": "Maize B73"
     }]
-

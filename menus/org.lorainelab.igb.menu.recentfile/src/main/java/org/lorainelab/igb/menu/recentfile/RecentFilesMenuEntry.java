@@ -8,15 +8,17 @@ import com.google.common.io.Files;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.WeakChangeListener;
 import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableSet;
-import javafx.collections.SetChangeListener;
+import javafx.collections.WeakListChangeListener;
 import javafx.scene.control.MenuItem;
+import org.lorainelab.igb.data.model.GenomeVersion;
+import org.lorainelab.igb.datasetloadingservice.api.DataSetLoadingService;
 import org.lorainelab.igb.menu.api.MenuBarEntryProvider;
 import org.lorainelab.igb.menu.api.model.ParentMenu;
 import org.lorainelab.igb.menu.api.model.WeightedMenu;
 import org.lorainelab.igb.menu.api.model.WeightedMenuEntry;
-import org.lorainelab.igb.datasetloadingservice.api.DataSetLoadingService;
 import org.lorainelab.igb.recentfiles.registry.api.RecentFilesRegistry;
 import org.lorainelab.igb.selections.SelectionInfoService;
 import org.slf4j.LoggerFactory;
@@ -45,18 +47,20 @@ public class RecentFilesMenuEntry implements MenuBarEntryProvider {
     @Activate
     public void activate() {
         buildRecentFileMenu();
-        recentFilesRegistry.getRecentFiles().addListener((ListChangeListener.Change<? extends String> change) -> {
+        recentFilesRegistry.getRecentFiles().addListener(new WeakListChangeListener<>((ListChangeListener.Change<? extends String> change) -> {
             buildRecentFileMenu();
-        });
+        }));
         clearMenuItem.setOnAction(action -> {
             recentFilesRegistry.clearRecentFiles();
             recentFilesMenu.setDisable(true);
         });
         recentFilesMenu.setDisable(!selectionInfoService.getSelectedGenomeVersion().get().isPresent());
-        selectionInfoService.getSelectedGenomeVersion().addListener((observable, oldValue, newValue) -> {
+        selectedGenomeVersionChangeListener = (observable, oldValue, newValue) -> {
             recentFilesMenu.setDisable(!selectionInfoService.getSelectedGenomeVersion().get().isPresent());
-        });
+        };
+        selectionInfoService.getSelectedGenomeVersion().addListener(new WeakChangeListener<>(selectedGenomeVersionChangeListener));
     }
+    private ChangeListener<Optional<GenomeVersion>> selectedGenomeVersionChangeListener;
 
     private void buildRecentFileMenu() {
         recentFilesMenu.getItems().clear();
@@ -77,7 +81,7 @@ public class RecentFilesMenuEntry implements MenuBarEntryProvider {
             menuItem.setOnAction(action -> {
                 fileOpener.openDataSet(new File(recentFile));
             });
-        }else{
+        } else {
             //option for user to delete entry
         }
         return menuItem;
@@ -102,7 +106,7 @@ public class RecentFilesMenuEntry implements MenuBarEntryProvider {
     public void setDataSetLoadingService(DataSetLoadingService fileOpener) {
         this.fileOpener = fileOpener;
     }
-    
+
     @Reference
     public void setSelectionInfoService(SelectionInfoService selectionInfoService) {
         this.selectionInfoService = selectionInfoService;

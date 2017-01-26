@@ -7,7 +7,9 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 import java.util.Collections;
 import java.util.List;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.beans.value.WeakChangeListener;
 import javafx.geometry.Bounds;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.Canvas;
@@ -41,13 +43,15 @@ public class ViewPortManager {
     public void activate() {
         this.canvas = canvasRegion.getCanvas();
         refresh();
-        canvasModel.getyFactor().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+        yFactorChangeListener = (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             tracksModel.getTrackRenderers().forEach(tr -> {
                 tr.stretchDelta().setValue(tr.stretchDelta().doubleValue() + (tr.activeStretchDelta().get() / canvasModel.getyFactor().doubleValue()));
                 tr.activeStretchDelta().setValue(0);
             });
-        });
+        };
+        canvasModel.getyFactor().addListener(new WeakChangeListener<>(yFactorChangeListener));
     }
+    private ChangeListener<Number> yFactorChangeListener;
 
     public final void refresh() {
         labelPane.updatedLabelBounds(canvasModel);
