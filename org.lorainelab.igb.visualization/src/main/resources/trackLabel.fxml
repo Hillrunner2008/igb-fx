@@ -30,7 +30,7 @@
                      <left>
                         <FontAwesomeIconView fx:id="dragGrip" fill="#8d8d8d" glyphName="ARROWS" size="24" BorderPane.alignment="TOP_LEFT">
                            <BorderPane.margin>
-                              <Insets />
+                              <Insets top="10.0" />
                            </BorderPane.margin>
                         </FontAwesomeIconView>
                      </left>

@@ -37,8 +37,8 @@ public class TabPaneManager {
     public TabPaneManager() {
         rightTabPane = new TabPane();
         bottomTabPane = new TabPane();
-        bottomTabPane.setMinHeight(250);
-        rightTabPane.setMinWidth(250);
+//        bottomTabPane.setMinHeight(250);
+//        rightTabPane.setMinWidth(250);
         SplitPane.setResizableWithParent(bottomTabPane, Boolean.FALSE);
         setAnchorPaneConstraints(rightTabPane);
         setAnchorPaneConstraints(bottomTabPane);
