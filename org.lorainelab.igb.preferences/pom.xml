@@ -51,9 +51,10 @@
                             !${project.artifactId}*,
                             *
                         </Import-Package>
-                        <Export-Package>${project.artifactId}</Export-Package>
+                        <Export-Package>org.lorainelab.igb.preferences,org.lorainelab.igb.version</Export-Package>
                         <Bundle-ActivationPolicy>lazy</Bundle-ActivationPolicy>
                         <Service-Component>*</Service-Component>
+                        <Private-Package>org.lorainelab.igb.preferences.*,org.lorainelab.igb.version.*</Private-Package>
                     </instructions>
                 </configuration>
             </plugin>

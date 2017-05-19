@@ -5,21 +5,16 @@ import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import java.io.IOException;
 import java.net.URL;
-import java.text.Collator;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.beans.Observable;
-import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.WeakChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.SetChangeListener;
-import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Tab;
@@ -27,7 +22,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
-import javafx.util.StringConverter;
 import org.lorainelab.igb.data.model.Chromosome;
 import org.lorainelab.igb.data.model.GenomeVersion;
 import org.lorainelab.igb.data.model.GenomeVersionRegistry;
@@ -45,10 +39,6 @@ public class GenomeAssemblyTab implements TabProvider {
     private final Tab genomeAssemblyTab;
     @FXML
     private AnchorPane tabContent;
-    @FXML
-    private ComboBox<String> speciesComboBox;
-    @FXML
-    private ComboBox<GenomeVersion> genomeVersionComboBox;
     @FXML
     private TableView<Chromosome> sequenceInfoTable;
     @FXML
@@ -78,8 +68,6 @@ public class GenomeAssemblyTab implements TabProvider {
             try {
                 fxmlLoader.load();
                 genomeAssemblyTab.setContent(tabContent);
-                initializeSpeciesNameComboBox();
-                initializeGenomeVersionComboBox();
                 initializeSequenceTable();
             } catch (IOException exception) {
                 throw new RuntimeException(exception);
@@ -87,45 +75,12 @@ public class GenomeAssemblyTab implements TabProvider {
         });
     }
 
-    private void initializeGenomeVersionComboBox() {
-        genomeVersionData.addAll(genomeVersionRegistry.getRegisteredGenomeVersions());
-        genomeVersionComboBox.setItems(genomeVersionData);
-        genomeVersionComboBox.setConverter(new StringConverter<GenomeVersion>() {
-            @Override
-            public String toString(GenomeVersion genomeVersion) {
-                return genomeVersion.name().get();
-            }
-
-            @Override
-            public GenomeVersion fromString(String genomeVersionString) {
-                return genomeVersionComboBox.getItems().filtered(gv -> gv.name().equals(genomeVersionString)).get(0);
-            }
-        });
-        genomeVersionComboBox.setDisable(true);
-        genomeVersionComboboxChangeListener = (observable, oldValue, selectedGenomeVersion) -> {
-            genomeVersionRegistry.setSelectedGenomeVersion(selectedGenomeVersion);
-        };
-        genomeVersionComboBox.valueProperty().addListener(new WeakChangeListener<>(genomeVersionComboboxChangeListener));
-        selectedGenomeVersionChangeListener = (observable, oldValue, selectedGenomeVersion) -> {
-            if (selectedGenomeVersion.isPresent()) {
-                loadSelectedGenomeVersion(selectedGenomeVersion.get());
-            } else {
-                tableData.clear();
-                genomeVersionComboBox.setValue(null);
-            }
-        };
-        genomeVersionRegistry.getSelectedGenomeVersion().addListener(selectedGenomeVersionChangeListener);
-    }
     private ChangeListener<GenomeVersion> genomeVersionComboboxChangeListener;
     private ChangeListener<Optional<GenomeVersion>> selectedGenomeVersionChangeListener;
 
     private void loadSelectedGenomeVersion(GenomeVersion selectedGenomeVersion) {
         Platform.runLater(() -> {
             synchronized (tableData) {
-                genomeVersionRegistry.getSelectedGenomeVersion().removeListener(selectedGenomeVersionChangeListener);
-                genomeVersionComboBox.setValue(selectedGenomeVersion);
-                genomeVersionRegistry.getSelectedGenomeVersion().addListener(selectedGenomeVersionChangeListener);
-                speciesComboBox.setValue(selectedGenomeVersion.getSpeciesName().get());
                 tableData.clear();
                 tableData.addAll(selectedGenomeVersion.getChromosomes());
             }
@@ -153,58 +108,6 @@ public class GenomeAssemblyTab implements TabProvider {
                 });
     }
 
-    private void initializeSpeciesNameComboBox() {
-        speciesComboBox.setItems(new SortedList<String>(speciesComboboxItems, Collator.getInstance()));
-        speciesComboboxItems.addAll(
-                genomeVersionRegistry.getRegisteredGenomeVersions()
-                        .stream()
-                        .map(gv -> gv.getSpeciesName().get())
-                        .collect(Collectors.toSet())
-        );
-        genomeVersionRegistry.getRegisteredGenomeVersions().addListener((SetChangeListener.Change<? extends GenomeVersion> change) -> {
-            Platform.runLater(() -> {
-                if (change.wasAdded()) {
-                    if (!speciesComboboxItems.contains(change.getElementAdded().getSpeciesName())) {
-                        final String speciesName = change.getElementAdded().getSpeciesName().get();
-                        if (!speciesComboboxItems.contains(speciesName)) {
-                            speciesComboboxItems.add(speciesName);
-                        }
-                    } else {
-                        //upde only version combo box
-                        genomeVersionComboBox.getItems().add(change.getElementAdded());
-                    }
-                } else {
-                    final GenomeVersion elementRemoved = change.getElementRemoved();
-                    genomeVersionComboBox.getItems().add(elementRemoved);
-                    long otherGenomeOfSameSpecies = genomeVersionRegistry.getRegisteredGenomeVersions().stream()
-                            .filter(genomeVersion -> genomeVersion.getSpeciesName().get().equalsIgnoreCase(change.getElementRemoved().getSpeciesName().get()))
-                            .count();
-                    if (otherGenomeOfSameSpecies <= 0) {
-                        final StringProperty speciesName = change.getElementRemoved().getSpeciesName();
-                        if (speciesComboboxItems.contains(speciesName.get())) {
-                            speciesComboboxItems.remove(speciesName.get());
-                        }
-                    }
-
-                }
-            });
-        });
-        speciesComboBoxChangeListener = (observable, oldValue, newValue) -> {
-            boolean disableGenomeVersionSelection = newValue == null || newValue.equals(speciesComboBox.getPromptText());
-            Platform.runLater(() -> {
-                if (!disableGenomeVersionSelection) {
-                    genomeVersionComboBox.getItems().clear();
-                    genomeVersionRegistry.getRegisteredGenomeVersions().stream()
-                            .filter(genomeVersion -> genomeVersion.getSpeciesName().get().equalsIgnoreCase(newValue))
-                            .forEach(genomeVersion -> genomeVersionComboBox.getItems().add(genomeVersion));
-                } else {
-                    genomeVersionRegistry.setSelectedGenomeVersion(null);
-                }
-                genomeVersionComboBox.setDisable(disableGenomeVersionSelection);
-            });
-        };
-        speciesComboBox.valueProperty().addListener(speciesComboBoxChangeListener);
-    }
     private ChangeListener<String> speciesComboBoxChangeListener;
     private ObservableList<String> speciesComboboxItems;
 
@@ -238,6 +141,14 @@ public class GenomeAssemblyTab implements TabProvider {
         seqNameColumn.prefWidthProperty().bind(sequenceInfoTable.widthProperty().multiply(.40));
         seqLengthColumn.prefWidthProperty().bind(sequenceInfoTable.widthProperty().multiply(.60));
         sequenceInfoTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        selectedGenomeVersionChangeListener = (observable, oldValue, selectedGenomeVersion) -> {
+            if (selectedGenomeVersion.isPresent()) {
+                loadSelectedGenomeVersion(selectedGenomeVersion.get());
+            } else {
+                tableData.clear();
+            }
+        };
+        genomeVersionRegistry.getSelectedGenomeVersion().addListener(new WeakChangeListener<>(selectedGenomeVersionChangeListener));
     }
 
 }
