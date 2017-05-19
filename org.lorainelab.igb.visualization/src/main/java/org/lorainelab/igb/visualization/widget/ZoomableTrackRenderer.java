@@ -59,7 +59,7 @@ public class ZoomableTrackRenderer implements TrackRenderer {
         activeStretchDelta = new SimpleDoubleProperty(0);
         canvasContext = new CanvasContext(canvas, DEFAULT_HEIGHT, 0);
         view = new View(new Rectangle2D(0, 0, modelWidth, track.getModelHeight()), canvasContext, chromosome, track.isNegative());
-        trackLabel = new TrackLabel(this, track.getTrackLabel(), track.isHeightLocked());
+        trackLabel = new TrackLabel(this, track.getTrackLabel(), track.isHeightLocked(), track.isNegative());
         isHeightLocked = trackLabel.getIsHeightLocked();
         gc = canvas.getGraphicsContext2D();
         tooltip = new Tooltip();

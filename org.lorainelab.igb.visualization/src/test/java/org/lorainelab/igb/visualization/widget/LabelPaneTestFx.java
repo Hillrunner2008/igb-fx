@@ -97,10 +97,10 @@ public class LabelPaneTestFx extends ApplicationTest {
         when(negTr.getCanvasContext()).thenReturn(negTrCanvasContext);
         when(negTr.getWeight()).thenReturn(2);
 
-        pos = new TrackLabel(posTr, "bed(+)", new SimpleBooleanProperty(false));
-        coord = new TrackLabel(coordTr, "Coordinates", new SimpleBooleanProperty(true));
-        neg = new TrackLabel(negTr, "bed(-)", new SimpleBooleanProperty(false));
-        
+        pos = new TrackLabel(posTr, "bed(+)", new SimpleBooleanProperty(false), false);
+        coord = new TrackLabel(coordTr, "Coordinates", new SimpleBooleanProperty(true), true);
+        neg = new TrackLabel(negTr, "bed(-)", new SimpleBooleanProperty(false), true);
+
         when(posTr.getTrackLabel()).thenReturn(pos);
         when(coordTr.getTrackLabel()).thenReturn(coord);
         when(negTr.getTrackLabel()).thenReturn(neg);

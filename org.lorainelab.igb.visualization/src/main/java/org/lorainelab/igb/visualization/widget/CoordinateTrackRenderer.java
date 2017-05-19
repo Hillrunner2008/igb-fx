@@ -57,7 +57,7 @@ public class CoordinateTrackRenderer implements TrackRenderer {
         weight = 0;
         viewBoundingRectangle = new Rectangle2D(0, 0, modelWidth, modelHeight);
         canvasContext = new CanvasContext(canvas, modelHeight, 0);
-        trackLabel = new TrackLabel(this, COORDINATES_TRACK_LABEL, new SimpleBooleanProperty(true));
+        trackLabel = new TrackLabel(this, COORDINATES_TRACK_LABEL, new SimpleBooleanProperty(true), false);
         gc = canvas.getGraphicsContext2D();
     }
 
