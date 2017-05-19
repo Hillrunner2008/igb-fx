@@ -275,13 +275,51 @@ public class ZoomableTrackRenderer implements TrackRenderer {
 
     private void processSelectionRectangle(CanvasModel canvasModel) {
         canvasModel.getSelectionRectangle().get().ifPresent(selectionRectangle -> {
-            Rectangle2D viewSelectionRect = convertAndTrimToViewCoords(selectionRectangle);
-            track.processSelectionRectangle(selectionRectangle, view);
+            Rectangle2D canvascontextbound = canvasContext.getBoundingRect();
+            convertAndTrimToViewCoords(selectionRectangle).ifPresent(rectangle -> {
+                track.processSelectionRectangle(rectangle, view);
+            });
         });
     }
 
-    private Rectangle2D convertAndTrimToViewCoords(Rectangle2D selectionRectangle) {
-        //TODO write conversion code
-        return selectionRectangle;
+    private Optional<Rectangle2D> convertAndTrimToViewCoords(Rectangle2D selectionRectangle) {
+        Rectangle2D rectangle;
+        track.getModelHeight();
+        double minx = selectionRectangle.getMinX() / view.getXfactor();
+        double maxx = selectionRectangle.getMaxX() / view.getXfactor();
+        double xoffset = maxx - minx;
+        double offsetX = view.modelCoordRect().getMinX();
+        minx += offsetX;
+
+        double boundingY = 0;
+        double yHeight = 0;
+
+        double trackMaxY = canvasContext.getBoundingRect().getMaxY();
+        double trackMinY = canvasContext.getBoundingRect().getMinY();
+        double selectionMaxY = Math.floor((selectionRectangle.getMaxY()));
+        double selectionMinY = Math.floor((selectionRectangle.getMinY()));
+
+        //entire track in selection
+        if (trackMinY > selectionMinY && trackMaxY < selectionMaxY) {
+            boundingY = trackMinY;
+            yHeight = trackMaxY - boundingY;
+        } //track top part in selection, botton out of selection
+        else if (trackMinY > selectionMinY && trackMinY < selectionMaxY && trackMaxY > selectionMaxY) {
+            boundingY = trackMinY;
+            yHeight = selectionMaxY - boundingY;
+        } //track top out of selection and bottom in selection
+        else if (trackMinY < selectionMinY && trackMinY < selectionMaxY && trackMaxY < selectionMaxY && trackMaxY > selectionMinY) {
+            boundingY = selectionMinY;
+            yHeight = trackMaxY - boundingY;
+        } //selection inside a track
+        else if (trackMinY < selectionMinY && trackMaxY > selectionMaxY) {
+            boundingY = selectionMinY;
+            yHeight = selectionMaxY - selectionMinY;
+        } else {
+            return Optional.empty();
+        }
+
+        Rectangle2D mouseEventBoundingBox = new Rectangle2D(minx, Math.floor(boundingY - trackMinY), xoffset, Math.floor(yHeight));
+        return Optional.of(mouseEventBoundingBox);
     }
 }
