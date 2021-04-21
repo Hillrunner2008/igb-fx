@@ -4,7 +4,6 @@ import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import htsjdk.samtools.seekablestream.SeekableFTPStream;
 import htsjdk.samtools.util.BlockCompressedInputStream;
-import htsjdk.samtools.util.HttpUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -123,8 +122,8 @@ public class DataSourceUtilsImpl implements DataSourceUtils {
     public static boolean resourceAvailable(final String path) {
         if (path.startsWith("http")) {
             try {
-                return HttpUtils.resourceAvailable(new URL(path));
-            } catch (MalformedURLException ex) {
+                return resourceAvailable(new URL(path));
+            } catch (IOException ex) {
                 LOG.error(ex.getMessage(), ex);
                 return false;
             }
@@ -133,7 +132,7 @@ public class DataSourceUtilsImpl implements DataSourceUtils {
         }
     }
 
-    public static boolean resourceAvailable(final URL url) {
+    public static boolean resourceAvailable(final URL url) throws IOException {
         String path = url.toExternalForm();
         if (path.startsWith("http")) {
             return HttpUtils.resourceAvailable(url);

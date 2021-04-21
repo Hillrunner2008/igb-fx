@@ -10,19 +10,41 @@
     
     <repositories>
         <repository>
-            <id>public</id>
-            <url>http://eos.transvar.org/nexus/content/groups/public</url>
+            <id>repo1</id>
+            <url>https://maven.bioviz.org/repo1</url>
         </repository>
         <repository>
-            <id>freehep-maven</id>
-            <url>http://eos.transvar.org/nexus/content/repositories/freehep-maven/</url>
+            <id>repo2</id>
+            <url>https://maven.bioviz.org/repo2</url>
+        </repository>
+        <repository>
+            <id>repo3</id>
+            <url>https://maven.bioviz.org/repo3</url>
+        </repository>
+        <repository>
+            <id>maven-releases</id>
+            <name>maven-releases</name>
+            <url>https://nexus.bioviz.org/repository/maven-releases</url>
         </repository>
     </repositories>
-    
+
     <pluginRepositories>
         <pluginRepository>
-            <id>public</id>
-            <url>http://eos.transvar.org/nexus/content/groups/public</url>
+            <id>repo1</id>
+            <url>https://maven.bioviz.org/repo1</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>repo2</id>
+            <url>https://maven.bioviz.org/repo2</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>repo3</id>
+            <url>https://maven.bioviz.org/repo3</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>maven-releases</id>
+            <name>maven-releases</name>
+            <url>https://nexus.bioviz.org/pluginRepository/maven-releases</url>
         </pluginRepository> 
     </pluginRepositories>
     
