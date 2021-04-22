@@ -32,6 +32,10 @@ start-shell.sh
 
 ***
 
+# Screenshots
+![IGB-FX Screenshot](screenshots/graphs.jpeg)
+![IGB-FX Screenshot](screenshots/quickload_genome.png)
+
 # About IGB-FX
 
 Like IGB classic, IGB-FX IGB runs in an OSGi container, which supports adding and removing pluggable Apps while IGB is running. 
